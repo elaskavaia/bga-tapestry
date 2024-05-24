@@ -204,6 +204,7 @@ class UrbanPlanners extends AbsCivilization {
                 $this->game->queueBenefitNormal(['choice' => [BE_URBANPLANNERS_BONUS, BE_DECLINE]], $player_id, reason_civ($civ));
             } else if ($num == 2) {
                 $this->game->queueBenefitNormal([BE_ANYRES, BE_TAPESTRY], $player_id, reason_civ($civ));
+                $this->removeTrackingCubes($player_id);
             }
             $this->game->notifyMoveStructure(clienttranslate('${player_name} placed landmark from their civilization mat x ${num}'), $cube_id, ['num' => $num], $player_id);
         }

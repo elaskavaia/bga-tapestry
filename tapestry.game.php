@@ -10655,21 +10655,24 @@ class Tapestry extends tapcommon {
         $derivedClass = strtolower($derivedClass);
         $derivedClass = ucwords($derivedClass);
         $derivedClass = str_replace(" ", "", $derivedClass);
+        $classname = array_get($info, "class", $derivedClass);
         try {
-            $classname = array_get($info, "class", $derivedClass);
-            require_once "modules/civs/$classname.php";
-            $opinst = new $classname($this);
-            return $opinst;
-        } catch (Throwable $e) {
-            if ($strict) {
-                $this->error($e);
-                throw new BgaSystemException("Cannot instantiate $classname for $civ");
-            } else {
-
-                $opinst = new BasicCivilization($civ, $this);
+            $file = "modules/civs/$classname.php";
+            if (@include_once($file)) {
+                $opinst = new $classname($this);
                 return $opinst;
             }
+            if ($strict) {
+                throw new BgaSystemException("Cannot instantiate $classname for $civ");
+            }
+        } catch (Throwable $e) {
+            if ($strict) {                
+                throw new BgaSystemException("Cannot instantiate $classname for $civ (error)");
+            }
         }
+
+        $opinst = new BasicCivilization($civ, $this);
+        return $opinst;
     }
 
     function finalStats($player_id) {
