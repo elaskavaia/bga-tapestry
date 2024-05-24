@@ -1,0 +1,218 @@
+id|-con|name|r|t|php
+1|BE_GAIN_COIN|Coin|g||'id'=>'coin','tt'=>'res','ct'=>RES_COIN
+2|BE_GAIN_WORKER|Worker|g||'id'=>'worker','tt'=>'res','ct'=>RES_WORKER
+3|BE_GAIN_FOOD|Food|g||'id'=>'food','tt'=>'res','ct'=>RES_FOOD
+4|BE_GAIN_CULTURE|Culture|g||'id'=>'culture','tt'=>'res','ct'=>RES_CULTURE
+5|BE_ANYRES|Any resource|g||'tt'=>'res','ct'=>BE_ANYRES, 'state'=>'any_resource'
+6|BE_TERRITORY|Territory tile|g||'tt'=>'card','ct'=>CARD_TERRITORY
+7|BE_TAPESTRY|Tapestry card|g||'tt'=>'card','ct'=>CARD_TAPESTRY
+8|BE_MARKET|Market|g||'tt'=>'structure','ct'=>BUILDING_MARKET
+9|BE_HOUSE|House|g||'tt'=>'structure','ct'=>BUILDING_HOUSE
+10|BE_FARM|Farm|g||'tt'=>'structure','ct'=>BUILDING_FARM
+11|BE_ARMORY|Armory|g||'tt'=>'structure','ct'=>BUILDING_ARMORY
+12|BE_INCOME_VP|Gain VP (Income)|v||
+13|BE_UPGRADE_TECH_INCOME|Upgrade (Income)|||
+14|BE_UPGRADE_TECH|Upgrade tech card|||
+15|BE_VP|Gain victory points|v||
+16|BE_INCOME_RES|Gain resources (Income)|||'icon' => 'no'
+17|BE_EXPLORE|Explore|e||'flags'=>0
+18|BE_RESEARCH|Research|r|5|'adv'=>1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+19|BE_RESEARCH_NB|Research (no benefits)|r|5|'adv'=>1,'flags'=>0
+20|BE_INVENT|Invent|i||'flags'=>(FLAG_FACE_BOTH)
+21|BE_CONQUER|Conquer|a||'flags'=>0
+22|BE_ADVANCE_E|Advance - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+23|BE_ADVANCE_S|Advance - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+24|BE_ADVANCE_M|Advance - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+25|BE_ADVANCE_T|Advance - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+26|BE_TECH_CARD|Tech Card|g||'tt'=>'card','ct'=>CARD_TECHNOLOGY
+27|BE_VP_TECH|VP - Tech cards|v||
+28|BE_VP_CAPITAL|VP - Capital score|v||
+29|BE_VP_TERRITORY|VP - Controlled territories|v||
+30|BE_VP_FARM|VP - Farms|v||
+31|BE_VP_ARMORY|VP - Armories|v||
+32|BE_TECH_CIRCLE|Gain tech card benefit - Circle|||
+33|BE_TECH_SQUARE|Gain tech card benefit - Square|||
+34||Landmark - Forge|||'lm'=>10
+35||Landmark - Rubber Works|||'lm'=>8
+36||Landmark - Tech Hub|||'lm'=>1
+37||Landmark - Barracks|||'lm'=>6
+38||Landmark - Tank Factory|||'lm'=>5
+39||Landmark - Fusion Reactor|||'lm'=>12
+40||Landmark - Lighthouse|||'lm'=>9
+41||Landmark - Train Station|||'lm'=>4
+42||Landmark - Launch Pad|||'lm'=>11
+43||Landmark - Apothecary|||'lm'=>2
+44||Landmark - Academy|||'lm'=>3
+45||Landmark - Laboratory|||'lm'=>7
+46||Explore (anywhere)|e||'flags'=>FLAG_ANYWHERE
+47||VP - Exploration|v||
+48||VP - Science|v||
+49||VP - Military|v||
+50||VP - Technology|v||
+51|BE_SPACE|Gain space tile|||
+52|BE_EXPLORE_SPACE|Explore space|s||'state'=>'explore_space'
+#same as 143 for now
+53|BE_REFRESH|Refresh tech cards (Optional)|||'alias'=>['or'=>[143, 401]]
+54||VP - Markets|v||
+55||Start new tech track|||'s'=>'t','sflags'=>0,'adv'=>0
+56||Landmark - Bakery|||'lm'=>13
+57||Landmark - Barn|||'lm'=>14
+58||Landmark - Com Tower|||'lm'=>15
+59||Landmark - Library|||'lm'=>16
+60||Landmark - Stock Market|||'lm'=>17
+61||Landmark - Treasury|||'lm'=>18
+62||Repeat current position|||'adv'=>0,'flags'=> (FLAG_GAIN_BENFIT | FLAG_PAY_BONUS),'s'=>'c', 'sflags'=>(FLAG_SELF)
+63|BE_VP_HOUSE|VP - Houses|v||
+64||Overwrite tapestry card|||
+65|BE_GAIN_CIV|Civilization|||
+66|BE_VP_TILES|VP - Territory tiles|v||
+67|BE_REGRESS_E|Regress - Exploration|t|1|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+68|BE_REGRESS_S|Regress - Science|t|2|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+69|BE_REGRESS_M|Regress - Military|t|3|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+70|BE_REGRESS_T|Regress - Technology|t|4|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+71|BE_VP_TAPESTY|VP - Tapestry cards|v||
+72||Research (no benefit, maxout bonus)|r||'flags'=>(FLAG_MAXOUT_BONUS)
+73||Conquer - both dice if toppled|a||'flags'=>(FLAG_CONQ_BOTH_DICE | FLAG_CONQ_OPPONENT)
+74||Conquer - both dice|a||'flags'=>2
+75||Conquer (anywhere)|a||'flags'=>1
+76||Advance (no benefits) - Exploration|t|1|'flags'=>0
+77||Advance (no benefits) - Science|t|2|'flags'=>0
+78||Advance (no benefits) - Military|t|3|'flags'=>0
+79||Advance (no benefits) - Technology|t|4|'flags'=>0
+80|BE_ADVANCE_EXPLORATION_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT)
+81|BE_ADVANCE_SCIENCE_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT)
+82|BE_ADVANCE_MILITARY_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT)
+83|BE_ADVANCE_TECHNOLOGY_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT)
+84|BE_ADVANCE_EXPLORATION_NOBENEFIT_OPT|Advance (choice, no benefits) - Exploration|t|1|'flags'=>0
+85|BE_ADVANCE_SCIENCE_NOBENEFIT_OPT|Advance (optional, no benefits) - Science|t|2|'flags'=>0
+86|BE_ADVANCE_MILITARY_NOBENEFIT_OPT|Advance (optional, no benefits) - Military|t|3|'flags'=>0
+87|BE_ADVANCE_TECHNOLOGY_NOBENEFIT_OPT|Advance (optional, no benefits) - Technology|t|4|'flags'=>0
+88|BE_ADVANCE_EXPLORATION_BENEFIT_OPT|Advance (optional, benefits) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+89|BE_ADVANCE_SCIENCE_BENEFIT_OPT|Advance (optional, benefits) - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+90|BE_ADVANCE_MILITARY_BENEFIT_OPT|Advance (optional, benefits) - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+91|BE_ADVANCE_TECHNOLOGY_BENEFIT_OPT|Advance (optional, benefits) - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+92||Advance (no benefit, free bonus) - Exploration|t|1|'flags'=>(FLAG_FREE_BONUS)
+93||Advance (no benefit, free bonus) - Science|t|2|'flags'=>(FLAG_FREE_BONUS)
+94||Advance (no benefit, free bonus) - Military|t|3|'flags'=>(FLAG_FREE_BONUS)
+95||Advance (no benefit, free bonus) - Technology|t|4|'flags'=>(FLAG_FREE_BONUS)
+96||Invent and instantly upgrade|i||'flags'=>6
+97||Advance (optional, no benefits, maxout bonus) - Exploration|t|1|'flags'=>(FLAG_MAXOUT_BONUS)
+98||Advance (optional, no benefits, maxout bonus) - Science|t|2|'flags'=>(FLAG_MAXOUT_BONUS)
+99||Advance (optional, no benefits, maxout bonus) - Military|t|3|'flags'=>(FLAG_MAXOUT_BONUS)
+100||Advance (optional, no benefits, maxout bonus) - Technology|t|4|'flags'=>(FLAG_MAXOUT_BONUS)
+101||Research - all move, you gain benefits (AGE OF DISCOVERY)|||'tap'=>2
+102||Landmark comparison (AGE OF WONDERS)|||'tap'=>4
+103||Advancement comparison (BOAST OF SUPERIORITY)|||'tap'=>6
+104||Explore (drawn territory only) and neighbours draw (COAL BARON)|||'tap'=>9
+105||Gain VP for Territory Tile terrain (COLONIALISM)|||'tap'=>10
+106||Regress on 3 to boost 4th (DARK AGES)|||'tap'=>11,'s'=>'c','sflags'=>(FLAG_SELF),'adv'=>1
+107||Discard Tapestry to Gain 2 VP each (DEMOCRACY)|||'tap'=>12
+108||Advance with opponent block (DICTATORSHIP)|||'tap'=>13,'s'=>'c','sflags'=>(FLAG_SELF),'adv'=>1
+109||All gain resource (DIPLOMACY)|||'tap'=>14
+110|BE_GAIN_ANY_INCOME_BUILDING|Gain income building|||'tap'=>14,'icon'=>1
+111||Gain any landmark (DYSTOPIA)|||'tap'=>15
+112||Tapestry Copy (ESPIONAGE)|||'tap'=>17
+113||Gain 3 VP per landmark (FEUDALISM)|v||'tap'=>19
+114||Resource/VP trade (GUILDS)|||'tap'=>21
+115||Advance anywhere, advance opponents - no benefit (OIL MAGNATE)|||'tap'=>28,'s'=>'c','sflags'=>(FLAG_SELF),'adv'=>1
+116||Worker/VP trade (OLYMPIC HOST)|||'tap'=>29
+117||Advancement comparison (PLEA FOR AID)|||'tap'=>32
+118||Repeat bonuses but no benefits (MARRIAGE OF STATE)|||'tap'=>23,'s'=>'c','sflags'=>(FLAG_OPPONENT),'adv'=>0
+119|BE_STANDUP_3_OUTPOSTS|Stand up 3 toppled outposts (REVOLUTION)|||'tap'=>35
+120||Advance/Regress (SOCIALISM)|||'tap'=>36,'s'=>'c','sflags'=>(FLAG_OPPONENT|FLAG_VIRTUAL_ALLOWED),'aflags'=>(FLAG_ADVANCE|FLAG_REGRESS|FLAG_POSCLOSEST)
+121||Invent - face up (STEAM TYCOON)|i||'tap'=>37,'flags'=>(FLAG_FACE_UP)
+122||Alliance choice (ALLIANCE)|||'tap'=>5,'s'=>'o','sflags'=>(FLAG_OPPONENT|FLAG_VIRTUAL_ALLOWED),'state'=>'trackSelect'
+123||First to era: invent and upgrade tech, else VP (TECHNOCRACY)|||'tap'=>38
+124||Copy opponent benefit, they get free bonus (TRADE ECONOMY)|||'tap'=>41,'s'=>'c','sflags'=>(FLAG_OPPONENT),'adv'=>0,'state'=>'trackSelect'
+125||Rewards (OLYMPIC HOST)|||'tap'=>29
+126||Invent - from top of the deck|i||'tap'=>37,'flags'=>(FLAG_FACE_DOWN)
+127||Invent and instantly upgrade|i||'flags'=>(FLAG_UPGRADE | FLAG_FACE_BOTH)
+128|BE_PLAY_TAPESTY_INCOME|Play tapestry card (Income)|||
+129||Gain cards and tiles (Income)|||
+130||Transfer tech card|||
+131||Regress (no benefits) - Exploration|t|1|'adv'=>-1,'flags'=>0
+132||Regress (no benefits) - Science|t|2|'adv'=>-1,'flags'=>0
+133||Regress (no benefits) - Military|t|3|'adv'=>-1,'flags'=>0
+134||Regress (no benefits) - Technology|t|4|'adv'=>-1,'flags'=>0
+135|BE_EXPLORE_SPACE_ALIEN|Explore space|s||'state'=>'explore_space'
+136||VP - Tapestry cards (hand)|v||'icon' => 'no'
+#tt - type of table, ct - type of card (card_type), dest - where to pay it
+137||Tapestry card to a neighbour|p||'tt'=>'card','ct'=>CARD_TAPESTRY,'dest'=>FLAG_NEIGHBOUR
+138||Tapestry card to a player|p||'tt'=>'card','ct'=>CARD_TAPESTRY,'dest'=>FLAG_TARGET
+140||Play Trap|||
+141||Select conquer die|||
+142|BE_CIV_ADJUSTMENT|Civilization adjustment|||
+143|BE_REFRESH_DO|Refresh tech cards|||'d'=>1
+144||Gain income building and place outside of the city bounds|||
+145||VP - Landmarks|v||
+146||Automa Civilization Conquerors|||
+151||Jump - Exploration|t|1|'adv'=>4,'flags'=>(FLAG_JUMP)
+152||Jump - Science|t|2|'adv'=>4,'flags'=>(FLAG_JUMP)
+153||Jump - Military|t|3|'adv'=>4,'flags'=>(FLAG_JUMP)
+154||Jump - Technology|t|4|'adv'=>4,'flags'=>(FLAG_JUMP)
+156||Advance (benefits, maxout bonus) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
+157||Advance (benefits, maxout bonus) - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
+158||Advance (benefits, maxout bonus) - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
+159||Advance (benefits, maxout bonus) - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
+160||Automa income stage|||'i'=>0
+161||Automa income stage|||'i'=>1
+162||Automa income stage|||'i'=>2
+163||Automa income stage|||'i'=>3
+164||Automa income stage|||'i'=>4
+165||Automa income stage|||'i'=>5
+166||Automa income stage|||'i'=>6
+167||Automa income stage|||'i'=>7
+168||Automa income stage|||'i'=>8
+170||Place an outpost|||'civ' => CIV_INFILTRATORS, 'state' => 'moveStructureOnto','tt'=>'structure','ct'=>BUILDING_OUTPOST
+171||Place a token to gain VP|||'icon' => 'no', 'civ' => CIV_INFILTRATORS
+172||Draw 3, Keep 1 Civilizations|||'icon' => 'no','tt'=>'card','ct'=>CARD_CIVILIZATION,'draw'=>3,'keep'=>1
+173||Discard Civilization, gain another|||'icon' => 'no','tt'=>'card','ct'=>CARD_CIVILIZATION,'keep'=>0,'draw'=>1
+174||Keep Civilization|||'icon' => 'no','ct'=>CARD_CIVILIZATION,'draw'=>0,'keep'=>1
+175||Draw 3, Keep 1 Technology Card|||'icon' => 'no','tt'=>'card','ct'=>CARD_TECHNOLOGY,'draw'=>3,'keep'=>1
+178||Midgame setup: Islanders's Explore (No Benefit)|e||'icon' => 'no','state' => 'explore','flags'=>FLAG_NO_BENEFIT
+179||Islanders's Explore (with Benefits)|e||'icon' => 'no', 'state' => 'explore'
+180|BE_MIDGAME_SETUP|Midgame setup for Civilization|||'icon' => 'no'
+181||Discard Tapestry card|||'icon' => 'icon_ben_7','tt'=>'card','ct'=>CARD_TAPESTRY, 'state'=>'playTapestryCard'
+190||Gain the benefit of a neighbor’s current position on any advancement track (no bonus)|||'s'=>'c','sflags'=>(FLAG_NEIGHBOUR),'adv'=>0,'state'=>'trackSelect'
+191||Gain the benefit of a territory or space tile in a neighbor’s supply|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
+192||Gain the benefit of a neighbor’s tech card, matching its current row|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
+193||Gain the benefits of a WHEN PLAYED tapestry card on a neighbor’s income mat|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
+194||Request to see the chosen neighbor’s hand of tapestry cards|||
+195|BE_TINKERERS_1|Choose 1 of your advancement tokens. Gain resources equal to the cost of advancing into its current position|||'s'=>'c','sflags'=>(FLAG_SELF),'aflags'=>(FLAG_STAY),'state' =>'trackSelect'
+196|BE_TINKERERS_2|Advance on any track to match the closest opponent who is ahead of you on that track. You may gain the benefit but not the bonus.|||'s'=>'c','sflags'=>FLAG_OPPONENT,'aflags'=>FLAG_ADVANCE|FLAG_POSCLOSEST,'state' =>'trackSelect'
+197|BE_TINKERERS_3|Regress exactly 3 spaces on an advancement track where this is possible. You may gain the benefit and pay to gain the bonus (if any)|||'adv'=>-3,'s'=>'c','sflags'=>(FLAG_SELF),'aflags'=>(FLAG_REGRESS|FLAG_POSEXACT),'state' =>'trackSelect'
+198|BE_TINKERERS_4|Advance to the next bonus on any track and gain that bonus for free. Do not gain the benefit or any landmarks you pass|||'s'=>'s','sflags'=>FLAG_SELF,'aflags'=>FLAG_ADVANCE,'state' =>'trackSelect'
+199||Opponents gain tech card from the deck|||'flags'=>(FLAG_OPPONENT)
+200|BE_CONFIRM|Confirm|||'icon' => 'no'
+201|BE_RESUME|Resume|||
+401|BE_DECLINE|Decline|||'icon' => 'no'
+301||Roll the black conquer die twice and gain one benefit of your choice
+302||Roll the research die twice and gain one benefit of your choice
+303||Roll the conquer dice and gain both benefits
+304||Roll the red conquer die twice and gain both benefits
+305||Gain tier II landmark|||'state'=>'buildingChoice'
+306|BE_ALIEN_D|Alien discard space tile|||
+307|BE_2_TERRITORY|Gain two territory tiles|g||'alias' => [BE_TERRITORY, BE_TERRITORY]
+308|BE_2_INVENT|Invent two times|i||'alias' => [BE_INVENT, BE_INVENT]
+309|BE_SPOT|Gain spot benefit
+310|BE_RENEGADES_ADV|RENEGADES Advance|||'civ'=>CIV_RENEGADES
+311|BE_GAMBLES_PICK|Gamblers: Draw 3 Tapestry, Play 1 (WHEN PLAYED), if cannot, Keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>3,'keep'=>1
+312|BE_COLLECTORS_GRAB|COLLECTORS Collect Building or Outpost
+313|BE_COLLECTORS_CARD|COLLECTORS Collect Card
+314|BE_CARD_PLAY_TRIGGER|Card comes into play triggers|||'auto'=>1
+315||URBAN PLANNER starting benefit|||'lm'=>19
+316|BE_URBANPLANNERS_GRAB|URBAN PLANNERS Collect Landmark
+502||2 VP|v||
+503||3 VP|v||
+504||4 VP|v||
+505||5 VP|v||
+506||6 VP|v||
+507||7 VP|v||
+510||10 VP|v||
+515||15 VP|v||
+520||20 VP|v||
+601||Adjust tracks|||'auto'=>1
+602||End of income|||'auto'=>1
+#Adjust benefit - no name
+603||-|||'auto'=>1
+#of of benefits

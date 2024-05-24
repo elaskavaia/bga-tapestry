@@ -1,0 +1,65 @@
+1. Tapestry effects
+1.1 When you play tapestry during income does "when played" effect considered:
+* mandatory if possible (current choice - only can decline effects if not possible to resolve)
+* optional (player can decline effect)
+* mandatory (if not possible to resolve effect player cannot play this tapestry at all) - not used in this game
+1.2 When playing tapestry as a benefit, same rules as 1.1
+1.3 Tapestry with This Era effects - effect cease (ends) either a) when player starts new income turn before he plays tapestry b) if player overplays current era tapestry as soon as it is covered and before its effects are resolved
+1.4 Benefit: Play Tapestry - if player has no tapestry cards in hand effect is "void", existing tapestry remains
+
+2. Moving effects
+2.1 Advance - move or intent to position the cube up the track (one or more spots), exception: Futurists (I am calling futurists move a Jump). Regress - move or intent to position the cube down the track. 
+2.2 If player "must" advance the following will make it "void": player finished game or all cubes at the end of the track (and advance does not provide max-out bonus) or track advance is blocked by previous effect (note: it cannot be effect of the tapestry card which is being covered because of 1.3)
+2.3 If player "must" regress the following will make it "void" : player finished game or all cubes at beggining of the track (position 0). Currently there are no effects that block regress.
+2.4 Landmark can only be gained if played Advanced on the spot following rule 2.1 (or Advancing through the spot, i.e. using Socialism)
+2.5 When player is asked to advance or regress using any effects and they have more then one cube on the track - player must choose the cube to move unless the second choice will result in void effect. I.e. if user must regress and one of two cubes cannot regress because its at 0, player must chose cube that can regress
+2.6 Advance is not considered "void" if it is results of max-out bonus, although cube is not moved up
+2.7 Effects such as "if you advance" triggered after advance is complete and not void (same for regress)
+2.8 "If you reach" rule should be read as "If you advance or regress" 
+2.9 "Repeating" of the benefit is not considered moving, i.e. it is neither advance or regress
+
+3. Effect resolution order 
+3.1 Advance resolution order: 
+    a) while advancing player picks and plays all landmarks in between current spot +1 and final destination and resolves placement
+    b) effects related to advancing into spots and tears resolve for each spot OR maxout effect is resolved if player cannot move up (if applicable)
+    c) effects related to general advance resolve
+    d) effects of benefit (if applicable) resolve 
+    e) effects of bonus (if applicable) resolve
+3.2 Regress resolution order is same except there is no landmarks gaining (a) and currently there is no effects that are triggered on regress (b-c) but may be possible with expansions
+3.3 Explore resolution order
+   a) triggered effects of "when exploring" resolve
+   b) check applicability - effect is void when either  player has no tiles OR player has no valid target placement
+   c) player places tile 
+   d) some effects  "if explored" resolve
+   e) player scores placement vp
+   f) player gains tile benefit
+   g) more effects of "if explored" resolved
+   
+3.4 Conquer resolution order
+    a) triggered effects of "when conquering" resolve
+    b) effect is void when either player has no more outposts OR player has no valid target placement (target validity may be affected by other effects)
+    c) player picks outposts and selects the tile (target must be valid)
+    d) triggered effects of "whenever you conquer a territory" resolve
+    e) if conquering opponent territory they may play trap, trap effects are resolved
+    f) toppling happens if applicable, toppling effects are resolved
+    g) territory control changes, territory control effects are resolved
+    h) player rolls the die
+    i) player gains an benefit of one or both dice (depending of previous effects)
+    j) effect of die rolling are resolved (i.e. opponent with trader may pick remaining die)
+    
+3.5 Tech Upgrade
+    a) During income upgrade can be denied, in this case it does not happen
+    b) Triggered effects of when upgrading resolved
+    c) If there is no valid targets, benefit is void
+    d) Player selects and upgrades valid target
+    e) The upgrade card benefit goes on the top stack
+    f) Triggered effects of "if upgraded" go on stack after     
+
+4. Imperativeness
+4.1 When drawing X cards or tiles: if no more available can reshuffle deck. If not enough left - draw as much as possible.
+4.3 Track spot benefit - mandatory if possible, is not possible is void
+4.4 Track spot bonus - user can decline payment, if paid in full or free - effect is mandatory if possible.
+4.5 Bonus for the spot is available  independent of benefit resolution (i.e. even benefit was void - bonus will be offered if applicable)
+4.6 If Benefit contains multiple effects (i.e. A B)  player can select order, unless stated otherwise by rule or irrelevant
+4.7 Upgrade benefit is mandatory if possible (except during income where it is optional). If upgrade resolved in moving card up player is considered gained the benefit even if benefit is void.
+
