@@ -1582,10 +1582,15 @@ $this->benefit_types = [ //
 ],
  316 => [  // BE_URBANPLANNERS_GRAB
   'name' => clienttranslate("URBAN PLANNERS Collect Landmark"),
+  'civ'=>CIV_URBAN_PLANNERS,
 ],
  317 => [  // BE_URBANPLANNERS_BONUS
   'name' => clienttranslate("URBAN PLANNERS Bonus if 2+ Landmarks replaced"),
-  'auto'=>1,
+  'auto'=>1,'civ'=>CIV_URBAN_PLANNERS,
+],
+ 318 => [  // BE_RELENTLESS_AB
+  'name' => clienttranslate("RELENTLESS Spent cubes now to collect benefit"),
+  'civ'=>CIV_RELENTLESS,
 ],
  502 => [  //
   'name' => clienttranslate("2 VP"),
@@ -2656,14 +2661,21 @@ $this->civilizations = array (
                 "exp" => "AA", ],
         CIV_RELENTLESS => [ "name" => clienttranslate("RELENTLESS"),
                 "description" => [ 
-                        clienttranslate("The Relentless are always pushing for improvement, rushing forward without pause."),
+                        clienttranslate("<i>The Relentless are always pushing for improvement, rushing forward without pause.</i>"),
                         clienttranslate("At the end of each of your income and advancement turns, if you gained at least one building (income or landmark) during that turn, place a player token on this civilization mat."),
                         clienttranslate("At the end of each of your advancement turns, if you did not gain at least one building on that turn, remove all player tokens from this mat, and gain rewards based on the following chart ('/' means 'or'):"),
                         clienttranslate("<li>1 token | 1 VP"), //
                         clienttranslate("<li>2 tokens | 3 VP + [TAPESTRY]"),
                         clienttranslate("<li>3 tokens | 6 VP + [TAPESTRY]/[ANY RESOURCE]"),
                         clienttranslate("<li>4 tokens | 10 VP + [TAPESTRY]/[ANY RESOURCE]/[EXPLORE]"),
-                        clienttranslate("<li>5+ tokens | 15 VP + [TAPESTRY]/[ANY RESOURCE]/[EXPLORE]/[INVENT]"), ],
+                        clienttranslate("<li>5+ tokens | 15 VP + [TAPESTRY]/[ANY RESOURCE]/[EXPLORE]/[INVENT]"), 
+                        ''
+               
+                ],
+                "description@a8" => [
+                        
+                        8 =>   clienttranslate("If you gain this civilization in the middle of the game, place 4 player tokens on this mat. You may discard them now to gain the benefit.")
+                ],
                 "slots_description" => '',
                 "slots" => [
                         0 => [ "benefit" => [ ] ], // start
@@ -2673,7 +2685,8 @@ $this->civilizations = array (
                         4 => [ "benefit" => [ 510, 'or'=>[ BE_TAPESTRY, BE_ANYRES, BE_EXPLORE] ] ], // 4 
                         5 => [ "benefit" => [ 515, 'or'=>[ BE_TAPESTRY, BE_ANYRES, BE_EXPLORE, BE_INVENT] ] ], 
                 ], //
-                "exp" => "AA", ],
+                "exp" => "AA", 
+                "al"=> 8],
         CIV_RENEGADES => [ "name" => clienttranslate("RENEGADES"),
                 "description" => [ 
                         clienttranslate("The Renegades choose to forge their own path, advancing in ways that other civilizations cannot and finding shortcuts along the way."),

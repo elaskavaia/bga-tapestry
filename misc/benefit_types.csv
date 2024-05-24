@@ -201,8 +201,9 @@ id|-con|name|r|t|php
 313|BE_COLLECTORS_CARD|COLLECTORS Collect Card
 314|BE_CARD_PLAY_TRIGGER|Card comes into play triggers|||'auto'=>1
 315||URBAN PLANNER starting benefit|||'lm'=>19
-316|BE_URBANPLANNERS_GRAB|URBAN PLANNERS Collect Landmark
-317|BE_URBANPLANNERS_BONUS|URBAN PLANNERS Bonus if 2+ Landmarks replaced|||'auto'=>1
+316|BE_URBANPLANNERS_GRAB|URBAN PLANNERS Collect Landmark|||'civ'=>CIV_URBAN_PLANNERS
+317|BE_URBANPLANNERS_BONUS|URBAN PLANNERS Bonus if 2+ Landmarks replaced|||'auto'=>1,'civ'=>CIV_URBAN_PLANNERS
+318|BE_RELENTLESS_AB|RELENTLESS Spent cubes now to collect benefit|||'civ'=>CIV_RELENTLESS
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

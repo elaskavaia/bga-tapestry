@@ -23,6 +23,21 @@ class Templates extends AbsCivilization {
         // 
     }
 
+    function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = '') {
+        $civ = $this->civ_id;
+        $this->systemAssertTrue("ERR:AbsCivilization:11", $this->game->isRealPlayer($player_id));
+        $this->systemAssertTrue("ERR:AbsCivilization:12", $this->game->hasCiv($player_id, $civ));
+        switch ($ben) {
+            case 0:
+                $this->systemAssertTrue("not implemented");
+                return true;  
+            default:
+                $this->systemAssertTrue("ERR:AbsCivilization:10");
+                return true;
+        }
+        return true;
+    }
+
     function moveCivCube(int $player_id, bool $is_midgame, int $spot, $extra) {
         $civ = $this->civ_id;
         if ($is_midgame) {

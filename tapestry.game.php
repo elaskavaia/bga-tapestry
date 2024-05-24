@@ -1780,11 +1780,6 @@ class Tapestry extends tapcommon {
                 $card_id = $this->getReasonArg($reason, 3);
                 $this->effect_cardComesInPlayTriggerResolve($card_id, $player_id, $reason);
                 return true;
-            case 316:
-            case 317:
-                /** @var UrbanPlanners */
-                $inst = $this->getCivilizationInstance(CIV_URBAN_PLANNERS, true);
-                return $inst->awardBenefits($player_id, $ben, $count, $reason);
             case 401:
                 // decline - no op
                 return true;
@@ -1797,6 +1792,7 @@ class Tapestry extends tapcommon {
                 return false; // no cleanup
             default:
                 //$this->debugConsole("default ben $ben");
+
                 if ($state !== null) {
                     $this->gamestate->nextState($state);
                     return false;
@@ -1809,6 +1805,11 @@ class Tapestry extends tapcommon {
                 if ($ben > 500 && $ben < 599) {
                     $this->awardVP($player_id, $ben - 500, $reason);
                     return true;
+                }
+                $civ = $this->getRulesBenefit($ben, 'civ', null);
+                if ($civ !== null) {
+                    $inst = $this->getCivilizationInstance($civ, true);
+                    return $inst->awardBenefits($player_id, $ben, $count, $reason);
                 }
                 $this->systemAssertTrue("Benefit $ben  not coded yet! Use Unblock");
         }
@@ -4309,7 +4310,12 @@ class Tapestry extends tapcommon {
         //$this->queueBenefitNormal([ 'p' => BE_TAPESTRY,'g' => BE_INVENT,0 => 0 ], $player_id, 'test');
         //return $this->matFindBenefit(["t"=>1,"adv"=>1,'flags'=> (FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS)]);
 
-        $this->finalGameScoring($player_id);
+        //$this->finalGameScoring($player_id);
+
+        $cards = [];
+        $cards[] = array('type' => CARD_CIVILIZATION, 'type_arg' => CIV_RELENTLESS, 'nbr' => 1);
+        $this->cards->createCards($cards, 'deck_civ');
+        $this->queueBenefitStandardOne(65, $player_id);
 
         // $this->queueBenefitNormal(BE_CONFIRM, $player_id);
         // $this->benefitCivEntry(CIV_GAMBLERS, $player_id);

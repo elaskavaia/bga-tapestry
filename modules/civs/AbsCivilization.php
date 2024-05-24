@@ -76,6 +76,6 @@ abstract class AbsCivilization {
 
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = '') {
         $civ = $this->civ_id;
-        return false;  // no cleanup
+        return true;  // cleanup
     }
 }
