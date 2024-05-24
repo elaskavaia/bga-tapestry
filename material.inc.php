@@ -1583,8 +1583,9 @@ $this->benefit_types = [ //
  316 => [  // BE_URBANPLANNERS_GRAB
   'name' => clienttranslate("URBAN PLANNERS Collect Landmark"),
 ],
- 317 => [  // BE_URBANPLANNERS_PUT
-  'name' => clienttranslate("URBAN PLANNERS Place Landmark"),
+ 317 => [  // BE_URBANPLANNERS_BONUS
+  'name' => clienttranslate("URBAN PLANNERS Bonus if 2+ Landmarks replaced"),
+  'auto'=>1,
 ],
  502 => [  //
   'name' => clienttranslate("2 VP"),

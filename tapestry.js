@@ -1853,6 +1853,10 @@ define([
             dojo.addClass(cube, "active_slot");
           }
         }
+      } else if (type==317) {
+        // urban planners action do not allow to click
+        this.setDescriptionOnMyTurn(name+'. '+_("Click on landmark to place or click Decline."));
+        // If you decline now placing another landmark right after won't trigger the benefit
       } else {
         dojo.query(".tech_spot .cube").addClass("active_slot");
         var id = "button_benefit_" + ben + "_0_0";

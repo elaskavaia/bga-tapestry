@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 define("BE_URBANPLANNERS_GRAB", 316);
+define("BE_URBANPLANNERS_BONUS", 317);
 
 
 class UrbanPlanners extends AbsCivilization {
@@ -90,13 +91,16 @@ class UrbanPlanners extends AbsCivilization {
         $this->capitalFlood($flood_area, $dx - 1, $dy, $flood_map, $capital, $type);
     }
 
-    function triggerPreGainStructure($player_id, $type) {
+    function triggerPreGainStructure($player_id, $type, $ben) {
         if (!$this->game->isRealPlayer($player_id))
             return false;
         $civ = $this->civ_id;
         if (!$this->game->hasCiv($player_id, $civ)) {
             return false;
         }
+        $landmark_type = $this->game->getRulesBenefit($ben, 'lm');
+        if($landmark_type==19) return false;
+
         $this->game->queueBenefitNormal(['or' => [BE_URBANPLANNERS_GRAB, BE_DECLINE]], $player_id, reason(CARD_CIVILIZATION, $civ));
         return true;
     }
@@ -107,6 +111,7 @@ class UrbanPlanners extends AbsCivilization {
         $this->systemAssertTrue("ERR:UrbanPlanners:12", $this->game->hasCiv($player_id, $civ));
         switch ($ben) {
             case BE_URBANPLANNERS_GRAB:
+
                 $this->game->clearCurrentBenefit($ben);
                 $next_benefit = $this->game->getCurrentBenefit();
                 $this->systemAssertTrue("ERR:UrbanPlanners:01",  $next_benefit);
@@ -123,13 +128,28 @@ class UrbanPlanners extends AbsCivilization {
                 $this->game->DbQuery("UPDATE structure SET card_location_arg='$player_id' WHERE card_id='$sid'");
                 $this->game->dbSetStructureLocation($sid, $civ_token_string, null, clienttranslate('${player_name} places landmark on URBAN PLANNERS'), $player_id);
                 $this->game->gainLandmarkTriggers($player_id, $landmark_type);
+                $this->removeTrackingCubes($player_id);
+
+
                 $this->game->nextStateBenefitManager();
                 return false;  // no cleanup
+            case BE_URBANPLANNERS_BONUS:
+                // remove cubes that indivicate how many time landmark was used
+                $this->removeTrackingCubes($player_id);
+                return true;
             default:
                 $this->systemAssertTrue("ERR:UrbanPlanners:10");
                 return true;
         }
         return false;  // no cleanup
+    }
+
+    function removeTrackingCubes($player_id) {
+        $civ = $this->civ_id;
+        $cubes = $this->game->getStructuresSearch(BUILDING_CUBE, null, "civilization_$civ");
+        foreach ($cubes as $cube) {
+            $this->game->dbSetStructureLocation($cube['card_id'], 'hand', 0, '', $player_id);
+        }
     }
 
     function hasActivatedAbilities($player_id) {
@@ -164,17 +184,25 @@ class UrbanPlanners extends AbsCivilization {
         $landmark_type2 = $this->game->getRulesBenefit($landmark_be, 'lm');
         $this->systemAssertTrue("ERR:UrbanPlanners:24", $landmark_type == $landmark_type2);
 
+
+
         $this->game->interruptBenefit();
         $this->game->benefitSingleEntry('standard', $landmark_be, $player_id, 1, reason_civ($civ));
         $state = 26; // place structure
 
         if ($this->game->isAdjustments4or8()) {
+            $bonus = $this->game->getCurrentBenefit(0, "a,317,401");
+            if ($bonus) {
+                $this->game->benefitCashed($bonus['benefit_id']);
+            }
             //If you place 2+ landmarks from this mat at the same time, also gain [ANY RESOURCE] and [TAPESTRY]
             $cube_id = $this->game->addCube($player_id, $info['card_location']);
 
             $cubes = $this->game->getStructuresSearch(BUILDING_CUBE, null, $info['card_location']);
             $num = count($cubes);
-            if ($num == 2) {
+            if ($num == 1) {
+                $this->game->queueBenefitNormal(['choice' => [BE_URBANPLANNERS_BONUS, BE_DECLINE]], $player_id, reason_civ($civ));
+            } else if ($num == 2) {
                 $this->game->queueBenefitNormal([BE_ANYRES, BE_TAPESTRY], $player_id, reason_civ($civ));
             }
             $this->game->notifyMoveStructure(clienttranslate('${player_name} placed landmark from their civilization mat x ${num}'), $cube_id, ['num' => $num], $player_id);

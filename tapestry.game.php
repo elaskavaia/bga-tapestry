@@ -2445,7 +2445,11 @@ class Tapestry extends tapcommon {
         if (($type == BUILDING_MARKET) && ($this->isTapestryActive($player_id, 8))) { // CAPITALISM
             $this->awardBaseResource($player_id, RES_COIN, 1, $this->getTokenName('tapestry', 8));
         }
-        $this->relentlessBenefitOnGainBuilding($player_id);
+        if ($this->hasCiv($player_id, CIV_RELENTLESS)) {
+            /** @var Relentless */
+            $inst = $this->getCivilizationInstance(CIV_RELENTLESS, true);
+            $inst->relentlessBenefitOnGainBuilding($player_id);
+        }
         if ($transition != null)
             $this->gamestate->nextState($transition);
         return false;
@@ -2558,47 +2562,17 @@ class Tapestry extends tapcommon {
             }
         }
         $this->historianBenefits($player_id, $landmark_type);
-        $this->relentlessBenefitOnGainBuilding($player_id);
-    }
 
-    function relentlessBenefitOnGainBuilding($player_id, $force = 0) {
-        if (!$player_id)
-            $player_id = $this->getActivePlayerId();
+
         if ($this->hasCiv($player_id, CIV_RELENTLESS)) {
-            $turn = $this->getPlayerTurn($player_id);
-            $cubes_cur = $this->getStructuresOnCiv(CIV_RELENTLESS, BUILDING_CUBE, $turn);
-            if (count($cubes_cur) == 0 || $force) {
-                $cubes = $this->getStructuresOnCiv(CIV_RELENTLESS, BUILDING_CUBE);
-                $num = count($cubes) + 1;
-                $structure_id = $this->addCube($player_id, "civ_23_$num", 0, $turn);
-                $this->notifyMoveStructure(clienttranslate('${player_name} added cube to RELENTLESS mat'), $structure_id, [], $player_id);
-            }
+            /** @var Relentless */
+            $inst = $this->getCivilizationInstance(CIV_RELENTLESS, true);
+            $inst->relentlessBenefitOnGainBuilding($player_id);
         }
     }
 
-    function relentlessBenefitOnEndOfTurn($player_id) {
-        if (!$player_id)
-            $player_id = $this->getActivePlayerId();
-        if (!$this->hasCiv($player_id, CIV_RELENTLESS))
-            return;
-        if ($this->getGameStateValue('income_turn'))
-            return;
-        $turn = (int) $this->getPlayerTurn($player_id);
-        $cubes_cur = $this->getStructuresOnCiv(CIV_RELENTLESS, BUILDING_CUBE, $turn);
-        if (count($cubes_cur) == 0) { // nothing was placed this turn
-            $cubes = $this->getStructuresOnCiv(CIV_RELENTLESS, BUILDING_CUBE);
-            $num = count($cubes);
-            if ($num == 0)
-                return;
-            $benefit = $this->getCivBenefit(CIV_RELENTLESS, $num);
-            $this->queueBenefitInterrupt($benefit, $player_id, reason_civ(CIV_RELENTLESS));
-            if (count($cubes) > 0) {
-                foreach ($cubes as $key => $value) {
-                    $this->dbSetStructureLocation($key, 'hand', null, '', $player_id);
-                }
-            }
-        }
-    }
+
+
 
     function hasCiv($player_id, $civ_id) {
         $card_id = $this->getUniqueValueFromDB("SELECT card_id FROM card WHERE card_type='5' AND card_type_arg='$civ_id' AND card_location='hand' AND card_location_arg='$player_id'");
@@ -4376,18 +4350,18 @@ class Tapestry extends tapcommon {
                     return true;
                 }
             case BE_HOUSE: {
-                    $this->triggerPreGainStructure($player_id, BUILDING_HOUSE);
+                    $this->triggerPreGainStructure($player_id, BUILDING_HOUSE, $ben);
                     return true;
                 }
         }
         $landmark_id = $this->getRulesBenefit($ben, 'lm');
         if ($landmark_id) {
-            $this->triggerPreGainStructure($player_id, BUILDING_LANDMARK);
+            $this->triggerPreGainStructure($player_id, BUILDING_LANDMARK, $ben);
             return true;
         }
         $rule_type = $this->getRulesBenefit($ben, 'r', 'x');
         if ($rule_type == 'a') {
-            $this->triggerPreGainStructure($player_id, BUILDING_OUTPOST);
+            $this->triggerPreGainStructure($player_id, BUILDING_OUTPOST, $ben);
             return true;
         }
         return true;
@@ -6776,7 +6750,7 @@ class Tapestry extends tapcommon {
         return true;
     }
 
-    function triggerPreGainStructure($player_id, $type) {
+    function triggerPreGainStructure($player_id, $type, $ben) {
         if (!$this->isRealPlayer($player_id))
             return false;
         if ($this->hasCiv($player_id, CIV_COLLECTORS)) {
@@ -6794,7 +6768,7 @@ class Tapestry extends tapcommon {
         if ($this->hasCiv($player_id, CIV_URBAN_PLANNERS)) {
             /** @var UrbanPlanners */
             $inst = $this->getCivilizationInstance(CIV_URBAN_PLANNERS, true);
-            return $inst->triggerPreGainStructure($player_id, $type);
+            return $inst->triggerPreGainStructure($player_id, $type, $ben);
         }
         return false;
     }
@@ -8325,7 +8299,7 @@ class Tapestry extends tapcommon {
             return $this->getObjectFromDB("SELECT * FROM benefit WHERE benefit_id = $id");
         }
         $this->systemAssertTrue("invalid array argument for getCurrentBenefit", !is_array($ben));
-        if ($ben)
+        if ($ben !== null)
             return $this->getObjectFromDB("SELECT * FROM benefit WHERE benefit_type = '$ben' AND benefit_category = '$cat' ORDER BY benefit_prerequisite, benefit_id LIMIT 1");
         else
             return $this->getObjectFromDB("SELECT * FROM benefit ORDER BY benefit_prerequisite, benefit_id LIMIT 1"); // should be current!
@@ -10239,7 +10213,18 @@ class Tapestry extends tapcommon {
         return false;
     }
 
-    function effect_endOfTurn($player_id) {
+    function effect_endOfTurn(int $player_id) {
+
+        $this->checkPrivateAchievement(2, $player_id);
+
+
+        if ($this->hasCiv($player_id, CIV_RELENTLESS)) {
+            /** @var Relentless */
+            $inst = $this->getCivilizationInstance(CIV_RELENTLESS, true);
+            $inst->relentlessBenefitOnEndOfTurn($player_id);
+        }
+
+
         $this->setGameStateValue('cube_choice', -1);
         $this->setGameStateValue('coal_baron', 0);
         $this->checkDictatorship($player_id);
@@ -10853,8 +10838,7 @@ class Tapestry extends tapcommon {
         $current_player = $this->getGameStateValue('current_player_turn');
         $this->switchPlayer($current_player, false);
         // check for end of turn trigger
-        $this->checkPrivateAchievement(2, $current_player);
-        $this->relentlessBenefitOnEndOfTurn($current_player);
+
 
 
         if ($this->getCurrentBenefit()) {

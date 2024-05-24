@@ -202,6 +202,7 @@ id|-con|name|r|t|php
 314|BE_CARD_PLAY_TRIGGER|Card comes into play triggers|||'auto'=>1
 315||URBAN PLANNER starting benefit|||'lm'=>19
 316|BE_URBANPLANNERS_GRAB|URBAN PLANNERS Collect Landmark
+317|BE_URBANPLANNERS_BONUS|URBAN PLANNERS Bonus if 2+ Landmarks replaced|||'auto'=>1
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||
