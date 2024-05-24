@@ -6912,7 +6912,7 @@ class Tapestry extends tapcommon {
                 $this->notifyWithName('message', $message);
             return true;
         }
-        $track_stub = "tech_spot_${track}_";
+        $track_stub = "tech_spot_{$track}_";
         $dictator_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location LIKE '${track_stub}%' AND card_location_arg2 LIKE 'dic_%' LIMIT 1");
         if ($dictator_data) {
             $dd = explode("_", $dictator_data['card_location_arg2']);

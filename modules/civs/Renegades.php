@@ -83,6 +83,9 @@ class Renegades extends AbsCivilization {
         $slots = $this->getRules('slots');
         $benefits = $slots[$cube_tier]['benefit'];
         $this->game->queueBenefitNormal($benefits);
+        if ($cube_tier == 4 &&  $this->game->getAdjustmentVariant()<8){
+            $this->game->achievementEOT($player_id);
+        }
         $this->game->nextStateBenefitManager();
         return false; // no cleanup
     }
