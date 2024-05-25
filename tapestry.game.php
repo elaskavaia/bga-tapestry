@@ -5540,6 +5540,10 @@ class Tapestry extends tapcommon {
             $this->systemAssertTrue("invalid card selected $card_type", $card_data);
             $location = $card_data['card_location'];
             $message = totranslate("This does not seems to be tech card from the face up display");
+
+            $card_id = $card_data['card_id'];
+            $this->dbSetCardLocation($card_id, 'hand', 0, '', $player_id);
+
             if ($location == 'draw') {
                 $this->userAssertTrue($message, $hasRecycles);
             } else if ($location == 'deck_tech_vis') {
@@ -5547,8 +5551,6 @@ class Tapestry extends tapcommon {
             } else {
                 $this->userAssertTrue($message);
             }
-            $card_id = $card_data['card_id'];
-            $this->dbSetCardLocation($card_id, 'hand', 0, '', $player_id);
         } else {
             $this->userAssertTrue(totranslate("You may only invent a face up card at this time"), $flags & FLAG_FACE_DOWN);
             $cards = $this->dbPickCardsForLocation(1, CARD_TECHNOLOGY, 'hand', $player_id);
