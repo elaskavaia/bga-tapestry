@@ -3008,7 +3008,7 @@ div[data-income="0"] #subtitle_bar {
   height: calc(106px * 2);
 }
 
-#decks .tech_card, #oversurface  .tech_card{
+#decks .tech_card {
   width: 103px;
   height: 67px;
 }
