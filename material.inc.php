@@ -2311,18 +2311,24 @@ $this->civilizations = array (
         CIV_FUTURISTS => array ("name" => clienttranslate("FUTURISTS"),
                 "description" => array (
                         clienttranslate("The Futurists mysteriously begin their civilization with significant advancements."),
-                        clienttranslate("<b>When you gain this civilization:</b> Advance on each track by exactly 4 spaces (with the end of each track as the limit). Do not gain benefits, bonuses, or landmarks. Also, gain 1 of each resource.") ),
+                        clienttranslate("<b>When you gain this civilization:</b> Advance on each track by exactly 4 spaces (with the end of each track as the limit). Do not gain benefits, bonuses, or landmarks. Also, gain 1 of each resource.") ,
+                        ''
+                ),
                 "adjustment" => clienttranslate("When starting the game with the Futurists, lose [CULTURE] and [ANY RESOURCE]."),//
                 "midgame_ben" => [173],
-                "midgame_ben@a4" => [174],
-                "midgame_setup@a4" => true,
-                "description@a4" => array (
+                "midgame_ben@a4a8" => [174], // do nothing (keep this civ)
+                "midgame_setup@a4a8" => true,
+                "description@a4a8" =>  [
                         clienttranslate("The Futurists mysteriously begin their civilization with significant advancements."),
-                        clienttranslate("At the end of your first income turn (or immediately if you gain the Futurists during the game), you may advance on up to two different tracks by exactly 4 spaces (with the end of each track as a limit). Do not gain benefits, bonuses, or landmarks. Also, gain any 2 resources.") ),//
-                "adjustment@a4" => clienttranslate("rules changed"),
+                        clienttranslate("At the end of your first income turn (or immediately if you gain the Futurists during the game), you may advance on up to two different tracks by exactly 4 spaces (with the end of each track as a limit). Do not gain benefits, bonuses, or landmarks."),
+                        clienttranslate("Also gain 2 [ANY RESOURCE] (whether or not you advance). Landmarks left in this way are available to gain later.")
+                ],//
+                "adjustment@a4a8" => clienttranslate("rules changed"),
                 "start_benefit" => [ BE_GAIN_COIN, BE_GAIN_CULTURE, BE_GAIN_FOOD, BE_GAIN_WORKER],
-                "start_benefit@a4" => [ BE_ANYRES, BE_ANYRES, 0, 0 ],
-                "automa" => false, ),
+                "start_benefit@a4a8" => [ BE_ANYRES, BE_ANYRES, 0, 0 ],
+                "automa" => false, 
+                "al" => 8
+        ),
         6 => array ("name" => clienttranslate("HERALDS"),
                 "description" => array (
                         clienttranslate("The Heralds proclaim their achievements worldwide. Start with 4 player tokens here."),

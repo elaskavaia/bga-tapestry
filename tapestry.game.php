@@ -4313,9 +4313,9 @@ class Tapestry extends tapcommon {
         //$this->finalGameScoring($player_id);
 
         $cards = [];
-        $cards[] = array('type' => CARD_CIVILIZATION, 'type_arg' => CIV_RELENTLESS, 'nbr' => 1);
+        $cards[] = array('type' => CARD_CIVILIZATION, 'type_arg' => CIV_FUTURISTS, 'nbr' => 1);
         $this->cards->createCards($cards, 'deck_civ');
-        $this->queueBenefitStandardOne(65, $player_id);
+        //$this->debug_awardCard("FUTURISTS");
 
         // $this->queueBenefitNormal(BE_CONFIRM, $player_id);
         // $this->benefitCivEntry(CIV_GAMBLERS, $player_id);
@@ -9612,19 +9612,7 @@ class Tapestry extends tapcommon {
                 if (!$start) {
                     $this->benefitCivEntry($civ, $player_id, 'midgame');
                 }
-                break;
-            case CIV_FUTURISTS: // FUTURISTS
-                // Add 1 of each resource.
-                if ($this->isAdjustments4()) {
-                    // May advance tokens 2 tracks
-                    $this->queueBenefitNormal(["or" => [151, 152, 153, 154, 401]], $player_id, $reason);
-                    $this->queueBenefitNormal(601, $player_id, $reason); // that suppose to remove track selected by first operation
-                    $this->queueBenefitNormal(["or" => [151, 152, 153, 154, 401]], $player_id, $reason);
-                    $this->queueBenefitNormal(BE_CONFIRM, $player_id, $reason);
-                } else {
-                    // Need to advance tokens 4 spaces
-                    $this->queueBenefitNormal([151, 152, 153, 154], $player_id, $reason);
-                }
+            
                 break;
             case CIV_HERALDS: // HERALDS 
                 // 4 tokens to slots 1-4
