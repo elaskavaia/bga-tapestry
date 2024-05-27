@@ -10223,14 +10223,7 @@ class Tapestry extends tapcommon {
 
     function effect_endOfTurn(int $player_id) {
 
-        $this->checkPrivateAchievement(2, $player_id);
 
-
-        if ($this->hasCiv($player_id, CIV_RELENTLESS)) {
-            /** @var Relentless */
-            $inst = $this->getCivilizationInstance(CIV_RELENTLESS, true);
-            $inst->relentlessBenefitOnEndOfTurn($player_id);
-        }
 
 
         $this->setGameStateValue('cube_choice', -1);
@@ -10848,10 +10841,16 @@ class Tapestry extends tapcommon {
         }
         $current_player = $this->getGameStateValue('current_player_turn');
         $this->switchPlayer($current_player, false);
-        // check for end of turn trigger
+        // check for end of turn trigger effects
+        $player_id = $current_player;
+        $this->checkPrivateAchievement(2, $player_id);
+        if ($this->hasCiv($player_id, CIV_RELENTLESS)) {
+            /** @var Relentless */
+            $inst = $this->getCivilizationInstance(CIV_RELENTLESS, true);
+            $inst->relentlessBenefitOnEndOfTurn($player_id);
+        }
 
-
-
+        // triggering of effect caused more stuff on stack
         if ($this->getCurrentBenefit()) {
             $this->gamestate->nextState('loopback');
             return;
