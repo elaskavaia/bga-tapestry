@@ -2334,7 +2334,7 @@ $this->civilizations = array (
                         clienttranslate("The Heralds proclaim their achievements worldwide. Start with 4 player tokens here."),
                         clienttranslate("If you start the game with this civilization, at the end of your first income turn, you may play a tapestry card on top of Maker of Fire."),
                         clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may move a player token from here to any “when played” tapestry card (yours or an opponent's). Gain the benefits of that card. Each tapestry may have at most 1 token.") ),
-                "description@a4" => [ 
+                "description@a4a8" => [ 
                         1 => clienttranslate("If you started the game with the Heralds, at the end of your first income turn, draw tapestry cards until you find a \"When Played\" or \"Continuous\" card. Discard the others, and you may play \"When Played\" or \"Continuous\" tapestry card on top of Maker of Fire (only place it; do not gain its benefit). The Heralds may not play the Renaissance card over Maker of Fire.") ],
                 "tokens_count" => 4,
                 "slots_description" => '',
@@ -2344,9 +2344,10 @@ $this->civilizations = array (
                         4 => [ "top" => 86,"left" => 40.5,"w" => 8.5,"h" => 5.5 ], ),
                 "income_trigger" => [ "from" => 2,"to" => 5 ], //
                 "adjustment" => clienttranslate("no change"),
-                "adjustment@a3" => clienttranslate("When starting the game with the Heralds, gain 4 tapestry cards."),
-                "adjustment@a4" => clienttranslate("rules changed. Note: benefit of card placed on Marker of Fire can be used with Herald ability"),
-                "automa" => false, ),
+                "adjustment@a4a8" => clienttranslate("rules changed. Note: benefit of card placed on Marker of Fire can be used with Herald ability"),
+                "automa" => false, 
+                "al" => 8
+        ),
         7 => array ("name" => clienttranslate("HISTORIANS"), //CIV_HISTORIANS
                 "description" => array (
                         clienttranslate("The Historians want to witness the achievements of other civilizations. Start with these 4 squares covered with your player tokens. <b>At the beginning of your income turns (2-5)</b>, you may discard 1 territory tile from your supply to give a token to any opponent (even if they already have a token). This represents a historian you're sending to that civilization."),

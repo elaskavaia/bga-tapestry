@@ -2748,7 +2748,7 @@ class Tapestry extends tapcommon {
         } else
             $message = clienttranslate('${player_name} plays a tapestry card ${card_name}');
         if ($era == 1 && $ben == 64 && $this->hasCiv($player_id, CIV_HERALDS)) {
-            if ($this->isAdjustments4()) {
+            if ($this->isAdjustments4or8()) {
                 $tapvar = $this->tapestry_card_data[$tap_type]['type'];
                 $allowed = true;
                 if ($tapvar == "now" || $tapvar == "cont") {
@@ -9617,7 +9617,7 @@ class Tapestry extends tapcommon {
             case CIV_HERALDS: // HERALDS 
                 // 4 tokens to slots 1-4
                 $tokens = $this->effect_setupCivTokens($civ, $player_id);
-                if ($this->isAdjustments4()) {
+                if ($this->isAdjustments4or8()) {
                     if ($start) {
                         $this->effect_drawCardsUntil($player_id, $reason);
                     }
