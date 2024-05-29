@@ -42,6 +42,8 @@ class Tapestry extends tapcommon {
     public array $capitals;
     public array $map;
     public array $dice;
+    public array $automa_civ_cards;
+    public array $decision_cards;
 
     // decks
     protected Deck $cards;
@@ -2145,7 +2147,7 @@ class Tapestry extends tapcommon {
                 } else if ($location == 'draw') {
                     $choice = array_get($this->civilizations[$civ_id], "midgame_ben", [174]);
                     $era = $this->getCurrentEra($player_id);
-                    if ($civ_id == CIV_HISTORIANS && $this->isAdjustments4() && $era <= 2) {
+                    if ($civ_id == CIV_HISTORIANS && $this->isAdjustments4or8() && $era <= 2) {
                         $choice = [173]; // Discard Civilization, gain another
                     }
                     $this->queueBenefitInterrupt($choice, $player_id, $reason);
@@ -2562,7 +2564,11 @@ class Tapestry extends tapcommon {
                 $this->benefitCivEntry(CIV_UTILITARIENS, $player_id, "triggered::$landmark_type");
             }
         }
-        $this->historianBenefits($player_id, $landmark_type);
+
+        /** @var Historians */
+        $inst = $this->getCivilizationInstance(CIV_HISTORIANS, true);
+        // placing landmark trigger historian benefits
+        $inst->historianBenefits($player_id, $landmark_type);
 
 
         if ($this->hasCiv($player_id, CIV_RELENTLESS)) {
@@ -2978,6 +2984,25 @@ class Tapestry extends tapcommon {
                 return $cid;
         }
         return 0;
+    }
+
+    function debug_civ(string $card_name) {
+        if (is_numeric($card_name)) {
+            $cid = $card_name;
+        } else {
+            $cid = $this->searchForCard($this->civilizations, $card_name);
+        }
+        $this->systemAssertTrue("card not found $card_name $cid", $cid);
+        $data = $this->getCardDataByType(CARD_CIVILIZATION, $cid);
+        if (!$data) {
+            $cards = [];
+            $cards[] = array('type' => CARD_CIVILIZATION, 'type_arg' => $cid, 'nbr' => 1);
+            $this->cards->createCards($cards, 'deck_civ');
+        }
+        $this->debug_awardCard(CARD_CIVILIZATION, $cid);
+        if ($this->getCurrentBenefit())
+            $this->gamestate->nextState('next');
+        return;
     }
 
     function debug_award($card_name) {
@@ -4315,7 +4340,7 @@ class Tapestry extends tapcommon {
         $cards = [];
         $cards[] = array('type' => CARD_CIVILIZATION, 'type_arg' => CIV_FUTURISTS, 'nbr' => 1);
         $this->cards->createCards($cards, 'deck_civ');
-        //$this->debug_awardCard("FUTURISTS");
+        $this->debug_award("FUTURISTS");
 
         // $this->queueBenefitNormal(BE_CONFIRM, $player_id);
         // $this->benefitCivEntry(CIV_GAMBLERS, $player_id);
@@ -8109,52 +8134,10 @@ class Tapestry extends tapcommon {
 
     function sendHistorian($pid, $tid, $token_id) {
         $this->checkAction('sendHistorian');
-        $benefit_data = $this->getCurrentBenefit(CIV_HISTORIANS, 'civ');
-        $this->systemAssertTrue("cannot find civ HISTORIAN", $benefit_data);
-        $this->benefitCashed($benefit_data); // the civ benefit.
-        $player_id = $this->getActivePlayerId();
-        // VALIDITY CHECKS
-        // 1. Check player owns HISTORIANS and the token is there.
-        $token_location = 'civ_7_' . $token_id;
-        $historian = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND (card_location = '$token_location') AND card_location_arg='$player_id' LIMIT 1");
-        if ($historian == null) {
-            throw new feException('Invalid historian token');
-        }
-        // 2. Check owns the territory tile.
-        $territory_id = $this->getUniqueValueFromDB("SELECT card_id FROM card WHERE card_type='1' AND card_type_arg='$tid' AND card_location='hand' AND card_location_arg='$player_id'");
-        if ($territory_id == null) {
-            throw new feException('Invalid territory tile');
-        }
-        $this->effect_discardCard($territory_id, $player_id);
-        $this->sendHistorianToken($historian, $pid);
-        // APPLY BENEFITS
+        /** @var Historians */
+        $inst = $this->getCivilizationInstance(CIV_HISTORIANS, true);
+        $inst->sendHistorian($pid, $tid, $token_id);
         $this->gamestate->nextState('benefit');
-    }
-
-    function sendHistorianTokensMidGame() {
-        $player_id = $this->getActivePlayerId();
-        $player_data = $this->loadPlayersBasicInfos();
-        $num = 1;
-        while ($num < 5 && count($player_data) > 1) {
-            foreach ($player_data as $pid => $player) {
-                if ($player_id != $pid) {
-                    $token_location = 'civ_7_' . $num;
-                    $historian = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND (card_location = '$token_location') AND card_location_arg='$player_id' LIMIT 1");
-                    $num++;
-                    if ($historian) {
-                        $this->sendHistorianToken($historian, $pid);
-                    }
-                }
-            }
-        }
-    }
-
-    function sendHistorianToken($historian, $otherPlayerId) {
-        $player_id = $this->getActivePlayerId();
-        $token_location = 'pb_' . $otherPlayerId;
-        $this->DbQuery("UPDATE structure SET card_location='$token_location' WHERE card_id='$historian'");
-        $message = clienttranslate('${player_name} gives a Historian token to ${player_name2}');
-        $this->notif("moveStructure", $player_id)->withStructure($historian)->withPlayer2($otherPlayerId)->notifyAll($message);
     }
 
     function declineBonus() {
@@ -9612,7 +9595,7 @@ class Tapestry extends tapcommon {
                 if (!$start) {
                     $this->benefitCivEntry($civ, $player_id, 'midgame');
                 }
-            
+
                 break;
             case CIV_HERALDS: // HERALDS 
                 // 4 tokens to slots 1-4
@@ -9621,14 +9604,6 @@ class Tapestry extends tapcommon {
                     if ($start) {
                         $this->effect_drawCardsUntil($player_id, $reason);
                     }
-                }
-                break;
-
-            case CIV_HISTORIANS:
-                $tokens = $this->effect_setupCivTokens($civ, $player_id);
-                if (!$start) {
-                    // middle game
-                    $this->sendHistorianTokensMidGame();
                 }
                 break;
             case CIV_MERRYMAKERS: // MERRYMAKERS
@@ -10284,71 +10259,11 @@ class Tapestry extends tapcommon {
     }
 
     function queueEraCivAbility($cid, $player_id, $incomeTurn = 0) {
-        if (!$incomeTurn)
-            $incomeTurn = $this->getCurrentEra($player_id);
-        $income_trigger = array_get_def($this->civilizations, $cid, 'income_trigger', null);
-        if (!$income_trigger)
-            return; // no income trigger
-        $from = array_get($income_trigger, 'from', 0);
-        $to = array_get($income_trigger, 'to', 0);
-        if ($to == 0)
-            return;
-        switch ($cid) {
-            case CIV_MERRYMAKERS: // MERRYMAKERS Move token up for benefit
-                if ($this->isAdjustments4()) {
-                    // XXX 1 time migration
-                    $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='7' AND card_location LIKE 'civ_$cid\\_%'");
-                    if (count($token_data) == 3) {
-                        $this->benefitCivEntry($cid, $player_id, 'midgame');
-                    }
-                }
-                break;
-            case CIV_HISTORIANS: // HISTORIANS Discard territory tile to give token (when they gain landmark, you gain the exposed beneftits).
-                $cubes = $this->getCollectionFromDB("SELECT card_location FROM structure WHERE card_location_arg='$player_id' AND  card_location LIKE 'civ_${cid}\\_%'");
-                if (count($cubes) == 0)
-                    return;
-                break;
-            case CIV_MILITANTS: // MILITANTS Gain exposed benefits at start of income turns
-                $from = 1;
-                if (in_range($incomeTurn, $from, $to))
-                    $this->militantBenefits();
-                return;
-            default:
-                break;
-        }
-        if (in_range($incomeTurn, $from, $to))
-            $this->benefitCivEntry($cid, $player_id);
-        else {
-            $notactive = clienttranslate('${player_name}: ability of ${civ_name} is not applicable in era ${era}');
-            $this->notifyWithName('message', $notactive, [
-                'civ_name' => $this->getTokenName(CARD_CIVILIZATION, $cid),
-                'era' => $incomeTurn
-            ], $player_id);
-        }
+        $inst = $this->getCivilizationInstance(CIV_RELENTLESS, true);
+        $inst->queueEraCivAbility($player_id, $incomeTurn);
     }
 
-    function historianBenefits($player_id, $landmark_id) {
-        if (($this->isAdjustments4()) && $landmark_id > 12) {
-            // skip historian
-            return;
-        }
-        // who has the historians?
-        $historian = $this->getUniqueValueFromDB("SELECT DISTINCT(card_location_arg) FROM structure WHERE card_location LIKE 'pb_$player_id'");
-        if (!$historian)
-            return;
-        $cubes = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location LIKE 'civ_7_%'");
-        $covered = array();
-        foreach ($cubes as $cube) {
-            array_push($covered, getPart($cube['card_location'], 2));
-        }
 
-        for ($a = 1; $a <= 4; $a++) {
-            if (!in_array($a, $covered)) {
-                $benefit = $this->civilizations[CIV_HISTORIANS]['slots'][$a]['benefit'];
-                $this->queueBenefitNormal($benefit, $historian, reason_civ(CIV_HISTORIANS));
-            }
-        }
-    }
 
     function militantBenefits() {
         $player_id = $this->getActivePlayerId();
@@ -10655,7 +10570,7 @@ class Tapestry extends tapcommon {
                 throw new BgaSystemException("Cannot instantiate $classname for $civ");
             }
         } catch (Throwable $e) {
-            if ($strict) {                
+            if ($strict) {
                 throw new BgaSystemException("Cannot instantiate $classname for $civ (error)");
             }
         }

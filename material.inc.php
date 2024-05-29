@@ -2330,18 +2330,31 @@ $this->civilizations = array (
                 "al" => 8
         ),
         6 => array ("name" => clienttranslate("HERALDS"),
-                "description" => array (
+                "description" => [
+                        "<i>",
                         clienttranslate("The Heralds proclaim their achievements worldwide. Start with 4 player tokens here."),
+                        "</i>",
                         clienttranslate("If you start the game with this civilization, at the end of your first income turn, you may play a tapestry card on top of Maker of Fire."),
-                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may move a player token from here to any “when played” tapestry card (yours or an opponent's). Gain the benefits of that card. Each tapestry may have at most 1 token.") ),
+                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may place 1 player token on any \"when played\" tapestry card (yours or an opponent's). Gain the benefits of that card. Each tapestry may have at most 1 token.") 
+                ],
                 "description@a4a8" => [ 
-                        1 => clienttranslate("If you started the game with the Heralds, at the end of your first income turn, draw tapestry cards until you find a \"When Played\" or \"Continuous\" card. Discard the others, and you may play \"When Played\" or \"Continuous\" tapestry card on top of Maker of Fire (only place it; do not gain its benefit). The Heralds may not play the Renaissance card over Maker of Fire.") ],
+                        1 => clienttranslate("The Heralds proclaim their achievements worldwide."),
+                        3 => clienttranslate("<b>At the end of your first income turn</b>, draw and discard tapestry cards until you find a \"when played\" or \"continuous\" card. Then, you may palce a \"when played\" or \"continuous\" tapestry card on top of Maker of Fire (only place it; do not gain its immediate benefit). The Heralds may not play the Renaissance card over Maker of Fire.") 
+                ],
                 "tokens_count" => 4,
                 "slots_description" => '',
-                "slots" => array (1 => [ "top" => 86,"left" => 15,"w" => 8.5,"h" => 5.5 ],
+                "slots" => [
+                        1 => [ "top" => 86,"left" => 15,"w" => 8.5,"h" => 5.5 ],
                         2 => [ "top" => 86,"left" => 23.5,"w" => 8.5,"h" => 5.5 ],
                         3 => [ "top" => 86,"left" => 32,"w" => 8.5,"h" => 5.5 ],
-                        4 => [ "top" => 86,"left" => 40.5,"w" => 8.5,"h" => 5.5 ], ),
+                        4 => [ "top" => 86,"left" => 40.5,"w" => 8.5,"h" => 5.5 ], 
+                ],
+                "slots@a8" => [
+                        1 => [ "top" => 50,"left" => 15 ],
+                        2 => [ "top" => 50,"left" => 25 ],
+                        3 => [ "top" => 50,"left" => 35 ],
+                        4 => [ "top" => 50,"left" => 45 ], 
+                ],
                 "income_trigger" => [ "from" => 2,"to" => 5 ], //
                 "adjustment" => clienttranslate("no change"),
                 "adjustment@a4a8" => clienttranslate("rules changed. Note: benefit of card placed on Marker of Fire can be used with Herald ability"),
@@ -2355,28 +2368,33 @@ $this->civilizations = array (
                         clienttranslate("<i>If you gain this civilization in the middle of the game, immediately give 4 of your player tokens to opponents, leaving the squares exposed on this mat.</i>") ),
                 //
                 "midgame_setup" => true,
-                "description@a4" => [ 
-                        0 => clienttranslate("The Historians want to witness the achievements of other civilizations. Start with these 4 squares covered with your player tokens and 1 Territory tile. <b>At the beginning of your income turns (2-5) in 2-3 player game or (1-4) in 4-5 player game</b>, you may discard 1 territory tile from your supply to give a token to any opponent (even if they already have a token). This represents a historian you're sending to that civilization."),
-                        1 => clienttranslate("Whenever any opponent with at least one of your 'historians' gains a landmark from an advancement track, you gain all of these exposed benefits."),
-                        2 => clienttranslate('<i>If you gain this civilization in the middle of the game and you are in era 1 or 2, discard it and draw another. Otherwise, immediately give 4 of your player tokens to opponents, leaving the squares exposed on this mat.</i>') ],
+                "description@a4a8" => [ 
+                        clienttranslate("<i>The Historians want to witness the achievements of other civilizations.</i>"),
+                        clienttranslate("Start with 1 Territory tile and with these 4 squares covered with your player tokens."),
+                        clienttranslate("<b>At the beginning of your income turns (2-5) in 1/2/3 player game or (1-4) in 4/5 player game</b>, you may discard 1 territory tile from your supply to give a token to any opponent (even if they already have a token). This represents a historian you're sending to that civilization."),
+                        clienttranslate("Whenever any opponent with at least one of your 'historians' gains a landmark from an advancement track, you gain all of these exposed benefits."),
+                        clienttranslate('<i>If you gain this civilization in the middle of the game and you are in era 1 or 2, discard it and draw another. Otherwise, immediately give 4 of your player tokens to opponents, leaving the squares exposed on this mat.</i>'),
+                        clienttranslate('<i>Then, if there are no landmarks remaining on advancement tracks, gain the exposed benefits.</i>') 
+                ],
                 "start_benefit" => [ ],
-                "start_benefit@a4" => [ BE_TERRITORY ],
+                "start_benefit@a4a8" => [ BE_TERRITORY ],
                 "income_trigger" => [ "from" => 2,"to" => 5 ], //
-                "income_trigger@a4p4" => [ "from" => 1,"to" => 4 ], //
-                "income_trigger@a4p5" => [ "from" => 1,"to" => 4 ], //
+                "income_trigger@a4a8p4p5" => [ "from" => 1,"to" => 4 ], //
                 "tokens_count" => 4,
                 "slots" => array ( // 
                         1 => [ "top" => 61,"left" => 30.5,"w" => 8.5,"h" => 5.5,"benefit" => [ 503 ] ],
                         2 => [ "top" => 66.5,"left" => 30.5,"w" => 8.5,"h" => 5.5,"benefit" => [ RES_WORKER ] ],
                         3 => [ "top" => 61,"left" => 39,"w" => 8.5,"h" => 5.5,"benefit" => [ RES_FOOD ] ],
                         4 => [ "top" => 66.5,"left" => 39,"w" => 8.5,"h" => 5.5,"benefit" => [ 503 ] ], ),
-                "slots@a4" => array ( //
+                "slots@a4a8" => array ( //
                         1 => [ "top" => 57,"left" => 29, "benefit" => [ BE_RESEARCH_NB ] ],
                         2 => [ "top" => 63,"left" => 29,"benefit" => [ 'p' => BE_TAPESTRY,'g' => BE_INVENT,0 => 0 ]],
                         3 => [ "top" => 57,"left" => 38,"benefit" => [ RES_FOOD ] ], //  
                         4 => [ "top" => 63,"left" => 38,"benefit" => [ BE_VP_TERRITORY ]], ),
                 "adjustment" => clienttranslate("no change"),
-                "adjustment@a4" => clienttranslate("rule changes"), ),
+                "adjustment@a4a8" => clienttranslate("rule changes"), 
+                "al"=>8
+        ),
         8 => array ("name" => clienttranslate("INVENTORS"),
                 "description" => array (
                         clienttranslate("The Inventors start with 4 player tokens here. <b>At the beginning of your income turns (2-5)</b>, you may move a player token from here to any tech card (yours or an opponent's). That card is instantly upgraded, and it ignores top-row prerequisites. If it is an opponent's tech card, you may gain the benefit after they do."),
