@@ -8,7 +8,7 @@ class Architects extends AbsCivilization {
     }
 
     function setupCiv(int $player_id, string $start) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $reason = reason_civ($civ);
         $tokens = [];
         if (!$start) {
@@ -36,7 +36,7 @@ class Architects extends AbsCivilization {
     }
 
     function moveCivCube(int $player_id, bool $is_midgame, int $spot, $extra) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         if ($this->game->isAdjustments4or8()) {
             if (!$is_midgame) {
                 // place cube in the city

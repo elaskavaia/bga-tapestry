@@ -17,9 +17,6 @@ spl_autoload_register(function ($class_name) {
             }
             include $class_name . ".php";
             break;
-        case "Tapestry":
-            include_once "tapestry.game.php";
-            break;
         case "Deck":
             include_once APP_GAMEMODULE_PATH . "/module/common/deck.game.php";
             break;

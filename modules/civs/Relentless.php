@@ -8,7 +8,7 @@ class Relentless extends AbsCivilization {
     }
 
     function setupCiv(int $player_id, string $start) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $reason = reason_civ($civ);
         $tokens = [];
         if ($start) {
@@ -42,7 +42,7 @@ class Relentless extends AbsCivilization {
     }
 
     function argCivAbilitySingle($player_id, $benefit) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $data = $benefit;
         $condition = $benefit['benefit_data'];
         $data['reason'] = $this->game->getReasonFullRec(reason(CARD_CIVILIZATION, $civ), false);
@@ -54,7 +54,7 @@ class Relentless extends AbsCivilization {
     }
 
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = '') {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $this->systemAssertTrue("ERR:Relentless:11", $this->game->isRealPlayer($player_id));
         $this->systemAssertTrue("ERR:Relentless:12", $this->game->hasCiv($player_id, $civ));
         switch ($ben) {

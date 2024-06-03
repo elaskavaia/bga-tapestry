@@ -31,7 +31,7 @@ $game_options = [
             2 => ['name' => totranslate('no Adjustments'), 'description' => totranslate('original rules')],
             1 => ['name' => totranslate('with Adjustments'), 'description' => totranslate('latest official adjustments')],
             4 => ['name' => totranslate('with Experimental Adjustments Nov 2022'),'beta'=>true, 'description' => totranslate('experimental rules')],
- //           8 => ['name' => totranslate('Adjustment Civilization Pack r8'),'alpha'=>true, 'description' => totranslate('official expansion')],
+            8 => ['name' => totranslate('Adjustment Civilization Pack r8'),'alpha'=>true, 'description' => totranslate('official expansion')],
         ],
 //             'startcondition' => [
 //                     1 => [ [ 'type' => 'minplayers', 'value' => 32, 'message' => totranslate('Maintenance in progress.  Table creation for Tapestry is disabled.') ] ],

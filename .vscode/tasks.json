@@ -23,8 +23,21 @@
         {
             "label": "update cards mat",
             "type": "shell",
-            "command": "php7.4 misc/other/genmat.php misc/benefit_types.csv",
+            "command": "php7.4 ${userHome}/git/bga-sharedcode/misc/genmat.php misc/benefit_types.csv",
             "problemMatcher": [],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "override taptest",
+            "type": "shell",
+            "command": "${workspaceFolder}/misc/rename.sh taptest ${userHome}/Develop/bga/bga-git/games/tapestry/taptest",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
             "group": {
                 "kind": "none",
                 "isDefault": false

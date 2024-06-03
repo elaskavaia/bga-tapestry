@@ -1,5 +1,14 @@
 {
-    "prettier.printWidth": 140,
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "misc/.*\\.csv$",
+        "isAsync": true,
+        "cmd": "php7.4 ~/git/bga-sharedcode/misc/genmat.php ${file}"
+      }
+    ]
+  },
+  "prettier.printWidth": 140,
     "editor.formatOnSaveMode": "modificationsIfAvailable",
     "editor.formatOnSave": false,
     "eslint.codeActionsOnSave.mode": "problems",

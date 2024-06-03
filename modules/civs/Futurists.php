@@ -8,7 +8,7 @@ class Futurists extends AbsCivilization {
     }
 
     function setupCiv(int $player_id, string $start) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $reason = reason_civ($civ);
         $tokens = [];
         if ($this->game->isAdjustments4or8()) {

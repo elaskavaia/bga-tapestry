@@ -8,7 +8,7 @@ class Templates extends AbsCivilization {
     }
 
     function setupCiv(int $player_id, string $start) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $reason = reason_civ($civ);
         $tokens = [];
         if ($start) {
@@ -24,7 +24,7 @@ class Templates extends AbsCivilization {
     }
 
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = '') {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $this->systemAssertTrue("ERR:AbsCivilization:11", $this->game->isRealPlayer($player_id));
         $this->systemAssertTrue("ERR:AbsCivilization:12", $this->game->hasCiv($player_id, $civ));
         switch ($ben) {
@@ -39,7 +39,7 @@ class Templates extends AbsCivilization {
     }
 
     function moveCivCube(int $player_id, bool $is_midgame, int $spot, $extra) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         if ($is_midgame) {
             //...
             return;
@@ -60,7 +60,7 @@ class Templates extends AbsCivilization {
     }
 
     function argCivAbilitySingle($player_id, $benefit) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $data = $benefit;
         $condition = $benefit['benefit_data'];
         $data['reason'] = $this->game->getReasonFullRec(reason(CARD_CIVILIZATION, $civ), false);

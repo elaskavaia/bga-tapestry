@@ -3,24 +3,26 @@
 declare(strict_types=1);
 
 abstract class AbsCivilization  {
-    protected int $civ_id; // numeric civ type
-    public Tapestry $game; // game ref
-    protected array $civilization_info = []; // material file info
-
+    private int $civ; // numeric civ type
+    public PGameXBody $game; // game ref
 
     public function __construct(int $civ, object $game) {
         $this->game = $game;
         if ($civ == 0) throw new feException("Invalid civ id 0");
-        $this->civ_id = $civ;
-        $this->civilization_info = &$this->game->civilizations[$civ];
+        $this->civ = $civ;
     }
 
     function getType() {
-        return $this->civ_id;
+        return $this->civ;
+    }
+
+    function getCivInfo() {
+        $civ = $this->civ;
+        return $this->game->civilizations[$civ];
     }
 
     function getRules($field = 'benefit', $def = null) {
-        return array_get($this->civilization_info, $field, $def);
+        return array_get($this->getCivInfo(), $field, $def);
     }
 
     function finalScoring($player_id) {
@@ -35,7 +37,7 @@ abstract class AbsCivilization  {
     }
 
     function setupCiv(int $player_id, string $start) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         if (!$start) {
             $midgame_setup = $this->getRules('midgame_setup', false);
             if ($midgame_setup)
@@ -67,7 +69,7 @@ abstract class AbsCivilization  {
     }
 
     function getSingleCube() {
-        $cubes = $this->game->getStructuresOnCiv($this->civ_id, BUILDING_CUBE);
+        $cubes = $this->game->getStructuresOnCiv($this->civ, BUILDING_CUBE);
         $cube = array_shift($cubes);
         $this->systemAssertTrue("ERR:AbsCivilization:01", $cube);
         return $cube;
@@ -78,12 +80,12 @@ abstract class AbsCivilization  {
     }
 
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = '') {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         return true;  // cleanup
     }
 
     function queueEraCivAbility($player_id, $incomeTurn = 0) {
-        $cid = $this->civ_id;
+        $cid = $this->civ;
         if (!$incomeTurn)
             $incomeTurn = $this->game->getCurrentEra($player_id);
         $income_trigger = array_get_def($this->game->civilizations, $cid, 'income_trigger', null);

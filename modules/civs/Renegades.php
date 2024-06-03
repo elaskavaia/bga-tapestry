@@ -8,7 +8,7 @@ class Renegades extends AbsCivilization {
     }
 
     function setupCiv(int $player_id, string $start) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $reason = reason_civ($civ);
         $token = $this->game->addCivToken($player_id, 0, $civ);
         if ($start) {
@@ -57,7 +57,7 @@ class Renegades extends AbsCivilization {
 
 
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = '') {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $this->systemAssertTrue("ERR:Renegades:01", $ben == 310); //BE_RENEGADES_ADV
         $tier = (int) getReasonPart($reason, 3);
         $cube = $this->getSingleCube();
@@ -92,7 +92,7 @@ class Renegades extends AbsCivilization {
 
     function moveCivCube(int $player_id, bool $is_midgame, int $spot, $extra) {
         if ($this->game->isAdjustments8() && $is_midgame) {
-            $civ = $this->civ_id;
+            $civ = $this->civ;
             $cube = $this->getSingleCube();
             $valid = $this->getCurrentBoardTiers($player_id);
             if (array_search($spot, $valid) === false) {
@@ -127,7 +127,7 @@ class Renegades extends AbsCivilization {
     }
 
     function argCivAbilitySingle($player_id, $benefit) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $data = $benefit;
         $condition = $benefit['benefit_data'];
         $data['reason'] = $this->game->getReasonFullRec(reason(CARD_CIVILIZATION, $civ), false);

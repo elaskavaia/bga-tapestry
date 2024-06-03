@@ -16,7 +16,7 @@ class Historians extends AbsCivilization {
     }
 
     function setupCiv(int $player_id, string $start) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $reason = reason_civ($civ);
         $tokens = $this->game->effect_setupCivTokens($civ, $player_id);
         if (!$start) {

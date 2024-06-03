@@ -444,7 +444,7 @@ class action_tapestry extends APP_GameAction
         $this->setAjaxMode();
         $ability = $this->getArg("ability", AT_alphanum_dash, true);
         $arg = $this->getArg("arg", AT_alphanum_dash, false, null);
-        /** @var Tapestry */
+        /** @var PGameXBody */
         $game = $this->game;
         $game->action_activatedAbility($ability, $arg);
         $this->ajaxResponse();

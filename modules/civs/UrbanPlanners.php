@@ -13,7 +13,7 @@ class UrbanPlanners extends AbsCivilization {
     }
 
     function finalScoring($player_id) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         if (!$this->game->hasCiv($player_id, $civ)) {
             return;
         }
@@ -94,7 +94,7 @@ class UrbanPlanners extends AbsCivilization {
     function triggerPreGainStructure($player_id, $type, $ben) {
         if (!$this->game->isRealPlayer($player_id))
             return false;
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         if (!$this->game->hasCiv($player_id, $civ)) {
             return false;
         }
@@ -106,7 +106,7 @@ class UrbanPlanners extends AbsCivilization {
     }
 
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = '') {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $this->systemAssertTrue("ERR:UrbanPlanners:11", $this->game->isRealPlayer($player_id));
         $this->systemAssertTrue("ERR:UrbanPlanners:12", $this->game->hasCiv($player_id, $civ));
         switch ($ben) {
@@ -145,7 +145,7 @@ class UrbanPlanners extends AbsCivilization {
     }
 
     function removeTrackingCubes($player_id) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         $cubes = $this->game->getStructuresSearch(BUILDING_CUBE, null, "civilization_$civ");
         foreach ($cubes as $cube) {
             $this->game->dbSetStructureLocation($cube['card_id'], 'hand', 0, '', $player_id);
@@ -155,7 +155,7 @@ class UrbanPlanners extends AbsCivilization {
     function hasActivatedAbilities($player_id) {
         if (!$this->game->isRealPlayer($player_id))
             return false;
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         if (!$this->game->hasCiv($player_id, $civ)) {
             return false;
         }
@@ -164,7 +164,7 @@ class UrbanPlanners extends AbsCivilization {
     }
 
     function action_activatedAbility($player_id, $ability, $arg, &$state) {
-        $civ = $this->civ_id;
+        $civ = $this->civ;
         if ($ability != "civ_25") return false;
         if (!$this->hasActivatedAbilities($player_id)) return false;
         $sid = $arg;
