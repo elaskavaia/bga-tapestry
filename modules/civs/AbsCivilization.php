@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 abstract class AbsCivilization  {
-    private int $civ; // numeric civ type
+    protected int $civ; // numeric civ type
     public PGameXBody $game; // game ref
 
     public function __construct(int $civ, object $game) {

@@ -1031,7 +1031,10 @@ abstract class PGameXBody extends tapcommon {
 
     function getStructuresOnCiv($cid, $type = BUILDING_CUBE, $arg2 = null) {
         $location_like = "civ\\_$cid\\_%";
-        $sql = "SELECT * FROM structure WHERE card_type='$type' AND card_location LIKE '$location_like'";
+        $sql = "SELECT * FROM structure WHERE card_location LIKE '$location_like'";
+        if ($type !== null) {
+            $sql .= " AND card_type = '$type'";
+        }
         if ($arg2 !== null)
             $sql .= " AND card_location_arg2 = $arg2";
         return $this->getCollectionFromDB($sql);
@@ -1824,7 +1827,7 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_triggerPrivateAchievement($player_id, $pos, $civ = 15) {
         if ($this->isAdjustments4() && $this->hasCiv($player_id, $civ)) {
-            $destination = "civa_${civ}_$pos";
+            $destination = "civa_{$civ}_$pos";
             $achievements = $this->getCollectionFromDB("SELECT card_location_arg FROM structure WHERE card_location = '$destination'");
             if (count($achievements) > 0) {
                 return; // player already has it
@@ -4083,7 +4086,7 @@ abstract class PGameXBody extends tapcommon {
     function saction_civTokenAdvance($player_id, $cid, $spot, $extra, $civ_args) {
         $condition = $civ_args['benefit_data'];
         $is_midgame = ($condition == 'midgame');
-        if ($cid == CIV_ARCHITECTS || $cid == CIV_RENEGADES) {
+        if ($cid == CIV_ARCHITECTS || $cid == CIV_RENEGADES || $cid == CIV_CRAFTSMEN) {
             $inst = $this->getCivilizationInstance($cid, true);
             $inst->moveCivCube($player_id, $is_midgame, $spot, $extra);
             return;
@@ -6808,7 +6811,7 @@ abstract class PGameXBody extends tapcommon {
             $table = 'card';
             $slot = $this->getCivSlotNumberForGain($civ, $table, $type);
             if ($slot <= 0) return false;
-            $sql = "SELECT * FROM card WHERE card_location = 'civ_${civ}_${slot}' LIMIT 1";
+            $sql = "SELECT * FROM card WHERE card_location = 'civ_{$civ}_${slot}' LIMIT 1";
             $cube =  $this->getObjectFromDB($sql);
             if ($cube) // already there 
                 return false;
@@ -6828,7 +6831,7 @@ abstract class PGameXBody extends tapcommon {
         $slot = $this->getCivSlotNumberForGain(CIV_COLLECTORS, 'card', $card_type);
         $this->systemAssertTrue("cannot find card $card_id $slot", $slot > 0);
         $civ = CIV_COLLECTORS;
-        $sql = "SELECT * FROM card WHERE card_location = 'civ_${civ}_${slot}' LIMIT 1";
+        $sql = "SELECT * FROM card WHERE card_location = 'civ_{$civ}_${slot}' LIMIT 1";
         $cube =  $this->getObjectFromDB($sql);
 
         if ($cube) // already there
@@ -7422,7 +7425,7 @@ abstract class PGameXBody extends tapcommon {
         $slots = $this->getRulesCiv($civ, 'slots');
         foreach ($slots as $i => $info) {
             if ($info[$field] == $value) {
-                return "civ_${civ}_$i";
+                return "civ_{$civ}_$i";
             }
         }
         return null;
@@ -7798,23 +7801,9 @@ abstract class PGameXBody extends tapcommon {
     function placeCraftsmen($slot) {
         $this->checkAction('placeCraftsmen');
         $player_id = $this->getActivePlayerId();
-        $this->systemAssertTrue("No civ CRAFTSMEN", $this->hasCiv($player_id, CIV_CRAFTSMEN));
-        $slots = $this->getCraftsmenSlots();
-        $this->userAssertTrue(totranslate('Invalid slot'), in_array($slot, $slots));
-        $civ_location = "civ_3_" . $slot;
-        $curr = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
-        $structure_id = $curr['card_id'];
-        $type = $curr['card_type'];
-        $this->DbQuery("UPDATE structure SET card_location='$civ_location' WHERE card_location='capital_structure'");
-        // NOTIFY...
-        $this->clearCurrentBenefit();
-        $this->notifyMoveStructure(clienttranslate('${player_name} places an income building on Craftsmen mat'), $structure_id, [], $player_id);
-        if (($this->isTapestryActive($player_id, 27)) && ($type <= 5)) { // MONARCHY
-            $this->awardVP($player_id, 3, reason_tapestry(27));
-        }
-        $benefits = $this->civilizations[3]['slots'][$slot]['benefit'];
-        $this->interruptBenefit();
-        $this->queueBenefitNormal($benefits, $player_id, reason_civ(CIV_CRAFTSMEN));
+        /** @var Craftsmen */
+        $inst = $this->getCivilizationInstance(CIV_CRAFTSMEN, true);
+        $inst->moveCivCube($player_id, false, $slot);
         $this->gamestate->nextState('next');
     }
 
@@ -8704,6 +8693,7 @@ abstract class PGameXBody extends tapcommon {
         if ($is_midgame) {
             switch ($civ) {
                 case CIV_RENEGADES:
+                case CIV_CRAFTSMEN:
                     return $civinst->argCivAbilitySingle($player_id, $benefit);
                 case CIV_ENTERTAINERS:
                     $data['slots'] = array_keys($slots);
@@ -8731,8 +8721,8 @@ abstract class PGameXBody extends tapcommon {
                     break;
                 case CIV_UTILITARIENS:
                     $own_landmarks = $this->getStructuresSearch(BUILDING_LANDMARK, null, null, $player_id);
-                    $cube1 = $this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_${civ}_9", $player_id);
-                    $cube2 = $this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_${civ}_10", $player_id);
+                    $cube1 = $this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_{$civ}_9", $player_id);
+                    $cube2 = $this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_{$civ}_10", $player_id);
                     foreach ($own_landmarks as $landmark_data) {
                         $landmark_type = $landmark_data['card_location_arg2'];
                         $slot = $this->getCivSlotWithValue(CIV_UTILITARIENS, "lm", $landmark_type);
@@ -9346,48 +9336,17 @@ abstract class PGameXBody extends tapcommon {
             'id' => $structure ? $structure['card_id'] : 0
         ];
         $this->addBenefitData($stra);
+        /** @var Craftsmen */
+        $cr = $this->getCivilizationInstance(CIV_CRAFTSMEN, true);
+        $slots = $cr->getCraftsmenSlots($player_id);
         return array(
-            'options' => $options, 'slots' => $this->getCraftsmenSlots(), 'anyoptions' => $any ? 1 : 0,
+            'options' => $options, 'slots' => $slots, 'anyoptions' => $any ? 1 : 0,
             'conquer_targets' => $this->getConquerTargets(true)
         ) + $stra;
     }
 
     function onMat($x, $y) {
         return ($x >= 3) && ($x <= 11) && ($y >= 3) && ($y <= 11);
-    }
-
-    function getCraftsmenSlots() {
-        $slots = array();
-        $civ_type = $this->getUniqueValueFromDB("SELECT card_type FROM structure WHERE card_location='capital_structure' LIMIT 1");
-        if ($civ_type > 4)
-            return $slots; // only income structures can be put on mat.
-        // Need to check which slots are available. 1-3, 4-7, 8-12
-        $civ_structures = $this->getCollectionFromDB("SELECT card_location FROM structure WHERE card_location LIKE 'civ_3\\_%'");
-        $used = array();
-        foreach ($civ_structures as $cs) {
-            $coords = explode("_", $cs['card_location']);
-            $c = $coords[2];
-            array_push($used, $c);
-        }
-        for ($a = 1; $a <= 3; $a++) {
-            if (!in_array($a, $used)) {
-                array_push($slots, $a);
-                break;
-            }
-        }
-        for ($a = 4; $a <= 7; $a++) {
-            if (!in_array($a, $used)) {
-                array_push($slots, $a);
-                break;
-            }
-        }
-        for ($a = 8; $a <= 12; $a++) {
-            if (!in_array($a, $used)) {
-                array_push($slots, $a);
-                break;
-            }
-        }
-        return $slots;
     }
 
     function argInvent() {
@@ -9559,7 +9518,7 @@ abstract class PGameXBody extends tapcommon {
 
         $this->interruptBenefit();
         $start_benefit = $this->getRulesCiv($civ, 'start_benefit', []);
-        //         $this->notifyWithName('message', clienttranslate('${player_name} setup civ ${civ}'), [ 'civ'=>$civ, 'start'=>$start_benefit ],
+        //         $this->notifyWithName('message', clienttranslate('${player_name} setup civ {$civ}'), [ 'civ'=>$civ, 'start'=>$start_benefit ],
         //                 $player_id);
         if (count($start_benefit) > 0) {
             $this->queueBenefitNormal($start_benefit, $player_id, $reason);
@@ -9712,7 +9671,7 @@ abstract class PGameXBody extends tapcommon {
             if ($cube) {
                 $num++;
             }
-            $sql = "SELECT * FROM card WHERE card_location = 'civ_${civ}_$i' LIMIT 1";
+            $sql = "SELECT * FROM card WHERE card_location = 'civ_{$civ}_$i' LIMIT 1";
             $cube =  $this->getObjectFromDB($sql);
             if ($cube) {
                 $num++;

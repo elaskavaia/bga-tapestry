@@ -122,4 +122,15 @@ final class GameTest extends TestCase {
         $this->assertEquals($from, 1);
         $this->assertEquals($to, 4);
     }
+
+    function testCraftsmen() {
+        $m = $this->game;
+        $civ = CIV_CRAFTSMEN;
+        $m->doAdjustMaterial(2, 8);
+        $inst = $m->getCivilizationInstance($civ, true);
+        $income_trigger = $inst->getRules('income_trigger', null);
+        $this->assertNull($income_trigger);
+        $mg= $inst->getRules('midgame_setup', null);
+        $this->assertNotNull($mg);
+    }
 }

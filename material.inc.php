@@ -2244,6 +2244,12 @@ $this->civilizations = array (
                 "description" => array (
                         clienttranslate("The Craftsmen want to create a wonder of the world, a massive statue. You may place income buildings here as an alternative to your capital city. You must place each building on the lowest available space in a column of your choice (you don't need to finish a column before starting another). As you cover a benefit, gain it immediately."),
                         clienttranslate("This grid counts as part of your capital city for building related benefits, but it does not score for completed rows and columns here.") ),
+                "description@a8" => [
+                        clienttranslate("The Craftsmen want to create a wonder of the world, a massive statue."),
+                        clienttranslate("You may place income buildings here as an alternative to your capital city. You must place each building on the lowest available space in a column of your choice (you don't need to finish a column before starting another). As you cover a benefit, gain it immediately."),     
+                        clienttranslate("This grid counts as poart of your capital city for building-related benefits (e.g., [HOUSEVP]), but it does not score for completed rows and columns here."),   
+                        clienttranslate("If you gain this civilization in the middle of the game, you may place up to 1 of your tokens in each column on this mat and gain only one of the covered benefits (you choose). You can place each token on a row as high as the number of your current era (for example, gaining them in era 3 allows you to put tokens on the first 3 rows from the bottom). After that, you can place the income buildings you gain on the lowest spaces above these tokens and gain the benefits like you normally would."),
+                ],
                 "slots" => array (
                         1 => [ "top" => 86,"left" => 12,"benefit" => [ BE_GAIN_WORKER ],"w" => 13,"h" => 8.5 ],
                         2 => [ "top" => 78.125,"left" => 12,"benefit" => [ BE_TERRITORY ],"w" => 13,"h" => 8.5 ],
@@ -2258,7 +2264,11 @@ $this->civilizations = array (
                         11 => [ "top" => 62.375,"left" => 36,"benefit" => [ BE_RESEARCH ],"w" => 13,"h" => 8.5 ],
                         12 => [ "top" => 54.5,"left" => 36,"benefit" => [ 513,BE_VP,BE_VP ],"w" => 13,"h" => 8.5 ], ),
                 "adjustment" => clienttranslate("When starting the game with the Craftsmen, lose [ANY RESOURCE] during your first income turn"),
-                "adjustment@a4" => clienttranslate("no changes") ),
+                "adjustment@a4" => clienttranslate("no changes"),
+                "adjustment@a8" => clienttranslate("midgame setup"),
+                "midgame_setup@a8" => true,
+                "al" => 8 
+        ),
         CIV_ENTERTAINERS => array ( // #4
         "name" => clienttranslate("ENTERTAINERS"),
                 "description" => array (
