@@ -2851,7 +2851,13 @@ $this->civilizations = array (
                         clienttranslate("Start with 4 face-up space tiles in your supply (not on this mat)."),
                         clienttranslate("At the beginning of your income turns (2-5), if there is a space tile on this civilization mat, discard it. Then choose one of these options:"),
                         clienttranslate("<li>Explore 1 space tile from your supply, placing it on this civilization mat. If you discarded a space tile from your civilization mat this turn, you must first pay [ANY RESOURCE]"),
-                        clienttranslate("<li>Gain [ANY RESOURCE]</li>"), ],"exp" => "PP","slots_description" => '',
+                        clienttranslate("<li>Gain [ANY RESOURCE]</li>"), 
+                ],
+                "description@a8" => [ 
+                        3 =>  clienttranslate("<li>Explore 1 space tile from your supply, placing it on this civilization mat."),
+
+                ],
+                "exp" => "PP","slots_description" => '',
                 "slots_description" => '',
                 "slot_choice"=>"any",
                 "slots" => [ // 
@@ -2886,16 +2892,29 @@ $this->civilizations = array (
                         "",
                         clienttranslate("On step 3 of your final income turn, gain 4 VP for each of these territory tiles that contain only water on the outer edges."),
                         "",
-                        clienttranslate("<it>If you gain this civilization in the middle of the game, you may discard it and gain another. If you keep it, immediately place up to 4 of your territory tiles on these hexes (don't gain exploration benefits from this)</it>"), ],
+			clienttranslate("<it>If you gain this civilization in the middle of the game, you may discard it and gain another. If you keep it, immediately place up to 4 of your territory tiles on these hexes (don't gain exploration benefits from this)</it>"), ],
+
+                "description@a8" => [
+                        clienttranslate("<i>The Islanders are mystified by a massive island on the horizon, and they devote their resources to exploring it.</i>"),
+                        clienttranslate("Start with 4 territory tiles in your supply."),
+                        clienttranslate("<b>At the beginning of your income turns (1-5)</b>, you may explore 1 of the hexes on this mat (place a territory tile here and gain the exploration benefit and [VP], just as you would on the board). Additional hexes may also be explored on advance turns via exploration actions. Tiles placed here cannot be conquered."),
+                        clienttranslate("<b>On your final income turn</b>, gain [4VP] for each of these territory tiles that contain only water on the outer edges."),
+                        clienttranslate("<it>If you gain this civilization in the middle of the game, you may discard it and gain another. If you keep it, immediately place up to 4 of your territory tiles on these hexes (don't gain exploration benefits from this)</it>"),
+                ],
+
                 "start_benefit" => [ "m" => 4,"g" => BE_TERRITORY ], //
                 "income_trigger" => [ "from" => 2,"to" => 5 ], //
+                "income_trigger@a8" => [ "from" => 1,"to" => 5 ], //
                 "midgame_ben" => ["or"=>[174,173]],
                 "midgame_setup" => true,
+                "slots_description" => '',
                 "slot_choice"=>"any",
                 "slots" => [
                         1 => [ "benefit" => [ 179 ] ],
                 ], //
-                "exp" => "PP" ],
+                "exp" => "PP",
+                "al" => 8 
+        ],
         CIV_RECYCLERS => [ "name" => clienttranslate("RECYCLERS"),//34
                 "description" => [ 
                         clienttranslate("The Recyclers take used technology and make it new again. Start by gaining 3 tech cards from the deck; discard 2 and keep 1, placing it in your bottom row. You may not upgrade it during your first income turn."),

@@ -1746,7 +1746,7 @@ abstract class PGameXBody extends tapcommon {
                 $inst = $this->getCivilizationInstance(CIV_RENEGADES, true);
                 return $inst->awardBenefits($player_id, $ben, $count, $reason);
             case 311: //BE_GAMBLES_PICK
-            case 319: 
+            case 319:
                 $cards = $this->effect_drawFromBenefit($player_id, $ben);
                 if (count($cards) == 0) {
                     return true; // cancel action, notif already sent
@@ -8070,7 +8070,7 @@ abstract class PGameXBody extends tapcommon {
         if ($cube) {
             $inventor = $cube['card_id'];
         } else {
-            $inventor = $this->addCube($player_id,'hand');
+            $inventor = $this->addCube($player_id, 'hand');
         }
 
         // 2. Check that $id is a technology card in play
@@ -8801,10 +8801,15 @@ abstract class PGameXBody extends tapcommon {
                 $token_data = $this->getCollectionFromDB("SELECT * FROM card WHERE card_location_arg='$player_id' AND card_type='$space_type' AND card_location='civilization_$civ'");
                 $space_tile = 0;
                 $ben = $slots[1]['benefit'];
-                if (count($token_data) > 0) {
-                    // pay to explore
+                if (count($token_data) >  0) {
                     $space_tile = array_key_first($token_data);
-                    $data['slots_choice'][1]['benefit'] = ['p' => BE_ANYRES, 'g' => $ben];
+                    if ($this->isAdjustments8()) {
+                        $data['slots_choice'][1]['benefit'] = [$ben];
+                    } else {
+                        // pay to explore
+               
+                        $data['slots_choice'][1]['benefit'] = ['p' => BE_ANYRES, 'g' => $ben];
+                    }
                 }
                 $data['slots_choice'][1]['discard_id'] = $space_tile;
                 break;
@@ -9564,7 +9569,7 @@ abstract class PGameXBody extends tapcommon {
                 // 3 tokens to 1,5,9
                 array_push($tokens, $this->addCivToken($player_id, 1, $civ));
                 array_push($tokens, $this->addCivToken($player_id, 5, $civ));
-                
+
                 if ($this->isAdjustments4or8()) {
                     $this->benefitCivEntry($civ, $player_id, 'midgame');
                 } else {
