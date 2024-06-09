@@ -896,7 +896,7 @@ define([
 
             break;
           case this.CON.CIV_HERALDS:
-            this.setDescriptionOnMyTurn(_("HERALDS: You may move a token to WHEN PLAYED tapestry card"));
+            this.setDescriptionOnMyTurn(_("HERALDS: You may place a player token to WHEN PLAYED tapestry card"));
             //tapestry_data
             dojo.query(".tapestry_slot:not(.tapestry_slot6) > .tapestry_card").forEach((node) => {
               var type = dojo.getAttr(node, "data-type-arg");
@@ -910,7 +910,7 @@ define([
           case 7:
             break;
           case 8:
-            this.setDescriptionOnMyTurn(_("INVENTORS: You may move a token to a Technology card"));
+            this.setDescriptionOnMyTurn(_("INVENTORS: You may place a player token on a Technology card"));
             dojo.query(".tech_slot_0 .tech_card,.tech_slot_1 .tech_card").addClass("active_slot");
             break;
           case this.CON.CIV_TRADERS:

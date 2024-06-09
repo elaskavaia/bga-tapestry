@@ -2412,14 +2412,26 @@ $this->civilizations = array (
                         clienttranslate("The Inventors start with 4 player tokens here. <b>At the beginning of your income turns (2-5)</b>, you may move a player token from here to any tech card (yours or an opponent's). That card is instantly upgraded, and it ignores top-row prerequisites. If it is an opponent's tech card, you may gain the benefit after they do."),
                         clienttranslate("Whenever an opponent's tech card with your token on it is upgraded to the top row, the opponent gains the benefit and then you gain the tech card, placing it in your bottom row. Your token remains on it. Landmarks on tech cards already gained by the opponent do nothing for you."),
                         clienttranslate("<b>Rulings:</b> You can put your token on the card which already has your inventor token. You cannot put token on the card in the top row - card in that row cannot be upgraded") ),
-                "slots" => array (1 => [ "top" => 80,"left" => 18,"w" => 8.5,"h" => 5.5 ],
+
+                "description@a8" => [
+                        clienttranslate("<i>The Inventors benefit from and contribute to technological upgrades.</i>"),
+                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may place a player token on one of your or your opponent's tech cards. If that card is in the bottom or middle row, it is instantly upgraded, and it ignores top-row prerequisites*."), 
+                        clienttranslate("If it is an opponent's tech card, you may gain the benfit after they do (if it's your card, gain the benefit as normal)."),
+                        clienttranslate("Whenever an opponent's tech card with your token on it is upgraded to their top row (by your action or theirs), after the benefits have been resolved, you gain the tech card, placing it on your bottom row. All tokens remain on it. Landmarks on tech cards already gained by the opponent do nothing for you."),
+                        clienttranslate("<i>* Any tech card with an Inventor's token ignores the prerequisites during the rest of the game.</i>"),
+                ],
+                "slots@a2a1a4" => array (1 => [ "top" => 80,"left" => 18,"w" => 8.5,"h" => 5.5 ],
                         2 => [ "top" => 86,"left" => 18,"w" => 8.5,"h" => 5.5 ],
                         3 => [ "top" => 80,"left" => 27.5,"w" => 8.5,"h" => 5.5 ],
                         4 => [ "top" => 86,"left" => 27.5,"w" => 8.5,"h" => 5.5 ], ),
                 "adjustment" => clienttranslate("no change"), //
                 "tokens_count" => 4,
+                "tokens_count@a8" => 0,
+                "slots"=> [],
                 "income_trigger" => [ "from" => 2,"to" => 5 ], //
-                "automa" => false, ),
+                "automa" => false, 
+                "al" => 8
+        ),
         CIV_ISOLATIONISTS => array ( // 9
         "name" => clienttranslate("ISOLATIONISTS"),
                 "description" => array (

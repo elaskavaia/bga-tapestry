@@ -8063,9 +8063,15 @@ abstract class PGameXBody extends tapcommon {
         $this->benefitCashed($benefit_data); // the civ benefit.
         // VALIDITY CHECKS
         // 1. Check player owns INVENTORS and a token is available.
-        $token_location = 'civ_8_%';
-        $inventor = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND card_location LIKE '$token_location' AND card_location_arg='$player_id' LIMIT 1");
-        $this->systemAssertTrue("No more inventor tokens", $inventor != null);
+
+        $cubes = $this->getStructuresOnCiv(CIV_INVENTORS, BUILDING_CUBE);
+        $cube = array_shift($cubes);
+        if ($cube) {
+            $inventor = $cube['card_id'];
+        } else {
+            $inventor = $this->addCube($player_id,'hand');
+        }
+
         // 2. Check that $id is a technology card in play
         $tech_card = $this->getObjectFromDB("SELECT card_id, card_location_arg player_id FROM card WHERE card_type='4' AND card_type_arg='$type' AND card_location='hand' AND (card_location_arg2 IS NULL OR card_location_arg2 <> 2)");
         $this->userAssertTrue(totranslate('Cannot use this tech card for inventor'), $tech_card != null);
@@ -10206,7 +10212,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function queueEraCivAbility($cid, $player_id, $incomeTurn = 0) {
-        $inst = $this->getCivilizationInstance($cid, true);
+        $inst = $this->getCivilizationInstance($cid, false);
         $inst->queueEraCivAbility($player_id, $incomeTurn);
     }
 
