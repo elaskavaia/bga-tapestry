@@ -6344,7 +6344,7 @@ define([
           }
           return;
         case this.CON.CARD_TECHNOLOGY: {
-          debugger;
+    
           const div_id = `tech_card_${card_type_arg}`;
           const card_div = $(div_id);
           if ($(from) && card_div) dojo.place(card_div, from);

@@ -2459,14 +2459,28 @@ $this->civilizations = array (
         10 => array ("name" => clienttranslate("LEADERS"),
                 "description" => array (
                         clienttranslate("The Leaders excel at cultivating the leadership abilities of their citizens."),
-                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may place a player token on an uncovered leader (square on this mat) to advance for free on the corresponding track. Gain the benefit, but you may not gain the bonus.") ),
+                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may place a player token on an uncovered leader (square on this mat) to advance for free on the corresponding track. Gain the benefit, but do not gain the bonus.") ,
+                        ''
+                ),
+                "description@a8" => [2=>clienttranslate('Note: Art track is not supported in BGA adaptation')],
                 "slot_choice"=>"unoccupied",
                 "slots_description" => clienttranslate('counterclockwise'),
-                "slots" => array (1 => [ "top" => 73.5,"left" => 17,"w" => 12,"h" => 8,"benefit" => [ BE_ADVANCE_EXPLORATION_BENEFIT_NOBONUS] ],
+                "slots" => [
+                        1 => [ "top" => 73.5,"left" => 17,"w" => 12,"h" => 8,"benefit" => [ BE_ADVANCE_EXPLORATION_BENEFIT_NOBONUS] ],
                         2 => [ "top" => 82,"left" => 17,"w" => 12,"h" => 8,"benefit" => [BE_ADVANCE_SCIENCE_BENEFIT_NOBONUS] ],
                         3 => [ "top" => 82,"left" => 30,"w" => 12,"h" => 8 ,"benefit" => [ BE_ADVANCE_MILITARY_BENEFIT_NOBONUS ]],
-                        4 => [ "top" => 73.5,"left" => 30,"w" => 12,"h" => 8,"benefit" => [ BE_ADVANCE_TECHNOLOGY_BENEFIT_NOBONUS ] ], ),
-                "adjustment" => clienttranslate("no change"),"income_trigger" => [ "from" => 2,"to" => 5 ], //
+                        4 => [ "top" => 73.5,"left" => 30,"w" => 12,"h" => 8,"benefit" => [ BE_ADVANCE_TECHNOLOGY_BENEFIT_NOBONUS ] ], 
+                ],
+                "slots@a8" => [
+                        1 => [ "top" => 78,  "left" => 15,"w" => 8,"h" => 5,"benefit" => [ BE_ADVANCE_EXPLORATION_BENEFIT_NOBONUS] ],
+                        2 => [ "top" => 84,  "left" => 29,"w" => 8,"h" => 5,"benefit" => [BE_ADVANCE_SCIENCE_BENEFIT_NOBONUS] ],
+                        3 => [ "top" => 78,  "left" => 33,"w" => 8,"h" => 5 ,"benefit" => [ BE_ADVANCE_MILITARY_BENEFIT_NOBONUS ]],
+                        4 => [ "top" => 72,  "left" => 24,"w" => 8,"h" => 5,"benefit" => [ BE_ADVANCE_TECHNOLOGY_BENEFIT_NOBONUS ] ], 
+                ],
+                "adjustment" => clienttranslate("no change"),
+                "adjustment@a8" => clienttranslate("extra track"),
+                "income_trigger" => [ "from" => 2,"to" => 5 ], //
+                "al"=>8,
         ),
         11 => array ("name" => clienttranslate("MERRYMAKERS"),
                 "description" => array (
