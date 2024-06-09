@@ -10392,7 +10392,7 @@ abstract class PGameXBody extends tapcommon {
     function effect_IncomeBenefits($allowed_benefits = null, $player_id = 0) {
         if (!$player_id)
             $player_id = $this->getActivePlayerId();
-        $player_income_data = $this->getObjectFromDB("SELECT player_income_armories armories, player_income_houses houses, player_income_markets markets, player_income_farms farms FROM playerextra WHERE player_id='$player_id'");
+        $player_income_data =  $this->getPlayerIncomeData($player_id);
         $total_benefits = [];
         $allowed_action = 'zzz';
         if (is_string($allowed_benefits)) {
@@ -10530,6 +10530,11 @@ abstract class PGameXBody extends tapcommon {
         return $opinst;
     }
 
+    function getPlayerIncomeData($player_id) {
+        $player_income_data = $this->getObjectFromDB("SELECT player_income_armories armories, player_income_houses houses, player_income_markets markets, player_income_farms farms FROM playerextra WHERE player_id='$player_id'");
+        return $player_income_data;
+    }
+
     function finalStats($player_id) {
         if ($player_id == PLAYER_SHADOW) {
             return;
@@ -10543,8 +10548,7 @@ abstract class PGameXBody extends tapcommon {
             $this->systemAssertTrue("unathorized move");
         }
         $this->setStat($score, 'game_points_total', $player_id);
-        $player_income_data = $this->getObjectFromDB("SELECT player_income_armories armories, player_income_houses houses, player_income_markets markets, player_income_farms farms FROM playerextra WHERE player_id='$player_id'");
-
+        $player_income_data =  $this->getPlayerIncomeData($player_id);
         $total = 0;
         for ($track = 1; $track <= 4; $track++) {
             $field = $this->income_tracks[$track]['field'];
