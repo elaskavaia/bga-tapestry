@@ -207,6 +207,8 @@ id|-con|name|r|t|php
 319|BE_GAMBLES_PICK_2|Gamblers: Draw 2 Tapestry, Play 1 (WHEN PLAYED), if cannot, Keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>2,'keep'=>1
 320||Gain the circle benefit of a neighbor's tech card, regardless of its current row.|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
 321||Gain the benefit of a territory tile in a neighbor’s supply|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
+322|BE_TINKERERS_2a|Advance on any track to match the closest opponent who is ahead of you on that track. Do not gain the benefit or the bonus.|||'s'=>'c','sflags'=>FLAG_OPPONENT,'aflags'=>FLAG_ADVANCE|FLAG_POSCLOSEST,'state' =>'trackSelect'
+323|BE_TINKERERS_3a|Regress exactly 3 spaces on an advancement track where this is possible. You may gain the benefit but not the bonus.|||'adv'=>-3,'s'=>'c','sflags'=>(FLAG_SELF),'aflags'=>(FLAG_REGRESS|FLAG_POSEXACT),'state' =>'trackSelect'
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

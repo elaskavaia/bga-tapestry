@@ -3683,9 +3683,18 @@ abstract class PGameXBody extends tapcommon {
                 $change = $spot - $start;
                 $this->trackMovementProper($track, $start, $change, FLAG_GAIN_BENFIT, true, $player_id);
                 break;
+            case BE_TINKERERS_2a: // 322
+                $start = $this->checkClosestOpponent($player_id, $track, $spot, FLAG_ADVANCE);
+                $change = $spot - $start;
+                $this->trackMovementProper($track, $start, $change, 0, true, $player_id);
+                break;
             case BE_TINKERERS_3: // 197
                 $this->checkSpot($spot - 3);
                 $this->trackMovementProper($track, $spot, -3, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, true, $player_id);
+                break;
+            case BE_TINKERERS_3a: // 323
+                $this->checkSpot($spot - 3);
+                $this->trackMovementProper($track, $spot, -3, FLAG_GAIN_BENFIT, true, $player_id);
                 break;
             case BE_TINKERERS_4:
                 //Advance to the next bonus on any track and gain that bonus for free. Do not gain the benefit or any landmarks you pass

@@ -130,6 +130,9 @@ if ( !defined('TAPESTRY')) { // guard since this included multiple times
     define("BE_TINKERERS_2", 196);
     define("BE_TINKERERS_3", 197);
     define("BE_TINKERERS_4", 198);
+    define("BE_TINKERERS_2a", 322);
+    define("BE_TINKERERS_3a", 323);
+
     define("BE_ALIEN_D", 306);
     define("BE_2_TERRITORY", 307);
     define("BE_2_INVENT", 308);
@@ -1605,6 +1608,14 @@ $this->benefit_types = [ //
   'name' => clienttranslate("Gain the benefit of a territory tile in a neighbor's supply"),
   'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard',
 ],
+ 322 => [  // BE_TINKERERS_2a
+  'name' => clienttranslate("Advance on any track to match the closest opponent who is ahead of you on that track. Do not gain the benefit or the bonus."),
+  's'=>'c','sflags'=>FLAG_OPPONENT,'aflags'=>FLAG_ADVANCE|FLAG_POSCLOSEST,'state' =>'trackSelect',
+],
+ 323 => [  // BE_TINKERERS_3a
+  'name' => clienttranslate("Regress exactly 3 spaces on an advancement track where this is possible. You may gain the benefit but not the bonus."),
+  'adv'=>-3,'s'=>'c','sflags'=>(FLAG_SELF),'aflags'=>(FLAG_REGRESS|FLAG_POSEXACT),'state' =>'trackSelect',
+],
  502 => [  //
   'name' => clienttranslate("2 VP"),
   'r' => 'v',
@@ -2990,24 +3001,39 @@ $this->civilizations = array (
                 "al" => 8
         ],
         CIV_TINKERERS => [ "name" => clienttranslate("TINKERERS"),
-                "description" => [ clienttranslate("The Tinkerers are masters of time and technology."),
+                "description" => [ 
+                        clienttranslate("The Tinkerers are masters of time and technology."),
                         clienttranslate("If you start the game with the Tinkerers, each opponent gains a tech card from the deck, placing it in their bottom row. They may not upgrade tech cards during their first income turn."),
                         clienttranslate("At the beginning of your income turns (2-5), you may place a player token on one of the unselected options here and act accordingly."),
                         clienttranslate("Unless otherwise noted, do not gain the advancement benefits or bonuses as a result of these player token manipulations."),
                         "",
                         //
                 ],
+                "description@a8" => [ 
+                        1 => '',
+                        3 => '',
+                ],
+
                 "slots" => [
                         1 => [ "benefit" => [ BE_TINKERERS_1 ],"w" => 7,"h" => 5,"top" => 78,"left" => 43 ],
                         2 => [ "benefit" => [ BE_TINKERERS_2 ],"w" => 7,"h" => 5,"top" => 78,"left" => 81  ],
                         3 => [ "benefit" => [ BE_TINKERERS_3 ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 43  ],
                         4 => [ "benefit" => [ BE_TINKERERS_4 ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 81  ],
                 ], //
+                "slots@a8" => [
+                        1 => [ "benefit" => [ BE_TINKERERS_1 ],"w" => 7,"h" => 5,"top" => 78,"left" => 43 ],
+                        2 => [ "benefit" => [ BE_TINKERERS_2a ],"w" => 7,"h" => 5,"top" => 78,"left" => 81  ],
+                        3 => [ "benefit" => [ BE_TINKERERS_3a ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 43  ],
+                        4 => [ "benefit" => [ BE_TINKERERS_4 ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 81  ],
+                ], //
                 "start_benefit" => [ 199 ], //
+                "start_benefit@a8" => [ 0 ], //
                 "slot_choice"=>"unoccupied", //
                 "midgame_setup" => false, //
                 "income_trigger" => [ "from" => 2,"to" => 5 ],
-                "exp" => "PP" ],
+                "exp" => "PP",
+                "al" => 8 
+        ],
         CIV_TREASURE_HUNTERS => [ "name" => clienttranslate("TREASUREHUNTERS"),
                 "description" => [ 
                         clienttranslate("The Treasure Hunters look for riches wherever they go, and they seek to protect their valuables from other civilizations."),
