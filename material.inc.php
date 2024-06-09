@@ -2512,7 +2512,14 @@ $this->civilizations = array (
                         12 => array ("top" => 71,"left" => 39,"benefit" => [ 515 ],"link" => [ ],"w" => 11,"h" => 6 ), ),
                 "description@a4" => [ 
                         1 => clienttranslate("Start with 1 player token on any benefit and another player token on another benefit. At the beginning of your income turns (2-5), you must move each token once orthogonally and gain the resulting benefit. Tokens can never share the same space."), ],
-                "slots@a4" => array (
+
+                "description@a8" => [
+                         
+                        clienttranslate("The Merrymakers frequently celebrate love and life; the longer the festival and the wilder the dance, the better."),
+                        clienttranslate("Start with 2 player tokens here, each on a different benefit (do not gain the benefits)."),
+                        clienttranslate("At the beginning of your income turns (2-5), you must move each token to an orthogonally adjacent space and gain the resulting benefit. Tokens can never share the same space. "),
+                ],
+                "slots@a4a8" => array (
                         1 => [ "top" => 90,"left" => 14,"benefit" => [ ],"link" => [ 2 ],"w" => 11,"h" => 6 ],
                         2 => array ("benefit" => [ BE_INVENT ],"link" => [ 3,6 ],"top" => 84,"left" => 14 ), //
                         3 => array ("benefit" => [ RES_WORKER,0 ],"link" => [ 2,4,7 ],"top" => 76,"left" => 14 ), //
@@ -2527,8 +2534,9 @@ $this->civilizations = array (
                         12 => array ("benefit" => [ BE_RESEARCH_NB ],"link" => [ 11,8 ],"top" => 69,"left" => 37 ), //
                 ),//
                 "adjustment" => clienttranslate("When starting the game with the Merrymakers, gain [ANY RESOURCE]"),
-                "adjustment@a4" => clienttranslate("rules changed"), //
+                "adjustment@a4a8" => clienttranslate("rules changed"), //
                 "income_trigger" => [ "from" => 2,"to" => 5 ], //
+                "al" => 8
         ),
         12 => array ("name" => clienttranslate("MILITANTS"),
                 "description" => array (

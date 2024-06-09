@@ -4153,7 +4153,7 @@ abstract class PGameXBody extends tapcommon {
             $this->userAssertTrue(totranslate("To use INVENTORS ability click on tech card"));
             return;
         }
-        if ($cid == CIV_MERRYMAKERS && $is_midgame && $this->isAdjustments4()) {
+        if ($cid == CIV_MERRYMAKERS && $is_midgame && $this->isAdjustments4or8()) {
             $state = 1;
             $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'");
             $this->userAssertTrue(totranslate("Token already placed on this spot"), $token_data == null);
@@ -4263,7 +4263,7 @@ abstract class PGameXBody extends tapcommon {
         $this->userAssertTrue(totranslate("Token cannot advance to this spottriggered power"), $valid);
         $token_info = $token_data[$tid];
         $state = $token_info['card_location_arg2'];
-        if ($cid == CIV_MERRYMAKERS && $this->isAdjustments4()) {
+        if ($cid == CIV_MERRYMAKERS && $this->isAdjustments4or8()) {
             $this->userAssertTrue(totranslate("Cannot move this token, it is already been moved during this era"), $state != $income_turn);
             $cube = $this->getStructureInfoSearch(BUILDING_CUBE, null, $civ_token_string);
             $this->userAssertTrue(totranslate("Token already placed on this spot"), !$cube);
@@ -4276,7 +4276,7 @@ abstract class PGameXBody extends tapcommon {
         else
             $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid));
         // second token
-        if ($cid == CIV_MERRYMAKERS && $this->isAdjustments4()) {
+        if ($cid == CIV_MERRYMAKERS && $this->isAdjustments4or8()) {
             $token_placed = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='$token_type' AND card_location LIKE 'civ_$cid\\_%' AND card_location_arg2 = $income_turn");
             if (count($token_placed) == 0)
                 $this->benefitCivEntry($cid, $player_id);
@@ -9563,11 +9563,11 @@ abstract class PGameXBody extends tapcommon {
                 // 3 tokens to 1,5,9
                 array_push($tokens, $this->addCivToken($player_id, 1, $civ));
                 array_push($tokens, $this->addCivToken($player_id, 5, $civ));
-                if (!$this->isAdjustments4()) {
-                    array_push($tokens, $this->addCivToken($player_id, 9, $civ));
-                }
-                if ($this->isAdjustments4()) {
+                
+                if ($this->isAdjustments4or8()) {
                     $this->benefitCivEntry($civ, $player_id, 'midgame');
+                } else {
+                    array_push($tokens, $this->addCivToken($player_id, 9, $civ));
                 }
                 break;
             case CIV_MILITANTS: // MILITANTS
