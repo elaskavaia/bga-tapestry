@@ -1494,7 +1494,7 @@ $this->benefit_types = [ //
   'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard',
 ],
  194 => [  //
-  'name' => clienttranslate("Request to see the chosen neighbor's hand of tapestry cards"),
+  'name' => clienttranslate("Pick at neighbor's hand of tapestry cards"),
 ],
  195 => [  // BE_TINKERERS_1
   'name' => clienttranslate("Choose 1 of your advancement tokens. Gain resources equal to the cost of advancing into its current position"),
@@ -1596,6 +1596,14 @@ $this->benefit_types = [ //
  319 => [  // BE_GAMBLES_PICK_2
   'name' => clienttranslate("Gamblers: Draw 2 Tapestry, Play 1 (WHEN PLAYED), if cannot, Keep 1"),
   'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>2,'keep'=>1,
+],
+ 320 => [  //
+  'name' => clienttranslate("Gain the circle benefit of a neighbor's tech card, regardless of its current row."),
+  'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard',
+],
+ 321 => [  //
+  'name' => clienttranslate("Gain the benefit of a territory tile in a neighbor's supply"),
+  'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard',
 ],
  502 => [  //
   'name' => clienttranslate("2 VP"),
@@ -2959,16 +2967,27 @@ $this->civilizations = array (
                         clienttranslate("If you do, you may request to see the chosen neighbor's hand of tapestry cards (they must show it to you)."),
                 //        
                 ],
+                "description@a8" => [
+                        3 =>  clienttranslate("If you do, you may peek at the chosen neighbor's hand of tapestry cards. You may tell other players what you saw.")
+                ],
                 "income_trigger" => [ "from" => 2,"to" => 5 ],
                 "slot_choice"=>"unoccupied",
                 "midgame_setup" => false,
                 "slots" => [
-                        1 => [ "benefit" => [ 193 ],"w" => 7,"h" => 5,"top" => 78,"left" => 43 ],
-                        2 => [ "benefit" => [ 191 ],"w" => 7,"h" => 5,"top" => 78,"left" => 81  ],
-                        3 => [ "benefit" => [ 190 ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 43  ],
-                        4 => [ "benefit" => [ 192 ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 81  ],
+                        1 => [ "benefit" => [ 193 ],"w" => 7,"h" => 5,"top" => 78,"left" => 43 ], // tapestry
+                        2 => [ "benefit" => [ 191 ],"w" => 7,"h" => 5,"top" => 78,"left" => 81  ], // terr or space
+                        3 => [ "benefit" => [ 190 ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 43  ], // track
+                        4 => [ "benefit" => [ 192 ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 81  ], // curr tech
                 ], //
-                "exp" => "PP" 
+                "slots@a8" => [
+                        1 => [ "benefit" => [ 193 ],"w" => 7,"h" => 5,"top" => 78,"left" => 43 ],
+                        2 => [ "benefit" => [ 321 ],"w" => 7,"h" => 5,"top" => 78,"left" => 81  ], // terr tile
+                        3 => [ "benefit" => [ 190 ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 43  ],
+                        4 => [ "benefit" => [ 320 ],"w" => 7,"h" => 5,"top" => 89.5,"left" => 81  ], // circle tech
+                ], //
+                "automa" => false,
+                "exp" => "PP" ,
+                "al" => 8
         ],
         CIV_TINKERERS => [ "name" => clienttranslate("TINKERERS"),
                 "description" => [ clienttranslate("The Tinkerers are masters of time and technology."),

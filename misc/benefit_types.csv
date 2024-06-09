@@ -177,7 +177,7 @@ id|-con|name|r|t|php
 191||Gain the benefit of a territory or space tile in a neighbor’s supply|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
 192||Gain the benefit of a neighbor’s tech card, matching its current row|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
 193||Gain the benefits of a WHEN PLAYED tapestry card on a neighbor’s income mat|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
-194||Request to see the chosen neighbor’s hand of tapestry cards|||
+194||Pick at neighbor’s hand of tapestry cards|||
 195|BE_TINKERERS_1|Choose 1 of your advancement tokens. Gain resources equal to the cost of advancing into its current position|||'s'=>'c','sflags'=>(FLAG_SELF),'aflags'=>(FLAG_STAY),'state' =>'trackSelect'
 196|BE_TINKERERS_2|Advance on any track to match the closest opponent who is ahead of you on that track. You may gain the benefit but not the bonus.|||'s'=>'c','sflags'=>FLAG_OPPONENT,'aflags'=>FLAG_ADVANCE|FLAG_POSCLOSEST,'state' =>'trackSelect'
 197|BE_TINKERERS_3|Regress exactly 3 spaces on an advancement track where this is possible. You may gain the benefit and pay to gain the bonus (if any)|||'adv'=>-3,'s'=>'c','sflags'=>(FLAG_SELF),'aflags'=>(FLAG_REGRESS|FLAG_POSEXACT),'state' =>'trackSelect'
@@ -205,6 +205,8 @@ id|-con|name|r|t|php
 317|BE_URBANPLANNERS_BONUS|URBAN PLANNERS Bonus if 2+ Landmarks replaced|||'auto'=>1,'civ'=>CIV_URBAN_PLANNERS
 318|BE_RELENTLESS_AB|RELENTLESS Spent cubes now to collect benefit|||'civ'=>CIV_RELENTLESS
 319|BE_GAMBLES_PICK_2|Gamblers: Draw 2 Tapestry, Play 1 (WHEN PLAYED), if cannot, Keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>2,'keep'=>1
+320||Gain the circle benefit of a neighbor's tech card, regardless of its current row.|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
+321||Gain the benefit of a territory tile in a neighbor’s supply|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

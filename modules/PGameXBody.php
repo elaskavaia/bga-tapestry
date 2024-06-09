@@ -7867,7 +7867,7 @@ abstract class PGameXBody extends tapcommon {
             $card = $this->getCardInfoById($card_id);
             $owner = $card['card_location_arg'];
         }
-        if ($ben == 191) { // gain terr/spce card benefit and do not move it
+        if ($ben == 191 || $ben == 321) { // gain terr/spce card benefit and do not move it
             $this->systemAssertTrue("can only select 1", $keep == 1);
             $this->setTargetPlayer($owner);
             $card_benefit = $this->getRulesCard($card['card_type'], $card['card_type_arg'], 'benefit');
@@ -7876,10 +7876,14 @@ abstract class PGameXBody extends tapcommon {
             $this->queueBenefitNormal(["or" => [194, 401]], $player_id, $reason);
             return;
         }
-        if ($ben == 192) { // gain tech card benefit and do not move it
+        if ($ben == 192  || $ben == 320) { // gain tech card benefit and do not move it
             $this->systemAssertTrue("can only select 1", $keep == 1);
             $this->setTargetPlayer($owner);
-            $slot = $card['card_location_arg2'];
+            if ($ben == 192) {
+                $slot = $card['card_location_arg2'];
+            } else {
+                $slot = 1; // circle
+            }
             $reason = reason($card['card_type'], $card['card_type_arg']);
             $this->queueTechBenefit($card['card_type_arg'], $slot, $player_id);
             $this->queueBenefitNormal(["or" => [194, 401]], $player_id, $reason);
@@ -8592,7 +8596,7 @@ abstract class PGameXBody extends tapcommon {
         }
         $args = [];
         $ben = $benefit_data['benefit_type'];
-        if ($ben == 191 || $ben == 192 || $ben == 193) {
+        if ($ben == 191 || $ben == 192 || $ben == 193 || $ben == 321 || $ben == 320) {
             $neighbours = $this->getPlayerNeighbours($player_id, false);
             $cards = [];
             foreach ($neighbours as $other) {
@@ -8602,8 +8606,12 @@ abstract class PGameXBody extends tapcommon {
                 } else if ($ben == 192) {
                     $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, 'hand', $other, 1);
                     $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, 'hand', $other, 2);
+                } else if ($ben == 320) {
+                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, 'hand', $other);
                 } else if ($ben == 193) {
                     $cards += $this->getCardsSearch(CARD_TAPESTRY, null, 'era%', $other);
+                } else if ($ben == 321) {
+                    $cards += $this->getCardsSearch(CARD_TERRITORY, null, 'hand', $other);
                 }
             }
             $args['title'] = $this->getBenefitName($ben);
