@@ -139,6 +139,7 @@ if ( !defined('TAPESTRY')) { // guard since this included multiple times
     define("BE_COLLECTORS_GRAB", 312);
     define("BE_COLLECTORS_CARD", 313);
     define("BE_CARD_PLAY_TRIGGER", 314);
+    define("BE_GAMBLES_PICK_2", 319);
     
     // TERRAIN
     define("TERRAIN_SEA", 1);
@@ -1592,6 +1593,10 @@ $this->benefit_types = [ //
   'name' => clienttranslate("RELENTLESS Spent cubes now to collect benefit"),
   'civ'=>CIV_RELENTLESS,
 ],
+ 319 => [  // BE_GAMBLES_PICK_2
+  'name' => clienttranslate("Gamblers: Draw 2 Tapestry, Play 1 (WHEN PLAYED), if cannot, Keep 1"),
+  'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>2,'keep'=>1,
+],
  502 => [  //
   'name' => clienttranslate("2 VP"),
   'r' => 'v',
@@ -2732,17 +2737,31 @@ $this->civilizations = array (
                 ], //
                 "exp" => "AA", ],
         CIV_GAMBLERS => [ "name" => clienttranslate("GAMBLERS"),
-                "description" => [ clienttranslate("The Gamblers know when to hold 'em and know when to fold 'em."),
+                "description" => [ 
+                        clienttranslate("The Gamblers know when to hold 'em and know when to fold 'em."),
                         clienttranslate("If you start the game with this civilization, at the end of your first income turn reveal 3 tapestry cards. Play one with a WHEN PLAYED ability on top of Maker of Fire, resolve the ability, and discard the other revealed cards."),
                         clienttranslate("If you reveal no valid cards, add 1 of the revealed cards to your hand and discard the rest."),
                         clienttranslate("At the beginning of your income turns (2-4), reveal 3 tapestry cards. Play one with a WHEN PLAYED ability on top of the current era, resolve the ability, and discard the other revealed cards."),
                         clienttranslate("If you reveal no valid cards, add 1 of the revealed cards to your hand and discard the rest."),
-                        clienttranslate("Then proceed to play your tapestry card for this era as normal (on top of it)."), ],
-                "income_trigger" => [ "from" => 1,"to" => 4,"decline" => false ], // 
+                        clienttranslate("Then proceed to play your tapestry card for this era as normal (on top of it)."), 
+                ],
+                "description@a8" => [
+                        clienttranslate("<i>The Gamblers know when to hold 'em and when to fold 'em.</i>"),
+                        clienttranslate("<b>At the end of your first income turn</b>, reveal 2 tapestry cards from the tops of the deck. Play one with a WHEN PLAYED ability on top of Maker of Fire, resolve the ability, and discard the other revealed card. If you reveal no WHEN PLAYED cards, add 1 of the revealed cards to your hand and discard the other."),
+                        clienttranslate("<b>At the beginning of your income turns (2-4)</b>, reveal 2 tapestry cards. Play one with a WHEN PLAYED ability on top of the current era, resolve the ability, and discard the other revealed card. If you reveal no WHEN PLAYED cards, add 1 of the revealed cards to your hand and discard the other. Then proceed to play your tapestry card for this era as normal (on top of it)."),
+                        '',
+                        '',
+                        clienttranslate("<i>If you gain this civilization in the middle of the game, you may immediately follow the instructions in the previous paragraph as if you were using the Gambler's ability on an income turn.</i>"),
+                ],
+                "income_trigger" => [ "from" => 1, "to" => 4,"decline" => false ], // 
                 "slots_description" => '',
-                "slots" => [ 0 => ['benefit'=> [311] ]],
+                "slots" => [ 0 => ['benefit'=> [BE_GAMBLES_PICK] ]],
+                "slots@a8" => [ 0 => ['benefit'=> [BE_GAMBLES_PICK_2] ]],
+                "midgame_setup@a8" => true,
                 "slot_choice"=>"any",
-                "exp" => "AA", ],
+                "exp" => "AA", 
+                "al"=>8
+        ],
         CIV_RELENTLESS => [ "name" => clienttranslate("RELENTLESS"),
                 "description" => [ 
                         clienttranslate("<i>The Relentless are always pushing for improvement, rushing forward without pause.</i>"),

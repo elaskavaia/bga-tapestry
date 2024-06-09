@@ -204,6 +204,7 @@ id|-con|name|r|t|php
 316|BE_URBANPLANNERS_GRAB|URBAN PLANNERS Collect Landmark|||'civ'=>CIV_URBAN_PLANNERS
 317|BE_URBANPLANNERS_BONUS|URBAN PLANNERS Bonus if 2+ Landmarks replaced|||'auto'=>1,'civ'=>CIV_URBAN_PLANNERS
 318|BE_RELENTLESS_AB|RELENTLESS Spent cubes now to collect benefit|||'civ'=>CIV_RELENTLESS
+319|BE_GAMBLES_PICK_2|Gamblers: Draw 2 Tapestry, Play 1 (WHEN PLAYED), if cannot, Keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>2,'keep'=>1
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

@@ -1746,6 +1746,7 @@ abstract class PGameXBody extends tapcommon {
                 $inst = $this->getCivilizationInstance(CIV_RENEGADES, true);
                 return $inst->awardBenefits($player_id, $ben, $count, $reason);
             case 311: //BE_GAMBLES_PICK
+            case 319: 
                 $cards = $this->effect_drawFromBenefit($player_id, $ben);
                 if (count($cards) == 0) {
                     return true; // cancel action, notif already sent
@@ -4086,7 +4087,7 @@ abstract class PGameXBody extends tapcommon {
     function saction_civTokenAdvance($player_id, $cid, $spot, $extra, $civ_args) {
         $condition = $civ_args['benefit_data'];
         $is_midgame = ($condition == 'midgame');
-        if ($cid == CIV_ARCHITECTS || $cid == CIV_RENEGADES || $cid == CIV_CRAFTSMEN) {
+        if ($cid == CIV_ARCHITECTS || $cid == CIV_RENEGADES || $cid == CIV_CRAFTSMEN || $cid == CIV_GAMBLERS) {
             $inst = $this->getCivilizationInstance($cid, true);
             $inst->moveCivCube($player_id, $is_midgame, $spot, $extra);
             return;
@@ -4209,7 +4210,7 @@ abstract class PGameXBody extends tapcommon {
             $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid));
             return;
         }
-        if ($cid == CIV_INFILTRATORS || $cid == CIV_GAMBLERS) {
+        if ($cid == CIV_INFILTRATORS) {
             $benefit = $slots_choice["benefit"];
             $opp_id = array_get($slots_choice, "player_id", "");
             $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid, $opp_id));
@@ -7895,7 +7896,7 @@ abstract class PGameXBody extends tapcommon {
             $this->queueBenefitNormal(["or" => [194, 401]], $player_id, $reason);
             return;
         }
-        if ($ben == BE_GAMBLES_PICK) {
+        if ($ben == BE_GAMBLES_PICK || $ben ==  319) {
             if ($this->isWhenPlayedTapestry($card)) {
                 foreach ($cards as $ocard_id => $ocard) {
                     if ($ocard_id != $card_id)
@@ -8608,7 +8609,7 @@ abstract class PGameXBody extends tapcommon {
             $args['title'] = $this->getBenefitName($ben);
         } else {
             $cards = $this->getCardsSearch(null, null, 'draw', $player_id);
-            if ($ben == BE_GAMBLES_PICK) {
+            if ($ben == BE_GAMBLES_PICK || $ben == 319) {
                 $args['title'] = $this->getBenefitName($ben);
             }
         }
@@ -8701,6 +8702,7 @@ abstract class PGameXBody extends tapcommon {
             switch ($civ) {
                 case CIV_RENEGADES:
                 case CIV_CRAFTSMEN:
+                case CIV_GAMBLERS:
                     return $civinst->argCivAbilitySingle($player_id, $benefit);
                 case CIV_ENTERTAINERS:
                     $data['slots'] = array_keys($slots);
@@ -8783,6 +8785,8 @@ abstract class PGameXBody extends tapcommon {
             }
         }
         switch ($civ) {
+            case CIV_GAMBLERS:
+                return $civinst->argCivAbilitySingle($player_id, $benefit);
             case CIV_TRADERS:
 
                 $targets = $this->getTraderTargets($player_id);
@@ -8817,9 +8821,6 @@ abstract class PGameXBody extends tapcommon {
                     $data['title'] = clienttranslate('You have 4 or less tapestry cards in hand');
                     $data['slots_choice'][1]['benefit'] = [136]; // 1 vp per tapestry in hand
                 }
-                break;
-            case CIV_GAMBLERS:
-                $data['title'] = clienttranslate('Gamble!');
                 break;
             case CIV_INFILTRATORS:
                 $data['title'] = clienttranslate('Chose to place an outpost or gain vp');
