@@ -2942,9 +2942,15 @@ $this->civilizations = array (
                         clienttranslate("On your final income turn, lose 1 VP per visible impassable plot."),
                         "",
                         clienttranslate("<it>If you gain this civilization in the middle of the game, you may discard it and gain another</it>"), ],
+                "description@a8" => [
+                        1 =>  clienttranslate("Start with 5 VP per district in your capital city with at least 2 impassable plots."),
+                        5 =>  clienttranslate("This civilization may not be used with the Cloud City capital city mat."),
+                ],
  
                 "midgame_ben" => ["or"=>[174,173]], //
-                "exp" => "PP" ],
+                "exp" => "PP",
+                "al" => 8
+         ],
         CIV_SPIES => [ "name" => clienttranslate("SPIES"),
                 "description" => [ 
                         clienttranslate("The Spies use subterfuge and deception to leech information from neighboring nations."),

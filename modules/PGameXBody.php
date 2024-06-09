@@ -9627,6 +9627,10 @@ abstract class PGameXBody extends tapcommon {
         }
         $capital = $this->getCapitalData($player_id);
         $vp = 0;
+        $num = 4;
+        if ($this->isAdjustments8()) {
+            $num = 5;
+        }
         for ($dx = 3; $dx < 12; $dx += 3) {
             for ($dy = 3; $dy < 12; $dy += 3) {
                 $district_info = $this->getDistrictInfo($dx, $dy, $capital, $player_id);
@@ -9635,7 +9639,7 @@ abstract class PGameXBody extends tapcommon {
                 $impasse = array_get($district_info['build_types'], BUILDING_IMPASS, 0);
                 //$this->debugConsole("district " . $district_info ['district'] . " impass $impasse");
                 if ($impasse >= 2) {
-                    $vp += 4;
+                    $vp += $num;
                 }
             }
         }
@@ -9645,6 +9649,9 @@ abstract class PGameXBody extends tapcommon {
     function finalRiverfolkScoring($player_id) {
         if (!$this->hasCiv($player_id, CIV_RIVERFOLK)) {
             return;
+        }
+        if ($this->isAdjustments8()) {
+            return; // no neg scoring
         }
         $capital = $this->getCapitalData($player_id);
         $vp = 0;
