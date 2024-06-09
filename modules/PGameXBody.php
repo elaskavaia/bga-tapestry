@@ -4170,7 +4170,8 @@ abstract class PGameXBody extends tapcommon {
             $this->dbSetStructureLocation($tid, $civ_token_string, $state, clienttranslate('${player_name} places a token on their civilization mat'), $player_id);
             return;
         }
-        $slots_choice = array_get($civ_args['slots_choice'], $spot, []);
+        $slots_choice_arr = array_get($civ_args, 'slots_choice', []);
+        $slots_choice = array_get($slots_choice_arr, $spot, []);
         if ($cid == CIV_ALIENS) {
             // chose spot
             $benefit = $slots_choice["benefit"];
@@ -9542,14 +9543,6 @@ abstract class PGameXBody extends tapcommon {
                         $this->effect_gainChosenMidGame($player_id);
                     }
                 }
-                break;
-            case CIV_ENTERTAINERS: // ENTERTAINERS
-                // 1 token needed on slot 1.
-                $tokens = $this->effect_setupCivTokens($civ, $player_id);
-                if (!$start) {
-                    $this->benefitCivEntry($civ, $player_id, 'midgame');
-                }
-
                 break;
             case CIV_HERALDS: // HERALDS 
                 // 4 tokens to slots 1-4

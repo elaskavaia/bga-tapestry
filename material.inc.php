@@ -2274,12 +2274,12 @@ $this->civilizations = array (
                 "description" => array (
                         clienttranslate("The Entertainers seek to spread their influence by entertaining various sectors of society. Start with a player token on the far left. <b>At the beginning of your income turns (2-5)</b>, advance the token one space to the right along a path and gain the benefit."),
                         clienttranslate("<i>If you gain this civilization in the middle of the game, start with a player token on any space here and gain the benefit.</i>") ),
-                "description@a4" => array (
+                "description@a4a8" => array (
                         clienttranslate("The Entertainers seek to spread their influence by entertaining various sectors of society. Start with a player token on the far left. <b>At the beginning of your income turns (1-4)</b>, advance the token one space to the right along a path and gain the benefit."),
                         clienttranslate("<i>If you gain this civilization in the middle of the game, start with a player token on any space here and gain the benefit.</i>") ),
                 "midgame_setup" => true,
                 "income_trigger" => [ "from" => 2,"to" => 5 ], //
-                "income_trigger@a4" => [ "from" => 1,"to" => 4 ], //
+                "income_trigger@a4a8" => [ "from" => 1,"to" => 4 ], //
                 "tokens_count" => 1,
                 "slots" => array (
                         1 => array ("top" => 64.25,"left" => 24,"benefit" => [ ],"link" => [ 2,3,4,5 ],"w" => 8.5,
@@ -2317,7 +2317,9 @@ $this->civilizations = array (
                         17 => [ "top" => 72.5,"left" => 66,"benefit" => [ BE_ADVANCE_S ],"link" => [ ],"w" => 8.5,
                                 "h" => 5.5 ], ),
                 "adjustment" => clienttranslate("When starting the game with the Entertainers, gain [ANY RESOURCE] during your first income turn."),
-                "adjustment@a4" => clienttranslate("rule changes"), ),
+                "adjustment@a4a8" => clienttranslate("rule changes"), 
+                "al" => 8, 
+        ),
         CIV_FUTURISTS => array ("name" => clienttranslate("FUTURISTS"),
                 "description" => array (
                         clienttranslate("The Futurists mysteriously begin their civilization with significant advancements."),
