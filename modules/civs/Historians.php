@@ -103,8 +103,8 @@ class Historians extends AbsCivilization {
     }
 
     function noLandmarksLeft() {
-        $lm = $this->game->getObjectFromDB("SELECT card_id FROM structure WHERE card_location LIKE 'landmark_mat_slot%' LIMIT 1");
-        return $lm == null; 
+        $lms = $this->game->getStructuresSearch(null, null, 'landmark_mat_slot%');
+        return count($lms) == 0; 
     }
 
     function activateBenefits($player_id) {
