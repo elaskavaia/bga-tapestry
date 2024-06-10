@@ -1616,6 +1616,12 @@ $this->benefit_types = [ //
   'name' => clienttranslate("Regress exactly 3 spaces on an advancement track where this is possible. You may gain the benefit but not the bonus."),
   'adv'=>-3,'s'=>'c','sflags'=>(FLAG_SELF),'aflags'=>(FLAG_REGRESS|FLAG_POSEXACT),'state' =>'trackSelect',
 ],
+ 324 => [  //
+  'name' => clienttranslate("Roll the black conquer die up to 2 times and gain the benefit of the final roll"),
+],
+ 325 => [  //
+  'name' => clienttranslate("Roll the research die up to 2 times and gain the benefit of the final roll"),
+],
  502 => [  //
   'name' => clienttranslate("2 VP"),
   'r' => 'v',
@@ -3044,9 +3050,28 @@ $this->civilizations = array (
                         clienttranslate("<li>Desert: Gain 1 [COIN], then roll the black conquer die twice and gain one benefit of your choice."),
                         clienttranslate("<li>Grassland: Gain 1 [CULTURE], then roll the research die twice and gain one benefit of your choice."),
                         clienttranslate("<li>Mountain: Gain 1 [WORKER], then roll the conquer dice and gain both benefits."),
-                        clienttranslate("<li>Forest: Gain 1 [FOOD], then roll the red conquer die twice and gain both benefits."), ],
+                        clienttranslate("<li>Forest: Gain 1 [FOOD], then roll the red conquer die twice and gain both benefits."), 
+                ],
+                "description@a8" => [ 
+                        clienttranslate("<i>The Treasure Hunters look for riches wherever they go.</a>"),
+                        clienttranslate("Start with 4 player tokens here."),
+                        "",
+                        clienttranslate("At the beginning of your income turns (2-5), you may place a player token from here on an empty territory adjacent to a territory you control that displays the listed terrain type (this is not a conquer action, but you now control the territory). Gain the corresponding treasure."),
+                        "",
+                        clienttranslate("<li>Desert: Gain [COIN], then roll the black conquer die up to 2 times and gain the benefit of the final roll."),
+                        clienttranslate("<li>Grassland: Gain [CULTURE], then roll the science die up to 2 times and gain the benefit of the final roll."),
+                        clienttranslate("<li>Mountain: Gain [WORKER], then roll the conquer dice and gain both benefits. "),
+                        clienttranslate("<li>Forest: Gain [FOOD], then roll the red conquer die twice and gain both benefits."), 
+                        clienttranslate("Territories controlled by one of your player tokens can be conquered; this is considered a topple of your token."), 
+                        clienttranslate("<i>If you gain this civilization in the middle of the game, you may discard it and draw another.</i>"),
+
+                ],
                 "income_trigger" => [ "from" => 2,"to" => 5 ],
                 "start_benefit" => [ BE_TERRITORY, BE_TERRITORY ], //
+                "start_benefit@a8" => [ 0, 0 ], //
+                "midgame_ben@a8" => ["or"=>[174,173]],
+                "midgame_setup@a8" => true,
+
                 "slot_choice"=>"occupied", //
                 "tokens_count" => 4,
                 "slots" => [
@@ -3055,16 +3080,30 @@ $this->civilizations = array (
                         3 => [ "benefit" => [ RES_WORKER, 303 ], "ter"=>TERRAIN_MOUNTAIN,"w" => 7,"h" => 5,"top" => 89.5,"left" => 15  ],
                         4 => [ "benefit" => [ RES_FOOD, 304 ], "ter"=>TERRAIN_FOREST,"w" => 7,"h" => 5,"top" => 89.5,"left" => 53  ],
                 ], //
-                "exp" => "PP" // 
+                "slots@a8" => [
+                        1 => [ "benefit" => [ RES_COIN, 324 ]  ], // TODO
+                        2 => [ "benefit" => [ RES_CULTURE, 325 ]   ],
+                        3 => [ "benefit" => [ RES_WORKER, 303 ] ],
+                        4 => [ "benefit" => [ RES_FOOD, 304 ] ],
+                ], //
+                "exp" => "PP", // 
+                // "al" => 8
         ],
         CIV_UTILITARIENS => [ "name" => clienttranslate("UTILITARIANS"),
-                "description" => [ 
+                "description" => [
                         clienttranslate("The Utilitarians aren't satisfied simply memorializing their advancements."),
                         clienttranslate("If you start the game with the Utilitarians, choose a tier II landmark and place it in your capital city."),
-                        "",
                         clienttranslate("Start with 2 player tokens here (1 on the first landmark you selected). After you gain a landmark on this list, you may place or move 1 of the player tokens on this mat next to that landmark's name to activate the corresponding ability."),
-                        "",
-                        clienttranslate("<it>If you gain this civilization in the middle of the game, you may immediately place up to 2 player tokens next to the corresponding landmark abilities on this mat if you have those landmarks</it>"), ],
+                        clienttranslate("<it>If you gain this civilization in the middle of the game, you may immediately place up to 2 player tokens next to the corresponding landmark abilities on this mat if you have those landmarks</it>"),
+                ],
+                "description@a8" => [
+                        clienttranslate("<i>Utilitarians create functional landmarks.</i>"),
+                        clienttranslate("If you start the game with the Utilitarians, choose a tier II landmark and place it here. <b>At the beginning of your second income turn</b>, place it in your capital city."),
+                        clienttranslate("Start with 2 player tokens here (1 on the first landmark you selected). After you gain a landmark on this list, you may place or move 1 of the player tokens on this mat next to that landmark's name to activate the corresponding ability (you may have a max of 2 active abilities at a time)."),
+                        clienttranslate("<i>If you gain this civilization in the middle of the game, you may either discard it and draw another or keep it and immediately place up to 2 player tokens next to the corresponding landmark abilities on this mat if you have those landmarks.</i>"),
+                ],
+                "midgame_ben@a8" => ["or"=>[174,173]],
+                "midgame_setup@a8" => true,
                 "tokens_count" => 2,
                 "slots" => [ 
                         1 => [ "lm" => 10,"w" => 7,"h" => 5,"top" => 59,"left" => 8,
@@ -3076,7 +3115,7 @@ $this->civilizations = array (
                         4 => [ "lm" => 5,"w" => 7,"h" => 5,"top" => 66,"left" => 53,
                                 "title" => clienttranslate("Tank Factory: Whenever you advance on tiers III and IV of the Military track, gain 4 VP") ],
                         5 => [ "lm" => 9,"w" => 7,"h" => 5,"top" => 74,"left" => 8, "cl"=>"activatable",
-                                "title" => clienttranslate("Lighthouse: Once on each of your advancement turns you may spend 2 [TERRITORY TILE] to gain [ANY REOURCE]") ],
+                                "title" => clienttranslate("Lighthouse: Once on each of your advancement turns you may discard 2 [TERRITORY TILE] to gain [ANY REOURCE]") ],
                         
                         6 => [ "lm" => 4,"w" => 7,"h" => 5,"top" => 74,"left" => 53,
                                 "title" => clienttranslate("Train Station: Whenever you advance on tiers III and IV of the Exploration track, gain 4 VP") ],
@@ -3088,7 +3127,9 @@ $this->civilizations = array (
                                 "title" => clienttranslate("Empty slot") ],
                         10 => [ "lm" => 0,"w" => 7,"h" => 5,"top" => 35,"left" => 53,
                                 "title" => clienttranslate("Empty slot") ], ], //
-                "exp" => "PP" ], );
+                "exp" => "PP",
+                "al" => 8 
+        ], );
 $this->capitals = array (
         1 => array ("name" => clienttranslate("Mountain"),"start" => [ "large" => "-3_-3","small" => "-2_-2" ], // 1/6
                 "grid" => [ "000000000","110001110","000111000","000111110","000001100","011100001","001000000",

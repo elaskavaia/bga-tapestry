@@ -2502,13 +2502,14 @@ abstract class PGameXBody extends tapcommon {
 
         $landmark = $this->getObjectFromDB("SELECT card_id, card_location_arg FROM structure WHERE card_location_arg2='$landmark_id' AND (card_type='6')");
         if (!$landmark) {
-            $this->debugConsole("Landmark $landmark_id is missing in action - skipping (send bug)"); // NOI18N
+            $this->systemAssertTrue("Landmark $landmark_id is missing in action - skipping (send bug)"); // NOI18N
             return true;
         }
         $sid = $landmark['card_id'];
         $owner = $landmark['card_location_arg'];
         //$this->debugConsole("claim land $landmark_id $player_id $owner $revisionism");
-        if ($owner == 0) {
+        $self = $owner == $player_id;
+        if ($owner == 0 || $self) {
             if ($this->isRealPlayer($player_id)) {
                 $curr = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
                 if ($curr != null) {
@@ -4227,13 +4228,7 @@ abstract class PGameXBody extends tapcommon {
         }
 
         if ($cid == CIV_UTILITARIENS) {
-            if (!$is_midgame) {
-                $cube = $this->getStructureInfoSearch(BUILDING_CUBE, null, $civ_token_string);
-                $this->systemAssertTrue("missing cube", $cube);
-                $landmark = getReasonPart($condition, 2);
-                $to_spot = $this->getCivSlotWithValue($cid, "lm", $landmark);
-                $this->dbSetStructureLocation($cube['card_id'], $to_spot, 0);
-            } else {
+            if ($is_midgame) {
                 $count = count($civ_args['targets']);
                 $this->systemAssertTrue("no cubes", $count);
                 $cube_id = $civ_args['targets'][0];
@@ -4241,7 +4236,25 @@ abstract class PGameXBody extends tapcommon {
                 if ($count > 1) {
                     $this->benefitCivEntry($cid, $player_id, 'midgame');
                 }
+                return;
             }
+            $condtype = getReasonPart($condition, 0);
+            if ($condtype == 'triggered') {
+                $cube = $this->getStructureInfoSearch(BUILDING_CUBE, null, $civ_token_string);
+                $this->systemAssertTrue("missing cube", $cube);
+                $landmark = getReasonPart($condition, 2);
+                $to_spot = $this->getCivSlotWithValue($cid, "lm", $landmark);
+                $this->dbSetStructureLocation($cube['card_id'], $to_spot, 0);
+                return;
+            }
+            if ($this->isAdjustments8()) {
+                // place landmark
+                $structure = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='civilization_39'");
+                $type = $structure['card_location_arg2'];
+                $this->queueBenefitInterrupt($this->landmark_data[$type]['benefit'], $player_id, reason_civ(CIV_UTILITARIENS));
+            }
+         
+     
             return;
         }
         if ($cid == CIV_MERRYMAKERS) {
@@ -7418,13 +7431,18 @@ abstract class PGameXBody extends tapcommon {
                 $this->queueBenefitNormal($this->landmark_data[$type]['benefit'], $player_id, reason_tapestry(15)); // DYSTOPIA
                 break;
             case 305:
-                //                 $cube = $this->getStructureInfoSearch(BUILDING_CUBE, CUBE_CIV, "civ_39_9", $player_id);
-                //                 $this->systemAssertTrue("cannot find cube on utilitariens", $cube);
-                //                 $slot = $this->getCivSlotWithValue(CIV_UTILITARIENS, "lm", $type);
-                //                 if ($slot) {
-                //                     $this->dbSetStructureLocation($cube ['card_id'], $slot);
-                //                 }
-                $this->queueBenefitNormal($this->landmark_data[$type]['benefit'], $player_id, reason_civ(CIV_UTILITARIENS));
+                if ($this->isAdjustments8()) {
+                    $cube = $this->getStructureInfoSearch(BUILDING_CUBE, CUBE_CIV, "civ_39_9", $player_id);
+                    $this->systemAssertTrue("cannot find cube on utilitariens", $cube);
+                    $slot = $this->getCivSlotWithValue(CIV_UTILITARIENS, "lm", $type);
+                    if ($slot) {
+                        $this->dbSetStructureLocation($cube['card_id'], $slot);
+                    }
+                    $this->DbQuery("UPDATE structure SET card_location_arg='$player_id' WHERE card_id='$structure'");
+                    $this->dbSetStructureLocation($structure, "civilization_39",  null, clienttranslate('${player_name} places ${structure_name} on their civilization mat'), $player_id);
+                } else {
+                    $this->queueBenefitNormal($this->landmark_data[$type]['benefit'], $player_id, reason_civ(CIV_UTILITARIENS));
+                }
                 break;
             default:
                 throw new BgaUserException($this->_('You cannot select a landmark at this time'));
@@ -8746,6 +8764,7 @@ abstract class PGameXBody extends tapcommon {
                     $data['decline'] = true;
                     break;
                 case CIV_UTILITARIENS:
+                    $data['slots_choice'] = [];
                     $own_landmarks = $this->getStructuresSearch(BUILDING_LANDMARK, null, null, $player_id);
                     $cube1 = $this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_{$civ}_9", $player_id);
                     $cube2 = $this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_{$civ}_10", $player_id);
@@ -8925,6 +8944,10 @@ abstract class PGameXBody extends tapcommon {
                         $data['title'] = clienttranslate('Move token into ${spot_name} from');
                         $data['spot_name'] = $this->landmark_data[$landmark]['name'];
                     }
+                } else if($this->isAdjustments8()){
+                    //$data['title'] = clienttranslate('Place landmark');
+                    $data['slots'] = null;
+                    $data['slots_choice'][0]['title'] = clienttranslate('Place landmark');
                 }
                 break;
             default:

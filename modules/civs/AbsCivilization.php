@@ -85,19 +85,23 @@ abstract class AbsCivilization  {
     }
 
     function queueEraCivAbility($player_id, $incomeTurn = 0) {
-        $cid = $this->civ;
+        $civ = $this->civ;
+        if ($civ == CIV_UTILITARIENS && $this->game->isAdjustments8() && $incomeTurn == 2) {
+            $this->game->benefitCivEntry($civ, $player_id);
+            return;
+        }
         if (!$incomeTurn)
             $incomeTurn = $this->game->getCurrentEra($player_id);
-        $income_trigger = array_get_def($this->game->civilizations, $cid, 'income_trigger', null);
+        $income_trigger = array_get_def($this->game->civilizations, $civ, 'income_trigger', null);
         if (!$income_trigger)
             return; // no income trigger
         $from = array_get($income_trigger, 'from', 0);
         $to = array_get($income_trigger, 'to', 0);
         if ($to == 0)
             return;
-        switch ($cid) {
+        switch ($civ) {
             case CIV_HISTORIANS: // HISTORIANS Discard territory tile to give token (when they gain landmark, you gain the exposed beneftits).
-                $cubes = $this->game->getCollectionFromDB("SELECT card_location FROM structure WHERE card_location_arg='$player_id' AND  card_location LIKE 'civ_{$cid}\\_%'");
+                $cubes = $this->game->getCollectionFromDB("SELECT card_location FROM structure WHERE card_location_arg='$player_id' AND  card_location LIKE 'civ_{$civ}\\_%'");
                 if (count($cubes) == 0)
                     return;
                 break;
@@ -109,11 +113,11 @@ abstract class AbsCivilization  {
                 break;
         }
         if (in_range($incomeTurn, $from, $to))
-            $this->game->benefitCivEntry($cid, $player_id);
+            $this->game->benefitCivEntry($civ, $player_id);
         else {
             $notactive = clienttranslate('${player_name}: ability of ${civ_name} is not applicable in era ${era}');
             $this->game->notifyWithName('message', $notactive, [
-                'civ_name' => $this->game->getTokenName(CARD_CIVILIZATION, $cid),
+                'civ_name' => $this->game->getTokenName(CARD_CIVILIZATION, $civ),
                 'era' => $incomeTurn
             ], $player_id);
         }
