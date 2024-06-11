@@ -22,7 +22,7 @@ define([
   "ebg/core/gamegui",
   "ebg/counter",
   "ebg/stock",
-  g_gamethemeurl + "modules/tapantistock.js",
+  g_gamethemeurl + "modules/tapantistock.js"
 ], function (dojo, declare) {
   return declare("bgagame.tapestry", ebg.core.gamegui, {
     constructor: function () {
@@ -106,7 +106,7 @@ define([
             {
               class: "bgabutton bgabutton_blue",
               innerHTML: "hide",
-              id: "zombiehide",
+              id: "zombiehide"
             },
             "neutralized_game_panel",
             "last"
@@ -117,7 +117,7 @@ define([
         }
 
         this.clientStateArgs = {
-          action: "none",
+          action: "none"
         };
 
         var player_count = 0;
@@ -238,7 +238,7 @@ define([
 
         const tapgame = this;
         dojo.extend(bgagame.tapantistock, {
-          slide: dojo.hitch(tapgame, "placeToken"),
+          slide: dojo.hitch(tapgame, "placeToken")
         });
 
         // card manager (hold antistocks per card type)
@@ -268,7 +268,7 @@ define([
         } catch (e) {
           console.error(e);
         }
- 
+
         // TECH TRACKS
         for (var ttid in gamedatas.tech_track_types) {
           this.tech_track[ttid] = [];
@@ -620,7 +620,7 @@ define([
 
       for (let i = 1; i <= 48; i++) {
         var div = this.format_string("<div id='territory_tile_${num}_help' class='tile territory_tile territory_tile_${num}'></div>", {
-          num: i,
+          num: i
         });
         dojo.place(div, helpnode);
         this.addTooltipForToken("territory_tile", i, "territory_tile_" + i + "_help");
@@ -673,7 +673,7 @@ define([
         case "civAbility":
           if (this.gamedatas.dice.empiricism > 0) {
             this.setClientState("client_empiricism", {
-              descriptionmyturn: _("Which roll do ${you} wish to claim?"),
+              descriptionmyturn: _("Which roll do ${you} wish to claim?")
             });
           }
           break;
@@ -714,6 +714,21 @@ define([
         case "trackSelect":
           dojo.query(".tech_spot .cube").style("pointer-events", "none");
           dojo.query(".tech_spot .cube").style("cursor", "auto");
+          break;
+        case "invent":
+          const args = this.gamedatas.gamestate.args;
+   
+          if (args.discard) {
+            for (let i in args.discard) {
+              const card = args.discard[i];
+              const card_type_arg = card.card_type_arg;
+              const div_id = `tech_card_${card_type_arg}`;
+              if ($(div_id)?.parentNode.id == "draw") {
+                card.card_location = "discard";
+                this.moveCard(card);
+              }
+            }
+          }
           break;
       }
       dojo.query(".active_slot").removeClass("active_slot");
@@ -763,7 +778,7 @@ define([
           return;
         }
         this.ajaxcallwrapper("keepCard", {
-          ids: ids.join(","),
+          ids: ids.join(",")
         });
       });
 
@@ -863,7 +878,7 @@ define([
           case this.CON.CIV_ARCHITECTS:
             if (data == "midgame") {
               this.setClientState("client_ArchitectsSwap", {
-                descriptionmyturn: _("ARCHITECTS: You may swap two Income buildings in your capital"),
+                descriptionmyturn: _("ARCHITECTS: You may swap two Income buildings in your capital")
               });
             } else {
               this.setDescriptionOnMyTurn(_("ARCHITECTS: Place a cube in your capital"));
@@ -984,14 +999,15 @@ define([
                 300
               );
             }
-            case this.CON.CIV_RENEGADES:
-              if (data == "midgame") {
-                this.setDescriptionOnMyTurn(_("RENEGADES: Place a player token in a tier that matches a tier on the board containing one of your player tokens"));
-                this.activateCivSlots(civ, args.slots);
-              };
-        
-  
-              break;
+          case this.CON.CIV_RENEGADES:
+            if (data == "midgame") {
+              this.setDescriptionOnMyTurn(
+                _("RENEGADES: Place a player token in a tier that matches a tier on the board containing one of your player tokens")
+              );
+              this.activateCivSlots(civ, args.slots);
+            }
+
+            break;
           default:
             break;
         }
@@ -1212,7 +1228,7 @@ define([
           break;
         case "client_standup":
           this.setDescriptionOnMyTurn(_("Select up to ${num} of your outposts to stand up"), {
-            num: this.clientStateArgs.num,
+            num: this.clientStateArgs.num
           });
           for (var cid in args.targets) {
             var bid = args.targets[cid]["card_id"];
@@ -1283,7 +1299,7 @@ define([
 
         case "research":
           this.setDescriptionOnMyTurn(_("${benefit}: ${You} must confirm"), {
-            benefit: this.getBenTooltipStr(args.bid, true),
+            benefit: this.getBenTooltipStr(args.bid, true)
           });
           for (var adv in args.all_advances) {
             var allowed = args.all_advances[adv];
@@ -1314,15 +1330,42 @@ define([
         case "invent":
           if (this.ownsCiv(34)) {
             // recyclers
-            setTimeout(() => {
-              let dtech = dojo.query("#draw > .tech_card");
-              dtech.addClass("active_slot");
-              if (dtech.length > 0) {
-                dojo.destroy("button_discard");
+
+            if (args.bid == 326) {
+              // invent from discard only
+              if (args.discard) {
+                for (let i in args.discard) {
+                  const card = args.discard[i];
+                  card.card_location = "draw";
+                  this.moveCard(card, "discard");
+                }
               }
-            }, 500);
-            this.addActionButton("button_discard", _("Inspect discard pile"), () => {
-              this.ajaxcallwrapper("invent", { id: -1 });
+              document.querySelectorAll("#draw > .tech_card").forEach((node) => node.classList.add("active_slot"));
+              this.addActionButton("button_invent_decline", _("Decline"), () => this.ajaxcallwrapper("decline"));
+              this.setDescriptionOnMyTurn("${you} may invent from top of discard");
+              break;
+            }
+
+            const al = this.getAdjustmentLevel();
+            let button =  _("Inspect top card of discard");
+            if (!args.discard) button = _('Nothing in discard');
+            if (al < 8) {
+              button = _("Inspect discard pile");
+            }
+            this.addActionButton("button_discard", button, () => {
+              if (al < 8) {
+                this.ajaxcallwrapper("invent", { id: -1 });
+              } else {
+                // show discard
+                if (args.discard) {
+                  for (let i in args.discard) {
+                    const card = args.discard[i];
+                    card.card_location = "draw";
+                    this.moveCard(card, "discard");
+                  }
+                } 
+                document.querySelectorAll("#draw > .tech_card").forEach((node) => node.classList.add("active_slot"));
+              }
             });
             this.addTooltip(
               "button_discard",
@@ -1330,6 +1373,14 @@ define([
               ""
             );
           }
+          setTimeout(() => {
+            let dtech = dojo.query("#draw > .tech_card");
+            dtech.addClass("active_slot");
+            if (dtech.length > 0) {
+              dojo.destroy("button_discard");
+            }
+          }, 300);
+
           dojo.query(".tech_card").removeClass("active_slot");
           dojo.query("#tech_deck_visible > .tech_card").addClass("active_slot");
 
@@ -1355,11 +1406,11 @@ define([
 
             if (num == 1) {
               this.setDescriptionOnMyTurn(_("${you} must confirm track to ${advance_or_regress}"), {
-                advance_or_regress: args.tracks_change > 0 ? _("advance") : _("regress"),
+                advance_or_regress: args.tracks_change > 0 ? _("advance") : _("regress")
               });
             } else
               this.setDescriptionOnMyTurn(_("${you} must choose track to ${advance_or_regress}"), {
-                advance_or_regress: args.tracks_change > 0 ? _("advance") : _("regress"),
+                advance_or_regress: args.tracks_change > 0 ? _("advance") : _("regress")
               });
             if (bd) {
               this.setMainTitle(this.getAdvanceTypeStr(bd.flags), "after");
@@ -1475,7 +1526,7 @@ define([
           const payArr = Array(payNum).fill(this.bonusdata.pay);
           const pgIcon = this.getBenIcon({
             p: payArr,
-            g: args.benefits,
+            g: args.benefits
           });
           if (args.benefit_category == "bonus") prefix = _("BONUS:") + " ";
           if (args.benefit_quantity == -1) {
@@ -1621,10 +1672,10 @@ define([
               }
             } else {
               if (args.title) this.setDescriptionOnMyTurn(_(args.title));
-              if (building.card_type==this.CON.BUILDING_OUTPOST) {
+              if (building.card_type == this.CON.BUILDING_OUTPOST) {
                 var sel = document.querySelector("#outpost_" + building.card_id);
                 if (sel) {
-                  const i = getPart( sel.parentNode.id,2);
+                  const i = getPart(sel.parentNode.id, 2);
                   this.tagAndBagMilitianOutpost(i);
                 }
               } else {
@@ -1683,7 +1734,7 @@ define([
                 this.addTrackSlotActionButton(i + "_0", "but_spot", () => {
                   this.ajaxcallwrapper("selectTrackSpot", {
                     track: track,
-                    spot: 0,
+                    spot: 0
                   });
                 });
               }
@@ -1853,9 +1904,9 @@ define([
             dojo.addClass(cube, "active_slot");
           }
         }
-      } else if (type==317) {
+      } else if (type == 317) {
         // urban planners action do not allow to click
-        this.setDescriptionOnMyTurn(name+'. '+_("Click on landmark to place or click Decline."));
+        this.setDescriptionOnMyTurn(name + ". " + _("Click on landmark to place or click Decline."));
         // If you decline now placing another landmark right after won't trigger the benefit
       } else {
         dojo.query(".tech_spot .cube").addClass("active_slot");
@@ -1956,7 +2007,7 @@ define([
         "/tapestry/tapestry/formAlliance.html",
         {
           lock: true,
-          pid: pid,
+          pid: pid
         },
         this,
         function (result) {},
@@ -2002,7 +2053,7 @@ define([
         {
           pid: pid,
           tid: tid,
-          token_id: token_id,
+          token_id: token_id
         },
         () => {
           if (selected) dojo.removeClass(selected, "clicked");
@@ -2051,7 +2102,7 @@ define([
       if (id != "button_confirm") type = id.split("_")[3];
       this.ajaxcallwrapper("choose_resources", {
         resources: payment,
-        type: type,
+        type: type
       });
     },
 
@@ -2069,7 +2120,7 @@ define([
             duration: 500,
             properties: {
               top: { start: node_coords.t, end: top },
-              left: { start: node_coords.l, end: left },
+              left: { start: node_coords.l, end: left }
             },
             onEnd: function () {
               dojo
@@ -2079,14 +2130,14 @@ define([
                   delay: 500,
                   properties: {
                     top: { start: top, end: node_coords.t },
-                    left: { start: left, end: node_coords.l },
+                    left: { start: left, end: node_coords.l }
                   },
                   onEnd: function () {
                     dojo.style(node, "zIndex", "1");
-                  },
+                  }
                 })
                 .play();
-            },
+            }
           })
           .play();
       }
@@ -2128,7 +2179,7 @@ define([
       this.ajaxcall(
         "/tapestry/tapestry/decline_tapestry.html",
         {
-          lock: true,
+          lock: true
         },
         this,
         function (result) {},
@@ -2152,7 +2203,7 @@ define([
         "/tapestry/tapestry/mystic.html",
         {
           lock: true,
-          ids: ids,
+          ids: ids
         },
         this,
         function (result) {
@@ -2217,7 +2268,7 @@ define([
           U: u,
           V: v,
           isol: isol,
-          outpost: outpost_id,
+          outpost: outpost_id
         },
         () => {
           dojo.query(".possible").removeClass("possible");
@@ -2248,7 +2299,7 @@ define([
           this.ajaxcallwrapper("place_structure", {
             x: this.capitalx,
             y: this.capitaly,
-            rot: this.capitalRot,
+            rot: this.capitalRot
           });
         });
         return;
@@ -2257,7 +2308,7 @@ define([
       this.ajaxcallwrapper("place_structure", {
         x: this.capitalx,
         y: this.capitaly,
-        rot: this.capitalRot,
+        rot: this.capitalRot
       });
     },
 
@@ -2460,7 +2511,7 @@ define([
           {
             cid: this.CON.CIV_ARCHITECTS,
             spot: this.capitalx,
-            extra: this.capitaly,
+            extra: this.capitaly
           },
           () => {
             dojo.removeClass(id, "clicked");
@@ -2489,7 +2540,7 @@ define([
         this.ajaxcallwrapper("civTokenAdvance", {
           cid: this.CON.CIV_ARCHITECTS,
           spot: getIntPart(prevbuilding.id, 1),
-          extra: getIntPart(incomebuilding.id, 1),
+          extra: getIntPart(incomebuilding.id, 1)
         });
 
         return;
@@ -2522,7 +2573,7 @@ define([
         this.setClientState("client_militarism");
       } else if (this.gamedatas.gamestate.args.exploitation) {
         this.setClientState("client_exploitation", {
-          descriptionmyturn: _("EXPLOITATION: ${you} can forgo the exploration VP for a doubled benefit"),
+          descriptionmyturn: _("EXPLOITATION: ${you} can forgo the exploration VP for a doubled benefit")
         });
       } else {
         this.processExplore(false, false);
@@ -2536,7 +2587,7 @@ define([
         "/tapestry/tapestry/alchemistChoice.html",
         {
           lock: true,
-          track: track,
+          track: track
         },
         this,
         function (result) {},
@@ -2593,7 +2644,7 @@ define([
         rot: this.selectedRot,
         militarism: militarism,
         exploitation: exploitation,
-        outpost_id: outpost_id,
+        outpost_id: outpost_id
       });
       this.selectedTile = 0;
       this.hideRotators();
@@ -2672,7 +2723,7 @@ define([
       var div = this.format_string_recursive(jstpl_score, {
         id: scoring_marker_id,
         value: value,
-        classes: classes,
+        classes: classes
       });
 
       dojo.place(div, animNodeId);
@@ -2820,7 +2871,7 @@ define([
       // console.log("place " + x + "," + y);
       dojo.style(mobileObj, {
         left: x + "px",
-        top: y + "px",
+        top: y + "px"
       });
       mobileObj.offsetLeft; // force re-flow
     },
@@ -3351,7 +3402,7 @@ define([
             this.format_block("jstpl_capital_cell", {
               cid: player_id + "_" + a + "_" + b,
               left: b * cell,
-              top: a * cell,
+              top: a * cell
             }),
             "capital_grid_" + player_id
           );
@@ -3715,7 +3766,6 @@ define([
       this.addTooltipForToken("civilization", civ_id, "civilization_" + civ_id, 1000);
 
       this.connect(card_div, "onclick", "onCivilizationClick");
-  
 
       // Add civ spots.
 
@@ -3752,7 +3802,7 @@ define([
 
     setupCivSlot: function (civ_id, sid, slots) {
       var slot = slots[sid];
-      const civ = "civilization_"+civ_id;
+      const civ = "civilization_" + civ_id;
       var chid = "civ_" + civ_id + "_" + sid;
 
       const div = dojo.place(this.format_block("jstpl_cube_holder", { chid: chid }), civ);
@@ -3823,7 +3873,7 @@ define([
                 type: type,
                 lid: coord,
                 top: 3 * dy + y,
-                left: 1.75 * dx + x, //
+                left: 1.75 * dx + x //
               }),
               location
             );
@@ -4057,7 +4107,7 @@ define([
         case "landmark":
           var info = this.landmark_data[typeId];
           if (!info) {
-            console.error("no landmark "+typeId);
+            console.error("no landmark " + typeId);
             break;
           }
           var title = this.getTooltipTitle(info["name"]);
@@ -4598,7 +4648,7 @@ define([
         {
           id: argid,
           class: "breadcrumbs_element",
-          innerHTML: divImgOp,
+          innerHTML: divImgOp
         },
         "breadcrumbs"
       );
@@ -4651,7 +4701,7 @@ define([
               // if (!this.checkActiveSlot(holder_id)) return;
               this.ajaxcallwrapper("civTokenAdvance", {
                 cid: cid,
-                spot: getPart(holder_id, 2),
+                spot: getPart(holder_id, 2)
               });
               this.selectedCiv = 0;
               break;
@@ -4663,7 +4713,7 @@ define([
           switch (cid) {
             case 3:
               this.ajaxcallwrapper("placeCraftsmen", {
-                slot: getPart(holder_id, 2),
+                slot: getPart(holder_id, 2)
               });
               break;
             default:
@@ -4700,7 +4750,7 @@ define([
           dojo.toggleClass(id, "selected");
           this.clientStateArgs.num = 3 - document.querySelectorAll(".selected").length;
           this.setDescriptionOnMyTurn(_("Select up to ${num} of your outposts to stand up"), {
-            num: this.clientStateArgs.num,
+            num: this.clientStateArgs.num
           });
           break;
         default:
@@ -4720,7 +4770,7 @@ define([
             var coords = land_id.split("_");
             this.ajaxcallwrapper("colonialism", {
               U: coords[1],
-              V: coords[2],
+              V: coords[2]
             });
           } else {
             if (!dojo.hasClass(land_id, "active_slot") || !this.checkAction("explore")) {
@@ -4775,7 +4825,7 @@ define([
           }
           if (this.ownsCiv(this.CON.CIV_ISOLATIONISTS) && this.emptyTerritory() && this.hasIsolationTokens()) {
             this.setClientState("client_isolationist", {
-              descriptionmyturn: _("Do ${you} wish to place an isolationist token?"),
+              descriptionmyturn: _("Do ${you} wish to place an isolationist token?")
             });
           } else {
             this.processConquer(false);
@@ -4790,7 +4840,7 @@ define([
           var coords = land_id.split("_");
           this.ajaxcallwrapper("conquer_structure", {
             u: coords[1],
-            v: coords[2],
+            v: coords[2]
           });
           //  dojo.query(".possible").removeClass("possible");
 
@@ -4804,7 +4854,7 @@ define([
           }
           this.ajaxcallwrapper("moveStructureOnto", {
             location: land_id,
-            id: outpost_id,
+            id: outpost_id
           });
           break;
         case "client_threasureHunterChoice":
@@ -4884,9 +4934,9 @@ define([
       }
 
       if (event.target?.id?.startsWith("building")) {
-        if (event.target.classList.contains('landmark')) {
-          const civ = getPart(id,1);
-          this.ajaxcallwrapper("activatedAbility", { ability: `civ_${civ}`, arg: getPart(event.target.id,1) }, undefined, true);
+        if (event.target.classList.contains("landmark")) {
+          const civ = getPart(id, 1);
+          this.ajaxcallwrapper("activatedAbility", { ability: `civ_${civ}`, arg: getPart(event.target.id, 1) }, undefined, true);
           return;
         }
       }
@@ -5064,7 +5114,7 @@ define([
         "chooseCivilization",
         {
           civ: civ,
-          cap: cap,
+          cap: cap
         },
         undefined,
         true
@@ -5144,7 +5194,7 @@ define([
 
           this.ajaxcallwrapper("selectTrackSpot", {
             track: this.clientStateArgs.track,
-            spot: this.clientStateArgs.spot,
+            spot: this.clientStateArgs.spot
           });
 
           break;
@@ -5164,7 +5214,7 @@ define([
           this.ajaxcallwrapper(this.clientStateArgs.action, {
             bid: bid,
             track: this.clientStateArgs.track,
-            spot: this.clientStateArgs.spot,
+            spot: this.clientStateArgs.spot
           });
 
           break;
@@ -5193,7 +5243,7 @@ define([
       dojo.addClass(land.parentNode, "elevated");
       dojo.place("selected_tile", this.selectedland);
       this.applyRotationTile();
-      if (!$('button_rotate')) this.addActionButton("button_rotate", _("Rotate"), "onRotateTileRight");
+      if (!$("button_rotate")) this.addActionButton("button_rotate", _("Rotate"), "onRotateTileRight");
     },
 
     hideRotators: function () {
@@ -5211,14 +5261,14 @@ define([
 
       this.territoryPopup = new dijit.TooltipDialog({
         id: "territoryPopup",
-        content: html,
+        content: html
       });
 
       dijit.popup.open({
         popup: this.territoryPopup,
         around: $(this.selectedland),
         //orient: {BL:'TL', TL:'BL',BR: 'TR'},
-        closable: true,
+        closable: true
       });
 
       $("territory_select").appendChild($("territory_tiles_" + this.player_id));
@@ -5292,7 +5342,7 @@ define([
             const targets = this.gamedatas.gamestate.args.benefits[bid].slots_choice[id].targets;
             const terindex = this.civilizations[this.CON.CIV_TREASURE_HUNTERS].slots[id].ter;
             const args = {
-              territory_name: this.gamedatas.terrain_types[terindex].name,
+              territory_name: this.gamedatas.terrain_types[terindex].name
             };
             this.setClientStateUpd("client_threasureHunterChoice", () => {
               this.setDescriptionOnMyTurn(_("TREASURE_HUNTERS: ${you} must choose adjacent territory of type ${territory_name}"), args);
@@ -5586,8 +5636,8 @@ define([
           player_id: player_id || this.player_id,
           cards: [card],
           count: 1,
-          type: card_type,
-        },
+          type: card_type
+        }
       };
       this.notif_newCards(notif);
     },
@@ -5959,7 +6009,7 @@ define([
         card.card_type_arg,
         card.card_location,
         card.card_location_arg,
-        card.card_location_arg2,
+        card.card_location_arg2
       ];
 
       var player_id = card_location_arg;
@@ -6239,9 +6289,9 @@ define([
           if (card_location == "deck_territory") {
             return "territory_deck";
           }
-          if (card_location.startsWith('civ_21_')) {
-			  return card_location;
-		  }
+          if (card_location.startsWith("civ_21_")) {
+            return card_location;
+          }
           let location = (card_location == "map" ? "land" : card_location) + "_" + card.card_location_arg2;
           return location;
         case this.CON.CARD_SPACE:
@@ -6306,7 +6356,7 @@ define([
         card.card_type_arg,
         card.card_location,
         card.card_location_arg,
-        card.card_location_arg2,
+        card.card_location_arg2
       ];
 
       switch (parseInt(card_type)) {
@@ -6344,7 +6394,6 @@ define([
           }
           return;
         case this.CON.CARD_TECHNOLOGY: {
-    
           const div_id = `tech_card_${card_type_arg}`;
           const card_div = $(div_id);
           if ($(from) && card_div) dojo.place(card_div, from);
@@ -6430,7 +6479,7 @@ define([
       this.gamedatas.dice.empiricism = notif.args.empiricism;
 
       this.setClientState("client_empiricism", {
-        descriptionmyturn: _("Which roll do ${you} wish to claim?"),
+        descriptionmyturn: _("Which roll do ${you} wish to claim?")
       });
     },
 
@@ -6494,14 +6543,14 @@ define([
       if (placeNode) {
         var name = this.divPlayerName(player_id);
         var messsage = this.format_string_recursive(_("${player} may undo up to this point"), {
-          player: name,
+          player: name
         });
         var div = dojo.create("div", {
           id: undoButId,
           innerHTML: messsage,
           class: "undomarker",
           title: _("Click to undo your move up to this point"),
-          onclick: "return false",
+          onclick: "return false"
         });
         dojo.place(div, placeNode, place);
         dojo.connect(div, "onclick", this, "onUndo");
@@ -6545,7 +6594,7 @@ define([
     onLoadingLogsComplete: function () {
       console.log("Loading logs complete");
       this.setUndoMove(this.gamedatas.undo_move, this.gamedatas.partial_undo, this.gamedatas.undo_player_id);
-    },
+    }
   });
 });
 

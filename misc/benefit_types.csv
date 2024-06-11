@@ -211,6 +211,7 @@ id|-con|name|r|t|php
 323|BE_TINKERERS_3a|Regress exactly 3 spaces on an advancement track where this is possible. You may gain the benefit but not the bonus.|||'adv'=>-3,'s'=>'c','sflags'=>(FLAG_SELF),'aflags'=>(FLAG_REGRESS|FLAG_POSEXACT),'state' =>'trackSelect'
 324||Roll the black conquer die up to 2 times and gain the benefit of the final roll
 325||Roll the research die up to 2 times and gain the benefit of the final roll
+326||Invent from top of discard|i||'flags'=>(FLAG_DISCARD),'state'=>'invent'
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

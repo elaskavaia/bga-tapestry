@@ -1914,7 +1914,9 @@ abstract class PGameXBody extends tapcommon {
         // stats by method
         if (is_numeric($ben)) {
             if ($this->isRealPlayer($player_id)) {
-                if (!$this->dbIncStatChecked($count, "game_points_be_$ben", $player_id)) {
+                if ($ben > 500 && $ben < 599) {
+                    $this->dbIncStatChecked($count, "game_points_be_15", $player_id);
+                } else if (!$this->dbIncStatChecked($count, "game_points_be_$ben", $player_id)) {
                     $this->warn("vp benefit is not defined for ben $ben");
                     $this->dbIncStatChecked($count, "game_points_be_15", $player_id);
                 }
@@ -5567,10 +5569,13 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getActivePlayerId();
         $hasRecycles = $this->hasCiv($player_id, CIV_RECYCLERS);
         if ($card_type == -1 && $hasRecycles) {
-            self::DbQuery("UPDATE card SET card_location='draw' WHERE card_type=4 AND card_location='discard'");
+            if ($this->getAdjustmentVariant()>=8) {
+                $this->systemAssertTrue("ERR:Invent:01");
+            } 
+            self::DbQuery("UPDATE card SET card_location='draw' WHERE card_type=4 AND card_location='discard'");  
+            
             $cards = $this->getCardsSearch(null, null, 'draw');
             $this->notifyWithName("moveCard", '', ['cards' => $cards, '_private' => true,], $player_id);
-
             $this->gamestate->nextState('next');
             return;
         }
@@ -5592,8 +5597,11 @@ abstract class PGameXBody extends tapcommon {
             $this->dbSetCardLocation($card_id, 'hand', 0, '', $player_id);
 
             if ($location == 'draw') {
-                $this->userAssertTrue($message, $hasRecycles);
+                $this->userAssertTrue($message, $hasRecycles && $this->getAdjustmentVariant()<8);
+            } else if ($location == 'discard') {
+                $this->userAssertTrue($message, $hasRecycles && $this->getAdjustmentVariant()>=8);
             } else if ($location == 'deck_tech_vis') {
+                $this->userAssertTrue(totranslate("You may not invent a face up card at this time"), $flags & FLAG_FACE_UP);
                 $this->drawTechCards(1); // replenish
             } else {
                 $this->userAssertTrue($message);
@@ -5612,16 +5620,13 @@ abstract class PGameXBody extends tapcommon {
         }
         if ($hasRecycles) {
             // discard cards recyclers looked at 
-            $cards = $this->getCardsSearch(null, null, 'draw');
-            if (count($cards) > 0) {
+            if ($this->getAdjustmentVariant()<8) {
                 self::DbQuery("UPDATE card SET card_location='discard' WHERE card_type=4 AND card_location='draw'");
-                $cards = $this->getCardsSearch(CARD_TECHNOLOGY, null, 'discard');
-                $this->notifyWithName("moveCard", '', ['cards' => $cards, '_private' => true,], $player_id);
             }
+            $cards = $this->getCardsSearch(CARD_TECHNOLOGY, null, 'discard');
+            $this->notifyWithName("moveCard", '', ['cards' => $cards, '_private' => true,], $player_id);
         }
         if ($card_id) {
-
-
             if ($flags & FLAG_UPGRADE) { // invent and upgrade!
                 // XXX when invent and upgrade cannot do delayed resolve
                 $this->effect_cardComesInPlayTriggerResolve($card_id, $player_id,  $current_benefit['benefit_data']);
@@ -9402,8 +9407,15 @@ abstract class PGameXBody extends tapcommon {
         return ($x >= 3) && ($x <= 11) && ($y >= 3) && ($y <= 11);
     }
 
+    function getCardOnTop(int $type, string $location) {
+        return $this->getObjectFromDB("SELECT * FROM card WHERE card_location='$location' AND card_type=$type ORDER BY card_location_arg DESC LIMIT 1");
+    }
+
     function argInvent() {
-        return $this->notifArgsAddBen();
+        $res = $this->notifArgsAddBen();
+        $top = $this->getCardOnTop(CARD_TECHNOLOGY, 'discard');
+        if ($top) $res['discard'] = [$top];
+        return $res;
     }
 
     function argTechBenefit() {

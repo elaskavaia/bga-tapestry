@@ -227,6 +227,7 @@ if ( !defined('TAPESTRY')) { // guard since this included multiple times
     define("FLAG_FACE_DOWN", 0b001);
     define("FLAG_FACE_BOTH", 0b011);
     define("FLAG_UPGRADE", 0b0100);
+    define("FLAG_DISCARD", 0b1000);
    
     // opponent selection
     define("FLAG_NEIGHBOUR", 0b0100);
@@ -1622,6 +1623,11 @@ $this->benefit_types = [ //
  325 => [  //
   'name' => clienttranslate("Roll the research die up to 2 times and gain the benefit of the final roll"),
 ],
+ 326 => [  //
+  'name' => clienttranslate("Invent from top of discard pile"),
+  'r' => 'i',
+  'flags'=>(FLAG_DISCARD),'state'=>'invent',
+],
  502 => [  //
   'name' => clienttranslate("2 VP"),
   'r' => 'v',
@@ -2688,7 +2694,14 @@ $this->civilizations = array (
                         4 => array ("top" => 76,"left" => 62,"w" => 8.5,"h" => 5.5,
                                 'tooltip' => clienttranslate('Have at least 1 tech card in each row.') ),
                         5 => array ("top" => 76,"left" => 77,"w" => 8.5,"h" => 5.5,
-                                'tooltip' => clienttranslate('Have at least 1 complete district with 3+ house income buildings.') ), ),
+                                'tooltip' => clienttranslate('Have at least 1 complete district with 3+ house income buildings.') ), 
+                ),
+// Have 4+ of the same resource   
+// Have 4+ tapestry cards   
+// Have 4+ territory tiles   
+// Have 4+ tech cards   
+// Have 4+ of the same income building   
+// Have 4+ landmarks
                 "description@a4" => [ 
                         1 => clienttranslate('Start with a player token to the left of this track. When you complete any achievement (public or private), advance the token to gain either the benefit underneath or 5 VP.'),
                         2 => clienttranslate('You have access to five personal Achievements (in addition to the three public achievements); you may complete each of them once in any order.'),
@@ -2943,18 +2956,29 @@ $this->civilizations = array (
         CIV_RECYCLERS => [ "name" => clienttranslate("RECYCLERS"),//34
                 "description" => [ 
                         clienttranslate("The Recyclers take used technology and make it new again. Start by gaining 3 tech cards from the deck; discard 2 and keep 1, placing it in your bottom row. You may not upgrade it during your first income turn."),
-                        "",
                         clienttranslate("At the beginning of your income turns (2-5), you may upgrade a tech card. This is in addition to the standard upgrade during each of those income turns."),
-                        "",
                         clienttranslate("When upgrading, the Recyclers may upgrade a card from the top row to the bottom row. Whenever you do this, gain 5 VP."),
-                        clienttranslate("When gaining a tech card, you may choose from the tech discard pile."), ],
-                "income_trigger" => [ "from" => 2,"to" => 5 ],
+                        clienttranslate("When gaining a tech card, you may choose from the tech discard pile."), 
+                ],
+                "description@a8" => [
+                        clienttranslate("<i>The Recyclers take used technology and make it new again.</i>"),
+                        clienttranslate("Start by drawing 3 tech cards from the deck; discard 2 and keep 1, placing it in your bottom row. You may not upgrade it during your first income turn."),
+                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may gain the top card of the tech discard pile, then you may upgrade a tech card. This is in addition to the standard upgrade during those turns."),
+                        clienttranslate("When upgrading, you may upgrade a card from the top row to the bottom row. Whenever you do this, gain [5VP]."),
+                        clienttranslate("When gaining a tech card, you may choose the top card of the tech discard pile.")
+                ],
+                "income_trigger" => [ "from" => 2, "to" => 5 ],
                 "exp" => "PP",
                 "start_benefit" => [ 175 ],
                 "slot_choice"=>"any",
                 "slots" => [
                         1 => [ "benefit" => [ 14 ] ],
                 ], //
+                "slots@a8" => [
+                        1 => [ "benefit" => [ 326, 14 ] ],
+                ], //
+                "slots_description" => '',
+                "al" => 8,
                 //
         ],
         CIV_RIVERFOLK => [ "name" => clienttranslate("RIVERFOLK"),

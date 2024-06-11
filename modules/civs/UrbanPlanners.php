@@ -98,7 +98,8 @@ class UrbanPlanners extends AbsCivilization {
         if (!$this->game->hasCiv($player_id, $civ)) {
             return false;
         }
-        $landmark_type = $this->game->getRulesBenefit($ben, 'lm');
+        $landmark_type = $this->game->getRulesBenefit($ben, 'lm',0);
+        if($landmark_type==0) return false;
         if($landmark_type==19) return false;
 
         $this->game->queueBenefitNormal(['or' => [BE_URBANPLANNERS_GRAB, BE_DECLINE]], $player_id, reason(CARD_CIVILIZATION, $civ));
