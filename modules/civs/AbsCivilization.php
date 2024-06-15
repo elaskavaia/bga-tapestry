@@ -75,12 +75,16 @@ abstract class AbsCivilization  {
         return $cube;
     }
 
+    function getCivSlot(int $slot) {
+        $civ = $this->civ;
+        return "civ_{$civ}_$slot";
+    }
+
     function argCivAbilitySingle($player_id, $benefit) {
         return [];
     }
 
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = '') {
-        $civ = $this->civ;
         return true;  // cleanup
     }
 

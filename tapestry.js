@@ -978,6 +978,45 @@ define([
 
             break;
 
+          case this.CON.CIV_COLLECTORS:
+            if (this.getAdjustmentLevel() >= 8) {
+              const targets = bene.targets;
+              for (var li in targets) {
+                const card = "card_" + targets[li];
+                dojo.addClass(card, "active_slot multi-select");
+              }
+              this.clientStateArgs.action = "civTokenAdvance";
+              this.clientStateArgs.cid = civ;
+              this.clientStateArgs.spot = 0;
+              this.addActionButton("button_confirm", _("Confirm"), () => {
+              
+                const selected1= document.querySelectorAll(".tapestry.selected");
+                const selected2= document.querySelectorAll(".territory.selected");
+                if (selected1.length==0 && selected2.length==0) {
+                  this.showError(_('Nothing is selected'));
+                  return;
+                }
+                if (selected1.length>1 || selected2.length>1 || selected1.length+selected2.length>2) {
+                  this.showError(_('Too many cards are selected'));
+                  return;
+                }
+                let tapId = 0;
+                if (selected1.length==1) {
+                  tapId = getPart(selected1[0].id,1);
+                }
+                let cardId = 0;
+                if (selected2.length==1) {
+                  cardId = getPart(selected2[0].id,1);
+                }
+  
+                this.ajaxcallwrapper("civTokenAdvance", {
+                  cid: civ,
+                  spot: tapId,
+                  extra: cardId
+                });
+              });
+            }
+            break;
           case this.CON.CIV_CHOSEN:
             this.clientStateArgs.action = "civTokenAdvance";
             this.clientStateArgs.cid = civ;
@@ -5006,6 +5045,11 @@ define([
 
         default:
           if (!this.checkActiveSlot(cid)) return;
+          const card = event.currentTarget;
+          if (dojo.hasClass(card,'multi-select')) {
+            dojo.toggleClass(card, "selected");
+            break;
+          }
           var id = getPart(cid, 1);
           this.ajaxcallwrapper("tapestryChoice", { card_id: id });
           break;

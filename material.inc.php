@@ -1575,7 +1575,7 @@ $this->benefit_types = [ //
   'name' => clienttranslate("COLLECTORS Collect Building or Outpost"),
 ],
  313 => [  // BE_COLLECTORS_CARD
-  'name' => clienttranslate("COLLECTORS Collect Card"),
+  'name' => clienttranslate("COLLECTORS Collect Card or Tile"),
 ],
  314 => [  // BE_CARD_PLAY_TRIGGER
   'name' => clienttranslate("Card comes into play triggers"),
@@ -1624,7 +1624,7 @@ $this->benefit_types = [ //
   'name' => clienttranslate("Roll the research die up to 2 times and gain the benefit of the final roll"),
 ],
  326 => [  //
-  'name' => clienttranslate("Invent from top of discard pile"),
+  'name' => clienttranslate("Invent from top of discard"),
   'r' => 'i',
   'flags'=>(FLAG_DISCARD),'state'=>'invent',
 ],
@@ -2809,12 +2809,19 @@ $this->civilizations = array (
         // AA
         CIV_COLLECTORS => [ "name" => clienttranslate("COLLECTORS"),
                 "description" => [ 
-                        clienttranslate("The collectors proudly display a variety of objects and buildings."),
-                        clienttranslate("When you gain at least one of the following during an advancement turn, you may place one of them on this civilization mat if there isn't already one of that type here. Then gain [ANY RESOURCE]."),
+                        clienttranslate("<i>The collectors proudly display a variety of objects and buildings.</i>"),
+                        clienttranslate("When you gain at least one of the following during an advancement turn, you may place one of them on this civilization mat if there isn't already one of that type here. Then gain listed benefit."),
                         clienttranslate("[OUTPOST]* [HOUSE] [LANDMARK] [TAPESTRY] [TERRITORY] [TECHNOLOGY]"),
+                        clienttranslate(""),
                         clienttranslate("At the end of the game, gain VP [1/3/6/10/15/21] according to the number of different objects on this civilization mat [1/2/3/4/5/6]."),
                         clienttranslate("Items on your mat still count as yours for the purposes of scoring, but may no longer be used, upgraded, played, or discarded.  All cards and tiles are kept face down."),
                         clienttranslate("* Gain outpost via conquer benefit; place on civilization mat instead of the map; do not roll dice"),
+                ],
+                "description@a8" => [
+                        2 => clienttranslate("[TAPESTRY]  [TILE]  [HOUSE]  ->  [ANY RESOURCE]"),
+                        3 => clienttranslate("[TECH CARD]  [OUTPOST]*  [LANDMARK]  ->  [ANY RESOURCE] x 2"),
+                        6 => clienttranslate("* via conquer benefit; do not roll dice"),
+                        7 => clienttranslate("<i>If you gain this civilization in the middle of the game, you may place 1 [TAPESTRY] and/or 1 [TILE] from your supply on this mat; do not gain any immediate benefit.</i>"),
                 ],
                 "slots_description" => '',
                 "slots" => [
@@ -2826,7 +2833,10 @@ $this->civilizations = array (
                         5 => [ "ct" => CARD_TERRITORY,  'tt'=>'card'],
                         6 => [ "ct" => CARD_TECHNOLOGY,  'tt'=>'card'],
                 ], //
-                "exp" => "AA", ],
+                "midgame_setup@a8" => true,
+                "exp" => "AA", 
+                "al" =>8
+        ],
         CIV_GAMBLERS => [ "name" => clienttranslate("GAMBLERS"),
                 "description" => [ 
                         clienttranslate("The Gamblers know when to hold 'em and know when to fold 'em."),

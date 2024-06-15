@@ -1743,7 +1743,6 @@ abstract class PGameXBody extends tapcommon {
                 $this->processSpotBenefits($track, $spot, $player_id, $flags, $reason);
                 return true;
             case 310: //BE_RENEGADES_ADV
-                /** @var Renegades */
                 $inst = $this->getCivilizationInstance(CIV_RENEGADES, true);
                 return $inst->awardBenefits($player_id, $ben, $count, $reason);
             case 311: //BE_GAMBLES_PICK
@@ -1755,27 +1754,9 @@ abstract class PGameXBody extends tapcommon {
                 $this->gamestate->nextState('keepCard');
                 return false;
             case 312: // BE_COLLECTORS_GRAB  structure              
-                $bene = $this->clearCurrentBenefit($ben);
-                $next_benefit = $this->getCurrentBenefit();
-                if ($this->effect_collectorsGrab($player_id, $next_benefit)) {
-                    $this->queueBenefitNormal(BE_ANYRES, $player_id, reason(CARD_CIVILIZATION, CIV_COLLECTORS));
-                    $this->benefitCashed($next_benefit);
-                }
-
-
-                $this->nextStateBenefitManager();
-                return false;
-
             case 313: // BE_COLLECTORS_CARD  card
-                $bene = $this->clearCurrentBenefit($ben);
-                $next_benefit = $this->getCurrentBenefit();
-                if ($this->effect_collectorsGrabCard($player_id, $bene)) {
-                    $this->queueBenefitNormal(BE_ANYRES, $player_id, reason(CARD_CIVILIZATION, CIV_COLLECTORS));
-                    $this->benefitCashed($next_benefit);
-                }
-
-                $this->nextStateBenefitManager();
-                return false;
+                $inst = $this->getCivilizationInstance(CIV_COLLECTORS, true);
+                return $inst->awardBenefits($player_id, $ben, $count, $reason);
 
             case 314: //BE_CARD_PLAY_TRIGGER
 
@@ -2436,7 +2417,7 @@ abstract class PGameXBody extends tapcommon {
         if ($sid == null) {
             return true;
         }
-        $curr = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
+        $curr = $this->getPendingStructure();
         if ($curr != null) {
             // we have problem
             $this->error("Claiming income building while another building is not resolved " . $curr['card_type_arg']);
@@ -4113,7 +4094,7 @@ abstract class PGameXBody extends tapcommon {
     function saction_civTokenAdvance($player_id, $cid, $spot, $extra, $civ_args) {
         $condition = $civ_args['benefit_data'];
         $is_midgame = ($condition == 'midgame');
-        if ($cid == CIV_ARCHITECTS || $cid == CIV_RENEGADES || $cid == CIV_CRAFTSMEN || $cid == CIV_GAMBLERS) {
+        if ($cid == CIV_ARCHITECTS || $cid == CIV_RENEGADES || $cid == CIV_CRAFTSMEN || $cid == CIV_GAMBLERS || $cid == CIV_COLLECTORS) {
             $inst = $this->getCivilizationInstance($cid, true);
             $inst->moveCivCube($player_id, $is_midgame, $spot, $extra);
             return;
@@ -6859,16 +6840,9 @@ abstract class PGameXBody extends tapcommon {
         if (!$this->isRealPlayer($player_id))
             return false;
         if ($this->hasCiv($player_id, CIV_COLLECTORS)) {
-            $civ = CIV_COLLECTORS;
-            $table = 'structure';
-            $slot = $this->getCivSlotNumberForGain($civ, $table, $type);
-            if ($slot <= 0)
-                return false;
-            $cube = $this->getStructureOnCivSlot($civ, $slot);
-            if ($cube) // already there
-                return false;
-            $this->queueBenefitNormal(['or' => [BE_COLLECTORS_GRAB, BE_DECLINE]], $player_id, reason(CARD_CIVILIZATION, CIV_COLLECTORS, "$table:$type"));
-            return true;
+            /** @var Collectors */
+            $inst = $this->getCivilizationInstance(CIV_COLLECTORS, true);
+            return $inst->triggerPreGainStructure($player_id, $type, $ben);
         }
         if ($this->hasCiv($player_id, CIV_URBAN_PLANNERS)) {
             /** @var UrbanPlanners */
@@ -6881,77 +6855,14 @@ abstract class PGameXBody extends tapcommon {
         if (!$this->isRealPlayer($player_id))
             return false;
         if ($this->hasCiv($player_id, CIV_COLLECTORS)) {
-            $civ = CIV_COLLECTORS;
-            $table = 'card';
-            $slot = $this->getCivSlotNumberForGain($civ, $table, $type);
-            if ($slot <= 0) return false;
-            $sql = "SELECT * FROM card WHERE card_location = 'civ_{$civ}_${slot}' LIMIT 1";
-            $cube =  $this->getObjectFromDB($sql);
-            if ($cube) // already there 
-                return false;
-
-            $this->queueBenefitInterrupt(['or' => [BE_COLLECTORS_CARD, BE_DECLINE]], $player_id, reason(CARD_CIVILIZATION, CIV_COLLECTORS, $card_id));
-            return true;
+            /** @var Collectors */
+            $civinst = $this->getCivilizationInstance(CIV_COLLECTORS);
+            return $civinst->triggerPreKeepCard($player_id, $card_id, $type);
         }
         return false;
     }
 
-    function effect_collectorsGrabCard($player_id, $bene) {
-        $data = $bene['benefit_data'];
-        $card_id = $this->getReasonArg($data, 3);
 
-        $card = $this->getCardInfoById($card_id);
-        $card_type = $card['card_type'];
-        $slot = $this->getCivSlotNumberForGain(CIV_COLLECTORS, 'card', $card_type);
-        $this->systemAssertTrue("cannot find card $card_id $slot", $slot > 0);
-        $civ = CIV_COLLECTORS;
-        $sql = "SELECT * FROM card WHERE card_location = 'civ_{$civ}_${slot}' LIMIT 1";
-        $cube =  $this->getObjectFromDB($sql);
-
-        if ($cube) // already there
-            return false;
-        $this->dbSetCardLocation($card_id, "civ_21_${slot}", 0, clienttranslate('${player_name} collected ${card_type_name} ${card_name} on COLLECTORS mat'), $player_id);
-        return true;
-    }
-
-    function effect_collectorsGrab($player_id, $bene) {
-        $ben = $bene['benefit_type'];
-
-        if ($ben == BE_HOUSE) {
-            // gain house
-            if ($this->claimIncomeStructure(BUILDING_HOUSE, null)) {
-                // no more houses
-                return false;
-            }
-            $structure_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
-            $structure_id = $structure_data['card_id'];
-            $this->dbSetStructureLocation($structure_id, 'civ_21_2', null, clienttranslate('${player_name} collected ${structure_name} on COLLECTORS mat'), $player_id);
-            $this->checkPrivateAchievement(5, $player_id);
-
-            return true;
-        }
-        if ($ben == BE_CONQUER) {
-            $structure_id = $this->getOutpostId(null, $player_id, false); // XXX Militants
-            if (!$structure_id) return false;
-            $this->dbSetStructureLocation($structure_id, 'civ_21_1', null, clienttranslate('${player_name} collected ${structure_name} on COLLECTORS mat'), $player_id);
-            return true;
-        }
-        $landmark_id = $this->getRulesBenefit($ben, 'lm');
-        if ($landmark_id) {
-            // landmark benefit
-            if ($this->claimLandmark($landmark_id, $player_id, null)) {
-                // no landmark?
-                return false;
-            }
-            $structure_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
-            $structure_id = $structure_data['card_id'];
-            $this->dbSetStructureLocation($structure_id, 'civ_21_3', null, clienttranslate('${player_name} collected ${structure_name} on COLLECTORS mat'), $player_id);
-            
-            $this->checkPrivateAchievement(6, $player_id);
-            return true;
-        }
-        $this->systemAssertTrue("unexpected benefit $ben");
-    }
 
     function triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance) {
         if (!$this->isRealPlayer($player_id))
@@ -7557,7 +7468,7 @@ abstract class PGameXBody extends tapcommon {
             }
         }
 
-        return $slot;
+        return (int) $slot;
     }
 
     function getCivBenefit($civ, $slot, $field = 'benefit') {
@@ -8827,6 +8738,7 @@ abstract class PGameXBody extends tapcommon {
                 case CIV_RENEGADES:
                 case CIV_CRAFTSMEN:
                 case CIV_GAMBLERS:
+                case CIV_COLLECTORS:
                     return $civinst->argCivAbilitySingle($player_id, $benefit);
                 case CIV_ENTERTAINERS:
                     $data['slots'] = array_keys($slots);
@@ -8914,6 +8826,8 @@ abstract class PGameXBody extends tapcommon {
             }
         }
         switch ($civ) {
+            case CIV_COLLECTORS:
+                return $civinst->argCivAbilitySingle($player_id, $benefit);
             case CIV_GAMBLERS:
                 return $civinst->argCivAbilitySingle($player_id, $benefit);
             case CIV_TRADERS:
@@ -9414,6 +9328,10 @@ abstract class PGameXBody extends tapcommon {
         return $capital;
     }
 
+    function getPendingStructure() {
+        return $this->getStructureInfoSearch(null,null,'capital_structure');
+    }
+
     function argPlaceStructure($stype = null) {
         // Need to provide details of which cells on the capital can be selected with each rotation of the structure.
         $options = array();
@@ -9810,32 +9728,6 @@ abstract class PGameXBody extends tapcommon {
         $this->awardVP($player_id, -$vp, reason_civ(CIV_RIVERFOLK));
     }
 
-    function finalCollectorsScoring($player_id) {
-        $civ = CIV_COLLECTORS;
-        if (!$this->hasCiv($player_id, $civ)) {
-            return;
-        }
-        $num = 0;
-        $vp = 0;
-
-        for ($i = 1; $i <= 6; $i++) {
-            $cube = $this->getStructureOnCivSlot($civ, $i);
-            if ($cube) {
-                $num++;
-            }
-            $sql = "SELECT * FROM card WHERE card_location = 'civ_{$civ}_$i' LIMIT 1";
-            $cube =  $this->getObjectFromDB($sql);
-            if ($cube) {
-                $num++;
-            }
-        }
-        // 1/3/6/10/15/21
-        for ($i = 1; $i <= $num; $i++) {
-            $vp = $vp + $i;
-        }
-
-        $this->awardVP($player_id, $vp, reason_civ($civ));
-    }
 
 
 
@@ -10638,8 +10530,6 @@ abstract class PGameXBody extends tapcommon {
                 $this->finalIslandersScoring();
             } else if ($civ == (CIV_RIVERFOLK)) {
                 $this->finalRiverfolkScoring($player_id);
-            } else if ($civ == (CIV_COLLECTORS)) {
-                $this->finalCollectorsScoring($player_id);
             } else {
                 $civ = $this->getCivilizationInstance($civ);
                 $civ->finalScoring($player_id);
