@@ -12,5 +12,6 @@ debug_giveCard(3,2);
 
 #gain card and resolve all the effect (i.e. if civ or tapestry comes into play)
 debug_awardCard(3,28); //tap OIL MAGNAT
+debug_award(TRAP); 
 debug_awardCard(5,3); //civ
 debug_insertCard(5,4); //civ entertainer on top

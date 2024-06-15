@@ -2673,47 +2673,59 @@ $this->civilizations = array (
         ),
         CIV_CHOSEN => array ("name" => clienttranslate("THE CHOSEN"),
                 "description" => array (
-                        clienttranslate("The Chosen seek glory unmatched by other civilizations, whom they look down upon with a mixture of bewilderment and pity."),
+                        clienttranslate("<i>The Chosen seek glory unmatched by other civilizations, whom they look down upon with a mixture of bewilderment and pity.</i>"),
                         clienttranslate("<b>At the beginning of your income turns (2-5):</b>"),
                         clienttranslate("For each advancement track you've completed or where there are no further-advanced tokens than yours, gain 1 [VP] per opponent."),
                         clienttranslate("For each achievement you've earned, gain [ANY RESOURCE]. If it's your final income turn, instead gain 5 [VP] per achievement earned.") ),
                 "adjustment" => clienttranslate("When starting the game with THE CHOSEN, gain 15 VP per opponent"),
-                "adjustment@a4" => clienttranslate("rule changes"),
+                "adjustment@a4a8" => clienttranslate("rule changes"),
                 //The first change is, "Whenever you earn an achievement, gain double the VP." The second change is: "At the beginning of your income turns (2-5):
                 //--If there is at least one advancement track on which there are no further-advanced tokens than yours, gain any 1 resource.
                 //--For each advancement track you've completed or where there are no further-advanced tokens than yours, gain 1 VP per opponent."
-                "achi" => [ ],"income_trigger" => [ "from" => 2,"to" => 5 ], //
-                "income_trigger@a4" => [ "from" => 0,"to" => 0 ], //
+                "achi" => [ ],
+                "income_trigger" => [ "from" => 2,"to" => 5 ], //
+                "income_trigger@a4a8" => [ "from" => 0,"to" => 0 ], //
                 "achi@a4" => array (
-                        1 => array ("top" => 76,"left" => 18,"w" => 8.5,"h" => 5.5,
+                        1 => array ("top" => 76,"left" => 18,"w" => 8.5,"h" => 5.5, 'c'=>6,
                                 'tooltip' => clienttranslate('Have 6+ of the same resource.') ),
-                        2 => array ("top" => 76,"left" => 32,"w" => 8.5,"h" => 5.5,
+                        2 => array ("top" => 76,"left" => 32,"w" => 8.5,"h" => 5.5,'c'=>5,
                                 'tooltip' => clienttranslate('Have 5+ tapestry cards in hand at end of turn.') ),
-                        3 => array ("top" => 76,"left" => 47,"w" => 8.5,"h" => 5.5,
+                        3 => array ("top" => 76,"left" => 47,"w" => 8.5,"h" => 5.5, 'c'=>5,
                                 'tooltip' => clienttranslate('Have 5+ territory tiles.') ),
-                        4 => array ("top" => 76,"left" => 62,"w" => 8.5,"h" => 5.5,
+                        4 => array ("top" => 76,"left" => 62,"w" => 8.5,"h" => 5.5, 'c'=>1,
                                 'tooltip' => clienttranslate('Have at least 1 tech card in each row.') ),
-                        5 => array ("top" => 76,"left" => 77,"w" => 8.5,"h" => 5.5,
+                        5 => array ("top" => 76,"left" => 77,"w" => 8.5,"h" => 5.5, 'c'=>3,
                                 'tooltip' => clienttranslate('Have at least 1 complete district with 3+ house income buildings.') ), 
                 ),
-// Have 4+ of the same resource   
-// Have 4+ tapestry cards   
-// Have 4+ territory tiles   
-// Have 4+ tech cards   
-// Have 4+ of the same income building   
-// Have 4+ landmarks
+                "achi@a8" => [
+                        [],
+                        ['top' => 80, 'left' => 15, 'w' => 9, 'h' => 5, 'tooltip' => clienttranslate('Have 4+ of the same resource'), 'c'=>4 ],
+                        ['top' => 80, 'left' => 28, 'w' => 9, 'h' => 5, 'tooltip' => clienttranslate('Have 4+ tapestry cards'), 'c'=>4 ],
+                        ['top' => 80, 'left' => 41, 'w' => 9, 'h' => 5, 'tooltip' => clienttranslate('Have 4+ territory tiles'), 'c'=>4 ],
+                        ['top' => 80, 'left' => 53, 'w' => 9, 'h' => 5, 'tooltip' => clienttranslate('Have 4+ tech cards'), 'c'=>4 ],
+                        ['top' => 80, 'left' => 66, 'w' => 9, 'h' => 5, 'tooltip' => clienttranslate('Have 4+ of the same income building'), 'c'=>4 ],
+                        ['top' => 80, 'left' => 78, 'w' => 9, 'h' => 5, 'tooltip' => clienttranslate('Have 4+ landmarks'), 'c'=>4 ],
+                ],
+
                 "description@a4" => [ 
                         1 => clienttranslate('Start with a player token to the left of this track. When you complete any achievement (public or private), advance the token to gain either the benefit underneath or 5 VP.'),
                         2 => clienttranslate('You have access to five personal Achievements (in addition to the three public achievements); you may complete each of them once in any order.'),
                         3 => '',
-                        4 => clienttranslate('<i>If you gain this civilization in the middle of the game, account for public and private achievements you have completed by advancing your token on this track and gaining the benefits.</i>'), ],
-                
+                        4 => clienttranslate('<i>If you gain this civilization in the middle of the game, account for public and private achievements you have completed by advancing your token on this track and gaining the benefits.</i>'), 
+                ],
+                "description@a8" => [ 
+                        1 => clienttranslate('Start with a player token to the left of this track. When you complete any achievement (public or private), advance the token to gain either the benefit underneath or 5 VP.'),
+                        2 => clienttranslate('You have access to six private achievements (in addition to the three public achievements). At the end of any advance turn, place a player token on any private achievement(s) to note their current completion.'),
+                        3 => '',
+                        4 => clienttranslate('<i>If you gain this civilization in the middle of the game, account for public and private achievements you\'ve currently earned by advancing your token on this track and gaining at most 2 benefits.</i>'), 
+                ],
+                "slots_description" => clienttranslate('left to right'),
                 "midgame_setup" => true,
             
                 "slots" => [ ],
                 //Worker -> Money -> Tech Card -> Food -> Any Income Building -> Culture -> Score Your City -> Science Die (full benefit/bonus)
                 "slots@a4" => [// 
-                        0 => [ "top" => 62,"left" => 6,"w" => 9,"h" => 5,"link" => [ 1 ] ],
+                        0 => [ "top" => 62,"left" => 6,"w" => 9,"h" => 5,"link" => [ 1 ], "title" => clienttranslate('Start') ],
                         1 => [ "benefit" => [ BE_GAIN_WORKER ],"top" => 62,"left" => 15,"w" => 9,"h" => 5,
                                 "link" => [ 2 ] ],
                         2 => [ "benefit" => [ BE_GAIN_COIN ],"top" => 62,"left" => 24,"w" => 9,"h" => 5,
@@ -2729,7 +2741,48 @@ $this->civilizations = array (
                         7 => [ "benefit" => [ 28 /* vp city */ ],"top" => 62,"left" => 69,"w" => 9,"h" => 5,
                                 "link" => [ 8 ] ],
                         8 => [ "benefit" => [ 18 /* research */ ],"top" => 62,"left" => 78,"w" => 9,"h" => 5,
-                                "link" => [ 0 ] ], ], ),
+                                "link" => [ 0 ] ], ],
+                "slots@a8" => [ // 
+                        0 => ["top" => 59, "left" => 11, "w" => 6, "h" => 4, "link" => [1]],
+                        1 => [
+                                "benefit" => [BE_GAIN_WORKER], "top" => 59, "left" => 18, "w"=>6,"h"=>4,
+                                "link" => [2]
+                        ],
+                        2 => [
+                                "benefit" => [BE_GAIN_COIN], "top" => 59, "left" => 26, "w"=>6,"h"=>4,
+                                "link" => [3]
+                        ],
+                        3 => [
+                                "benefit" => [20 /* Invent */], "top" => 59, "left" => 34, "w"=>6,"h"=>4,
+                                "link" => [4]
+                        ],
+                        4 => [
+                                "benefit" => [BE_GAIN_FOOD], "top" => 59, "left" => 42, "w"=>6,"h"=>4,
+                                "link" => [5]
+                        ],
+                        5 => [
+                                "benefit" => [110 /* any inc build */], "top" => 59, "left" => 51, "w"=>6,"h"=>4,
+                                "link" => [6]
+                        ],
+                        6 => [
+                                "benefit" => [BE_GAIN_CULTURE], "top" => 59, "left" => 58, "w"=>6,"h"=>4,
+                                "link" => [7]
+                        ],
+                        7 => [
+                                "benefit" => [18 /* research */], "top" => 59, "left" => 66, "w"=>6,"h"=>4,
+                                "link" => [8]
+                        ],
+                        8 => [
+                                "benefit" => [28 /* vp city */], "top" => 59, "left" => 74, "w"=>6,"h"=>4,
+                                "link" => [9]
+                        ],
+                        9 => [
+                                "benefit" => [74 /* conquer both dice */], "top" => 59, "left" => 81, "w"=>6,"h"=>4,
+                                "link" => [0]
+                        ],
+                ],
+                "al" => 8
+        ),
         16 => array ("name" => clienttranslate("TRADERS"),
                 "description" => array (
                         clienttranslate("The Traders prefer to connect with other civilizations economically, not militarily. Start with 4 player tokens here."),

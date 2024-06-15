@@ -287,6 +287,14 @@ class action_tapestry extends APP_GameAction
         $this->ajaxResponse();
     }
 
+    public function acdebug()
+    {
+        $this->setAjaxMode();
+        $args = $this->getArg("a", AT_json, true);
+        $this->game->action_debug($args);
+        $this->ajaxResponse();
+    }
+
 
     public function placeCraftsmen()
     {

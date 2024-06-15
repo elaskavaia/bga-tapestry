@@ -763,6 +763,7 @@ abstract class PGameXBody extends tapcommon {
         // undo
         $result += $this->argUndo();
         //  $result['canceledNotifIds'] = $this->getCanceledNotifIds();
+        $result['testenv'] = $this->isTestEnv();
         return $result;
     }
 
@@ -1819,28 +1820,31 @@ abstract class PGameXBody extends tapcommon {
     function awardBaseResource($player_id, $benefit_id, $increase, $reason) {
         $newCount = $this->dbIncResourceCount($benefit_id, '*', null, $increase, $player_id, $reason);
         // triggers
-        if ($this->isAdjustments4() && $this->hasCiv($player_id, CIV_CHOSEN)) {
-            if ($newCount >= 6) {
-                $this->effect_triggerPrivateAchievement($player_id, 1);
+        if ($this->hasCiv($player_id, CIV_CHOSEN) && $this->isAdjustments4or8()) {
+            $achi = $this->getRulesCiv(CIV_CHOSEN, 'achi', []);
+            $category = 1;
+            $max = $achi[$category]['c'];
+            if ($newCount >= $max) {
+                $this->effect_triggerPrivateAchievement($player_id, $category);
             }
         }
     }
 
-    function effect_triggerPrivateAchievement($player_id, $pos, $civ = 15) {
-        if ($this->isAdjustments4() && $this->hasCiv($player_id, $civ)) {
-            $destination = "civa_{$civ}_$pos";
-            $achievements = $this->getCollectionFromDB("SELECT card_location_arg FROM structure WHERE card_location = '$destination'");
-            if (count($achievements) > 0) {
-                return; // player already has it
-            }
-            $token_id = $this->addCube($player_id, $destination);
-            $achi = $this->civilizations[$civ]['achi'];
-            $this->notifyMoveStructure('', $token_id, [], $player_id);
-            $this->notifyWithName('message_info', clienttranslate('${player_name} achieves ${achi_name}'), [
-                'achi_name' => $achi[$pos]['tooltip']
-            ], $player_id);
-            $this->benefitCivEntry($civ, $player_id);
+    function effect_triggerPrivateAchievement($player_id, $pos, $civ = CIV_CHOSEN, $data = null) {
+        if (!$this->hasCiv($player_id, $civ))  return;
+        $destination = "civa_{$civ}_$pos";
+        $achievements = $this->getCollectionFromDB("SELECT card_location_arg FROM structure WHERE card_location = '$destination'");
+        if (count($achievements) > 0) {
+            return; // player already has it
         }
+        $token_id = $this->addCube($player_id, $destination);
+        $achi = $this->civilizations[$civ]['achi'];
+        $this->notifyMoveStructure('', $token_id, [], $player_id);
+        $this->notifyWithName('message_info', clienttranslate('${player_name} achieves ${achi_name}'), [
+            'achi_name' => $achi[$pos]['tooltip']
+        ], $player_id);
+        $this->interruptBenefit();
+        $this->benefitCivEntry($civ, $player_id, $data);
     }
 
     function dbIncResourceCount($benefit_id, $notif, $new_count, $increase, $player_id, $reason = null) {
@@ -2161,6 +2165,7 @@ abstract class PGameXBody extends tapcommon {
                 if ($this->isTapestryActive($player_id, TAP_TYRANNY)) {
                     $this->queueBenefitInterrupt(64, $player_id, $card_id);
                 }
+                $this->checkPrivateAchievement(2, $player_id, CIV_CHOSEN);
                 break;
             case CARD_TECHNOLOGY:
                 $tech_type = $card_type_arg;
@@ -2178,17 +2183,11 @@ abstract class PGameXBody extends tapcommon {
                 }
                 $this->checkMysticPrediction(1 /* tech cards */, $player_id);
                 // check chosen achievement
-                $this->checkPrivateAchievement(4 /* tech cards */, $player_id);
+                $this->checkPrivateAchievement(4 /* tech cards */, $player_id, CIV_CHOSEN);
 
                 break;
             case CARD_TERRITORY:
-                if ($this->isAdjustments4() && $this->hasCiv($player_id, CIV_CHOSEN)) {
-                    // tile count
-                    $tile = count($this->cards->getCardsOfTypeInLocation(CARD_TERRITORY, null, 'hand', $player_id));
-                    if ($tile >= 5) {
-                        $this->effect_triggerPrivateAchievement($player_id, 3);
-                    }
-                }
+                $this->checkPrivateAchievement(3 /* territory */, $player_id, CIV_CHOSEN);
                 break;
             default:
                 break;
@@ -2454,6 +2453,7 @@ abstract class PGameXBody extends tapcommon {
             $inst = $this->getCivilizationInstance(CIV_RELENTLESS, true);
             $inst->relentlessBenefitOnGainBuilding($player_id);
         }
+
         if ($transition != null)
             $this->gamestate->nextState($transition);
         return false;
@@ -2562,7 +2562,7 @@ abstract class PGameXBody extends tapcommon {
             }
             $to_spot = $this->getCivSlotWithValue(CIV_UTILITARIENS, "lm", $landmark_type);
             if ($to_spot) {
-                $this->notif('message', $player_id)->notifyAll(clienttranslate('${player_name} triggered power of Utilitaries'));
+                $this->notif('message', $player_id)->notifyAll(clienttranslate('${player_name} triggered power of Utilitarias'));
                 $this->benefitCivEntry(CIV_UTILITARIENS, $player_id, "triggered::$landmark_type");
             }
         }
@@ -3538,6 +3538,20 @@ abstract class PGameXBody extends tapcommon {
         $this->gamestate->nextState('next');
     }
 
+    function action_debug(array $args) {
+        // $this->checkAction('acdebug'); unchecked
+        $this->systemAssertTrue('Unathorized dev action', $this->isTestEnv());
+
+        if (count($args) == 0) return;
+        $civ = array_get($args, 'civ', 0);
+        if ($civ) {
+            $this->notifyWithName('message','debug action gain civ');
+            $this->debug_civ($civ);
+        } else {
+            $this->systemAssertTrue('Unsupported dev action');
+        }
+    }
+
     function action_selectCube($cube_id) {
         $this->checkAction('select_cube');
         $player_id = $this->getActivePlayerId();
@@ -4153,9 +4167,42 @@ abstract class PGameXBody extends tapcommon {
             $this->dbSetStructureLocation($tid, $civ_token_string, $income_turn, $message, $player_id);
             return;
         }
-        if ($cid == CIV_CHOSEN && !$this->isAdjustments4()) {
-            // just use effect
-            $this->theChosenBenefits();
+        if ($cid == CIV_CHOSEN) {
+            if ($this->isAdjustments4or8()) {
+                $cubes = $this->getStructuresOnCiv($cid, BUILDING_CUBE);
+                $cube = array_shift($cubes);
+                $spot = getPart($cube['card_location'],2) + 1;
+                $civ_token_string = "civ_" . $cid . "_" . $spot;
+                $tid = $cube['card_id'];
+                $state = $cube['card_location_arg2'] ?? 0;
+                if ($spot == 1) $state = 0;
+                $this->systemAssertTrue("missing cube on chosen", $cube);
+                $this->systemAssertTrue("Token cannot advance to this spot $spot $cid", isset($slot_data[$spot]));
+                $benefit = $slot_data[$spot]["benefit"];
+                $this->systemAssertTrue("invalid benefot for $cid $spot", is_array($benefit));
+                if ($extra == 5) { // 5 VP instead
+                    $benefit = 505;
+                }
+        
+                if ($extra == 0) { // Forfeit
+                    $this->notifyWithName('message', clienttranslate('${player_name} forfeits benefit'), [], $player_id);
+                } else {
+                    if ($this->isAdjustments8() && $is_midgame) {
+                        // no more than 2 benefit allowed midgame
+                        if ($state>=2) {
+                            $this->userAssertTrue(totranslate('Cannot use more than 2 benefits if gaining this civilization midgame'));
+                        }
+                    }
+                    $state ++;
+                    $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid, $condition));
+                }
+
+                // UPDATE token
+                $this->dbSetStructureLocation($tid, $civ_token_string, $state, clienttranslate('${player_name} advances on their civilization mat'), $player_id);
+            } else {
+                // just use effect
+                $this->theChosenBenefits();
+            }
             return;
         }
         if ($cid == CIV_HERALDS) {
@@ -4255,8 +4302,6 @@ abstract class PGameXBody extends tapcommon {
                 $type = $structure['card_location_arg2'];
                 $this->queueBenefitInterrupt($this->landmark_data[$type]['benefit'], $player_id, reason_civ(CIV_UTILITARIENS));
             }
-         
-     
             return;
         }
         if ($cid == CIV_MERRYMAKERS) {
@@ -4296,10 +4341,8 @@ abstract class PGameXBody extends tapcommon {
         $this->systemAssertTrue("Token cannot advance to this spot $spot $cid", isset($slot_data[$spot]));
         $benefit = $slot_data[$spot]["benefit"];
         $this->systemAssertTrue("invalid benefot for $cid $spot", is_array($benefit));
-        if ($extra == 5 && $cid == CIV_CHOSEN) // 5 VP instead
-            $this->queueBenefitNormal([505], $player_id, reason_civ($cid));
-        else
-            $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid));
+
+        $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid));
         // second token
         if ($cid == CIV_MERRYMAKERS && $this->isAdjustments4or8()) {
             $token_placed = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='$token_type' AND card_location LIKE 'civ_$cid\\_%' AND card_location_arg2 = $income_turn");
@@ -5569,11 +5612,11 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getActivePlayerId();
         $hasRecycles = $this->hasCiv($player_id, CIV_RECYCLERS);
         if ($card_type == -1 && $hasRecycles) {
-            if ($this->getAdjustmentVariant()>=8) {
+            if ($this->getAdjustmentVariant() >= 8) {
                 $this->systemAssertTrue("ERR:Invent:01");
-            } 
-            self::DbQuery("UPDATE card SET card_location='draw' WHERE card_type=4 AND card_location='discard'");  
-            
+            }
+            self::DbQuery("UPDATE card SET card_location='draw' WHERE card_type=4 AND card_location='discard'");
+
             $cards = $this->getCardsSearch(null, null, 'draw');
             $this->notifyWithName("moveCard", '', ['cards' => $cards, '_private' => true,], $player_id);
             $this->gamestate->nextState('next');
@@ -5597,9 +5640,9 @@ abstract class PGameXBody extends tapcommon {
             $this->dbSetCardLocation($card_id, 'hand', 0, '', $player_id);
 
             if ($location == 'draw') {
-                $this->userAssertTrue($message, $hasRecycles && $this->getAdjustmentVariant()<8);
+                $this->userAssertTrue($message, $hasRecycles && $this->getAdjustmentVariant() < 8);
             } else if ($location == 'discard') {
-                $this->userAssertTrue($message, $hasRecycles && $this->getAdjustmentVariant()>=8);
+                $this->userAssertTrue($message, $hasRecycles && $this->getAdjustmentVariant() >= 8);
             } else if ($location == 'deck_tech_vis') {
                 $this->userAssertTrue(totranslate("You may not invent a face up card at this time"), $flags & FLAG_FACE_UP);
                 $this->drawTechCards(1); // replenish
@@ -5620,7 +5663,7 @@ abstract class PGameXBody extends tapcommon {
         }
         if ($hasRecycles) {
             // discard cards recyclers looked at 
-            if ($this->getAdjustmentVariant()<8) {
+            if ($this->getAdjustmentVariant() < 8) {
                 self::DbQuery("UPDATE card SET card_location='discard' WHERE card_type=4 AND card_location='draw'");
             }
             $cards = $this->getCardsSearch(CARD_TECHNOLOGY, null, 'discard');
@@ -6401,6 +6444,8 @@ abstract class PGameXBody extends tapcommon {
         if ($structures == 2) {
             $this->queueBenefitInterrupt(RES_ANY, $player_id, reason_civ(CIV_NOMADS));
         }
+        $this->checkPrivateAchievement(5, $player_id);
+        $this->checkPrivateAchievement(6, $player_id);
         $this->gamestate->nextState('next');
     }
 
@@ -6881,6 +6926,8 @@ abstract class PGameXBody extends tapcommon {
             $structure_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
             $structure_id = $structure_data['card_id'];
             $this->dbSetStructureLocation($structure_id, 'civ_21_2', null, clienttranslate('${player_name} collected ${structure_name} on COLLECTORS mat'), $player_id);
+            $this->checkPrivateAchievement(5, $player_id);
+
             return true;
         }
         if ($ben == BE_CONQUER) {
@@ -6899,6 +6946,8 @@ abstract class PGameXBody extends tapcommon {
             $structure_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
             $structure_id = $structure_data['card_id'];
             $this->dbSetStructureLocation($structure_id, 'civ_21_3', null, clienttranslate('${player_name} collected ${structure_name} on COLLECTORS mat'), $player_id);
+            
+            $this->checkPrivateAchievement(6, $player_id);
             return true;
         }
         $this->systemAssertTrue("unexpected benefit $ben");
@@ -7114,21 +7163,25 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-    function checkPrivateAchievement($category, $player_id = null) {
+    function checkPrivateAchievement($category, $player_id = null, $civ = CIV_CHOSEN, $data = null) {
         if (!$player_id)
             $player_id = $this->getActivePlayerId();
-        if (!$this->hasCiv($player_id, CIV_CHOSEN))
+        if (!$this->hasCiv($player_id, $civ))
             return;
-        if (!$this->isAdjustments4()) {
+        if (!$this->isAdjustments4or8()) {
             return;
         }
+        $achi = $this->getRulesCiv($civ, 'achi', []);
+        $achi_type = $category;
+        $max = $achi[$achi_type]['c'];
+
         $achieved = false;
         switch ($category) {
             case 1:
                 // resource count
                 for ($i = 1; $i <= 4; $i++) {
                     $newCount = $this->getResourceCountAll($player_id, $i);
-                    if ($newCount >= 6) {
+                    if ($newCount >= $max) {
                         $achieved = true;
                         break;
                     }
@@ -7137,33 +7190,62 @@ abstract class PGameXBody extends tapcommon {
             case 2:
                 // tap count
                 $taps = count($this->cards->getCardsOfTypeInLocation(CARD_TAPESTRY, null, 'hand', $player_id));
-                if ($taps >= 5) {
+                if ($taps >= $max) {
                     $achieved = true;
                 }
                 break;
             case 3:
                 $tile = count($this->cards->getCardsOfTypeInLocation(CARD_TERRITORY, null, 'hand', $player_id));
-                if ($tile >= 5) {
+                if ($tile >= $max) {
                     $achieved = true;
                 }
                 break;
             case 4: // tech cards
-                $levels = $this->getCollectionFromDB("SELECT DISTINCT card_location_arg2 FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type=4");
-                //$this->debugConsole("tech levels " . count($levels));
-                if (count($levels) >= 3) {
-                    $achieved = true;
+                if ($this->isAdjustments4()) {
+                    $levels = $this->getCollectionFromDB("SELECT DISTINCT card_location_arg2 FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type=4");
+                    //$this->debugConsole("tech levels " . count($levels));
+                    if (count($levels) >= 3) {
+                        $achieved = true;
+                    }
+                } else {
+                    $count = count($this->getCardsSearch(CARD_TERRITORY, null, null, $player_id));
+                    if ($count >= $max) {
+                        $achieved = true;
+                    }
                 }
                 break;
-            case 5: // houses in districts
-                $houses_complete = false;
-                $this->getDistrictCount($player_id, $houses_complete);
-                if ($houses_complete) {
+            case 5:
+                if ($this->isAdjustments4()) {
+                    // houses in districts
+                    $houses_complete = false;
+                    $this->getDistrictCount($player_id, $houses_complete);
+                    if ($houses_complete) {
+                        $achieved = true;
+                    }
+                } else {
+                    // buildings of the same type
+                    $player_income_data =  $this->getPlayerIncomeData($player_id);
+                    for ($track = 1; $track <= 4; $track++) {
+                        $field = $this->income_tracks[$track]['field'];
+                        $count = (int) ($player_income_data[$field]);
+                        if ($count - 1 >= $max) {
+                            $achieved = true;
+                        }
+                    }
+                }
+                break;
+            case 6:  // landmarks 
+                if ($this->isAdjustments4()) {
+                    break;
+                };
+                $count = count($this->getStructuresSearch(BUILDING_LANDMARK, null,  null, $player_id));
+                if ($count >= $max) {
                     $achieved = true;
                 }
                 break;
         }
         if ($achieved) {
-            $this->effect_triggerPrivateAchievement($player_id, $category);
+            $this->effect_triggerPrivateAchievement($player_id, $category, $civ, $data);
         }
     }
 
@@ -7548,6 +7630,8 @@ abstract class PGameXBody extends tapcommon {
         if (($this->isTapestryActive($player_id, 27)) && ($type <= 5)) { // MONARCHY
             $this->awardVP($player_id, 3, reason_tapestry(27));
         }
+        $this->checkPrivateAchievement(5, $player_id);
+        $this->checkPrivateAchievement(6, $player_id);
         // Update capital mat
         if ($oobounds)
             return;
@@ -8759,6 +8843,10 @@ abstract class PGameXBody extends tapcommon {
                     }
                     $data['slots'] = array_keys($slots);
                     break;
+                case CIV_CHOSEN:
+                    $token_data = $this->getStructuresOnCiv($civ, BUILDING_CUBE);
+                    $data['slots'] = $this->getLinkedSlots($civ, $token_data);
+                    break;
                 case CIV_ADVISORS:
                     $choices = [];
                     $choices[0]['benefit'] = [];
@@ -8848,7 +8936,7 @@ abstract class PGameXBody extends tapcommon {
                         $data['slots_choice'][1]['benefit'] = [$ben];
                     } else {
                         // pay to explore
-               
+
                         $data['slots_choice'][1]['benefit'] = ['p' => BE_ANYRES, 'g' => $ben];
                     }
                 }
@@ -8949,7 +9037,7 @@ abstract class PGameXBody extends tapcommon {
                         $data['title'] = clienttranslate('Move token into ${spot_name} from');
                         $data['spot_name'] = $this->landmark_data[$landmark]['name'];
                     }
-                } else if($this->isAdjustments8()){
+                } else if ($this->isAdjustments8()) {
                     //$data['title'] = clienttranslate('Place landmark');
                     $data['slots'] = null;
                     $data['slots_choice'][0]['title'] = clienttranslate('Place landmark');
@@ -9601,7 +9689,7 @@ abstract class PGameXBody extends tapcommon {
 
             case CIV_CHOSEN:
                 // 1 token needed on slot 1.
-                if ($this->isAdjustments4()) {
+                if ($this->isAdjustments4or8()) {
                     array_push($tokens, $this->addCivToken($player_id, 0, $civ));
                     if (!$start) {
                         $this->effect_gainChosenMidGame($player_id);
@@ -9763,7 +9851,7 @@ abstract class PGameXBody extends tapcommon {
     function effect_gainChosenMidGame($player_id = null) {
         if (!$player_id)
             $player_id = $this->getActivePlayerId();
-        $civ_id = CIV_CHOSEN;
+        $civ = CIV_CHOSEN;
         $achievements = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location LIKE 'achievement%' AND card_location_arg='$player_id'");
         $achi_count = sizeOf($achievements);
         $this->notifyAllPlayers("message", clienttranslate('${player_name} has completed ${count} public achievements'), array(
@@ -9771,11 +9859,11 @@ abstract class PGameXBody extends tapcommon {
             'count' => $achi_count,
         ));
         for ($a = 0; $a < $achi_count; $a++) {
-            $this->benefitCivEntry($civ_id, $player_id);
+            $this->benefitCivEntry($civ, $player_id, 'midgame');
         }
         // private achivements 
-        for ($i = 1; $i <= 5; $i++) {
-            $this->checkPrivateAchievement($i, $player_id);
+        for ($i = 1; $i <= 6; $i++) {
+            $this->checkPrivateAchievement($i, $player_id, $civ, 'midgame');
         }
     }
 
@@ -10476,7 +10564,7 @@ abstract class PGameXBody extends tapcommon {
                         array_inc($total_benefits, $b, 1);
                     }
                 }
-                $reason = reason('inspot', "${track}_${slot}");
+                $reason = reason('inspot', "{$track}_{$slot}");
                 foreach ($benefits as $bid => $count) {
                     $this->awardBenefits($player_id, $bid, $count, $reason);
                 }
@@ -10766,7 +10854,6 @@ abstract class PGameXBody extends tapcommon {
         $this->switchPlayer($current_player, false);
         // check for end of turn trigger effects
         $player_id = $current_player;
-        $this->checkPrivateAchievement(2, $player_id);
         if ($this->hasCiv($player_id, CIV_RELENTLESS)) {
             /** @var Relentless */
             $inst = $this->getCivilizationInstance(CIV_RELENTLESS, true);
@@ -10849,7 +10936,7 @@ abstract class PGameXBody extends tapcommon {
 
     function awardAchievementVP($player_id, $count, $reason = null, $place = null) {
         $this->awardVP($player_id, $count, $reason, $place);
-        if ($this->isAdjustments4()) {
+        if ($this->getAdjustmentVariant()>=4) {
             if ($this->hasCiv($player_id, CIV_CHOSEN)) {
                 $this->notifyWithName('message', clienttranslate('${player_name} - The Chosen - gains achievement benefit'));
                 $this->benefitCivEntry(CIV_CHOSEN, $player_id);

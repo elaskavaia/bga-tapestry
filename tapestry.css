@@ -3618,8 +3618,9 @@ div[data-income="0"] #subtitle_bar {
 .paintover {
   background-color: #f2dfc2;
 }
-.achi_slot {
-}
+/* .achi_slot {
+  outline: 1px solid red;
+} */
 
 /* AUTOMA */
 

@@ -641,6 +641,18 @@ define([
       dojo.query(".expandablecontent > *").connect("onclick", this, (event) => {
         var id = event.currentTarget.id;
         if (this.showHelp(id)) return;
+        if (this.gamedatas.testenv && id.startsWith('civ')) {
+          civ = getPart(id,1);
+          var name = this.getTr(this.civilizations[civ]["name"]);
+          var message = this.format_string(_("You are about to GAIN civilzation ${name} (This only available for testing purposes)"), { name: name });
+    
+          this.confirmationDialog(message, () => {
+            this.ajaxcallwrapper("acdebug", {a: JSON.stringify({ civ: civ })}, undefined, true);
+          }, ()=> {
+            this.tooltips[id].open(id);
+          });
+          return;
+        }
         this.tooltips[id].open(id);
       });
       dojo.query("#allcards .expandabletoggle").connect("onclick", this, "onToggleAllCards");
@@ -970,21 +982,25 @@ define([
             this.clientStateArgs.action = "civTokenAdvance";
             this.clientStateArgs.cid = civ;
             this.clientStateArgs.spot = 0;
-            if (this.getAdjustmentLevel() == 4) {
+            if (this.getAdjustmentLevel() >= 4) {
               if (args.slots.length == 0) break;
               const info = this.civilizations[civ];
               const index = args.slots[0];
               const ben = info.slots[index].benefit;
 
               this.clientStateArgs.spot = index;
+              decline = false;
               this.setClientStateUpd(
                 "client_benvpchoice",
                 () => {
                   this.setDescriptionOnMyTurn(_("CHOSEN: ${you} must choose to gain 5VP or benefit"));
                   this.addImageActionButton("button_5", this.getBenIcon(505), "ajaxClientStateHandler");
                   if (ben) this.addImageActionButton("button_1", this.getBenIcon(ben), "ajaxClientStateHandler");
-                  this.addCancelButton();
-                  this.addActionButton("button_civDecline", _("Decline"), "onCivDecline");
+                  if (data == "midgame") {
+                    this.addImageActionButton("button_0", _("Forfeit"), "ajaxClientStateHandler");
+                  }
+                  //this.addCancelButton();
+                  //this.addActionButton("button_civDecline", _("Decline"), "onCivDecline");
                 },
                 300
               );
@@ -1339,10 +1355,13 @@ define([
                   card.card_location = "draw";
                   this.moveCard(card, "discard");
                 }
-              }
+              } 
               document.querySelectorAll("#draw > .tech_card").forEach((node) => node.classList.add("active_slot"));
               this.addActionButton("button_invent_decline", _("Decline"), () => this.ajaxcallwrapper("decline"));
               this.setDescriptionOnMyTurn("${you} may invent from top of discard");
+              if (!args.discard) {
+                this.setDescriptionOnMyTurn("${you} may invent from top of discard, but nothing is in discard");
+              }
               break;
             }
 
@@ -3615,12 +3634,12 @@ define([
       this._helpMode = true;
       dojo.addClass("ebd-body", "help-mode");
       this._displayedTooltip = null;
-      document.body.addEventListener("click", this.closeCurrentTooltip.bind(this));
+      document.body.addEventListener("click", this.closeCurrentTooltip);
       this.setDescriptionOnMyTurn(_("HELP MODE Activated. Click on game elements to get tooltips"));
       dojo.empty("generalactions");
       this.addCancelButton(undefined, () => this.deactivateHelpMode());
 
-      let handler = this.onClickForHelp.bind(this);
+      let handler = this.onClickForHelp;
       document.querySelectorAll(".withtooltip").forEach((node) => {
         node.addEventListener("click", handler, false);
       });
@@ -3632,8 +3651,8 @@ define([
       this.closeCurrentTooltip();
       this._helpMode = false;
       dojo.removeClass("ebd-body", "help-mode");
-      document.body.removeEventListener("click", this.closeCurrentTooltip.bind(this));
-      let handler = this.onClickForHelp.bind(this);
+      document.body.removeEventListener("click", this.closeCurrentTooltip);
+      let handler = this.onClickForHelp;
       document.querySelectorAll(".withtooltip").forEach((node) => {
         node.removeEventListener("click", handler, false);
       });
@@ -3642,12 +3661,12 @@ define([
     },
 
     closeCurrentTooltip() {
-      if (!this._helpMode) return;
+      if (!gameui._helpMode) return;
 
-      if (this._displayedTooltip == null) return;
+      if (gameui._displayedTooltip == null) return;
 
-      this._displayedTooltip.destroy();
-      this._displayedTooltip = null;
+      gameui._displayedTooltip.destroy();
+      gameui._displayedTooltip = null;
     },
 
     onClickForHelp(event) {
@@ -3780,10 +3799,13 @@ define([
         for (var sid in slots) {
           var slot = slots[sid];
           var chid = "civa_" + civ_id + "_" + sid;
-          dojo.place(
-            this.format_block("jstpl_cube_holder", { chid: chid, top: slot.top, left: slot.left, width: slot.w, height: slot.h }),
-            card_div
-          );
+          var divs = this.format_block("jstpl_cube_holder", { chid: chid });
+          var div = dojo.place(divs, card_div);
+          if (slot.top) div.style.top = slot.top + "%";
+          if (slot.left) div.style.left = slot.left + "%";
+          if (slot.w) div.style.width = slot.w + "%";
+          if (slot.h) div.style.height = slot.h + "%";
+
           dojo.addClass(chid, "achi_slot");
           if (slot.tooltip) {
             var bentml = this.getTooltipMessage(slot.tooltip);
