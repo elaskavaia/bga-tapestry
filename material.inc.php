@@ -1573,9 +1573,11 @@ $this->benefit_types = [ //
 ],
  312 => [  // BE_COLLECTORS_GRAB
   'name' => clienttranslate("COLLECTORS Collect Building or Outpost"),
+  'civ'=>CIV_COLLECTORS,
 ],
  313 => [  // BE_COLLECTORS_CARD
   'name' => clienttranslate("COLLECTORS Collect Card or Tile"),
+  'civ'=>CIV_COLLECTORS,
 ],
  314 => [  // BE_CARD_PLAY_TRIGGER
   'name' => clienttranslate("Card comes into play triggers"),
@@ -2969,21 +2971,35 @@ $this->civilizations = array (
         ],
         CIV_INFILTRATORS => [ "name" => clienttranslate("INFILTRATORS"),
                 "description" => [ 
-                        clienttranslate("The Infiltrators fortify and influence other civilizations."),
+                        clienttranslate("<i>The Infiltrators fortify and influence other civilizations.</i>"),
                         clienttranslate("Start with 1 [CULTURE]."),
                         clienttranslate("At the beginning of your income turns (2-5), you may do one of the following:"),
                         clienttranslate("<li>Place an outpost token on any territory with exactly 1 opponent outpost and nothing else. This is not a conquer action, and both outposts remain upright (control of the territory is shared). Gain the benefit on the territory (if any). There are now 2 tokens on this territory, so it cannot be conquered. It does not count for the middle island achievement."),
                         clienttranslate("<li>Place a player token on an opponent's capital city territory and gain 1 VP for each outpost token that opponent hasn't placed on the board. If it's your third player token there, gain another civilization."),
-                        clienttranslate("Whenever you would gain a new civilization, draw 3 and keep 1 (discard the others)"), ],
+                        clienttranslate("Whenever you would gain a new civilization, draw 3 and keep 1 (discard the others)"), 
+                ],
+                "description@a8" => [ 
+                        clienttranslate("<i>The Infiltrators fortify and influence other civilizations.</i>"),
+                        clienttranslate("Start with a player token on each opponent's capital city territory."),
+                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may choose one of the following options: "),
+                        clienttranslate("<li>Place an outpost on any territory with exactly 1 opponent outpost and nothing else. This is not a conquer action, and both outposts remain upright (control of the territory is shared). Gain the benefit on the territory (if any). Opponents cannot conquer this territory. It does not count for the middle island achievement."),
+                        clienttranslate("<li>Place a player token on an opponent's capital city territory and gain [1VP] for each outpost that opponent hasn't placed on the board. If it's your third player token there, gain another civilization."),
+                        clienttranslate("Whenever you would gain a new civilization, draw 3 and keep 1 (discard the others)"), 
+                        clienttranslate("If you gain this civilization in the middle of the game, give an opponent a player token in addition to the starting one.")
+                ],
                 "exp" => "PP", //
                 "start_benefit" => [ BE_GAIN_CULTURE ], //
+                "start_benefit@a8" => [ 0 ], //
                 "slots_description" => '',
                 "slot_choice"=>"any",
+                "midgame_setup" => false,
+                "midgame_setup@a8" => true,
                 "slots" => [ 
-                        0 => [ "benefit" => [ 170 ] ],
-                        1 => [ "benefit" => [ 171 ] ],
+                        [ "benefit" => [ 170 ] ],
+                        [ "benefit" => [ 171 ] ],
                 ], //
                 "income_trigger" => [ "from" => 2,"to" => 5 ], // 
+                "al" => 8
         ],
         CIV_ISLANDERS => [ "name" => clienttranslate("ISLANDERS"),
                 "description" => [ 
@@ -3168,13 +3184,13 @@ $this->civilizations = array (
                         4 => [ "benefit" => [ RES_FOOD, 304 ], "ter"=>TERRAIN_FOREST,"w" => 7,"h" => 5,"top" => 89.5,"left" => 53  ],
                 ], //
                 "slots@a8" => [
-                        1 => [ "benefit" => [ RES_COIN, 324 ]  ], // TODO
-                        2 => [ "benefit" => [ RES_CULTURE, 325 ]   ],
+                        1 => [ "benefit" => [ RES_COIN, 301 ]  ], // TODO 324
+                        2 => [ "benefit" => [ RES_CULTURE, 302 ]   ], // TODO 325
                         3 => [ "benefit" => [ RES_WORKER, 303 ] ],
                         4 => [ "benefit" => [ RES_FOOD, 304 ] ],
                 ], //
                 "exp" => "PP", // 
-                // "al" => 8
+                "al" => 8
         ],
         CIV_UTILITARIENS => [ "name" => clienttranslate("UTILITARIANS"),
                 "description" => [

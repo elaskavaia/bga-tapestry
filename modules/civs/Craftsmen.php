@@ -8,7 +8,9 @@ class Craftsmen extends AbsCivilization {
     }
 
 
-    function moveCivCube(int $player_id, bool $is_midgame, int $spot, $extra = null) {
+    function moveCivCube(int $player_id, int $spot, string $extra, array $civ_args) {
+        $condition = array_get($civ_args,'benefit_data');
+        $is_midgame = ($condition == 'midgame');
         $civ = $this->civ;
         $game = $this->game;
         if (!$is_midgame) {
@@ -18,13 +20,13 @@ class Craftsmen extends AbsCivilization {
             $slots = $this->getCraftsmenSlots($player_id);
             $game->userAssertTrue(totranslate('Invalid slot'), in_array($spot, $slots));
             $civ_location = "civ_3_" . $spot;
-            $curr = $game->getStructureInfoSearch(null,null,'capital_structure');
+            $curr = $game->getStructureInfoSearch(null, null, 'capital_structure');
             $structure_id = $curr['card_id'];
             $type = $curr['card_type'];
- 
-            $game->dbSetStructureLocation($structure_id, $civ_location, null,clienttranslate('${player_name} places an income building on Craftsmen mat'), $player_id);
 
-  
+            $game->dbSetStructureLocation($structure_id, $civ_location, null, clienttranslate('${player_name} places an income building on Craftsmen mat'), $player_id);
+
+
             if (($game->isTapestryActive($player_id, 27)) && ($type <= 5)) { // MONARCHY
                 $game->awardVP($player_id, 3, reason_tapestry(27));
             }

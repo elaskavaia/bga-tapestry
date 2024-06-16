@@ -98,7 +98,7 @@ final class GameTest extends TestCase {
             $inst = $m->getCivilizationInstance($civ, false);
             $this->assertEquals($civ, $inst->getType());
 
-            //if ($al == 8) print("$name ($civ) \n$description\n\n");
+            if ($al != 8) print("$name ($civ) \n$description\n\n");
         }
     }
 
@@ -132,5 +132,27 @@ final class GameTest extends TestCase {
         $this->assertNull($income_trigger);
         $mg= $inst->getRules('midgame_setup', null);
         $this->assertNotNull($mg);
+    }
+
+    function testCollectors() {
+        $game = $this->game;
+        $civ = CIV_COLLECTORS;
+        $xciv = $game->getRulesBenefit(BE_COLLECTORS_GRAB, 'civ', null);
+        $this->assertEquals($civ, $xciv);
+        $xciv = $game->getRulesBenefit(BE_COLLECTORS_CARD, 'civ', null);
+        $this->assertEquals($civ, $xciv);
+        $inst = $game->getCivilizationInstance($civ, true);
+        $this->assertNotNull($inst);
+    }
+
+    function testInfiltrators() {
+        $game = $this->game;
+        $civ = CIV_INFILTRATORS;
+        $xciv = $game->getRulesBenefit(170, 'civ', null);
+        $this->assertEquals($civ, $xciv);
+        $xciv = $game->getRulesBenefit(171, 'civ', null);
+        $this->assertEquals($civ, $xciv);
+        $inst = $game->getCivilizationInstance($civ, true);
+        $this->assertNotNull($inst);
     }
 }

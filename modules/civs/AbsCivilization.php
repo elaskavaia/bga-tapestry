@@ -47,7 +47,7 @@ abstract class AbsCivilization  {
         return array('tokens' => $tokens, 'outposts' => []);
     }
 
-    function moveCivCube(int $player_id, bool $is_midgame, int $spot, $extra) {
+    function moveCivCube(int $player_id, int $spot, string $extra, array $civ_args) {
     }
 
     function triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance) {
@@ -82,6 +82,40 @@ abstract class AbsCivilization  {
 
     function argCivAbilitySingle($player_id, $benefit) {
         return [];
+    }
+
+    function populateSlotChoiceForArgs(array &$data) {
+        $civ = $this->civ;
+        $game = $this->game;
+        $slots = $this->getRules('slots');
+        $slot_choice = $this->getRules('slot_choice');
+        $data['slots_choice'] = [];
+        if ($slots) {
+            $only = [];
+            if ($slot_choice == 'unoccupied') {
+                $token_data = $game->getStructuresOnCiv($civ, BUILDING_CUBE);
+                foreach ($token_data as $token) {
+                    $slot = getPart($token['card_location'], 2);
+                    unset($slots[$slot]);
+                }
+            }
+            if ($slot_choice == 'occupied') {
+                $token_data = $game->getStructuresOnCiv($civ, BUILDING_CUBE);
+                foreach ($token_data as $token) {
+                    $slot = getPart($token['card_location'], 2);
+                    $only[$slot] = 1;
+                }
+            }
+            if ($slot_choice) {
+                foreach ($slots as $i => $info) {
+                    if (count($only) == 0 || isset($only[$i]))
+                        $data['slots_choice'][$i]['benefit'] = $info['benefit'];
+                }
+                if (count($slots) > 1)
+                    $data['title'] = clienttranslate('Choose one of these options');
+            }
+        }
+        return $slots;
     }
 
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = '') {

@@ -38,7 +38,9 @@ class Templates extends AbsCivilization {
         return true;
     }
 
-    function moveCivCube(int $player_id, bool $is_midgame, int $spot, $extra) {
+    function moveCivCube(int $player_id, int $spot, string $extra, array $civ_args) {
+        $condition = array_get($civ_args,'benefit_data');
+        $is_midgame = ($condition == 'midgame');
         $civ = $this->civ;
         if ($is_midgame) {
             //...
@@ -62,7 +64,7 @@ class Templates extends AbsCivilization {
     function argCivAbilitySingle($player_id, $benefit) {
         $civ = $this->civ;
         $data = $benefit;
-        $condition = $benefit['benefit_data'];
+        $condition = array_get($benefit, 'benefit_data');
         $data['reason'] = $this->game->getReasonFullRec(reason(CARD_CIVILIZATION, $civ), false);
         $data['slots'] = [];
         $slots = $this->getRules('slots');

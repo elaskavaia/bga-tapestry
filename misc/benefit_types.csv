@@ -197,8 +197,8 @@ id|-con|name|r|t|php
 309|BE_SPOT|Gain spot benefit
 310|BE_RENEGADES_ADV|RENEGADES Advance|||'civ'=>CIV_RENEGADES
 311|BE_GAMBLES_PICK|Gamblers: Draw 3 Tapestry, Play 1 (WHEN PLAYED), if cannot, Keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>3,'keep'=>1
-312|BE_COLLECTORS_GRAB|COLLECTORS Collect Building or Outpost
-313|BE_COLLECTORS_CARD|COLLECTORS Collect Card or Tile
+312|BE_COLLECTORS_GRAB|COLLECTORS Collect Building or Outpost|||'civ'=>CIV_COLLECTORS
+313|BE_COLLECTORS_CARD|COLLECTORS Collect Card or Tile|||'civ'=>CIV_COLLECTORS
 314|BE_CARD_PLAY_TRIGGER|Card comes into play triggers|||'auto'=>1
 315||URBAN PLANNER starting benefit|||'lm'=>19
 316|BE_URBANPLANNERS_GRAB|URBAN PLANNERS Collect Landmark|||'civ'=>CIV_URBAN_PLANNERS

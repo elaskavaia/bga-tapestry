@@ -7,8 +7,9 @@ class Gamblers extends AbsCivilization {
         parent::__construct(CIV_GAMBLERS, $game);
     }
 
-
-    function moveCivCube(int $player_id, bool $is_midgame, int $spot, $extra) {
+    function moveCivCube(int $player_id, int $spot, string $extra, array $civ_args) {
+        $condition = array_get($civ_args,'benefit_data');
+        $is_midgame = ($condition == 'midgame');
         $civ = $this->civ;
         $slots = $this->getRules('slots');
         $benefit = $slots[0]["benefit"];
