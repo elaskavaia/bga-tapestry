@@ -35,7 +35,7 @@ class Architects extends AbsCivilization {
         return array('tokens' => $tokens, 'outposts' => []);
     }
 
-    function moveCivCube(int $player_id, int $spot, string $extra, array $civ_args) {
+    function moveCivCube(int $player_id, int $spot,  $extra, array $civ_args) {
         $condition = array_get($civ_args,'benefit_data');
         $is_midgame = ($condition == 'midgame');
         $civ = $this->civ;

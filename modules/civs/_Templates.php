@@ -9,12 +9,12 @@ class Templates extends AbsCivilization {
 
     function setupCiv(int $player_id, string $start) {
         $civ = $this->civ;
-        $reason = reason_civ($civ);
-        $tokens = [];
-        if ($start) {
-        } else { // midgame setup
-
+        if (!$start) {
+            $midgame_setup = $this->getRules('midgame_setup', false);
+            if ($midgame_setup)
+                $this->game->benefitCivEntry($civ, $player_id, 'midgame');
         }
+        $tokens = $this->game->effect_setupCivTokens($civ, $player_id);
         return array('tokens' => $tokens, 'outposts' => []);
     }
 
@@ -38,7 +38,7 @@ class Templates extends AbsCivilization {
         return true;
     }
 
-    function moveCivCube(int $player_id, int $spot, string $extra, array $civ_args) {
+    function moveCivCube(int $player_id, int $spot,  $extra, array $civ_args) {
         $condition = array_get($civ_args,'benefit_data');
         $is_midgame = ($condition == 'midgame');
         $civ = $this->civ;

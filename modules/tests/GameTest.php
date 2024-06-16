@@ -155,4 +155,18 @@ final class GameTest extends TestCase {
         $inst = $game->getCivilizationInstance($civ, true);
         $this->assertNotNull($inst);
     }
+
+    function testTraders() {
+        $game = $this->game;
+        $civ = CIV_TRADERS;
+        // $xciv = $game->getRulesBenefit(170, 'civ', null);
+        // $this->assertEquals($civ, $xciv);
+        // $xciv = $game->getRulesBenefit(171, 'civ', null);
+        // $this->assertEquals($civ, $xciv);
+        $game->doAdjustMaterial(2, 8);
+        $inst = $game->getCivilizationInstance($civ, true);
+        $this->assertNotNull($inst);
+        $sben = $inst->getRules('start_benefit', null);
+        $this->assertNotNull($sben);
+    }
 }

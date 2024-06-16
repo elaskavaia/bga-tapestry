@@ -1747,6 +1747,29 @@ abstract class PGameXBody extends tapcommon {
                 $card_id = $this->getReasonArg($reason, 3);
                 $this->effect_cardComesInPlayTriggerResolve($card_id, $player_id, $reason);
                 return true;
+
+            case 324:
+                
+                $this->clearCurrentBenefit($ben);
+                $this->rollBlackConquerDie($player_id);
+                $this->prepareUndoSavepoint();
+                $b1 = $this->getConquerDieBenefit('black', $player_id);
+                if (!$b1) {
+                    $this->notifyAllPlayers('message', clienttranslate('this die roll results in no benefit'), []);
+                }
+                $reason = reason('die', clienttranslate('Conquer die'));
+                if ($count > 1) {
+                    if ($b1) {
+                        $this->queueBenefitNormal(['or' => [[$b1, "h" => 603], 202]], $player_id, $reason);
+                        $this->queueBenefitNormal($ben, $player_id, $reason, $count - 1);
+                    }
+                } else {
+                    $this->queueBenefitNormal($b1, $player_id, $reason);
+                }
+
+   
+                $this->gamestate->nextState('loopback');
+                return false; // no cleanup
             case 401:
                 // decline - no op
                 return true;
@@ -4060,7 +4083,7 @@ abstract class PGameXBody extends tapcommon {
         $this->gamestate->nextState('benefit');
     }
 
-    function action_civTokenAdvance($cid, $spot, $extra) {
+    function action_civTokenAdvance(int $cid, int $spot, $extra) {
         $this->checkAction('civTokenAdvance');
         $player_id = $this->getActivePlayerId();
         // VALIDITY CHECK...
@@ -4085,13 +4108,11 @@ abstract class PGameXBody extends tapcommon {
             case CIV_GAMBLERS:
             case CIV_COLLECTORS:
             case CIV_INFILTRATORS:
+            case CIV_TRADERS:
                 $inst = $this->getCivilizationInstance($cid, true);
                 $inst->moveCivCube($player_id, $spot, $extra, $civ_args);
                 return;
-            case CIV_TRADERS:
-                $this->systemAssertTrue('missing hex for traders', $extra);
-                $this->sendTrader($extra, $spot);
-                return;
+
         }
 
         $slot_data = array_get($this->civilizations[$cid], 'slots', []);
@@ -5998,35 +6019,7 @@ abstract class PGameXBody extends tapcommon {
         return $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location_arg='$player_id' AND (card_type=5) AND (card_type_arg=1) AND card_location LIKE 'land_%'");
     }
 
-    function getTraderTargets($player_id) {
-        $valid = [];
-        $map_data = $this->getMap();
-        if (!$this->isAdjustments4()) {
-            // not owned explored
-            foreach ($map_data as $coord => $hex) {
-                if ($hex['map_tile_id'] == 0) continue;
-                if ($hex['occupancy'] == 0) {
-                    array_push($valid, $coord);
-                } else if ($hex['occupancy'] == 1 && !$this->isHexOwner($player_id, $coord, $map_data)) {
-                    $building = array_shift($hex['structures']);
-                    if ($building['card_type'] == BUILDING_OUTPOST) {
-                        array_push($valid, $coord);
-                    }
-                }
-            }
-        } else {
-            foreach ($map_data as $coord => $hex) {
-                if ($hex['map_tile_id'] == 0) continue;
-                if ($hex['occupancy'] == 1) {
-                    $building = array_shift($hex['structures']);
-                    if ($building['card_type'] == BUILDING_OUTPOST) {
-                        array_push($valid, $coord);
-                    }
-                }
-            }
-        }
-        return $valid;
-    }
+
 
     function getConquerTargets($nomads = false, $anywhere = false, $player_id = -1, $only_empty = false) {
         if ($player_id == -1)
@@ -7814,7 +7807,7 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getActivePlayerId();
         /** @var Craftsmen */
         $inst = $this->getCivilizationInstance(CIV_CRAFTSMEN, true);
-        $inst->moveCivCube($player_id, false, $slot);
+        $inst->moveCivCube($player_id, $slot, '', []);
         $this->gamestate->nextState('next');
     }
 
@@ -7993,81 +7986,6 @@ abstract class PGameXBody extends tapcommon {
         $this->notifyMoveStructure($message, $structure_id, [], $player_id);
     }
 
-    function sendTrader($land_coords, $building_type) {
-        $player_id = $this->getActivePlayerId();
-
-        // VALIDITY check. Check that coords match an empty or single outpost space.
-        $coords = getPart($land_coords, 1) . "_" . getPart($land_coords, 2);
-        $targets = $this->getTraderTargets($player_id);
-        if (!in_array($coords, $targets)) {
-            throw new BgaUserException('Invalid location for Trader');
-        }
-        $map_data = $this->getMap();
-        $hex = $map_data[$coords];
-        $tile_structs = $hex['structures'];
-
-        $reason = reason_civ(CIV_TRADERS);
-
-        if ($building_type) {
-            $this->systemAssertTrue('trader cannot place income building with default rules', $this->isAdjustments4());
-            //--Gain an income building and place it on a territory with exactly 1 opponent outpost token and nothing else; the opponent immediately gains the benefit revealed by the income building. The opponent controls the territory.
-            $message = clienttranslate('${player_name} places an icome building at ${coord_text}');
-            $trader = $this->dbGetIncomeBuildingOfType($building_type, true);
-            $this->systemAssertTrue("no income building of this type left", $trader);
-            $this->claimIncomeStructure($building_type, null);
-            $income_level = $this->dbGetIncomeTrackLevel($building_type, $player_id);
-            $building_benefits = $this->income_tracks[$building_type][$income_level]['benefit'];
-            $this->effect_placeOnMap($player_id, $trader, $land_coords, $message, false);
-            $other_building = array_shift($tile_structs);
-            $this->userAssertTrue(totranslate('TRADERS can only place income building on opponent\'s territory'), $other_building['card_location_arg'] != $player_id);
-            $this->queueBenefitNormal($building_benefits, $other_building['card_location_arg'], $reason);
-            return;
-        }
-        // Check player owns TRADERS and the token is available.
-        $token_location = 'civ_16_%';
-        $message = clienttranslate('${player_name} places a Trader token at ${coord_text}');
-        $trader = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND (card_location LIKE '$token_location') AND card_location_arg='$player_id' LIMIT 1");
-        $this->systemAssertTrue("no traders left", $trader);
-        $this->effect_placeOnMap($player_id, $trader, $land_coords, $message, true);
-
-        // APPLY BENEFITS
-        if (count($tile_structs) == 0) { // benefit is 1VP per adjacent opponent territory
-            if ($this->isAdjustments4()) {
-                return $this->userAssertTrue(totranslate('Cannot place on empty territory'));
-            }
-
-            $neighbours = $this->getNeighbourHexes($coords);
-            $count = 0;
-            $opponents = $this->getOpponentsStartingFromLeft($player_id);
-            foreach ($neighbours as $neighbour) {
-                foreach ($opponents as $opponent_id)
-                    if ($this->isHexOwner($opponent_id, $neighbour, $map_data)) {
-                        $count++;
-                        break 1;
-                    }
-            }
-            $this->awardVP($player_id, $count, $reason);
-            return;
-        }
-        $other_building = array_shift($tile_structs);
-
-        $map_tile_id = $hex['map_tile_id'];
-        $tile_data = $this->territory_tiles[$map_tile_id];
-        $benefits = array_get($tile_data, 'benefit');
-        if ($other_building['card_type'] != '5') {
-            return $this->userAssertTrue(totranslate('TRADERS can only share hexes with outposts') . toJson($other_building));
-        }
-        if ($this->isAdjustments4()) {
-            //At the beginning of your income turns (2-5), choose one:
-            //--Gain an income building and place it on a territory with exactly 1 opponent outpost token and nothing else; the opponent immediately gains the benefit revealed by the income building. The opponent controls the territory.
-            //--Place a player token on a territory with exactly 1 opponent outpost token and nothing else: Gain the benefit on the territory (if any); you both share control of this territory for scoring purposes.
-            //--Place a player token on a territory you control with exactly 1 outpost token and nothing else: Gain the benefit on the territory (if any).
-        } else {
-            $this->userAssertTrue(totranslate('TRADERS can only place a cube on opponent\'s territory'), $other_building['card_location_arg'] != $player_id);
-        }
-        if ($benefits)
-            $this->queueBenefitInterrupt($benefits, $player_id, $reason);
-    }
 
     function sendInventor($type) {
         $this->checkAction('sendInventor');
@@ -8712,7 +8630,6 @@ abstract class PGameXBody extends tapcommon {
         $data['reason'] = $this->getReasonFullRec(reason(CARD_CIVILIZATION, $civ), false);
         $data['slots'] = [];
         $slots = $this->getRulesCiv($civ, 'slots');
-        $slot_choice = $this->getRulesCiv($civ, 'slot_choice');
         $is_midgame = $condition == 'midgame';
         $civinst = $this->getCivilizationInstance($civ);
         if ($is_midgame) {
@@ -8782,43 +8699,15 @@ abstract class PGameXBody extends tapcommon {
             }
             return $data;
         }
-        $data['slots_choice'] = [];
-        if ($slots) {
-            $only = [];
-            if ($slot_choice == 'unoccupied') {
-                $token_data = $this->getStructuresOnCiv($civ, BUILDING_CUBE);
-                foreach ($token_data as $token) {
-                    $slot = getPart($token['card_location'], 2);
-                    unset($slots[$slot]);
-                }
-            }
-            if ($slot_choice == 'occupied') {
-                $token_data = $this->getStructuresOnCiv($civ, BUILDING_CUBE);
-                foreach ($token_data as $token) {
-                    $slot = getPart($token['card_location'], 2);
-                    $only[$slot] = 1;
-                }
-            }
-            if ($slot_choice) {
-                foreach ($slots as $i => $info) {
-                    if (count($only) == 0 || isset($only[$i]))
-                        $data['slots_choice'][$i]['benefit'] = $info['benefit'];
-                }
-                if (count($slots) > 1)
-                    $data['title'] = clienttranslate('Choose one of these options');
-            }
-        }
+        $slots = $civinst->populateSlotChoiceForArgs($data);
+
         switch ($civ) {
             case CIV_COLLECTORS:
             case CIV_GAMBLERS:
             case CIV_INFILTRATORS:
-                return $civinst->argCivAbilitySingle($player_id, $benefit);
             case CIV_TRADERS:
-
-                $targets = $this->getTraderTargets($player_id);
-                $data['targets'] = $targets;
-
-                break;
+                return $civinst->argCivAbilitySingle($player_id, $benefit);
+         
             case CIV_LEADERS:
                 $data['slots'] = array_keys($slots);
                 break;
@@ -8915,9 +8804,7 @@ abstract class PGameXBody extends tapcommon {
             default:
                 break;
         }
-        $income_trigger = $this->getRulesCiv($civ, 'income_trigger', null);
-        $decline = array_get($income_trigger, 'decline', true);
-        $data['decline'] = $decline;
+
         return $data;
     }
 

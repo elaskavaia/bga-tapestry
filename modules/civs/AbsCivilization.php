@@ -47,7 +47,7 @@ abstract class AbsCivilization  {
         return array('tokens' => $tokens, 'outposts' => []);
     }
 
-    function moveCivCube(int $player_id, int $spot, string $extra, array $civ_args) {
+    function moveCivCube(int $player_id, int $spot, $extra, array $civ_args) {
     }
 
     function triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance) {
@@ -68,9 +68,13 @@ abstract class AbsCivilization  {
         $this->game->systemAssertTrue($log, $cond);
     }
 
-    function getSingleCube() {
+    function getSingleCube(int $player_id = 0) {
         $cubes = $this->game->getStructuresOnCiv($this->civ, BUILDING_CUBE);
         $cube = array_shift($cubes);
+        if ($cube) return $cube;
+        if ($player_id) {
+            return $this->game->addCube($player_id, 'hand');
+        }
         $this->systemAssertTrue("ERR:AbsCivilization:01", $cube);
         return $cube;
     }
@@ -115,6 +119,9 @@ abstract class AbsCivilization  {
                     $data['title'] = clienttranslate('Choose one of these options');
             }
         }
+        $income_trigger = $this->getRules('income_trigger', null);
+        $decline = array_get($income_trigger, 'decline', true);
+        $data['decline'] = $decline;
         return $slots;
     }
 

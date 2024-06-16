@@ -1,3 +1,5 @@
+const { coords } = require("dojo/main");
+
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -641,16 +643,22 @@ define([
       dojo.query(".expandablecontent > *").connect("onclick", this, (event) => {
         var id = event.currentTarget.id;
         if (this.showHelp(id)) return;
-        if (this.gamedatas.testenv && id.startsWith('civ')) {
-          civ = getPart(id,1);
+        if (this.gamedatas.testenv && id.startsWith("civ")) {
+          civ = getPart(id, 1);
           var name = this.getTr(this.civilizations[civ]["name"]);
-          var message = this.format_string(_("You are about to GAIN civilzation ${name} (This only available for testing purposes)"), { name: name });
-    
-          this.confirmationDialog(message, () => {
-            this.ajaxcallwrapper("acdebug", {a: JSON.stringify({ civ: civ })}, undefined, true);
-          }, ()=> {
-            this.tooltips[id].open(id);
+          var message = this.format_string(_("You are about to GAIN civilzation ${name} (This only available for testing purposes)"), {
+            name: name
           });
+
+          this.confirmationDialog(
+            message,
+            () => {
+              this.ajaxcallwrapper("acdebug", { a: JSON.stringify({ civ: civ }) }, undefined, true);
+            },
+            () => {
+              this.tooltips[id].open(id);
+            }
+          );
           return;
         }
         this.tooltips[id].open(id);
@@ -729,7 +737,7 @@ define([
           break;
         case "invent":
           const args = this.gamedatas.gamestate.args;
-   
+
           if (args.discard) {
             for (let i in args.discard) {
               const card = args.discard[i];
@@ -941,14 +949,23 @@ define([
             dojo.query(".tech_slot_0 .tech_card,.tech_slot_1 .tech_card").addClass("active_slot");
             break;
           case this.CON.CIV_TRADERS:
-            const targets = bene.targets;
             if (this.getAdjustmentLevel() == 4) {
-              this.setDescriptionOnMyTurn(_("TRADERS: You may place trader token or income building on half-occupied territory"));
+              this.setDescriptionOnMyTurn(_("TRADERS: You may place trader token or income building on half-occupied territory."));
+            } else if (this.getAdjustmentLevel() == 8) {
+              this.setDescriptionOnMyTurn(
+                _(
+                  "TRADERS: You may place trader token or income building on half-occupied territory. If opponent controls it you also need a select a Territory Tile to give them"
+                )
+              );
             } else {
               this.setDescriptionOnMyTurn(_("TRADERS: You may place trader token on empty or half-occupied territory"));
             }
+            const targets = bene.targets;
             for (var li in targets) {
-              dojo.addClass("land_" + targets[li], "active_slot");
+              const type = targets[li];
+              const node = "land_" + li;
+              dojo.addClass(node, "active_slot");
+              if (type == 2) dojo.addClass(node, "own_land");
             }
 
             break;
@@ -989,26 +1006,25 @@ define([
               this.clientStateArgs.cid = civ;
               this.clientStateArgs.spot = 0;
               this.addActionButton("button_confirm", _("Confirm"), () => {
-              
-                const selected1= document.querySelectorAll(".tapestry.selected");
-                const selected2= document.querySelectorAll(".territory.selected");
-                if (selected1.length==0 && selected2.length==0) {
-                  this.showError(_('Nothing is selected'));
+                const selected1 = document.querySelectorAll(".tapestry.selected");
+                const selected2 = document.querySelectorAll(".territory.selected");
+                if (selected1.length == 0 && selected2.length == 0) {
+                  this.showError(_("Nothing is selected"));
                   return;
                 }
-                if (selected1.length>1 || selected2.length>1 || selected1.length+selected2.length>2) {
-                  this.showError(_('Too many cards are selected'));
+                if (selected1.length > 1 || selected2.length > 1 || selected1.length + selected2.length > 2) {
+                  this.showError(_("Too many cards are selected"));
                   return;
                 }
                 let tapId = 0;
-                if (selected1.length==1) {
-                  tapId = getPart(selected1[0].id,1);
+                if (selected1.length == 1) {
+                  tapId = getPart(selected1[0].id, 1);
                 }
                 let cardId = 0;
-                if (selected2.length==1) {
-                  cardId = getPart(selected2[0].id,1);
+                if (selected2.length == 1) {
+                  cardId = getPart(selected2[0].id, 1);
                 }
-  
+
                 this.ajaxcallwrapper("civTokenAdvance", {
                   cid: civ,
                   spot: tapId,
@@ -1096,6 +1112,34 @@ define([
       if (decline) {
         this.addActionButton("button_civDecline", _("Decline"), "onCivDecline");
       }
+    },
+
+    sendTrader: function (type) {
+      const al = this.getAdjustmentLevel();
+      let tile = 0;
+      const coords = this.clientStateArgs.land_id;
+      if (al >= 8) {
+        if (!dojo.hasClass(coords, "own_land")) {
+          const tileNode = $(`territory_tiles_${this.player_id}`).querySelector(".selected");
+          if (!tileNode) {
+            this.showError(_("Select a tile to give first"));
+            $(`territory_tiles_${this.player_id}`)
+              .querySelectorAll(".territory")
+              .forEach((node) => dojo.addClass(node, "active_slot"));
+            return;
+          }
+          tile = getPart(tileNode.id, 1);
+        }
+      }
+      this.clientStateArgs.cid = this.CON.CIV_TRADERS;
+      this.clientStateArgs.spot = 0;
+
+      this.clientStateArgs.extra = {
+        bt: type,
+        tile: tile,
+        coords: coords
+      };
+      this.ajaxClientStateAction("civTokenExtra", "extra");
     },
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -1230,23 +1274,20 @@ define([
           dojo.query("#space_tiles_" + this.player_id + " .space_tile").addClass("active_slot");
           break;
         case "client_trader":
-          dojo.addClass($(this.clientStateArgs.land_id).parentNode, "selected");
-          this.addActionButton("button_0", _("Trader"), () => {
-            this.clientStateArgs.spot = this.clientStateArgs.building_type = 0;
+          const land = $(this.clientStateArgs.land_id);
+          dojo.addClass(land.parentNode, "selected");
 
-            this.ajaxClientStateAction();
-          });
-          var mat = $("income_mat_" + this.player_id);
-          for (i = 1; i <= 4; i++) {
-            const type = i;
-            var sel = mat.querySelector(".building" + type);
-            if (sel) {
-              dojo.addClass(sel.parentNode, "active_slot");
-              var div = this.format_block("jstpl_building", { type: type, bid: "x" });
-              this.addImageActionButton("button_" + type, div, () => {
-                this.clientStateArgs.spot = this.clientStateArgs.building_type = type;
-                this.ajaxClientStateAction();
-              });
+          this.addActionButton("button_0", _("Trader"), () => this.sendTrader(0));
+          if (!dojo.hasClass(land, "own_land")) {
+            var mat = $("income_mat_" + this.player_id);
+            for (i = 1; i <= 4; i++) {
+              const type = i;
+              var sel = mat.querySelector(".building" + type);
+              if (sel) {
+                dojo.addClass(sel.parentNode, "active_slot");
+                var div = this.format_block("jstpl_building", { type: type, bid: "x" });
+                this.addImageActionButton("button_" + type, div, () => this.sendTrader(type));
+              }
             }
           }
           this.addCancelButton();
@@ -1394,7 +1435,7 @@ define([
                   card.card_location = "draw";
                   this.moveCard(card, "discard");
                 }
-              } 
+              }
               document.querySelectorAll("#draw > .tech_card").forEach((node) => node.classList.add("active_slot"));
               this.addActionButton("button_invent_decline", _("Decline"), () => this.ajaxcallwrapper("decline"));
               this.setDescriptionOnMyTurn("${you} may invent from top of discard");
@@ -1405,8 +1446,8 @@ define([
             }
 
             const al = this.getAdjustmentLevel();
-            let button =  _("Inspect top card of discard");
-            if (!args.discard) button = _('Nothing in discard');
+            let button = _("Inspect top card of discard");
+            if (!args.discard) button = _("Nothing in discard");
             if (al < 8) {
               button = _("Inspect discard pile");
             }
@@ -1421,7 +1462,7 @@ define([
                     card.card_location = "draw";
                     this.moveCard(card, "discard");
                   }
-                } 
+                }
                 document.querySelectorAll("#draw > .tech_card").forEach((node) => node.classList.add("active_slot"));
               }
             });
@@ -4865,15 +4906,18 @@ define([
           break;
         case "civAbility":
           if (!this.checkActiveSlot(land_id)) return;
-          this.clientStateArgs.extra = land_id;
+          this.clientStateArgs.land_id = land_id;
+
           if (this.selectedCiv == this.CON.CIV_TRADERS) {
-            if (this.getAdjustmentLevel() == 4) {
-              this.clientStateArgs.land_id = land_id;
+            if (this.getAdjustmentLevel() >= 4) {
               this.setClientState("client_trader");
-              return;
+            } else {
+              this.sendTrader(0);
             }
+            return;
           }
-          this.ajaxClientStateAction();
+          this.clientStateArgs.extra = land_id;
+          this.ajaxClientStateAction(); // who calls it?
           break;
         case "conquer":
           if (!this.checkAction("conquer")) {
@@ -5046,7 +5090,7 @@ define([
         default:
           if (!this.checkActiveSlot(cid)) return;
           const card = event.currentTarget;
-          if (dojo.hasClass(card,'multi-select')) {
+          if (dojo.hasClass(card, "multi-select")) {
             dojo.toggleClass(card, "selected");
             break;
           }
@@ -5423,12 +5467,15 @@ define([
       this.ajaxClientStateAction();
     },
 
-    ajaxClientStateAction: function (action) {
+    ajaxClientStateAction: function (action, encodeField) {
       const args = dojo.clone(this.clientStateArgs);
       const sendAction = action ? action : args.action;
       if (!sendAction) {
         this.showError("Cannot determine the action to take, reload the browser");
         return;
+      }
+      if (encodeField) {
+        args[encodeField] = JSON.stringify(this.clientStateArgs[encodeField]);
       }
       this.ajaxcallwrapper(sendAction, args);
     },

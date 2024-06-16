@@ -22,7 +22,7 @@ class Infiltrators extends AbsCivilization {
         return array('tokens' => $tokens, 'outposts' => []);
     }
 
-    function moveCivCube(int $player_id, int $slot, string $extra, array $civ_args) {
+    function moveCivCube(int $player_id, int $slot,  $extra, array $civ_args) {
         $civ = $this->civ;
         $game = $this->game;
         $condition = array_get($civ_args, 'benefit_data');

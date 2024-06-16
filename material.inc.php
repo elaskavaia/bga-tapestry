@@ -2785,7 +2785,7 @@ $this->civilizations = array (
                 ],
                 "al" => 8
         ),
-        16 => array ("name" => clienttranslate("TRADERS"),
+        CIV_TRADERS => array ("name" => clienttranslate("TRADERS"),
                 "description" => array (
                         clienttranslate("The Traders prefer to connect with other civilizations economically, not militarily. Start with 4 player tokens here."),
                         clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may place a player token from here on any territory on the map matching one of these descriptions:"),
@@ -2797,16 +2797,29 @@ $this->civilizations = array (
                         2 => clienttranslate("<li>Gain an income building and place it on a territory with exactly 1 opponent outpost token and nothing else; the opponent immediately gains the benefit revealed by the income building. The opponent controls the territory."),
                         3 => clienttranslate("<li>Place a player token on a territory with exactly 1 opponent outpost token and nothing else: Gain the benefit on the territory (if any); you both share control of this territory for scoring purposes."),
                         4 => clienttranslate("<li>Place a player token on a territory you control with exactly 1 outpost token and nothing else: Gain the benefit on the territory (if any).") ),
+                "description@a8" => [
+                        clienttranslate("<i>The Traders prefer to connect with other civilizations economically, not militarily.</i>"),
+                        clienttranslate("Start with 2 territory tiles."),
+                        clienttranslate("At the beginning of your income turns (2-5), choose one of the following options. For the first two options, you must have a territory tile to give:"),
+                        clienttranslate("<li>Place a player token on a territory with exactly 1 opponent outpost and nothing else: Give a territory tile to that opponent, then you gain both the benfit on the traded territory tile and the benefit of the territory (if any) on which you just placed a player token. The opponent controls the territory."),
+                        clienttranslate("<li>Gain an income building and place it (toppled) on a territory with exactly 1 opponent outpost and nothing else: Give a territory tile to that opponent, then both you and your opponent gain the benefit revealed by the income building. The opponent controls the territory."),
+                        clienttranslate("<li>Place a player token on a territory you control with exactly 1 outpost and nothing else: Gain [ANY RESOURCE] or [5VP], then roll the black conquer die and gain the result; each opponent gains a territory tile."),
+                ],     
                 "tokens_count" => 4,
+                "tokens_count@a8" => 0,
                 "slots_description" => '',
-                "slots" => array (1 => [ "top" => 71,"left" => 76.3,"w" => 8.5,"h" => 5.5 ],
+                "slots" => [
+                        1 => [ "top" => 71,  "left" => 76.3,"w" => 8.5,"h" => 5.5 ],
                         2 => [ "top" => 76.6,"left" => 76.3,"w" => 8.5,"h" => 5.5 ],
                         3 => [ "top" => 82.3,"left" => 76.3,"w" => 8.5,"h" => 5.5 ],
-                        4 => [ "top" => 88,"left" => 76.3,"w" => 8.5,"h" => 5.5 ], ),
+                        4 => [ "top" => 88,  "left" => 76.3,"w" => 8.5,"h" => 5.5 ], 
+                ],
                 "adjustment" => clienttranslate("When starting the game with the Traders, gain [ANY RESOURCE] [ANY RESOURCE] and 10 VP."),
-                "adjustment@a4" => clienttranslate("rules changes"),
+                "adjustment@a4a8" => clienttranslate("rules changes"),
                 "automa" => false,
                 "income_trigger" => [ "from" => 2,"to" => 5 ], //
+                "start_benefit@a8" => [ "m" => 2, "g" => BE_TERRITORY ], //
+                "al"=>8
         ),
         // AA
         CIV_COLLECTORS => [ "name" => clienttranslate("COLLECTORS"),
