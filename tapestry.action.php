@@ -119,17 +119,11 @@ class action_tapestry extends APP_GameAction
         $this->setAjaxMode();
         $cid = $this->getArg("cid", AT_posint, true);
         $spot = $this->getArg("spot", AT_posint, true);
-        $extra = $this->getArg("extra", AT_alphanum_dash, false, 0);
-        $this->game->action_civTokenAdvance($cid, $spot, $extra);
-        $this->ajaxResponse();
-    }
-
-    public function civTokenExtra()
-    {
-        $this->setAjaxMode();
-        $cid = $this->getArg("cid", AT_posint, true);
-        $spot = $this->getArg("spot", AT_posint, true);
-        $extra = $this->getArg("extra", AT_json, false, []);
+        $extra = $this->getArg("extra", AT_alphanum_dash, false, '');
+        $extra_js = (array) $this->getArg("extra_js", AT_json, false, []);
+        if (count($extra_js)>0) {
+            $extra = $extra_js; 
+        }
         $this->game->action_civTokenAdvance($cid, $spot, $extra);
         $this->ajaxResponse();
     }

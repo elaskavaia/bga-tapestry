@@ -1659,7 +1659,14 @@ abstract class PGameXBody extends tapcommon {
             case 201:
                 // resume player turn 
                 $this->clearCurrentBenefit($ben);
+
                 $this->gamestate->jumpToState(13);
+                return false;
+            case 202:
+                $this->clearCurrentBenefit($ben);
+                $del = $this->getRulesBenefit($ben, 'del', null);
+                if ($del) $this->clearCurrentBenefit($del);
+                $this->gamestate->nextState($state);
                 return false;
             case 301:
                 //                 301||Roll the black conquer die twice and gain one benefit of your choice
@@ -1749,26 +1756,30 @@ abstract class PGameXBody extends tapcommon {
                 return true;
 
             case 324:
-
-                $this->clearCurrentBenefit($ben);
                 $this->rollBlackConquerDie($player_id, true);
-                $b1 = $this->getConquerDieBenefit('black', $player_id);
-                if (!$b1) {
-                    $this->notifyAllPlayers('message', clienttranslate('this die roll results in no benefit'), []);
-                }
-                $reason = reason('die', clienttranslate('Conquer die'));
+                $this->interruptBenefit();
+
                 if ($count > 1) {
-                    if ($b1) {
-                        $this->queueBenefitNormal(['or' => [[$b1, "h" => 603], 202]], $player_id, $reason);
-                        $this->queueBenefitNormal($ben, $player_id, $reason, $count - 1);
-                    }
+                    $this->queueBenefitNormal(['or' => [330, 202]], $player_id, $reason);
+                    $this->queueBenefitNormal(603, $player_id, $reason, 1);
+                    $this->queueBenefitNormal($ben, $player_id, $reason, $count - 1);
                 } else {
-                    $this->queueBenefitNormal($b1, $player_id, $reason);
+                    $this->queueBenefitNormal(330, $player_id, $reason);
                 }
+                return true;
 
+            case 325:
+                $this->rollScienceDie($reason, 'science_die', $player_id, true);
+                $this->interruptBenefit();
 
-                $this->gamestate->nextState('loopback');
-                return false; // no cleanup
+                if ($count > 1) {
+                    $this->queueBenefitNormal(['or' => [332, 202]], $player_id, $reason);
+                    $this->queueBenefitNormal(603, $player_id, $reason, 1);
+                    $this->queueBenefitNormal($ben, $player_id, $reason, $count - 1);
+                } else {
+                    $this->queueBenefitNormal(332, $player_id, $reason);
+                }
+                return true;
 
             case 328: // BE_TERRITORY_BE_SELECT:
 
@@ -1779,13 +1790,26 @@ abstract class PGameXBody extends tapcommon {
                     $ben = $this->getRulesCard(CARD_TERRITORY, $tile_id, 'benefit', []);
                     $bens = array_merge($bens, $ben);
                 }
-                if (count($bens)==0) {
-                  $this->notifyWithName('message', clienttranslate('${player_name} uses one of benefits from controlled territories, but none of them have benefits'), []);
+                if (count($bens) == 0) {
+                    $this->notifyWithName('message', clienttranslate('${player_name} uses one of benefits from controlled territories, but none of them have benefits'), []);
                 } else {
-                  $this->notifyWithName('message', clienttranslate('${player_name} uses one of benefits from controlled territories'), []);
-                  $this->queueBenefitInterrupt(['or' => $bens], $player_id, $reason);
+                    $this->notifyWithName('message', clienttranslate('${player_name} uses one of benefits from controlled territories'), []);
+                    $this->queueBenefitInterrupt(['or' => $bens], $player_id, $reason);
                 }
-   
+
+                return true;
+            case 330: // 
+                $b1 = $this->getConquerDieBenefit('black', $player_id);
+                if (!$b1) {
+                    $this->notifyAllPlayers('message', clienttranslate('this die roll results in no benefit'), []);
+                } else {
+                    $reason = reason('die', clienttranslate('Conquer die'));
+                    $this->queueBenefitNormal($b1, $player_id, $reason);
+                }
+                return true;
+            case 332: // research die benefit
+                $b1 = $this->getGameStateValue('science_die');
+                $this->queueBenefitNormal(21 + $b1, $player_id, $reason);
                 return true;
             case 401:
                 // decline - no op
@@ -1799,6 +1823,8 @@ abstract class PGameXBody extends tapcommon {
                 return false; // no cleanup
             default:
                 //$this->debugConsole("default ben $ben");
+                $del = $this->getRulesBenefit($ben, 'del', null);
+                if ($del) $this->clearCurrentBenefit($del);
 
                 if ($state !== null) {
                     $this->gamestate->nextState($state);
@@ -1847,7 +1873,7 @@ abstract class PGameXBody extends tapcommon {
         $this->notifyMoveStructure('', $token_id, [], $player_id);
         $this->notifyWithName('message_info', clienttranslate('${player_name} achieves ${achi_name} (${civ_name})'), [
             'achi_name' => $achi[$pos]['tooltip'],
-            'civ_name' => $this->getTokenName('civ',$civ)
+            'civ_name' => $this->getTokenName('civ', $civ)
         ], $player_id);
         $this->interruptBenefit();
         $this->benefitCivEntry($civ, $player_id, $data);
@@ -2167,7 +2193,7 @@ abstract class PGameXBody extends tapcommon {
             case CARD_TAPESTRY:
                 if ($this->isTapestryActive($player_id, TAP_ACADEMIA)) {
                     $this->awardVP($player_id, 3, reason_tapestry(TAP_ACADEMIA));
-                } 
+                }
                 if ($this->isTapestryActive($player_id, TAP_TYRANNY)) {
                     $this->queueBenefitInterrupt(64, $player_id, $card_id);
                 }
@@ -2972,12 +2998,11 @@ abstract class PGameXBody extends tapcommon {
     //////////////////////////////////////////////////////////////////////////////
     //////////// DEBUG METHODS
     ////////////
-    function debug_bene($benefit = null, $player_id = 0) {
-        if (!$player_id)
-            $player_id = $this->getActivePlayerId();
+    function debug_bene(string $benefit = null, int $count = 1) {
+        $player_id = $this->getCurrentPlayerId();
         if ($benefit) {
             $benefit = explode(':', $benefit);
-            $this->queueBenefitInterrupt($benefit, $player_id, reason("str", "debug"));
+            $this->queueBenefitInterrupt($benefit, $player_id, reason("str", "debug"), $count);
         }
         $this->gamestate->nextState('benefit');
     }
@@ -2996,6 +3021,8 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function debug_civ(string $card_name) {
+        $this->queueBenefitNormal(201);
+        $this->interruptBenefit();
         if (is_numeric($card_name)) {
             $cid = $card_name;
         } else {
@@ -3009,8 +3036,8 @@ abstract class PGameXBody extends tapcommon {
             $this->cards->createCards($cards, 'deck_civ');
         }
         $this->debug_awardCard(CARD_CIVILIZATION, $cid);
-        if ($this->getCurrentBenefit())
-            $this->gamestate->nextState('next');
+
+        $this->gamestate->jumpToState(18);
         return;
     }
 
@@ -4290,18 +4317,14 @@ abstract class PGameXBody extends tapcommon {
         //$this->queueBenefitNormal([ 'p' => 5,'g' => 142 ],  $this->getActivePlayerId(), reason('str', 'debug'));
         $player_id = $this->getCurrentPlayerId();
 
-        $inst = $this->getCivilizationInstance(CIV_ALCHEMISTS, true);
-        return $inst->removeCubes();
+        // $inst = $this->getCivilizationInstance(CIV_ALCHEMISTS, true);
+        // return $inst->removeCubes();
+
+        $this->queueBenefitNormal([RES_COIN, ["m" => 2, "g" => 324]], $player_id);
 
 
-        // $this->queueBenefitNormal(BE_CONFIRM, $player_id);
         // $this->benefitCivEntry(CIV_GAMBLERS, $player_id);
         $this->gamestate->jumpToState(18);
-    }
-
-    function debug_ben($benefits) {
-        $this->queueBenefitInterrupt($benefits, $this->getCurrentPlayerId(), reason("str", "debug"));
-        $this->gamestate->nextState('benefit');
     }
 
     function debug_next() {

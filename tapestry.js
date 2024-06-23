@@ -1,4 +1,4 @@
-const { coords } = require("dojo/main");
+const { coords, xhr } = require("dojo/main");
 
 /**
  *------
@@ -862,6 +862,7 @@ define([
           this.clientStateArgs.cid = civ;
           this.clientStateArgs.spot = 0;
           this.clientStateArgs.bid = i;
+          this.clientStateArgs.extra = '';
           for (let slot in bene.slots_choice) {
             const info = bene.slots_choice[slot];
             if (!info.ben_icons) info.ben_icons = this.getBenIcon(info.benefit);
@@ -1133,7 +1134,7 @@ define([
         tile: tile,
         coords: coords
       };
-      this.ajaxClientStateAction("civTokenExtra", "extra");
+      this.ajaxClientStateAction("civTokenAdvance");
     },
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -1994,7 +1995,7 @@ define([
         if ($(id)) {
           id += "_x";
         }
-        var div = ben <= 33 ? this.getBenIcon(ben) : name;
+        var div = this.getBenIcon(type);
         this.addImageActionButton(id, div, "onOptionBenefitClick", undefined, name != div ? name : undefined);
       }
       //				for (let i=1;i<=64;i++){
@@ -3070,7 +3071,6 @@ define([
     },
 
     ajaxcallwrapper: function (action, args, handler, nocheck) {
-      debugger;
       if (!args) {
         args = [];
       }
@@ -5442,9 +5442,10 @@ define([
               territory_name: this.gamedatas.terrain_types[terindex].name
             };
             this.setClientStateUpd("client_threasureHunterChoice", () => {
+              this.clientStateArgs.cid = this.CON.CIV_TREASURE_HUNTERS;
               this.setDescriptionOnMyTurn(_("TREASURE_HUNTERS: ${you} must choose adjacent territory of type ${territory_name}"), args);
-              for (var cid in targets) {
-                dojo.addClass("land_" + targets[cid], "active_slot");
+              for (var x in targets) {
+                dojo.addClass("land_" + targets[x], "active_slot");
               }
               this.addCancelButton();
             });
@@ -5454,15 +5455,16 @@ define([
       this.ajaxClientStateAction();
     },
 
-    ajaxClientStateAction: function (action, encodeField) {
+    ajaxClientStateAction: function (action) {
       const args = dojo.clone(this.clientStateArgs);
       const sendAction = action ? action : args.action;
       if (!sendAction) {
         this.showError("Cannot determine the action to take, reload the browser");
         return;
       }
-      if (encodeField) {
-        args[encodeField] = JSON.stringify(this.clientStateArgs[encodeField]);
+      if (args.extra &&  typeof args.extra == "object") {
+        args.extra_js = JSON.stringify(args.extra);
+        delete args.extra;
       }
       this.ajaxcallwrapper(sendAction, args);
     },

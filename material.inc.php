@@ -1601,7 +1601,7 @@ $this->benefit_types = [ //
 ],
  202 => [  // BE_REROLL
   'name' => clienttranslate("Re-roll"),
-  'icon' => 'no','state'=>'loopback',
+  'icon' => 'no','state'=>'loopback','del'=>603,
 ],
  401 => [  // BE_DECLINE
   'name' => clienttranslate("Decline"),
@@ -3883,7 +3883,7 @@ $this->civilizations = array(
                 "start_benefit" => [BE_TERRITORY, BE_TERRITORY], //
                 "start_benefit@a8" => [0, 0], //
                 "midgame_ben@a8" => ["or" => [174, 173]],
-                "midgame_setup@a8" => true,
+  
 
                 "slot_choice" => "occupied", //
                 "tokens_count" => 4,
@@ -3894,10 +3894,10 @@ $this->civilizations = array(
                         4 => ["benefit" => [RES_FOOD, 304], "ter" => TERRAIN_FOREST, "w" => 7, "h" => 5, "top" => 89.5, "left" => 53],
                 ], //
                 "slots@a8" => [
-                        1 => ["benefit" => [RES_COIN, 301]], // TODO 324
-                        2 => ["benefit" => [RES_CULTURE, 302]], // TODO 325
-                        3 => ["benefit" => [RES_WORKER, 303]],
-                        4 => ["benefit" => [RES_FOOD, 304]],
+                        1 => ["benefit" => [RES_COIN, ["m" => 2, "g" => 324]],         "top" => 71, "left" => 42],
+                        2 => ["benefit" => [RES_CULTURE,  ["m" => 2, "g" => 325]],     "top" => 71, "left" => 80],
+                        3 => ["benefit" => [RES_WORKER, 303],                          "top" => 80, "left" => 42],
+                        4 => ["benefit" => [RES_FOOD, 304],                            "top" => 80, "left" => 80],
                 ], //
                 "exp" => "PP", // 
                 "al" => 8

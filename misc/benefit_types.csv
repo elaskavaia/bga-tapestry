@@ -185,7 +185,7 @@ id|-con|name|r|t|php
 199||Opponents gain tech card from the deck|||'flags'=>(FLAG_OPPONENT)
 200|BE_CONFIRM|Confirm|||'icon' => 'no'
 201|BE_RESUME|Resume|||
-202|BE_REROLL|Re-roll|||'icon' => 'no','state'=>'loopback'
+202|BE_REROLL|Re-roll|||'icon' => 'no','state'=>'loopback','del'=>603
 401|BE_DECLINE|Decline|||'icon' => 'no'
 301||Roll the black conquer die twice and gain one benefit of your choice
 302||Roll the research die twice and gain one benefit of your choice
