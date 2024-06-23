@@ -213,6 +213,12 @@ id|-con|name|r|t|php
 324||Roll the black conquer die 
 325||Roll the research die
 326||Invent from top of discard|i||'flags'=>(FLAG_DISCARD),'state'=>'invent'
+327|BE_TERRITORY_BE_BLACKDIE|Territory Benefit|||'auto'=>1
+328|BE_TERRITORY_BE_SELECT|Territory Benefit (Controlled)|||
+329||Roll all dice|||'civ'=>CIV_ALCHEMISTS
+330|BE_CONQ_DIE_BLACK|Black die benefit|||'die'=>'black','r'=>'die'
+331|BE_CONQ_DIE_RED|Red die benefit|||'die'=>'red','r'=>'die'
+332|BE_RESEARCH_DIE|Gain research die benefit|||'die'=>'research','r'=>'die'
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

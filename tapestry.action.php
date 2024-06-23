@@ -67,20 +67,6 @@ class action_tapestry extends APP_GameAction
         $this->ajaxResponse();
     }
 
-    public function alchemistRoll()
-    {
-        $this->setAjaxMode();
-        $this->game->alchemistRoll();
-        $this->ajaxResponse();
-    }
-
-    public function alchemistClaim()
-    {
-        $this->setAjaxMode();
-        $this->game->alchemistClaim();
-        $this->ajaxResponse();
-    }
-
     public function advance()
     {
         $this->setAjaxMode();
@@ -202,13 +188,7 @@ class action_tapestry extends APP_GameAction
     }
 
 
-    public function alchemistChoice()
-    {
-        $this->setAjaxMode();
-        $track = $this->getArg("track", AT_int, true);
-        $this->game->action_alchemistChoice($track);
-        $this->ajaxResponse();
-    }
+
 
     public function conquer_structure()
     {

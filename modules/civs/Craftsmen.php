@@ -36,17 +36,16 @@ class Craftsmen extends AbsCivilization {
             $game->queueBenefitNormal($benefits, $player_id, reason_civ(CIV_CRAFTSMEN));
             return;
         }
-        $civ_token_string = "civ_{$civ}_$spot";
+
         $income_turn = $game->getCurrentEra($player_id);
 
         $first = false;
         $slots = $this->getCraftsmenSlotsMidgame($player_id, $first);
         $game->userAssertTrue(totranslate('Invalid slot'), in_array($spot, $slots));
 
-        // find free cube
-        $cube = $game->addCube($player_id, 'hand');
         // UPDATE cube
-        $game->dbSetStructureLocation($cube, $civ_token_string, $income_turn, clienttranslate('${player_name} advances on their civilization mat'), $player_id);
+        $this->placeCivCube($player_id, $spot, 0, $income_turn);
+
 
         if ($first) {
             // gain benefit

@@ -30,7 +30,7 @@ class Templates extends AbsCivilization {
         switch ($ben) {
             case 0:
                 $this->systemAssertTrue("not implemented");
-                return true;  
+                return true;
             default:
                 $this->systemAssertTrue("ERR:AbsCivilization:10");
                 return true;
@@ -39,22 +39,17 @@ class Templates extends AbsCivilization {
     }
 
     function moveCivCube(int $player_id, int $spot,  $extra, array $civ_args) {
-        $condition = array_get($civ_args,'benefit_data');
+        $condition = array_get($civ_args, 'benefit_data');
         $is_midgame = ($condition == 'midgame');
         $civ = $this->civ;
         if ($is_midgame) {
             //...
             return;
         }
-        $civ_token_string = "civ_{$civ}_$spot";
-        $income_turn = $this->game->getCurrentEra($player_id);
 
-        // find free cube
-        $cubes = $this->game->getStructuresSearch(BUILDING_CUBE, null , "civilization_$civ");
-        $cube = array_key_first($cubes);
-        
+
         // UPDATE cube
-        $this->game->dbSetStructureLocation($cube['card_id'], $civ_token_string, $income_turn, clienttranslate('${player_name} advances on their civilization mat'), $player_id);
+        $this->placeCivCube($player_id, $spot);
     }
 
     function triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance) {

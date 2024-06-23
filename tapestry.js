@@ -690,14 +690,6 @@ define([
 
           break;
 
-        case "civAbility":
-          if (this.gamedatas.dice.empiricism > 0) {
-            this.setClientState("client_empiricism", {
-              descriptionmyturn: _("Which roll do ${you} wish to claim?")
-            });
-          }
-          break;
-
         case "bonus":
           this.bonusdata = args.args;
           break;
@@ -873,26 +865,28 @@ define([
           for (let slot in bene.slots_choice) {
             const info = bene.slots_choice[slot];
             if (!info.ben_icons) info.ben_icons = this.getBenIcon(info.benefit);
-            if (!info.title) {
-              info.title = "${ben_icons}";
-            }
+            if (!info.title) info.title = "${ben_icons}";
+            if (!info.tooltip) info.tooltip = this.getBenTooltipStr(info.benefit, true);
 
-            if (!info.ben_tooltip) info.ben_tooltip = this.getBenTooltipStr(info.benefit, true);
             if (info.player_id) {
               info.player_name = this.divPlayerName(info.player_id, info.player_name);
             }
 
             const message = this.format_string_recursive(info.title, info);
 
-            this.addImageActionButton("button_" + slot, message, "onCivSpotHandler", undefined, info.ben_tooltip);
+            this.addImageActionButton("button_" + slot, message, "onCivSpotHandler", undefined, info.tooltip);
           }
         }
 
         switch (civ) {
           case this.CON.CIV_ALCHEMISTS:
-            this.setDescriptionOnMyTurn(_("ALCHEMISTS: Choose to roll or stop"));
-            this.addActionButton("button_alchemistroll", _("Roll"), () => this.ajaxcallwrapper("alchemistRoll"));
-            this.addActionButton("button_alchemistrollstop", _("Stop"), () => this.ajaxcallwrapper("alchemistClaim"));
+            if (this.getAdjustmentLevel() < 8) {
+              this.setDescriptionOnMyTurn(_("ALCHEMISTS: Choose to roll or stop"));
+              this.addActionButton("button_alchemistroll", _("Roll"), () => this.ajaxcallwrapper("civTokenAdvance", { spot: 1, cid: civ }));
+              this.addActionButton("button_alchemistrollstop", _("Stop"), () =>
+                this.ajaxcallwrapper("civTokenAdvance", { spot: 0, cid: civ })
+              );
+            }
             decline = false;
             break;
           case this.CON.CIV_ARCHITECTS:
@@ -1290,19 +1284,6 @@ define([
               }
             }
           }
-          this.addCancelButton();
-          break;
-        case "client_empiricism":
-          this.addActionButton(
-            "button_empiricism_science_" + this.gamedatas.dice.science,
-            this.getTr(this.tech_track_types[this.gamedatas.dice.science]["description"]),
-            "onEmpiricismClick"
-          );
-          this.addActionButton(
-            "button_empiricism_empiricism_" + this.gamedatas.dice.empiricism,
-            this.getTr(this.tech_track_types[this.gamedatas.dice.empiricism]["description"]),
-            "onEmpiricismClick"
-          );
           this.addCancelButton();
           break;
 
@@ -2010,6 +1991,9 @@ define([
       } else {
         dojo.query(".tech_spot .cube").addClass("active_slot");
         var id = "button_benefit_" + ben + "_0_0";
+        if ($(id)) {
+          id += "_x";
+        }
         var div = ben <= 33 ? this.getBenIcon(ben) : name;
         this.addImageActionButton(id, div, "onOptionBenefitClick", undefined, name != div ? name : undefined);
       }
@@ -2679,21 +2663,6 @@ define([
       }
     },
 
-    onEmpiricismClick: function (event) {
-      dojo.stopEvent(event);
-      var track = event.currentTarget.id.split("_")[3];
-      this.ajaxcall(
-        "/tapestry/tapestry/alchemistChoice.html",
-        {
-          lock: true,
-          track: track
-        },
-        this,
-        function (result) {},
-        function (is_error) {}
-      );
-    },
-
     onExploitationClick: function (event) {
       dojo.stopEvent(event);
       var coords = event.currentTarget.id.split("_");
@@ -3101,6 +3070,7 @@ define([
     },
 
     ajaxcallwrapper: function (action, args, handler, nocheck) {
+      debugger;
       if (!args) {
         args = [];
       }
@@ -3234,9 +3204,14 @@ define([
     addTrackSlotActionButton: function (track_slot, prefix, handler) {
       var adv = track_slot;
       var div = this.divTrackSlot(track_slot);
+      var div_id = prefix + "_" + adv;
 
-      this.addActionButton(prefix + "_" + adv, div, handler, undefined, undefined, "gray");
-      dojo.addClass(prefix + "_" + adv, "bgaimagebutton");
+      if ($(div_id)) {
+        div_id += "_x";
+      }
+
+      this.addActionButton(div_id, div, handler, undefined, undefined, "gray");
+      dojo.addClass(div_id, "bgaimagebutton");
     },
     divTrackSlot: function (track_slot) {
       var adv = track_slot;
@@ -3515,13 +3490,13 @@ define([
     },
 
     getConqDieDiv: function (color, roll) {
+      if (roll === undefined) roll = this.gamedatas.dice[color];
       var image_types = color + " die-flat die-face die-face-" + roll;
       return '<div class="' + image_types + '"></div>';
     },
 
     rolldie: function (color, num) {
       if (num === undefined) return;
-      //replace all of this kind with dojo.byId() at BGA Studio
       var die = $(color + "_die");
 
       var r = num;
@@ -4519,13 +4494,25 @@ define([
           names.push(this.getBenIcon(ben, level + 1));
         } else if (this.benefit_types[ben]) {
           const ben_type = this.benefit_types[ben].r;
-          const icon = this.benefit_types[ben].icon;
-          if (icon === "no" || icon === 0 || (icon === undefined && ben > 64)) {
-            var benname = this.benefit_types[ben]["name"];
-            names.push("<div class='named-benefit'>" + this.getTr(benname) + "</div>");
+          if (ben_type == "die") {
+            const die = this.benefit_types[ben].die;
+            let div = "";
+            if (die == "research") {
+              const num = this.gamedatas.dice.science;
+              div = this.divTrackSlot(num);
+            } else {
+              div = this.getConqDieDiv(die);
+            }
+            names.push(div);
           } else {
-            const icon_type = icon == "yes" || !icon ? "" : icon;
-            names.push(`<div class="icon icon_ben icon_ben_${ben} ben_type_${ben_type} ben_set_${total} ${icon_type}"></div>`);
+            const icon = this.benefit_types[ben].icon;
+            if (icon === "no" || icon === 0 || (icon === undefined && ben > 64)) {
+              var benname = this.benefit_types[ben]["name"];
+              names.push("<div class='named-benefit'>" + this.getTr(benname) + "</div>");
+            } else {
+              const icon_type = icon == "yes" || !icon ? "" : icon;
+              names.push(`<div class="icon icon_ben icon_ben_${ben} ben_type_${ben_type} ben_set_${total} ${icon_type}"></div>`);
+            }
           }
         } else {
           names.push(ben);
@@ -5598,7 +5585,6 @@ define([
       dojo.subscribe("trap", this, "notif_trap");
 
       dojo.subscribe("topple", this, "notif_topple");
-      dojo.subscribe("alchemistChoice", this, "notif_alchemistChoice");
       dojo.subscribe("benefitQueue", this, "notif_benefitQueue");
       this.notifqueue.setSynchronous("benefitQueue", 300);
 
@@ -5842,11 +5828,14 @@ define([
       var die_red = notif.args.die_red;
       var die_black = notif.args.die_black;
       this.updateConquerDice(die_red, die_black);
+      if (die_red) this.gamedatas.dice.red = parseInt(die_red);
+      if (die_black) this.gamedatas.dice.black = parseInt(die_black);
     },
 
     notif_science_roll: function (notif) {
       var die = notif.args.die;
       this.updateScienceDie(die);
+      this.gamedatas.dice.science = parseInt(die);
     },
 
     notif_techtransfer: function (notif) {
@@ -6585,15 +6574,6 @@ define([
     notif_topple: function (notif) {
       var bid = notif.args.bid;
       this.toggleTopple(bid);
-    },
-
-    notif_alchemistChoice: function (notif) {
-      this.gamedatas.dice.science = notif.args.science;
-      this.gamedatas.dice.empiricism = notif.args.empiricism;
-
-      this.setClientState("client_empiricism", {
-        descriptionmyturn: _("Which roll do ${you} wish to claim?")
-      });
     },
 
     notif_bonusPayment: function (notif) {

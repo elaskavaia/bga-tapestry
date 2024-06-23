@@ -371,7 +371,7 @@ abstract class tapcommon extends Table {
         $extra = "";
         if ($like)
             $extra = "%";
-        if (preg_match("/^[A-Za-z_0-9${extra}]+$/", $key) == 0) {
+        if (preg_match("/^[A-Za-z_0-9{$extra}]+$/", $key) == 0) {
             throw new feException("key must be alphanum and underscore non empty string '$key'");
         }
     }
@@ -384,7 +384,7 @@ abstract class tapcommon extends Table {
         $extra = "";
         if ($like)
             $extra = "%";
-        if (preg_match("/^[-A-Za-z_0-9 :,()${extra}]+$/", $key) == 0) {
+        if (preg_match("/^[-A-Za-z_0-9 :,(){$extra}]+$/", $key) == 0) {
             throw new feException("value must be alphanum and underscore non empty string '$key'");
         }
     }

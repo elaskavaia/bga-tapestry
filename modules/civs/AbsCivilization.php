@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-abstract class AbsCivilization  {
+abstract class AbsCivilization {
     protected int $civ; // numeric civ type
     public PGameXBody $game; // game ref
 
@@ -79,9 +79,35 @@ abstract class AbsCivilization  {
         return $cube;
     }
 
+    function getAllCubesOnCiv() {
+        $civ = $this->civ;
+        return $this->game->getStructuresOnCiv($civ, BUILDING_CUBE);
+    }
+
     function getCivSlot(int $slot) {
         $civ = $this->civ;
         return "civ_{$civ}_$slot";
+    }
+
+    function placeCivCube($player_id, int $spot, int $cube_id = 0, int $state = null, string $message = '*') {
+        $civ = $this->civ;
+        $civ_token_string = "civ_{$civ}_$spot";
+
+        $this->systemAssertTrue("Civ slot occupied $civ_token_string", $this->game->getStructureOnCivSlot($civ, $spot) == null);
+
+        if ($state === null) $state = $this->game->getCurrentEra($player_id);
+
+        // find free cube
+        if ($cube_id === 0) {
+            $cube_id = (int) $this->game->addCube($player_id, 'hand');
+        }
+
+        if ($message == '*') {
+            $message = clienttranslate('${player_name} advances on their civilization mat');
+        }
+
+        // UPDATE cube
+        $this->game->dbSetStructureLocation($cube_id, $civ_token_string, $state, $message, $player_id);
     }
 
     function argCivAbilitySingle($player_id, $benefit) {

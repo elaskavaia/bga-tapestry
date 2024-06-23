@@ -179,13 +179,13 @@ abstract class PGameXBody extends tapcommon {
                     $variant = $vars[1];
                     // if variant matches
                     $orig = $variant;
-                    $variant = preg_replace("/p${num}/", "", $variant, 1);
+                    $variant = preg_replace("/p{$num}/", "", $variant, 1);
                     if ($orig != $variant) {
                         $variant = preg_replace("/p[0-9]/", "", $variant);
                     }
 
                     $orig = $variant;
-                    $variant = preg_replace("/a${adj}/", "", $variant, 1);
+                    $variant = preg_replace("/a{$adj}/", "", $variant, 1);
                     if ($orig != $variant) {
                         $variant = preg_replace("/a[0-9]/", "", $variant);
                     }
@@ -1664,12 +1664,12 @@ abstract class PGameXBody extends tapcommon {
             case 301:
                 //                 301||Roll the black conquer die twice and gain one benefit of your choice
                 $this->clearCurrentBenefit($ben);
-                $this->rollBlackConquerDie($player_id);
+                $this->rollBlackConquerDie($player_id, false);
                 $b1 = $this->getConquerDieBenefit('black', $player_id);
                 if (!$b1) {
                     $this->notifyAllPlayers('message', clienttranslate('this die roll results in no benefit'), []);
                 }
-                $this->rollBlackConquerDie($player_id);
+                $this->rollBlackConquerDie($player_id, false);
                 $b2 = $this->getConquerDieBenefit('black', $player_id);
                 if (!$b2) {
                     $this->notifyAllPlayers('message', clienttranslate('this die roll results in no benefit'), []);
@@ -1688,8 +1688,8 @@ abstract class PGameXBody extends tapcommon {
             case 302:
                 //302||Roll the research die twice and gain one benefit of your choice
                 $this->clearCurrentBenefit($ben);
-                $b1 = $this->rollScienceDie($reason, 'science_die', $player_id);
-                $b2 = $this->rollScienceDie($reason, 'science_die', $player_id);
+                $b1 = $this->rollScienceDie($reason, 'science_die', $player_id, false);
+                $b2 = $this->rollScienceDie($reason, 'science_die', $player_id, false);
                 $this->queueBenefitNormal(['or' => [21 + $b1, 21 + $b2]], $player_id, $reason);
                 $this->prepareUndoSavepoint();
                 $this->gamestate->nextState('loopback');
@@ -1698,9 +1698,9 @@ abstract class PGameXBody extends tapcommon {
             case 303:
                 //                 303||Roll the conquer dice and gain both benefits
                 $this->clearCurrentBenefit($ben);
-                $this->rollRedConquerDie($player_id);
+                $this->rollRedConquerDie($player_id, false);
                 $this->conquerDieBenefit('red', $player_id);
-                $this->rollBlackConquerDie($player_id);
+                $this->rollBlackConquerDie($player_id, false);
                 $this->conquerDieBenefit('black', $player_id);
                 $this->prepareUndoSavepoint();
                 $this->gamestate->nextState('loopback');
@@ -1708,9 +1708,9 @@ abstract class PGameXBody extends tapcommon {
             case 304:
                 //                 304||Roll the red conquer die twice and gain both benefits
                 $this->clearCurrentBenefit($ben);
-                $this->rollRedConquerDie($player_id);
+                $this->rollRedConquerDie($player_id, false);
                 $this->conquerDieBenefit('red', $player_id);
-                $this->rollRedConquerDie($player_id);
+                $this->rollRedConquerDie($player_id, false);
                 $this->conquerDieBenefit('red', $player_id);
                 $this->prepareUndoSavepoint();
                 $this->gamestate->nextState('loopback');
@@ -1749,10 +1749,9 @@ abstract class PGameXBody extends tapcommon {
                 return true;
 
             case 324:
-                
+
                 $this->clearCurrentBenefit($ben);
-                $this->rollBlackConquerDie($player_id);
-                $this->prepareUndoSavepoint();
+                $this->rollBlackConquerDie($player_id, true);
                 $b1 = $this->getConquerDieBenefit('black', $player_id);
                 if (!$b1) {
                     $this->notifyAllPlayers('message', clienttranslate('this die roll results in no benefit'), []);
@@ -1767,12 +1766,30 @@ abstract class PGameXBody extends tapcommon {
                     $this->queueBenefitNormal($b1, $player_id, $reason);
                 }
 
-   
+
                 $this->gamestate->nextState('loopback');
                 return false; // no cleanup
+
+            case 328: // BE_TERRITORY_BE_SELECT:
+
+                $data = $this->getControlHexes($player_id);
+                $bens = array();
+                foreach ($data as $coords => $hex) {
+                    $tile_id = $hex['map_tile_id'];
+                    $ben = $this->getRulesCard(CARD_TERRITORY, $tile_id, 'benefit', []);
+                    $bens = array_merge($bens, $ben);
+                }
+                if (count($bens)==0) {
+                  $this->notifyWithName('message', clienttranslate('${player_name} uses one of benefits from controlled territories, but none of them have benefits'), []);
+                } else {
+                  $this->notifyWithName('message', clienttranslate('${player_name} uses one of benefits from controlled territories'), []);
+                  $this->queueBenefitInterrupt(['or' => $bens], $player_id, $reason);
+                }
+   
+                return true;
             case 401:
                 // decline - no op
-                return true;
+                return false;
             case 603:
                 // this removes next benefit from the stack
                 $this->clearCurrentBenefit($ben);
@@ -1828,8 +1845,9 @@ abstract class PGameXBody extends tapcommon {
         $token_id = $this->addCube($player_id, $destination);
         $achi = $this->civilizations[$civ]['achi'];
         $this->notifyMoveStructure('', $token_id, [], $player_id);
-        $this->notifyWithName('message_info', clienttranslate('${player_name} achieves ${achi_name}'), [
-            'achi_name' => $achi[$pos]['tooltip']
+        $this->notifyWithName('message_info', clienttranslate('${player_name} achieves ${achi_name} (${civ_name})'), [
+            'achi_name' => $achi[$pos]['tooltip'],
+            'civ_name' => $this->getTokenName('civ',$civ)
         ], $player_id);
         $this->interruptBenefit();
         $this->benefitCivEntry($civ, $player_id, $data);
@@ -2003,7 +2021,7 @@ abstract class PGameXBody extends tapcommon {
         if (!$ben)
             $ben = 46 + $track;
         $spot = $this->getMaxTrackSlot($track, $player_id);
-        $this->awardVP($player_id, $spot * $count, $reason, "tech_spot_${track}_${spot}", $ben);
+        $this->awardVP($player_id, $spot * $count, $reason, "tech_spot_{$track}_{$spot}", $ben);
     }
 
     function getNumberOfControlledTerritories($player_id) {
@@ -2149,7 +2167,7 @@ abstract class PGameXBody extends tapcommon {
             case CARD_TAPESTRY:
                 if ($this->isTapestryActive($player_id, TAP_ACADEMIA)) {
                     $this->awardVP($player_id, 3, reason_tapestry(TAP_ACADEMIA));
-                }
+                } 
                 if ($this->isTapestryActive($player_id, TAP_TYRANNY)) {
                     $this->queueBenefitInterrupt(64, $player_id, $card_id);
                 }
@@ -2765,7 +2783,7 @@ abstract class PGameXBody extends tapcommon {
             $this->DbQuery("UPDATE card SET card_location='era_6' WHERE card_id='$prev_id'");
             $args = $this->notifArgsAddCardInfo($prev_id, [
                 'espionage' => false,
-                'destination' => "tapestry_slot_${player_id}_6"
+                'destination' => "tapestry_slot_{$player_id}_6"
             ]);
             $this->notifyWithName("tapestrycard", '', $args, $player_id);
         }
@@ -2782,7 +2800,7 @@ abstract class PGameXBody extends tapcommon {
         }
         $args = $this->notifArgsAddCardInfo($card_id, [
             'espionage' => false,
-            'destination' => "tapestry_slot_${player_id}_$era"
+            'destination' => "tapestry_slot_{$player_id}_$era"
         ]);
         $this->notifyWithName("tapestrycard", $message, $args, $player_id);
         if ($card_effect) {
@@ -2799,20 +2817,21 @@ abstract class PGameXBody extends tapcommon {
     function rollScienceDie2($reason) {
         $player_id = $this->getActivePlayerId();
         $this->setGameStateValue('science_die_empiricism', 0);
-        $roll1 = $this->rollScienceDie($reason);
+        $roll1 = $this->rollScienceDie($reason, 'science_die', $player_id, false);
         if ($this->isTapestryActive($player_id, TAP_EMPIRICISM)) { // EMPIRICISM
-            $this->rollScienceDie(reason_tapestry(TAP_EMPIRICISM), 'science_die_empiricism');
+            $this->rollScienceDie(reason_tapestry(TAP_EMPIRICISM), 'science_die_empiricism', $player_id, false);
         }
         $this->prepareUndoSavepoint();
         return $roll1;
     }
 
-    function rollScienceDie($data, $dievar = 'science_die', $player_id = -1) {
+    function rollScienceDie($data, $dievar = 'science_die', $player_id = -1, $undosave = true) {
         $die_roll = bga_rand(1, 4);
         $this->setGameStateValue($dievar, $die_roll);
         $this->notifyWithTrack("science_roll", clienttranslate('${player_name} rolls the science die with result ${track_name} ${reason}'), [
             'die' => $die_roll, 'track' => $die_roll, 'reason' => $this->getReasonFullRec($data)
         ], $player_id);
+        if ($undosave) $this->prepareUndoSavepoint();
         return $die_roll;
     }
 
@@ -2827,7 +2846,7 @@ abstract class PGameXBody extends tapcommon {
         } else {
             $this->checkTrack($track);
         }
-        $track_stub = "tech_spot_${track}_${spot}";
+        $track_stub = "tech_spot_{$track}_{$spot}";
         return $track_stub;
     }
 
@@ -3365,65 +3384,6 @@ abstract class PGameXBody extends tapcommon {
         $this->gamestate->nextState('next');
     }
 
-    function action_alchemistChoice($track) {
-        //$this->checkAction('alchemistRoll');
-        $options = array();
-        array_push($options, $this->getGameStateValue('science_die'));
-        array_push($options, $this->getGameStateValue('science_die_empiricism'));
-        if (!in_array($track, $options)) {
-            throw new feException('Invalid Alchemist Choice');
-        }
-        $this->setGameStateValue('science_die_empiricism', 0);
-        $this->setGameStateValue('science_die', $track);
-        $this->alchemistRollFinish($track);
-    }
-
-    function alchemistRoll() {
-        $this->checkAction('alchemistRoll');
-        $benefit_id = $this->getUniqueValueFromDB("SELECT benefit_id FROM benefit WHERE benefit_category='civ' AND benefit_type='1'");
-        if ($benefit_id == null)
-            throw new feException('Invalid alchemist roll');
-        $die_roll = $this->rollScienceDie2(reason_civ(1));
-        $this->alchemistRollFinish($die_roll);
-    }
-
-    function alchemistRollFinish($die_roll) {
-        $player_id = $this->getActivePlayerId();
-        $benefit_id = $this->getUniqueValueFromDB("SELECT benefit_id FROM benefit WHERE benefit_category='civ' AND benefit_type='1'");
-        $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='7' AND card_location LIKE 'civ_1\\_%'");
-        $bust = false;
-        foreach ($token_data as $tid => $token) {
-            $slot = explode("_", $token['card_location'])[2];
-            if ($slot == $die_roll) {
-                $bust = true;
-            }
-        }
-        $token_id = -1;
-        if ($bust) {
-            $this->notifyWithName('message_error', clienttranslate('${player_name} busts'));
-            $this->benefitCashed($benefit_id);
-            if ($this->isAdjustments4()) {
-                $track = $die_roll;
-                $this->queueBenefitInterrupt(["or" => [BE_REGRESS_E - 1 + $track, 401]], $player_id, reason_civ(CIV_ALCHEMISTS)); // Regress with BB
-            } else {
-                $this->queueBenefitInterrupt(BE_ANYRES, $player_id, reason_civ(CIV_ALCHEMISTS));
-            }
-            $this->DbQuery("UPDATE structure SET card_location='hand' WHERE card_location_arg='$player_id' AND card_type='7' AND card_location LIKE 'civ_1\\_%'");
-        }
-        if (!$bust)
-            $token_id = $this->addCivToken($player_id, $die_roll, CIV_ALCHEMISTS);
-        $this->notifyAllPlayers("alchemistRoll", '', array(
-            'player_id' => $player_id,
-            'player_name' => $this->getActivePlayerName(), 'token_id' => $token_id, 'tokens' => $token_data,
-            'die' => $die_roll,
-        ));
-        if ($bust) {
-            $this->gamestate->nextState('benefit');
-            return true;
-        }
-        //$this->gamestate->nextState('benefit');
-        return false;
-    }
 
     function matFindBenefit($options) {
         foreach ($this->benefit_types as $ben => $info) {
@@ -3448,44 +3408,7 @@ abstract class PGameXBody extends tapcommon {
         $this->systemAssertTrue("No matching benefit for " . toJson($options));
     }
 
-    function alchemistClaim() {
-        $this->checkAction('alchemistClaim');
-        $player_id = $this->getActivePlayerId();
-        $benefit_id = $this->getUniqueValueFromDB("SELECT benefit_id FROM benefit WHERE benefit_category='civ' AND benefit_type='1'");
-        if ($benefit_id == null)
-            throw new feException('Benefit not available');
-        $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='7' AND card_location LIKE 'civ_1\\_%'");
-        $this->userAssertTrue(totranslate('You must Roll at least once'), count($token_data) > 0);
-        $this->benefitCashed($benefit_id);
-        $this->interruptBenefit();
-        $tracks = [];
-        foreach ($token_data as $tid => $token) {
-            $track = getPart($token['card_location'], 2);
-            $tracks[] = $track;
-        }
-        $reason = reason_civ(CIV_ALCHEMISTS);
-        if ($this->isAdjustments4()) {
-            $withben = [];
-            foreach ($tracks as $track) {
-                $withben[] = $this->matFindBenefit([
-                    "t" => $track, "adv" => 1,
-                    'flags' => (FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS)
-                ]);
-            }
-            $withben[] = 401;
-            $this->queueBenefitNormal(['or' => $withben], $player_id, $reason);
-        } else {
-            foreach ($tracks as $track) {
-                $this->queueBenefitNormal(96 + $track, $player_id, $reason); // advance no ben, buf +5 for going over
-            }
-        }
-        $this->DbQuery("UPDATE structure SET card_location='hand' WHERE card_location_arg='$player_id' AND card_type='7' AND card_location LIKE 'civ_1\\_%'");
-        $this->notifyAllPlayers("alchemistRoll", '', array(
-            'player_id' => $player_id, 'token_id' => -1,
-            'tokens' => $token_data, 'die' => 1,
-        ));
-        $this->gamestate->nextState('benefit');
-    }
+
 
     function checkTrack($track) {
         $this->systemAssertTrue("invalid track $track", $track > 0 && $track <= 4);
@@ -3617,7 +3540,7 @@ abstract class PGameXBody extends tapcommon {
                 $era = $this->getCurrentEra($player_id);
                 $args += [
                     'opp_name' => $this->getPlayerNameById($owner),
-                    'destination' => "tapestry_slot_${player_id}_$era"
+                    'destination' => "tapestry_slot_{$player_id}_$era"
                 ];
                 $this->notifyWithName("tapestrycard", clienttranslate('${player_name} selects to benefit from ${opp_name} advancing their ${track_name} (${card_name})'), $args, $player_id);
                 break;
@@ -3666,7 +3589,7 @@ abstract class PGameXBody extends tapcommon {
             case 108: // DICTATORSHIP:  Advance on any track and gain the benefit (you may pay to gain the bonus). Opponents may not advance on that track until after your next turn.
                 $this->trackMovementProper($track, $spot, ACTION_ADVANCE, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, true, $player_id);
                 $turn = $this->getPlayerTurn($player_id);
-                $data = "dic_${turn}_${track}";
+                $data = "dic_{$turn}_{$track}";
                 $this->DbQuery("UPDATE structure SET card_location_arg2='$data' WHERE card_id='$cube_id'");
                 $this->notifyMoveStructure('', $cube_id, [], $player_id);
                 break;
@@ -3918,7 +3841,7 @@ abstract class PGameXBody extends tapcommon {
                 $cubesmap = $this->getClosestBonus($player_id, $track);
                 $this->userAssertTrue(totranslate('Cannot determine bonus for this selection'), (count($cubesmap) > 0));
                 foreach ($cubesmap as $cube_iname => $pos) {
-                    if ($pos == "${track}_${spot}") {
+                    if ($pos == "{$track}_{$spot}") {
                         $cube_id = getPart($cube_iname, 1);
                         break;
                     }
@@ -4109,10 +4032,10 @@ abstract class PGameXBody extends tapcommon {
             case CIV_COLLECTORS:
             case CIV_INFILTRATORS:
             case CIV_TRADERS:
+            case CIV_ALCHEMISTS:
                 $inst = $this->getCivilizationInstance($cid, true);
                 $inst->moveCivCube($player_id, $spot, $extra, $civ_args);
                 return;
-
         }
 
         $slot_data = array_get($this->civilizations[$cid], 'slots', []);
@@ -4129,7 +4052,7 @@ abstract class PGameXBody extends tapcommon {
             // it has to be placed at right-most slot, so check the slot to the right - it has to have outpost (or be last)
             if ($spot != 4 && $spot != 8) {
                 $next_spot = $spot + 1;
-                $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = 'civ_${cid}_${next_spot}'");
+                $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = 'civ_{$cid}_{$next_spot}'");
                 $this->userAssertTrue(totranslate("Outpost must be place on the right most spot in each row"), $token_data);
             }
             // get new outpost from hand
@@ -4157,7 +4080,7 @@ abstract class PGameXBody extends tapcommon {
             return;
         }
         if ($cid == CIV_CHOSEN) {
-            if ($this->isAdjustments4or8()) {
+            if ($this->getAdjustmentVariant() >= 4) {
                 $cubes = $this->getStructuresOnCiv($cid, BUILDING_CUBE);
                 $cube = array_shift($cubes);
                 $spot = getPart($cube['card_location'], 2) + 1;
@@ -4187,7 +4110,8 @@ abstract class PGameXBody extends tapcommon {
                 }
 
                 // UPDATE token
-                $this->dbSetStructureLocation($tid, $civ_token_string, $state, clienttranslate('${player_name} advances on their civilization mat'), $player_id);
+                $inst = $this->getCivilizationInstance($cid, false);
+                $inst->placeCivCube($player_id, $spot, $tid, $state);
             } else {
                 // just use effect
                 $this->theChosenBenefits();
@@ -4334,7 +4258,8 @@ abstract class PGameXBody extends tapcommon {
                 $this->benefitCivEntry($cid, $player_id);
         }
         // UPDATE token
-        $this->dbSetStructureLocation($tid, $civ_token_string, $income_turn, clienttranslate('${player_name} advances on their civilization mat'), $player_id);
+        $inst = $this->getCivilizationInstance($cid, false);
+        $inst->placeCivCube($player_id, $spot, $tid, $income_turn);
     }
 
     function checkBenefitOrder($order, $b, $cat = 'choice') {
@@ -4364,34 +4289,10 @@ abstract class PGameXBody extends tapcommon {
     function debug_q() {
         //$this->queueBenefitNormal([ 'p' => 5,'g' => 142 ],  $this->getActivePlayerId(), reason('str', 'debug'));
         $player_id = $this->getCurrentPlayerId();
-        //         $curr = $this->getStructureInfoById(88, false);
-        //         $curr ['card_location'] = "land_2_1";
-        //         $this->notifyMoveStructure('bzz', $curr, [ ], $player_id);
-        //         $this->notifyAllPlayers('simplePause', '', [ 'time' => 1000 ]);
-        //         $this->notifyMoveStructure('bzz 2', 88, [ ], $player_id);
-        //$builder = new NotifBuilder($this);
-        //$this->notif()->send('helo');
-        //         // starting civ
-        //$type = CARD_CIVILIZATION;
-        //$this->debug_insertCard($type, CIV_ADVISORS);
-        //$this->debug_awardCard(CARD_CIVILIZATION, CIV_INFILTRATORS, null, true, $player_id);
-        //$this->benefitCivEntry(CIV_UTILITARIENS, $player_id, "triggered::2");
-        //         $cards = $this->dbPickCardsForLocation(1, $type, 'choice', $player_id);
-        //         $this->notifyWithName("newCards", clienttranslate('${player_name} draws'), [ 'card_type' => $type,
-        //                 'cards' => $cards ], $player_id);
-        // $this->benefitCivEntry(CIV_ARCHITECTS, $this->getActivePlayerId());
-        // optional regress
-        //         $this->queueBenefitInterrupt(["or"=>[BE_REGRESS_E - 1 + 1,401]], $player_id, reason_civ(CIV_ALCHEMISTS)); 
-        //         $this->gamestate->nextState('next');
-        //$this->queueBenefitNormal([ 'p' => BE_TAPESTRY,'g' => BE_INVENT,0 => 0 ], $player_id, 'test');
-        //return $this->matFindBenefit(["t"=>1,"adv"=>1,'flags'=> (FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS)]);
 
-        //$this->finalGameScoring($player_id);
+        $inst = $this->getCivilizationInstance(CIV_ALCHEMISTS, true);
+        return $inst->removeCubes();
 
-        $cards = [];
-        $cards[] = array('type' => CARD_CIVILIZATION, 'type_arg' => CIV_FUTURISTS, 'nbr' => 1);
-        $this->cards->createCards($cards, 'deck_civ');
-        $this->debug_award("FUTURISTS");
 
         // $this->queueBenefitNormal(BE_CONFIRM, $player_id);
         // $this->benefitCivEntry(CIV_GAMBLERS, $player_id);
@@ -4527,6 +4428,21 @@ abstract class PGameXBody extends tapcommon {
             // CHOICE - AND and can choose order
             $op = $cat == 'choice' ? 'a' : 'o';
             if (is_array($ben)) {
+                if (count($ben) == 1) {
+                    $sub = reset($ben);
+                    $this->queueBenefitNormal($sub, $player_id, $reason, $count);
+                    continue;
+                }
+                if (count($ben) == 0) {
+                    $this->error("choice benefit with empty array");
+                    continue;
+                }
+                foreach ($ben as $sub) {
+                    if (is_array($sub)) {
+                        $this->systemAssertTrue("Cannot queue recursive choice benefit " . toJson($ben));
+                    }
+                }
+
                 $ben = implode(',', $ben);
             }
             $this->benefitSingleEntry("$op,$ben", 0, $player_id, 1, $reason);
@@ -5118,7 +5034,7 @@ abstract class PGameXBody extends tapcommon {
             $coord = str_replace('land_', '', $coord);
         }
         $c = str_replace('_', ',', $coord);
-        return "(${c})";
+        return "({$c})";
     }
 
     function getDecisionPair() {
@@ -5205,7 +5121,7 @@ abstract class PGameXBody extends tapcommon {
                     $era = $this->getCurrentEra($player_id);
                     $era_string = 'era' . $era;
                     $this->DbQuery("UPDATE card SET card_location='$era_string',card_location_arg='$player_id' WHERE card_id='$card_id'");
-                    $args = $this->notifArgsAddCardInfo($card_id, ['destination' => "tapestry_slot_${player_id}_$era"]);
+                    $args = $this->notifArgsAddCardInfo($card_id, ['destination' => "tapestry_slot_{$player_id}_$era"]);
                     $this->notifyWithName("tapestrycard", clienttranslate('${player_name} plays a tapestry card ${card_name}'), $args, $player_id);
                 }
                 break;
@@ -5881,7 +5797,7 @@ abstract class PGameXBody extends tapcommon {
 
     function useTrackSpot($player_id, $track, $spot, $bThrow = false, $checkOnly = false) {
         if ($spot < 1 || $spot > 12) return true;
-        $loc = "tech_spot_${track}_${spot}";
+        $loc = "tech_spot_{$track}_{$spot}";
         $current = $this->getStructureInfoSearch(BUILDING_MARKER, null, $loc, $player_id, null);
         if ($current != null) {
             if ($bThrow) {
@@ -6209,7 +6125,7 @@ abstract class PGameXBody extends tapcommon {
             } else {
                 //  3. Check edges that match for bonus points.
                 $edge_count = $this->getMatchingEdgeCount($coord, $map);
-                $this->awardVP($player_id, $edge_count, $reason, "${map}_wrapper_$coord", 47);
+                $this->awardVP($player_id, $edge_count, $reason, "{$map}_wrapper_$coord", 47);
             }
         } else {
             $this->notifyWithName('message', clienttranslate('${player_name} no benefit for the territory'), [], $player_id);
@@ -6512,7 +6428,7 @@ abstract class PGameXBody extends tapcommon {
         $args = $this->argConquer();
         $this->clearCurrentBenefit();
         $player_id = $this->getActivePlayerId();
-        $coord = "${u}_${v}";
+        $coord = "{$u}_{$v}";
         $valid_locations = $args['targets'];
         $orig_reason = $args['data'];
         $this->effect_conquer($player_id, $coord, $valid_locations, $isol, $oid, $orig_reason);
@@ -6902,7 +6818,7 @@ abstract class PGameXBody extends tapcommon {
             return true;
         }
         $track_stub = "tech_spot_{$track}_";
-        $dictator_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location LIKE '${track_stub}%' AND card_location_arg2 LIKE 'dic_%' LIMIT 1");
+        $dictator_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location LIKE '{$track_stub}%' AND card_location_arg2 LIKE 'dic_%' LIMIT 1");
         if ($dictator_data) {
             $dd = explode("_", $dictator_data['card_location_arg2']);
             $dictator = $dictator_data['card_location_arg'];
@@ -7094,7 +7010,7 @@ abstract class PGameXBody extends tapcommon {
                         $achieved = true;
                     }
                 } else {
-                    $count = count($this->getCardsSearch(CARD_TERRITORY, null, null, $player_id));
+                    $count = count($this->getCardsSearch(CARD_TECHNOLOGY, null, null, $player_id));
                     if ($count >= $max) {
                         $achieved = true;
                     }
@@ -8152,7 +8068,7 @@ abstract class PGameXBody extends tapcommon {
         if ($coords || $map_id == 0) {
             $x = floor($coords / 100) - 50;
             $y = $coords % 100 - 50;
-            return $this->getMapHexData("${x}_${y}");
+            return $this->getMapHexData("{$x}_{$y}");
         } else {
             $map_data = $this->getObjectFromDB("SELECT * FROM map WHERE map_id='$map_id'");
             return $this->getMapHexData($map_data['map_coords']);
@@ -8639,6 +8555,7 @@ abstract class PGameXBody extends tapcommon {
                 case CIV_GAMBLERS:
                 case CIV_COLLECTORS:
                 case CIV_INFILTRATORS:
+                case CIV_ALCHEMISTS:
                     return $civinst->argCivAbilitySingle($player_id, $benefit);
                 case CIV_ENTERTAINERS:
                     $data['slots'] = array_keys($slots);
@@ -8706,8 +8623,9 @@ abstract class PGameXBody extends tapcommon {
             case CIV_GAMBLERS:
             case CIV_INFILTRATORS:
             case CIV_TRADERS:
+            case CIV_ALCHEMISTS:
                 return $civinst->argCivAbilitySingle($player_id, $benefit);
-         
+
             case CIV_LEADERS:
                 $data['slots'] = array_keys($slots);
                 break;
@@ -9870,7 +9788,7 @@ abstract class PGameXBody extends tapcommon {
             $spot = (int) $coords[3];
             for ($i = $spot + 1; $i <= 12; $i++) {
                 if (array_key_exists('option', $this->tech_track_data[$track][$i])) {
-                    $advances["cube_$id"] = "${track}_${i}";
+                    $advances["cube_$id"] = "{$track}_{$i}";
                     break;
                 }
             }
@@ -9901,7 +9819,7 @@ abstract class PGameXBody extends tapcommon {
                 continue;
             }
             if ($track == $sel_track || $sel_track == 0) {
-                $advances["${track}_${new_spot}"] = 1;
+                $advances["{$track}_{$new_spot}"] = 1;
                 $cubes[] = "cube_$tid";
             }
         }
@@ -10756,18 +10674,18 @@ abstract class PGameXBody extends tapcommon {
         $this->prepareUndoSavepoint();
     }
 
-    function rollRedConquerDie($player_id) {
+    function rollRedConquerDie(int $player_id, bool $undosave) {
         // Roll conquer dice
         $die_red = bga_rand(0, 5);
         if ($die_red == 5)
             $die_red = 2;
         $this->setGameStateValue("conquer_die_red", $die_red);
         $this->notif('conquer_roll')->withPlayer($player_id)->withArg('red_name', $this->dice_names['red'][$die_red]['name'])->withPreserveArg('die_red', $die_red)->notifyAll(clienttranslate('${player_name} rolls red conquer dice ${red_name}'));
-        //$this->prepareUndoSavepoint();
+        if ($undosave) $this->prepareUndoSavepoint();
         return $die_red;
     }
 
-    function rollBlackConquerDie($player_id) {
+    function rollBlackConquerDie($player_id, bool $undosave) {
         // Roll conquer dice
         $die_black = bga_rand(0, 5);
         if ($die_black == 5)
@@ -10791,7 +10709,7 @@ abstract class PGameXBody extends tapcommon {
         }
 
 
-        //$this->prepareUndoSavepoint();
+        if ($undosave) $this->prepareUndoSavepoint();
         return $die_black;
     }
 
