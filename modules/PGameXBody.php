@@ -1126,13 +1126,15 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function dbAddCube($player_id, $destination, $type_arg = 0, $arg2 = 0) {
-        $this->DbQuery("INSERT INTO structure (card_type, card_location, card_location_arg, card_type_arg, card_location_arg2) VALUES ('7', '$destination', '$player_id', '$type_arg', '$arg2')");
-        $structure_id = $this->getLastId('structure');
-        return $structure_id;
+        return $this->dbAddStructure($player_id, BUILDING_CUBE, $type_arg, $destination, $arg2);
     }
 
     function dbAddMarker($player_id, $destination, $type_arg = 0, $arg2 = 0) {
-        $this->DbQuery("INSERT INTO structure (card_type, card_location, card_location_arg, card_type_arg, card_location_arg2) VALUES ('8', '$destination', '$player_id', '$type_arg', '$arg2')");
+        return $this->dbAddStructure($player_id, BUILDING_MARKER, $type_arg, $destination, $arg2);
+    }
+
+    function dbAddStructure($player_id, $type, $type_arg, $destination, $arg2 = 0) {
+        $this->DbQuery("INSERT INTO structure (card_type, card_location, card_location_arg, card_type_arg, card_location_arg2) VALUES ('$type', '$destination', '$player_id', '$type_arg', '$arg2')");
         $structure_id = $this->getLastId('structure');
         return $structure_id;
     }
@@ -6350,7 +6352,7 @@ abstract class PGameXBody extends tapcommon {
         $outposts = $this->getOutpostsInHand($player_id);
         $outpost_id = array_key_first($outposts);
         if ($this->hasCiv($player_id, CIV_MILITANTS)) { // MILITANTS
-            if (count($outposts) == 0) {
+            if (count($outposts) == 0 && $this->isAdjustments4()) {
                 return $this->addCube($player_id, 'hand');
             }
 
@@ -6375,9 +6377,11 @@ abstract class PGameXBody extends tapcommon {
             }
             if ($oid == null) {
                 if ($top_id) return $top_id;
-                return $bottom_id;
-            }
-            if (($oid != $top) && ($oid != $bottom)) {
+                if ($bottom_id) return $bottom_id;
+                if ($this->isAdjustments8()) return $outpost_id;
+                
+            } else if (($oid != $top) && ($oid != $bottom)) {
+                if ($this->isAdjustments8()) return $outpost_id;
                 if ($bThrow)
                     $this->userAssertTrue(totranslate('You must choose one of the leftmost outposts'));
                 $outpost_id = null;
@@ -6394,7 +6398,7 @@ abstract class PGameXBody extends tapcommon {
         $outposts = $this->getOutpostsInHand($player_id);
         if ($this->hasCiv($player_id, CIV_MILITANTS)) { // MILITANTS
             $result = [];
-            if (count($outposts) == 0) {
+            if (count($outposts) == 0 && $this->isAdjustments4()) {
                 $result[] = $this->addCube($player_id, 'hand');
                 return $result;
             } else {
@@ -8435,7 +8439,7 @@ abstract class PGameXBody extends tapcommon {
             case 170:
                 $outposts = $this->getOutpostsInHand($player_id);
                 $res['outpost'] = $outpost_id = $this->getOutpostId(null, $player_id, false);
-                if (count($outposts) == 0 && $this->hasCiv($player_id, CIV_MILITANTS)) { // MILITANTS
+                if (count($outposts) == 0 && $this->hasCiv($player_id, CIV_MILITANTS) && $this->isAdjustments4()) { // MILITANTS
                     $res['structures'] = [$outpost_id];
                 } else {
                     $res['structures'] = array_keys($outposts);
@@ -9427,6 +9431,12 @@ abstract class PGameXBody extends tapcommon {
                     if ($outcount > 0 && $outcount < 8) {
                         //  4- -> 0, 5 -> 2, 6 -> 4, 7 -> 6, 8 -> 8
                         $this->benefitCivEntry($civ, $player_id, 'midgame');
+                    }
+                } else {
+                    if ($this->isAdjustments8()) {
+                        // we suppose to put player tokens on starting tile, instead add 2 more outposts
+                        array_push($outpost_ids, $this->dbAddStructure($player_id, BUILDING_OUTPOST, 0, 'hand', 0));
+                        array_push($outpost_ids, $this->dbAddStructure($player_id, BUILDING_OUTPOST, 0, 'hand', 0));
                     }
                 }
                 // 8 outposts to 1-8, fill 4,8,3,7,2,6,1,5

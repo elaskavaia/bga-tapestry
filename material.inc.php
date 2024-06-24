@@ -3212,7 +3212,19 @@ $this->civilizations = array(
                         '',
                         clienttranslate("<i>If you gain this civilization in the middle of the game, place your remaining outposts on these spaces from right to left (you choose the row for each outpost).</i>")
                 ),
+                "description@a4" => [
+                        1 => clienttranslate('If the Militants exhaust their supply of outposts, they may use player tokens as outposts.')
+                ],
+                "description@a8" => [
+                        clienttranslate("<i>The Militants seek to reap the benefits of the territories they control.</i>"),
+                        clienttranslate("Start with 8 outposts covering these hexes; also, start with 2 player tokens (instead of outposts) on your starting territory so you have extra outposts to use for conquering. *On BGA you just get 2 more outposts instead"),
+                        clienttranslate("Whenever you would place an outpost, take the leftmost outpost from either row here."),
+                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, gain all of the exposed benefits."),
+                        clienttranslate("* On your income turns, if this benefit is exposed, perform the conquer action only after all other exposed benefits are gained."),
+                        clienttranslate("<i>If you gain this civilization in the middle of the game, place your remaining outposts on these spaces from right to left (you choose the row for each outpost).</i>"),
+                ],
                 "income_trigger" => ["from" => 1, "to" => 5], //
+                "income_trigger@a8" => ["from" => 2, "to" => 5], //
                 "midgame_setup" => true,
                 "slots_description" => clienttranslate('left to right, top to bottom'),
                 "slots" => array(
@@ -3237,10 +3249,19 @@ $this->civilizations = array(
                         7 => ["benefit" => [505], "cl" => "paintover"],
                         8 => ["benefit" => [BE_CONQUER], "cl" => "paintover"], //conquier
                 ), //
-                "adjustment@a4" => clienttranslate("rules changed"),
-                "description@a4" => [
-                        1 => clienttranslate('If the Militants exhaust their supply of outposts, they may use player tokens as outposts.')
-                ],
+                "slots@a8" => array(
+                        1 => ["top" => 50, "benefit" => [BE_GAIN_COIN]], 
+                        2 => ["top" => 50, "benefit" => [502]],
+                        3 => ["top" => 50, "benefit" => [BE_GAIN_FOOD]],
+                        4 => ["top" => 50, "benefit" => [BE_VP_TERRITORY]], //1 VP per Terr
+                        5 => ["top" => 57, "benefit" => [503]],
+                        6 => ["top" => 57, "benefit" => [BE_GAIN_WORKER]],
+                        7 => ["top" => 57, "benefit" => [505]],
+                        8 => ["top" => 57, "benefit" => [BE_CONQUER]], //conquier
+                ), //
+                "adjustment@a4a8" => clienttranslate("rules changed"),
+                "al"=>8
+
         ),
         CIV_MYSTICS => array(
                 "name" => clienttranslate("MYSTICS"),
