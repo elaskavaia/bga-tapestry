@@ -119,7 +119,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} may use your civilization ability'),
         "type" => "activeplayer",
         "args" => "argCivAbility",
-        "possibleactions" => array("civTokenAdvance","civDecline", "tapestryChoice", "sendHistorian", "mystic", "sendInventor"),
+        "possibleactions" => array("civTokenAdvance","civDecline", "tapestryChoice", "sendHistorian", "sendInventor"),
         "transitions" => array("benefit" => 18, "next" => 18)
     ),
 

@@ -47,7 +47,12 @@ abstract class AbsCivilization {
         return array('tokens' => $tokens, 'outposts' => []);
     }
 
+    function hasCiv($player_id) {
+        return $this->game->hasCiv($player_id, $this->civ);
+    }
+
     function moveCivCube(int $player_id, int $spot, $extra, array $civ_args) {
+        $this->systemAssertTrue("ERR:AbsCivilization:11");
     }
 
     function triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance) {
@@ -108,6 +113,8 @@ abstract class AbsCivilization {
 
         // UPDATE cube
         $this->game->dbSetStructureLocation($cube_id, $civ_token_string, $state, $message, $player_id);
+
+        return $cube_id;
     }
 
     function argCivAbilitySingle($player_id, $benefit) {

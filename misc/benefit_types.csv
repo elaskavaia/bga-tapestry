@@ -72,9 +72,9 @@ id|-con|name|r|t|php
 70|BE_REGRESS_T|Regress - Technology|t|4|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
 71|BE_VP_TAPESTY|VP - Tapestry cards|v||
 72||Research (no benefit, maxout bonus)|r||'flags'=>(FLAG_MAXOUT_BONUS)
-73||Conquer - both dice if toppled|a||'flags'=>(FLAG_CONQ_BOTH_DICE | FLAG_CONQ_OPPONENT)
-74||Conquer - both dice|a||'flags'=>2
-75||Conquer (anywhere)|a||'flags'=>1
+73||Conquer - both dice if toppled|a||'flags'=>(FLAG_CONQ_BOTH_DICE | FLAG_CONQ_OPPONENT), 'icon'=>1
+74||Conquer - both dice|a||'flags'=>2, 'icon'=>1
+75||Conquer (anywhere)|a||'flags'=>1, 'icon'=>1
 76||Advance (no benefits) - Exploration|t|1|'flags'=>0
 77||Advance (no benefits) - Science|t|2|'flags'=>0
 78||Advance (no benefits) - Military|t|3|'flags'=>0
@@ -126,7 +126,7 @@ id|-con|name|r|t|php
 124||Copy opponent benefit, they get free bonus (TRADE ECONOMY)|||'tap'=>41,'s'=>'c','sflags'=>(FLAG_OPPONENT),'adv'=>0,'state'=>'trackSelect'
 125||Rewards (OLYMPIC HOST)|||'tap'=>29
 126||Invent - from top of the deck|i||'tap'=>37,'flags'=>(FLAG_FACE_DOWN)
-127||Invent and instantly upgrade|i||'flags'=>(FLAG_UPGRADE | FLAG_FACE_BOTH)
+127||Invent and instantly upgrade|i||'flags'=>(FLAG_UPGRADE | FLAG_FACE_BOTH),'icon'=>1
 128|BE_PLAY_TAPESTY_INCOME|Play tapestry card (Income)|||
 129||Gain cards and tiles (Income)|||
 130||Transfer tech card|||
@@ -143,7 +143,7 @@ id|-con|name|r|t|php
 141||Select conquer die|||
 142|BE_CIV_ADJUSTMENT|Civilization adjustment|||
 143|BE_REFRESH_DO|Refresh tech cards|||'d'=>1
-144||Gain income building and place outside of the city bounds|||
+144||Gain income building and place outside of the city bounds|||'icon'=>1
 145||VP - Landmarks|v||
 146||Automa Civilization Conquerors|||
 151||Jump - Exploration|t|1|'adv'=>4,'flags'=>(FLAG_JUMP)
@@ -219,6 +219,8 @@ id|-con|name|r|t|php
 330|BE_CONQ_DIE_BLACK|Black die benefit|||'die'=>'black','r'=>'die'
 331|BE_CONQ_DIE_RED|Red die benefit|||'die'=>'red','r'=>'die'
 332|BE_RESEARCH_DIE|Gain research die benefit|||'die'=>'research','r'=>'die'
+333|BE_MYSTIC_TAP|Mystic tapestry ability|||'civ'=>CIV_MYSTICS
+334|BE_MYSTIC_TAP_GAIN|Mystic tapestry setup|||'civ'=>CIV_MYSTICS
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||
@@ -228,6 +230,7 @@ id|-con|name|r|t|php
 510||10 VP|v||
 515||15 VP|v||
 520||20 VP|v||
+600|BE_OP_UNIQUE|Unique choice|||'auto'=>1
 601||Adjust tracks|||'auto'=>1
 602||End of income|||'auto'=>1
 #Adjust benefit - no name

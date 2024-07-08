@@ -131,8 +131,7 @@ if (!defined('TAPESTRY')) { // guard since this included multiple times
         define("BE_TINKERERS_2", 196);
         define("BE_TINKERERS_3", 197);
         define("BE_TINKERERS_4", 198);
-        define("BE_TINKERERS_2a", 322);
-        define("BE_TINKERERS_3a", 323);
+
 
         define("BE_ALIEN_D", 306);
         define("BE_2_TERRITORY", 307);
@@ -143,14 +142,19 @@ if (!defined('TAPESTRY')) { // guard since this included multiple times
         define("BE_COLLECTORS_GRAB", 312);
         define("BE_COLLECTORS_CARD", 313);
         define("BE_CARD_PLAY_TRIGGER", 314);
+        define("BE_URBANPLANNERS_GRAB", 316);
+        define("BE_URBANPLANNERS_BONUS", 317);
+        define("BE_RELENTLESS_AB", 318);
         define("BE_GAMBLES_PICK_2", 319);
-
+        define("BE_TINKERERS_2a", 322);
+        define("BE_TINKERERS_3a", 323);
         define("BE_TERRITORY_BE_BLACKDIE", 327);
         define("BE_TERRITORY_BE_SELECT", 328);
-
         define("BE_CONQ_DIE_BLACK", 330);
         define("BE_CONQ_DIE_RED", 331);
         define("BE_RESEARCH_DIE", 332);
+        define("BE_MYSTIC_TAP", 333);
+        define("BE_OP_UNIQUE", 600);
 
         // TERRAIN
         define("TERRAIN_SEA", 1);
@@ -695,19 +699,19 @@ $this->structure_types = //
         );
 $this->dice = array(
         'red' => array(
-                0 => [505], 
-                1 => [506], 
-                2 => [BE_VP_TERRITORY], 
-                3 => [504], 
+                0 => [505],
+                1 => [506],
+                2 => [BE_VP_TERRITORY],
+                3 => [504],
                 4 => [507],
                 5 => [BE_VP_TERRITORY],
         ),
         'black' => array(
-                0 => [BE_GAIN_COIN], 
+                0 => [BE_GAIN_COIN],
                 1 => [BE_TERRITORY_BE_BLACKDIE],
-                2 => [BE_GAIN_WORKER], 
+                2 => [BE_GAIN_WORKER],
                 3 => [BE_GAIN_FOOD],
-                4 => [BE_GAIN_CULTURE], 
+                4 => [BE_GAIN_CULTURE],
                 5 => [BE_TERRITORY_BE_BLACKDIE]
         ),
         'science' => [0 => [], 1 => [], 2 => [], 3 => []],
@@ -1077,17 +1081,17 @@ $this->benefit_types = [ //
  73 => [  //
   'name' => clienttranslate("Conquer - both dice if toppled"),
   'r' => 'a',
-  'flags'=>(FLAG_CONQ_BOTH_DICE | FLAG_CONQ_OPPONENT),
+  'flags'=>(FLAG_CONQ_BOTH_DICE | FLAG_CONQ_OPPONENT), 'icon'=>1,
 ],
  74 => [  //
   'name' => clienttranslate("Conquer - both dice"),
   'r' => 'a',
-  'flags'=>2,
+  'flags'=>2, 'icon'=>1,
 ],
  75 => [  //
   'name' => clienttranslate("Conquer (anywhere)"),
   'r' => 'a',
-  'flags'=>1,
+  'flags'=>1, 'icon'=>1,
 ],
  76 => [  //
   'name' => clienttranslate("Advance (no benefits) - Exploration"),
@@ -1348,7 +1352,7 @@ $this->benefit_types = [ //
  127 => [  //
   'name' => clienttranslate("Invent and instantly upgrade"),
   'r' => 'i',
-  'flags'=>(FLAG_UPGRADE | FLAG_FACE_BOTH),
+  'flags'=>(FLAG_UPGRADE | FLAG_FACE_BOTH),'icon'=>1,
 ],
  128 => [  // BE_PLAY_TAPESTY_INCOME
   'name' => clienttranslate("Play tapestry card (Income)"),
@@ -1419,6 +1423,7 @@ $this->benefit_types = [ //
 ],
  144 => [  //
   'name' => clienttranslate("Gain income building and place outside of the city bounds"),
+  'icon'=>1,
 ],
  145 => [  //
   'name' => clienttranslate("VP - Landmarks"),
@@ -1729,6 +1734,14 @@ $this->benefit_types = [ //
   'name' => clienttranslate("Gain research die benefit"),
   'die'=>'research','r'=>'die',
 ],
+ 333 => [  // BE_MYSTIC_TAP
+  'name' => clienttranslate("Mystic tapestry ability"),
+  'civ'=>CIV_MYSTICS,
+],
+ 334 => [  // BE_MYSTIC_TAP_GAIN
+  'name' => clienttranslate("Mystic tapestry setup"),
+  'civ'=>CIV_MYSTICS,
+],
  502 => [  //
   'name' => clienttranslate("2 VP"),
   'r' => 'v',
@@ -1764,6 +1777,10 @@ $this->benefit_types = [ //
  520 => [  //
   'name' => clienttranslate("20 VP"),
   'r' => 'v',
+],
+ 600 => [  // BE_OP_UNIQUE
+  'name' => clienttranslate("Unique choice"),
+  'auto'=>1,
 ],
  601 => [  //
   'name' => clienttranslate("Adjust tracks"),
@@ -2786,7 +2803,7 @@ $this->civilizations = array(
                         #clienttranslate("[FOOD]+[EXPLORE]     [CULTURE]+[CONQUER]     [COIN]+[INVENT]     [WORKER]+[RESEARCH X]     [TERRITORY]+[ANY RESOURCE]"),
                 ],
                 "adjustment" => clienttranslate("When starting the game with the Alchemists, gain [ANY RESOURCE] [ANY RESOURCE] and 10 VP"),
-                "adjustment@a4a8" => clienttranslate("rules changed"), //
+                "adjustment@a4a8" => clienttranslate("rules change"), //
                 "income_trigger" => ["from" => 2, "to" => 5], //
                 "slots_description" => clienttranslate('counter clockwise'),
                 "slots" => [ //
@@ -2824,7 +2841,7 @@ $this->civilizations = array(
                 ),
                 "midgame_setup" => true,
                 "adjustment" => clienttranslate("When starting the game with the Architects in a game with 3 or more total players, gain 10 VP per opponent."),
-                "adjustment@a4a8" => clienttranslate("rules changed"),
+                "adjustment@a4a8" => clienttranslate("rules change"),
                 "description@a4a8" => [
                         1 => clienttranslate("When starting the game with the Architects, place 1 cube per opponent on your capital city to create an impassable plot. Each cube must be placed in a different district.")
                 ],
@@ -2947,7 +2964,7 @@ $this->civilizations = array(
                         ],
                 ),
                 "adjustment" => clienttranslate("When starting the game with the Entertainers, gain [ANY RESOURCE] during your first income turn."),
-                "adjustment@a4a8" => clienttranslate("rule changes"),
+                "adjustment@a4a8" => clienttranslate("rules change"),
                 "al" => 8,
         ),
         CIV_FUTURISTS => array(
@@ -2966,7 +2983,7 @@ $this->civilizations = array(
                         clienttranslate("At the end of your first income turn (or immediately if you gain the Futurists during the game), you may advance on up to two different tracks by exactly 4 spaces (with the end of each track as a limit). Do not gain benefits, bonuses, or landmarks."),
                         clienttranslate("Also gain 2 [ANY RESOURCE] (whether or not you advance). Landmarks left in this way are available to gain later.")
                 ], //
-                "adjustment@a4a8" => clienttranslate("rules changed"),
+                "adjustment@a4a8" => clienttranslate("rules change"),
                 "start_benefit" => [BE_GAIN_COIN, BE_GAIN_CULTURE, BE_GAIN_FOOD, BE_GAIN_WORKER],
                 "start_benefit@a4a8" => [BE_ANYRES, BE_ANYRES, 0, 0],
                 "automa" => false,
@@ -3040,7 +3057,7 @@ $this->civilizations = array(
                         4 => ["top" => 63, "left" => 38, "benefit" => [BE_VP_TERRITORY]],
                 ),
                 "adjustment" => clienttranslate("no change"),
-                "adjustment@a4a8" => clienttranslate("rule changes"),
+                "adjustment@a4a8" => clienttranslate("rules change"),
                 "al" => 8
         ),
         8 => array(
@@ -3201,7 +3218,7 @@ $this->civilizations = array(
                         12 => array("benefit" => [BE_RESEARCH_NB], "link" => [11, 8], "top" => 69, "left" => 37), //
                 ), //
                 "adjustment" => clienttranslate("When starting the game with the Merrymakers, gain [ANY RESOURCE]"),
-                "adjustment@a4a8" => clienttranslate("rules changed"), //
+                "adjustment@a4a8" => clienttranslate("rules change"), //
                 "income_trigger" => ["from" => 2, "to" => 5], //
                 "al" => 8
         ),
@@ -3250,7 +3267,7 @@ $this->civilizations = array(
                         8 => ["benefit" => [BE_CONQUER], "cl" => "paintover"], //conquier
                 ), //
                 "slots@a8" => array(
-                        1 => ["top" => 50, "benefit" => [BE_GAIN_COIN]], 
+                        1 => ["top" => 50, "benefit" => [BE_GAIN_COIN]],
                         2 => ["top" => 50, "benefit" => [502]],
                         3 => ["top" => 50, "benefit" => [BE_GAIN_FOOD]],
                         4 => ["top" => 50, "benefit" => [BE_VP_TERRITORY]], //1 VP per Terr
@@ -3259,8 +3276,8 @@ $this->civilizations = array(
                         7 => ["top" => 57, "benefit" => [505]],
                         8 => ["top" => 57, "benefit" => [BE_CONQUER]], //conquier
                 ), //
-                "adjustment@a4a8" => clienttranslate("rules changed"),
-                "al"=>8
+                "adjustment@a4a8" => clienttranslate("rules change"),
+                "al" => 8
 
         ),
         CIV_MYSTICS => array(
@@ -3277,6 +3294,8 @@ $this->civilizations = array(
                 ],
                 "midgame_ben" => [173], // discard and gain another
                 "midgame_ben@a4" => [174],
+                "midgame_ben@a8" => [174],
+                "start_benefit@a8" => [334],
                 "midgame_setup@a4" => true,
                 "slots_description" => "",
                 "slots" => array(
@@ -3314,6 +3333,18 @@ $this->civilizations = array(
                 ),
                 "adjustment" => clienttranslate("When starting the game with the Mystics, gain [ANY RESOURCE]"),
                 "adjustment@a4" => clienttranslate("no change"),
+                "adjustment@a8" => clienttranslate("rules change"),
+                "description@a8" => [
+clienttranslate("<i>The Mystics boast of their ability to predict the future (they're actually just good planners).</i>"),
+clienttranslate("Start with a private, randomized deck of 8 tapestry cards (draw them from the public deck; you may look through them before shuffling them) and draw 2 of those cards. Whenever you would gain a tapestry card, instead draw the top card of your private deck. Whenever you discard or pay a tapestry card, place it in a private discard pile. If your private deck is ever empty and you are gaining a card, shuffle your discard pile to form the deck."),
+clienttranslate("After playing your tapestry card on income turns (2-4), gain the top card of the public deck and discard your entire hand of tapestry cards to your private discard pile."),
+clienttranslate("Based on the quantity of cards discarded in this way, gain the following, then gain 2 cards from your pricate deck:"),
+clienttranslate("<li>2 cards --> choose one: | "),
+clienttranslate("<li>4 cards --> choose two different:   [CONQUER]/[ANY RESOURCE]/[INVENT]/[INCOME BUILDING] (do not place in the city)"),
+clienttranslate("<li>6 cards --> choose three different:   [CONQUER-BOTH DICE]/[ANY RESOURCE]/[INVENT]+[UPGRADE]/[INCOME BUILDING]"),
+clienttranslate("<i>If you gain this civilization in the middle of the game, proceed to create your private deck of 8 tapestry cards, draw 1 from it (adding it to your current hand), discard your entire hand to gain benefits as if it is your income turn, then draw 2 tapestry cards from your private deck.</i>"),
+                 ],
+                "al" => 8
         ),
         14 => array(
                 "name" => clienttranslate("NOMADS"),
@@ -3347,7 +3378,7 @@ $this->civilizations = array(
                         clienttranslate("For each achievement you've earned, gain [ANY RESOURCE]. If it's your final income turn, instead gain 5 [VP] per achievement earned.")
                 ),
                 "adjustment" => clienttranslate("When starting the game with THE CHOSEN, gain 15 VP per opponent"),
-                "adjustment@a4a8" => clienttranslate("rule changes"),
+                "adjustment@a4a8" => clienttranslate("rules change"),
                 //The first change is, "Whenever you earn an achievement, gain double the VP." The second change is: "At the beginning of your income turns (2-5):
                 //--If there is at least one advancement track on which there are no further-advanced tokens than yours, gain any 1 resource.
                 //--For each advancement track you've completed or where there are no further-advanced tokens than yours, gain 1 VP per opponent."
@@ -3512,7 +3543,7 @@ $this->civilizations = array(
                         4 => ["top" => 88,  "left" => 76.3, "w" => 8.5, "h" => 5.5],
                 ],
                 "adjustment" => clienttranslate("When starting the game with the Traders, gain [ANY RESOURCE] [ANY RESOURCE] and 10 VP."),
-                "adjustment@a4a8" => clienttranslate("rules changes"),
+                "adjustment@a4a8" => clienttranslate("rules change"),
                 "automa" => false,
                 "income_trigger" => ["from" => 2, "to" => 5], //
                 "start_benefit@a8" => ["m" => 2, "g" => BE_TERRITORY], //
@@ -3689,7 +3720,8 @@ $this->civilizations = array(
                         2 => ["top" => 90, "left" => 80, "benefit" => [BE_ANYRES, 'h' => BE_ALIEN_D], "w" => 13, "h" => 8.5],
                 ],
                 "start_benefit" => ["m" => 4, "g" => BE_SPACE], //
-                "income_trigger" => ["from" => 2, "to" => 5, "decline" => false], // 
+                "income_trigger" => ["from" => 2, "to" => 5, "decline" => false], //
+                "al" => 8
         ],
         CIV_INFILTRATORS => [
                 "name" => clienttranslate("INFILTRATORS"),
@@ -3904,7 +3936,7 @@ $this->civilizations = array(
                 "start_benefit" => [BE_TERRITORY, BE_TERRITORY], //
                 "start_benefit@a8" => [0, 0], //
                 "midgame_ben@a8" => ["or" => [174, 173]],
-  
+
 
                 "slot_choice" => "occupied", //
                 "tokens_count" => 4,
@@ -4073,37 +4105,58 @@ $this->income_tracks = array(
 
 $this->card_types = array(
         CARD_TERRITORY => array(
-                "deck" => "deck_territory", "name" => clienttranslate("Territory"),
-                "data" => $this->territory_tiles
+                "deck" => "deck_territory",
+                "discard" => "discard",
+                "name" => clienttranslate("Territory"),
+                "data" => $this->territory_tiles,
+
         ),
         CARD_SPACE => [
-                "deck" => "deck_space", "name" => clienttranslate("Space"),
+                "deck" => "deck_space",
+                "discard" => "discard",
+                "name" => clienttranslate("Space"),
                 "data" => $this->space_tiles
         ],
         CARD_TAPESTRY => array(
-                "deck" => "deck_tapestry", "name" => clienttranslate("Tapestry"),
+                "deck" => "deck_tapestry",
+                "discard" => "discard",
+                "name" => clienttranslate("Tapestry"),
                 "data" => $this->tapestry_card_data
         ),
         CARD_TECHNOLOGY => array(
-                "deck" => "deck_tech", "name" => clienttranslate("Technology"),
+                "deck" => "deck_tech",
+                "discard" => "discard",
+                "name" => clienttranslate("Technology"),
                 "data" => $this->tech_card_data
         ),
         CARD_CIVILIZATION => [
                 "deck" => "deck_civ",
+                "discard" => "discard",
                 "name" => clienttranslate("Civilization"),
                 "data" => $this->civilizations
         ],
         CARD_CAPITAL => array(
                 "deck" => "deck_capital",
+                "discard" => "limbo",
                 "name" => clienttranslate("Capital"),
                 "data" => $this->capitals
         ),
         CARD_DECISION => [
-                "deck" => "deck_decision", "name" => clienttranslate("Decision Card"),
+                "deck" => "deck_decision",
+                "discard" => "discard_decision",
+                "name" => clienttranslate("Decision Card"),
                 "data" => $this->decision_cards
         ],
         CARD_AUTOMACIV => [
-                "deck" => "deck_automaciv", "name" => clienttranslate("Automa Civilization"),
+                "deck" => "deck_automaciv",
+                "discard" => "limbo",
+                "name" => clienttranslate("Automa Civilization"),
                 "data" => $this->automa_civ_cards
+        ],
+        113 => [ // fake cards to represent decks for Mystics new edition
+                "deck" => "deck_13",
+                "discard" => "discard_13",
+                "name" => clienttranslate("Tapestry (Private Deck)"),
+                "data" => []
         ],
 );

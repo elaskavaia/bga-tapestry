@@ -158,7 +158,7 @@ define([
         this.income_track_data = gamedatas.income_track_data;
         this.landmark_data = gamedatas.landmark_data;
 
-        this.benefitQueue = gamedatas.benefitQueue;
+        this.benefitQueueList = gamedatas.benefitQueueList;
         this.benefit_types = gamedatas.benefit_types;
         //{};
         //for (var key in gamedatas.constants) {
@@ -1479,6 +1479,9 @@ define([
             num++;
             this.updateToolbarForBenefit(type);
           }
+          if (args.count > 1) {
+            this.setMainTitle("x "+args.count, "after");
+          }
           if (args.tracks_change) {
             for (var type in args.tracks) {
               var bd = this.benefit_types[type];
@@ -2273,28 +2276,16 @@ define([
 
     onMystic: function (event) {
       dojo.stopEvent(event);
-      if (!this.checkAction("mystic")) {
-        return;
-      }
-
-      var ids = "";
+      var ids = [];
       dojo.forEach(dojo.query(".clicked"), function (node) {
-        var coords = node.id.split("_");
-        ids += coords[2] + ",";
+        var coords = getPart(node.id,2);
+        ids.push(coords);
       });
-      ids = ids.substring(0, ids.length - 1);
-      this.ajaxcall(
-        "/tapestry/tapestry/mystic.html",
-        {
-          lock: true,
-          ids: ids
-        },
-        this,
-        function (result) {
-          dojo.query(".clicked").removeClass("clicked");
-        },
-        function (is_error) {}
-      );
+      this.ajaxcallwrapper('civTokenAdvance', {
+        cid: this.CON.CIV_MYSTICS,
+        spot: 0,
+        extra_js:JSON.stringify(ids) 
+      });
     },
 
     ownsCiv: function (civ_id, player_id = this.player_id) {
@@ -3778,7 +3769,7 @@ define([
         if (!target) continue;
 
         dojo.setAttr(target, `data-deck-count`, count);
-        dojo.setAttr(target, `data-discard-count`, dscount);
+        if (dscount!==undefined) dojo.setAttr(target, `data-discard-count`, dscount);
       }
       console.log("counters=", counters);
     },
@@ -3872,6 +3863,9 @@ define([
       if (civ_id == this.CON.CIV_ISLANDERS) {
         dojo.place('<div id="islanders" class="islanders_map"></div>', div_id);
         this.setupLandOther(1, "islanders", "islanders");
+      }
+      if (civ_id == this.CON.CIV_MYSTICS && this.getAdjustmentLevel()>=8) {
+        dojo.place('<div id="deck_13" class="tapestry_deck"></div>', div_id);
       }
 
       return card_div;
@@ -4672,7 +4666,7 @@ define([
       try {
         var parent = $("breadcrumbs");
 
-        var order = this.benefitQueue;
+        var order = this.benefitQueueList;
         dojo.empty(parent);
 
         if (order && enabled) {
@@ -5588,7 +5582,7 @@ define([
 
       dojo.subscribe("topple", this, "notif_topple");
       dojo.subscribe("benefitQueue", this, "notif_benefitQueue");
-      this.notifqueue.setSynchronous("benefitQueue", 300);
+      //this.notifqueue.setSynchronous("benefitQueue", 300);
 
       dojo.subscribe("income", this, "notif_income");
       dojo.subscribe("undoMove", this, "notif_undoMove");
@@ -5970,7 +5964,8 @@ define([
     },
 
     notif_benefitQueue: function (notif) {
-      this.benefitQueue = notif.args;
+      console.log(notif);
+      this.benefitQueueList = notif.args;
       this.updateBreadCrumbs(true);
     },
 
@@ -6360,7 +6355,7 @@ define([
       const location_to = this.getCardDivLocatonId(card);
       const div = cardsman.findOrCreateDiv(card.card_type_arg, card.card_id, from, card);
       cardsman.slide(div, location_to);
-      if (location_to == cardsman.discard) {
+      if (location_to == cardsman.discard || location_to == 'deck_13') {
         cardsman.fadeOutAndDestroy(div);
       }
       return div;
@@ -6418,6 +6413,9 @@ define([
           }
           if (card_location == "discard") {
             return "tapestry_deck";
+          }
+          if (card_location == "discard_13") {
+            return "deck_13";
           }
           if (card_location == "deck_tapestry") {
             return "tapestry_deck";

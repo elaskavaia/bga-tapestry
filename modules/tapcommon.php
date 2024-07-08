@@ -246,7 +246,7 @@ abstract class tapcommon extends Table {
         if ($args == null)
             $args = [];
         $this->systemAssertTrue("Invalid notification signature", is_array($args));
-        $private = isset($args['_private']);
+        $private = array_get($args,'_private', false);
         unset($args['_private']);
         if (isset($args['_notifType'])) {
             $type = $args['_notifType'];

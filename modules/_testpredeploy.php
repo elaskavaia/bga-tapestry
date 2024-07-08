@@ -11,7 +11,7 @@ require_once "modules/_autoload.php";
 require_once "modules/tests/GameTest.php";
 
 
-$x = new GameTest();
+$x = new GameTest("GameTest");
 $methods = get_class_methods($x);
 foreach ($methods as $method) {
     if (startsWith($method,"test")) {

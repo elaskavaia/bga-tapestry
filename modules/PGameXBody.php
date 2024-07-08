@@ -749,7 +749,7 @@ abstract class PGameXBody extends tapcommon {
         $result['cards'] += $this->getCardsSearch(null, null, 'map', null);
         $result['cards'] += $this->getCardsSearch(null, null, 'civ_21_%', null);
         $inorder = $this->dbGetBenefitQueue();
-        $result['benefitQueue'] = $inorder;
+        $result['benefitQueueList'] = $inorder;
         $result['income_turn_phase'] = $this->getIncomeTurnPhase();
         $result['main_player'] = $this->getGameStateValue('current_player_turn');
         // game variants
@@ -804,21 +804,23 @@ abstract class PGameXBody extends tapcommon {
 
     function getDeckCounters($onedeck = null) {
         $res = [];
-        $decks = ['deck_territory', 'deck_space', 'deck_tapestry', 'deck_tech', 'deck_civ', 'deck_decision'];
-        foreach ($decks as $deck) {
-            if ($onedeck != null && $deck != $onedeck)
+
+        foreach ($this->card_types as $type => $deckinfo) {
+            $deck = $deckinfo['deck'];
+            $discard = $deckinfo['discard'];
+            if ($discard == 'limbo') {
                 continue;
-            $res[$deck] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='$deck' ");
+            }
+            if ($onedeck == null || $onedeck == $deck) {
+                $res[$deck] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='$deck' ");
+                if ($discard == 'discard') {
+                    $discard_name = str_replace("deck", "discard", $deck);
+                    $res[$discard_name] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='$discard' AND card_type=$type");
+                } else {
+                    $res[$discard] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='$discard'");
+                }
+            }
         }
-        // 'discard_territory','discard_space','discard_tapestry','discard_tech','discard_civ'
-
-        $res['discard_tech'] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='discard' AND card_type=4");
-        $res['discard_territory'] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='discard' AND card_type=1");
-        $res['discard_civ'] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='discard' AND card_type=5");
-        $res['discard_tapestry'] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='discard' AND card_type=3");
-        $res['discard_space'] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='discard' AND card_type=2");
-        $res['discard_decision'] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='discard_decision'");
-
         if ($onedeck == null) {
             $playerswithbots = $this->loadPlayersBasicInfosWithBots();
             foreach ($playerswithbots as $player_id => $info) {
@@ -1079,6 +1081,16 @@ abstract class PGameXBody extends tapcommon {
         return $this->getObjectFromDB($sql);
     }
 
+    function getCardInfo($card) {
+        if (is_array($card)) {
+            $info = $card;
+        } else {
+            $info = $this->getCardInfoById($card);
+        }
+        $this->checkNumber(array_get($info, 'card_id'));
+        return $info;
+    }
+
     function getStructureInfoById($structure_id, $aliased = false) {
         if ($aliased)
             $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg, card_location_arg2 location_arg2 ";
@@ -1230,6 +1242,7 @@ abstract class PGameXBody extends tapcommon {
                 return true;
             case BE_TAPESTRY:
                 $this->awardCard($player_id, $count, CARD_TAPESTRY, false, $reason);
+
                 return true;
             case 8:
                 return $this->claimIncomeStructure(BUILDING_MARKET);
@@ -1815,7 +1828,10 @@ abstract class PGameXBody extends tapcommon {
                 return true;
             case 401:
                 // decline - no op
-                return false;
+                return true;
+            case 601:
+                // no op
+                return true;
             case 603:
                 // this removes next benefit from the stack
                 $this->clearCurrentBenefit($ben);
@@ -2070,15 +2086,17 @@ abstract class PGameXBody extends tapcommon {
         $this->DbQuery("UPDATE card SET card_location='$location', card_location_arg='$location_arg' WHERE card_type_arg='$card_class' AND card_type='$card_type'");
     }
 
-    function dbPickCardsForLocation($count, $card_type, $to_location, $player_id = 0, $no_deck_reform = false) {
-        $deck = $this->card_types[$card_type]["deck"];
-        $cards = $this->cards->pickCardsForLocation($count, $deck, $to_location, $player_id, true);
+    function dbPickCardsForLocation($count, $card_type, $to_location, $location_arg = 0, $deck = null, $discard = null) {
+        if ($deck === null) $deck = $this->card_types[$card_type]["deck"];
+        if ($discard === null) $discard = 'discard';
+
+        $cards = $this->cards->pickCardsForLocation($count, $deck, $to_location, $location_arg, true);
         $missing = $count - count($cards);
-        if ($missing && $no_deck_reform == false) {
+        if ($missing) {
             // resuffle discard into deck
-            $this->DbQuery("UPDATE card SET card_location='$deck' WHERE card_type='$card_type' AND card_location='discard'");
+            $this->DbQuery("UPDATE card SET card_location='$deck' WHERE card_type='$card_type' AND card_location='$discard'");
             $this->cards->shuffle($deck);
-            $cards += $this->cards->pickCardsForLocation($missing, $deck, $to_location, $player_id, true);
+            $cards += $this->cards->pickCardsForLocation($missing, $deck, $to_location, $location_arg, true);
             $missing = $count - count($cards);
             $this->notifyAllPlayers('message', clienttranslate('Card deck is reshuffled'), []);
         }
@@ -2096,16 +2114,26 @@ abstract class PGameXBody extends tapcommon {
         return $cards;
     }
 
-    function awardCard($player_id, $count, $card_type, $face_down = false, $reason = '') {
+
+    function awardCard($player_id, $count, $card_type, $face_down = false, $reason = '', $deck = null, $discard = null) {
         if (!$player_id)
             $player_id = $this->getActivePlayerId();
-        $deck = $this->card_types[$card_type]["deck"];
+
+
+        if ($card_type == CARD_TAPESTRY && $this->isAdjustments8() && $this->hasCiv($player_id, CIV_MYSTICS)) {
+            if ($deck === null) $deck = 'deck_13';
+            if ($discard === null) $discard = 'discard_13';
+        }
+
+        if ($deck === null) $deck = $this->card_types[$card_type]["deck"];
+        if ($discard === null) $discard = 'discard';
+
         $type_name = $this->card_types[$card_type]["name"];
         //$this->error("award card $player_id, $count, $card_type, $face_down, $deck|");
         //$dc= $this->getCollectionFromDB("SELECT * FROM card WHERE card_location='$deck'");
         //$this->error(json_encode($dc, JSON_PRETTY_PRINT));
         if ($card_type != CARD_CIVILIZATION) {
-            $cards = $this->dbPickCardsForLocation($count, $card_type, 'hand', $player_id);
+            $cards = $this->dbPickCardsForLocation($count, $card_type, 'hand', $player_id, $deck, $discard);
         } else {
             $cards = $this->dbPickCardsForLocation($count, $card_type, 'draw', $player_id);
         }
@@ -3201,7 +3229,7 @@ abstract class PGameXBody extends tapcommon {
         if ($ben == 181) {
             // discard
             $this->clearCurrentBenefit();
-            $this->effect_discardCard($card_id);
+            $this->effect_discardCard($card_id, $player_id);
         } else {
             $this->playTapestryCard($card_id, $player_id);
         }
@@ -3450,32 +3478,6 @@ abstract class PGameXBody extends tapcommon {
     function checkTrackSpot($track, $spot) {
         $this->checkTrack($track);
         $this->checkSpot($spot);
-    }
-
-    function mystic($ids) {
-        $this->checkAction('mystic');
-        $player_id = $this->getActivePlayerId();
-        // VALIDITY CHECKS
-        $this->systemAssertTrue("user does not have mystics", $this->hasCiv($player_id, CIV_MYSTICS));
-        $era = $this->getCurrentEra($player_id);
-        if ($era <= 1)
-            $this->userAssertTrue(totranslate('You must choose a value from each row'), count($ids) == 4);
-        else
-            $this->userAssertTrue(totranslate('Make a number of predictions equal to number of remaining eras'), count($ids) + $era == 5);
-        $rows = array();
-        $this->clearCurrentBenefit();
-        foreach ($ids as $id) {
-            $index = floor(($id - 1) / 9);
-            if (($index > 3) || (array_key_exists((int) $index, $rows))) {
-                $this->userAssertTrue(totranslate('You must choose a value from each row'));
-            }
-            $pos = (($id - 1) % 9) + 1;
-            $rows[$index] = $pos;
-            $tid = $this->addCube($player_id, "civ_13_$id", CUBE_CIV, 0);
-            $this->notifyMoveStructure('', $tid, [], $player_id);
-            $this->checkMysticPrediction($index + 1, $player_id);
-        }
-        $this->gamestate->nextState('next');
     }
 
     function action_debug(array $args) {
@@ -3886,22 +3888,36 @@ abstract class PGameXBody extends tapcommon {
         $this->action_selectCube($cube_id);
     }
 
-    function effect_discardCard($card_id, $player_id = null, $location = 'discard') {
+    function effect_discardCard($card_id, $player_id = null, $location = null, $private = false) {
         if (is_array($card_id))
             $cards_ids = $card_id;
         else
             $cards_ids = [$card_id];
-        foreach ($cards_ids as $card_id) {
-            if (is_array($card_id))
-                $card_id = $card_id['card_id'];
-            $this->checkNumber($card_id);
-            $this->DbQuery("UPDATE card SET card_location='$location',card_location_arg=0,card_location_arg2=0 WHERE card_id='$card_id'");
 
-            $notif = clienttranslate('${player_name} discards ${card_type_name} ${card_name}');
-            if ($location == 'limbo') $notif = '';
+        $mystic = false;
+        if ($this->isAdjustments8() && $this->hasCiv($player_id, CIV_MYSTICS)) {
+            $mystic = true;
+        }
+
+        if ($location === null) $location = 'discard';
+        $notif = clienttranslate('${player_name} discards ${card_type_name} ${card_name}');
+        if ($location == 'limbo' || $private) $notif = '';
+        foreach ($cards_ids as $card) {
+            $card_info = $this->getCardInfo($card);
+            $card_id = $card_info['card_id'];
+            if ($mystic && $card_info['card_type'] == CARD_TAPESTRY) {
+                $location = 'discard_13';
+            }
+            $this->DbQuery("UPDATE card SET card_location='$location',card_location_arg=0,card_location_arg2=0 WHERE card_id='$card_id'");
             $this->notif("discardCard")->withPlayer($player_id)->withCard($card_id)->notifyAll($notif);
         }
         $this->notifyDeckCounters();
+        if ($location !== 'discard') {
+            $this->notifyDeckCounters($location);
+        }
+        if ($private && $location != 'limbo') {
+            $this->notifyWithName('message', clienttranslate('${player_name} discards ${count} cards'), ['count' => count($cards_ids)], $player_id);
+        }
     }
 
     function effect_moveCard($card_id, $player_id = null, $location = 'hand', $location_arg = 0, $location_arg2 = null, $message = null) {
@@ -4062,6 +4078,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_INFILTRATORS:
             case CIV_TRADERS:
             case CIV_ALCHEMISTS:
+            case CIV_MYSTICS:
                 $inst = $this->getCivilizationInstance($cid, true);
                 $inst->moveCivCube($player_id, $spot, $extra, $civ_args);
                 return;
@@ -4470,7 +4487,7 @@ abstract class PGameXBody extends tapcommon {
 
                 $ben = implode(',', $ben);
             }
-            $this->benefitSingleEntry("$op,$ben", 0, $player_id, 1, $reason);
+            $this->benefitSingleEntry("$op,$ben", 0, $player_id, $op == 'o' ? $count : 1, $reason);
         }
         if ($vp > 0) {
             $this->awardVP($player_id, $vp, $reason);
@@ -5052,6 +5069,8 @@ abstract class PGameXBody extends tapcommon {
                 $this->effect_addToppledShadowOutpost($coord);
             }
         }
+
+        $this->prepareUndoSavepoint();
     }
 
     function coordText($coord) {
@@ -6162,7 +6181,7 @@ abstract class PGameXBody extends tapcommon {
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coord'");
             $this->DbQuery("UPDATE structure SET card_location='land_$coord' WHERE card_id='$outpost_id'");
             $this->notifyMoveStructure(clienttranslate('${player_name} places an outpost on the new territory (MILITARISM) at ${coord_text}'), $outpost_id, [], $player_id);
-            $this->checkMysticConquerBonus();
+            $this->checkConqueredTerritories();
         }
         $this->gamestate->nextState('next');
     }
@@ -6314,7 +6333,7 @@ abstract class PGameXBody extends tapcommon {
                 'outposts' => $affected
             ]);
         }
-        $this->checkMysticConquerBonus();
+        $this->checkConqueredTerritories();
         $this->checkToppleAward($player_id);
         $this->gamestate->nextState('next');
     }
@@ -6379,7 +6398,6 @@ abstract class PGameXBody extends tapcommon {
                 if ($top_id) return $top_id;
                 if ($bottom_id) return $bottom_id;
                 if ($this->isAdjustments8()) return $outpost_id;
-                
             } else if (($oid != $top) && ($oid != $bottom)) {
                 if ($this->isAdjustments8()) return $outpost_id;
                 if ($bThrow)
@@ -6889,73 +6907,7 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-    function getMysticPrediction($category, $player_id) {
-        if (!$this->hasCiv($player_id, CIV_MYSTICS))
-            return null;
-        $civ_tokens = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location LIKE 'civ_13\\_%'");
-        if (count($civ_tokens) == 0)
-            return null;
-        $prediction = 0;
-        $awarded = false;
-        $category_name = 'unknown';
-        $actual = 0;
-        $prediction = -1;
-        $civ_location = null;
-        $cube_id = null;
-        switch ($category) {
-            case 1:
-                $actual = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='4'");
-                $category_name = clienttranslate('Tech cards');
-                break;
-            case 2:
-                $actual = $this->getDistrictCount($player_id);
-                $category_name = clienttranslate('Complete districts');
-                break;
-            case 3:
-                $actual = $this->getNumberOfControlledTerritories($player_id);
-                $category_name = clienttranslate('Controlled territories');
-                break;
-            case 4:
-                $actual = $this->getFinishedTracks($player_id);
-                $category_name = clienttranslate('Completed tracks');
-                break;
-            default:
-                return null;
-        }
-        foreach ($civ_tokens as $ct) {
-            $holder = explode("_", $ct['card_location'])[2];
-            $awarded = ($ct['card_location_arg2']) ? true : false;
-            $civ_location = $ct['card_location'];
-            $cube_id = $ct['card_id'];
-            if (($category == 1) && ($holder < 10)) { // TECH CARDS
-                $prediction = $holder;
-                break;
-            }
-            if (($category == 2) && ($holder > 9) && ($holder < 19)) { // DISTRICTS
-                $prediction = $holder - 9;
-                break;
-            }
-            if (($category == 3) && ($holder > 18) && ($holder < 28)) { // CONTROLLED OR CONQUERED TERRITORY?
-                $prediction = $holder - 18;
-                break;
-            }
-            if (($category == 4) && ($holder > 27)) { // TECH TRACKS
-                $prediction = $holder - 27;
-                break;
-            }
-        }
-        return array(
-            'awarded' => $awarded, 'value' => $prediction, 'cube_id' => $cube_id, 'location' => $civ_location,
-            'actual' => $actual, 'category_name' => $category_name
-        );
-    }
 
-    function checkMysticConquerBonus() {
-        $player_id = $this->getUniqueValueFromDB("SELECT card_location_arg FROM card WHERE card_type='5' AND card_type_arg='13' AND card_location='hand'");
-        if ($player_id == null)
-            return;
-        $this->checkMysticPrediction(3, $player_id);
-    }
 
     function getFinishedTracks($player_id) {
         $finished_tracks = 0;
@@ -6971,25 +6923,10 @@ abstract class PGameXBody extends tapcommon {
         // Completed track - check for mystic bonus
         if (!$player_id)
             $player_id = $this->getActivePlayerId();
-        if (!$this->hasCiv($player_id, CIV_MYSTICS))
-            return;
-        //What did they predict?
-        $mystic_prediction = $this->getMysticPrediction($category, $player_id);
-        if ($mystic_prediction == null)
-            return;
-        $prediction = $mystic_prediction['value'];
-        $awarded = $mystic_prediction['awarded'];
-        $actual = $mystic_prediction['actual'];
-        // Award
-        if (($prediction == $actual) && (!$awarded)) {
-            $this->notifyAllPlayers("message", clienttranslate('${player_name} achieves their MYSTICS prediction: ${category_name}'), array(
-                'player_id' => $player_id, 'player_name' => $this->getPlayerNameById($player_id),
-                'category_name' => $mystic_prediction['category_name'], 'i18n' => ['category_name']
-            ));
-            $civ_location = $mystic_prediction['location'];
-            $this->DbQuery("UPDATE structure SET card_location_arg2=1 WHERE card_location='$civ_location'");
-            $this->queueBenefitNormal(BE_ANYRES, $player_id, reason_civ(CIV_MYSTICS));
-        }
+
+        /** @var Mystics */
+        $inst = $this->getCivilizationInstance(CIV_MYSTICS, true);
+        return $inst->checkMysticPrediction($category, $player_id);
     }
 
     function checkPrivateAchievement($category, $player_id = null, $civ = CIV_CHOSEN, $data = null) {
@@ -7191,23 +7128,30 @@ abstract class PGameXBody extends tapcommon {
         $comp = $this->getCompositeBenefit($benefit_data);
         $op = $comp['op'];
         $types = $comp['types'];
+
         if ($op == 'standard' && $bid == $types[0]) {
             $track = $args['tracks'][$bid]['track'];
+
             $this->action_selectTrackSpot($track, $spot);
             return;
         }
         $this->systemAssertTrue("wrong category $op", $op == 'or');
-        $this->benefitCashed($benefit_data['benefit_id']);
         $player_id = $benefit_data['benefit_player_id'];
         $data = $benefit_data['benefit_data'];
         $cat = $benefit_data['benefit_category'];
+        $count = (int) $benefit_data['benefit_quantity'];
+
         $this->systemAssertTrue("Wrong player $player_id for benefit choice", $this->getActivePlayerId() == $player_id);
         $this->systemAssertTrue("Invalid benefit logged $bid $cat $data", $types);
         $this->systemAssertTrue("invalid benefit choice $bid", in_array($bid, $types));
+
+
         $change = array_get($args, 'tracks_change', 0);
         $this->setGameStateValue('cube_choice', $spot - $change);
-        $this->processBenefitChoice($bid);
+
+        $this->reinjectCompositeBenefitWithChoiceRemoved($bid, $benefit_data, $count - 1);
         $this->queueBenefitInterrupt($bid, $player_id, $data);
+
         $this->gamestate->nextState('next');
     }
 
@@ -7217,89 +7161,46 @@ abstract class PGameXBody extends tapcommon {
         $benefit_data = $this->getCurrentBenefit();
         $comp = $this->getCompositeBenefit($benefit_data);
         $op = $comp['op'];
-        $this->systemAssertTrue("wrong category $op", $op == 'choice');
-        $this->benefitCashed($benefit_data['benefit_id']);
         $player_id = $benefit_data['benefit_player_id'];
         $data = $benefit_data['benefit_data'];
-        $cat = $benefit_data['benefit_category'];
+        $this->systemAssertTrue("wrong category $op", $op == 'choice');
         $this->systemAssertTrue("wrong player $player_id", $this->getActivePlayerId() == $player_id);
-        $types = $comp['types'];
-        if ($types)
-            $options = $types;
-        else
-            $options = $comp['ids'];
-        $or_id = $benefit_data['benefit_id'];
-        if (($key = array_search($bid, $options)) !== false) {
-            unset($options[$key]);
-            $options = array_values($options);
-        } else {
-            $this->systemAssertTrue("illegal benefit choice $bid $data $cat");
-        }
-        $this->interruptBenefit();
-        if ($types) {
-            $this->queueBenefitNormal($bid, $player_id, $data);
-            if (count($options) > 1)
-                $this->queueBenefitNormal(['choice' => $options], $player_id, $data);
-            else
-                $this->queueBenefitNormal($options, $player_id, $data);
-        } else { // XXX remove
-            if (count($options) <= 1) {
-                $this->benefitCashed($or_id);
-                $this->DbQuery("UPDATE benefit SET benefit_prerequisite='0' WHERE benefit_id='$bid'");
-            } else {
-                $this->DbQuery("UPDATE benefit SET benefit_prerequisite='0' WHERE benefit_id='$bid'");
-                $this->DbQuery("UPDATE benefit SET benefit_data='" . implode(',', $options) . "' WHERE benefit_id='$or_id'");
-            }
-        }
-        $this->notifyBenefitQueue();
+
+        $this->reinjectCompositeBenefitWithChoiceRemoved($bid, $benefit_data);
+        $this->queueBenefitInterrupt($bid, $player_id, $data);
+
         $this->gamestate->nextState('next');
     }
 
-    function processBenefitAdjustment($selected_ben) {
-        // this is special benefit that removes prviously selected track from the next choice
-        if ($selected_ben == 401)
-            return 1; // declined
-        $selected_track = (int) $this->getRulesBenefit($selected_ben, 't', 0);
-        if ($selected_track == 0) {
-            $this->error("ben601: cannot determine selected track $selected_ben=>$selected_track");
-            return 2;
+    function reinjectCompositeBenefitWithChoiceRemoved($selected_ben, $benefit_data, $count = 1) {
+        $this->benefitCashed($benefit_data);
+        if ($count <= 0) return;
+
+        $comp = $this->getCompositeBenefit($benefit_data);
+        $op = $comp['op'];
+        $options = $comp['types'];
+        $player_id = $benefit_data['benefit_player_id'];
+        $data = $benefit_data['benefit_data'];
+
+        if (($key = array_search($selected_ben, $options)) !== false) {
+            unset($options[$key]);
+            $options = array_values($options);
+        } else {
+            $cat = $benefit_data['benefit_category'];
+            $this->systemAssertTrue("illegal benefit choice $selected_ben $data $cat");
         }
-        $next_benefit = $this->getCurrentBenefitWithInfo();
-        if ($next_benefit) {
-            $bid = $next_benefit['benefit_id'];
-            $comp = $this->getCompositeBenefit($next_benefit);
-            if ($comp['op'] == 'or') {
-                foreach ($comp['types'] as $ben) {
-                    $track = (int) $this->getRulesBenefit($ben, 't', 0);
-                    if ($track == 0) {
-                        $this->error("ben601: cannot determine selected track for $ben");
-                        return 3;
-                    }
-                    if ($track == $selected_track) {
-                        $options = $comp['types'];
-                        if (($key = array_search($ben, $options)) !== false) {
-                            unset($options[$key]);
-                            $options = array_values($options);
-                        }
-                        $cat = "o," . implode(',', $options);
-                        //$this->debugConsole("Benefit updated $bid $cat");
-                        $this->DbQuery("UPDATE benefit SET benefit_category='$cat' WHERE benefit_id = $bid");
-                        $this->notifyBenefitQueue();
-                        return 0;
-                    }
-                }
-            }
-        }
-        return 4;
+
+
+        $this->interruptBenefit();
+
+        if (count($options) > 1)
+            $this->queueBenefitNormal([$op => $options], $player_id, $data, $count);
+        else
+            $this->queueBenefitNormal($options, $player_id, $data, $count);
     }
 
-    function processBenefitChoice($selected_ben) {
-        $next_benefit = $this->getCurrentBenefit();
-        if (array_get($next_benefit, 'benefit_type', 0) == 601) {
-            $this->benefitCashed($next_benefit);
-            $this->processBenefitAdjustment($selected_ben);
-        }
-    }
+
+
 
     function checkValidIncomeType($type) {
         return (($type < 5) && ($type > 0));
@@ -8062,7 +7963,7 @@ abstract class PGameXBody extends tapcommon {
                     // XXX validate desttype vs $dest
                     $this->effect_moveCard($items, $player_id, 'hand', $dest);
                 } else
-                    $this->effect_discardCard($items, $player_id);
+                    $this->effect_discardCard($items, $player_id, 'discard', true);
                 break;
             case BE_TECH_CARD: // tech cards.
                 $items = $this->getCardsInHand($player_id, CARD_TECHNOLOGY, $params);
@@ -9387,6 +9288,9 @@ abstract class PGameXBody extends tapcommon {
                     $era = $this->getCurrentEra($player_id);
                     if ($era < 5) // in era 5 - no effect
                         $this->benefitCivEntry(CIV_MYSTICS, $player_id);
+                } else if ($this->isAdjustments8()) {
+                    $civinst = $this->getCivilizationInstance($civ, true);
+                    return $civinst->setupCiv($player_id, $start);
                 } else {
                     $this->benefitCivEntry(CIV_MYSTICS, $player_id);
                 }
@@ -10317,9 +10221,7 @@ abstract class PGameXBody extends tapcommon {
         $civs = $this->getAllCivs($player_id);
         foreach ($civs as $info) {
             $civ = $info['card_type_arg'];
-            if ($civ == (CIV_MYSTICS)) {
-                $this->finalMysticsScoring($player_id);
-            } else if ($civ == (CIV_ISLANDERS)) {
+            if ($civ == (CIV_ISLANDERS)) {
                 $this->finalIslandersScoring();
             } else if ($civ == (CIV_RIVERFOLK)) {
                 $this->finalRiverfolkScoring($player_id);
@@ -10401,31 +10303,7 @@ abstract class PGameXBody extends tapcommon {
         $this->setStat(count($civs), 'game_card_civ', $player_id);
     }
 
-    function finalMysticsScoring($player_id = null) {
-        if (!$player_id)
-            $player_id = $this->getActivePlayerId();
-        for ($i = 1; $i <= 4; $i++) {
-            $data = $this->getMysticPrediction($i, $player_id);
-            if ($data == null)
-                continue; // ?
-            $prediction = $data['value'];
-            if ($prediction == -1)
-                continue; // no prediction
-            $real = $data['actual'];
-            $category_name = $data['category_name'];
-            $this->notifyAllPlayers('message', clienttranslate('Final MYSTICS prediction for ${category_name}: predicted ${predicted}, actual ${actual}'), [
-                'i18n' => ['category_name'], 'category_name' => $category_name, 'predicted' => $prediction,
-                'actual' => $real
-            ]);
-            if ($real == $prediction) {
-                $reason = reason_civ(CIV_MYSTICS);
-                $count = 10;
-                if ($this->isAdjustments4())
-                    $count = 20;
-                $this->awardVP($player_id, $count, $reason);
-            }
-        }
-    }
+
 
     function finalIslandersScoring($doscore = true) {
         $player_id = $this->getActivePlayerId();
@@ -10627,6 +10505,10 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
+    function checkConqueredTerritories() {
+        $this->checkMysticPrediction(3 /* controlled territories */, $this->getCivOwner(CIV_MYSTICS));
+    }
+
     function effect_endOfConquer($player_id = null) {
         $this->clearCurrentBenefit(141);
         //$this->debugConsole("end of conquer for $player_id");
@@ -10639,7 +10521,7 @@ abstract class PGameXBody extends tapcommon {
         $owners = $map_data['map_owners'];
         $this->systemAssertTrue('conquer action can result only in one owner ' . toJson($map_data), count($owners) == 1);
         $owner = array_shift($owners);
-        $this->checkMysticConquerBonus();
+        $this->checkConqueredTerritories();
         // AWARD 2: Somebody has been toppled, have they done it twice (must be shown on board, e.g. no history.)
         $toppled = (count($map_data['map_occupants']) == 2);
         if ($toppled) {

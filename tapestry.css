@@ -1044,7 +1044,8 @@ div[data-income="0"] #subtitle_bar {
   background-position: 49% 71%;
   background-size: 335% auto;
 }
-.icon_ben_21 {
+.icon_ben_21,.icon_ben_73, .icon_ben_74, .icon_ben_75 {
+  /* cinquer */
   background-position: 0% 99%;
   background-image: url("img/advance.png");
   background-size: 266%;
@@ -1073,6 +1074,7 @@ div[data-income="0"] #subtitle_bar {
 
 .icon_ben_26,
 .icon_ben_20,
+.icon_ben_127,
 .icon_ben_27 {
   background-position: -7% 37%;
   background-image: url("img/advance.png");
@@ -1113,7 +1115,7 @@ div[data-income="0"] #subtitle_bar {
   background-size: 400%;
 }
 
-.icon_ben_110 {
+.icon_ben_110,.icon_ben_144 {
   background-position: 77% 13%;
   background-image: url("img/advance.png");
   background-size: 620%;

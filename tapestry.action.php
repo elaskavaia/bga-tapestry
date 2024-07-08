@@ -78,14 +78,6 @@ class action_tapestry extends APP_GameAction
         $this->ajaxResponse();
     }
 
-    public function mystic()
-    {
-        $this->setAjaxMode();
-        $ids = $this->getArg("ids", AT_numberlist, true);
-        $this->game->mystic(explode(',', $ids));
-        $this->ajaxResponse();
-    }
-
 
     public function selectTrackSpot()
     {
