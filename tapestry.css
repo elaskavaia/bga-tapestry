@@ -1698,6 +1698,10 @@ div[data-income="0"] #subtitle_bar {
   pointer-events: none;
 }
 
+#setup_choices .civilization .tapestry_deck {
+  display: none;
+}
+
 .tooltipimage .space_tile,
 .tooltipimage .territory_tile {
   width: calc(91px * 2);

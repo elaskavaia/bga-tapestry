@@ -10,14 +10,6 @@ abstract class tapcommon extends Table {
         parent::__construct();
     }
 
-    public static function getUniqueValueFromDB($sql, $low_priority_select = false) {
-        return parent::getUniqueValueFromDB($sql, $low_priority_select);
-    }
-
-    public function getCollectionFromDB( $sql, $bSingleValue=false, $low_priority_select=false ) {
-        return parent::getCollectionFromDB( $sql, $bSingleValue, $low_priority_select);
-    }
-
     function prepareUndoSavepoint($first = false) {
         //$undo_moves_player = $this->getGameStateValue('current_player_turn');
         if ($this->undoSaveOnMoveEndDup) return; // was already saved

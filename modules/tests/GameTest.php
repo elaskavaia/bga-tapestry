@@ -169,4 +169,14 @@ final class GameTest extends TestCase {
         $sben = $inst->getRules('start_benefit', null);
         $this->assertNotNull($sben);
     }
+
+    function testMystics() {
+        $game = $this->game;
+        $civ = CIV_TRADERS;
+        $game->doAdjustMaterial(2, 8);
+        $inst = $game->getCivilizationInstance($civ, true);
+        $this->assertNotNull($inst);
+        $sben = $inst->getRules('start_benefit', null);
+        $this->assertNotNull($sben);
+    }
 }
