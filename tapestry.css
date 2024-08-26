@@ -3687,6 +3687,9 @@ div[data-income="0"] #subtitle_bar {
   height: 50%;
   top: 45%;
 }
+.income_mat_automa .tapestry_slot1 {
+  width: 11%;
+}
 
 .income_mat_automa .tapestry_slot2 {
   left: 21%;

@@ -28,10 +28,6 @@ class Relentless extends AbsCivilization {
         return array('tokens' => $tokens, 'outposts' => []);
     }
 
-    function triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance) {
-        return true;
-    }
-
     function argCivAbilitySingle($player_id, $benefit) {
         $civ = $this->civ;
         $data = $benefit;

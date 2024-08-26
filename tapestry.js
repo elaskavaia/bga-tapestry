@@ -426,6 +426,10 @@ define([
           // ADD TAPESTRY ERA CARDS
           this.moveCards(player_id, player_data.tapestry);
 
+
+
+
+
           // Income mat resource zones
           for (var a = 0; a < 9; a++) {
             dojo.place(this.format_block("jstpl_resource_zone", { rzid: player_id + "_" + a }), "resource_track_" + player_id);
@@ -454,6 +458,15 @@ define([
             dojo.query(".tech_slot_1 #tech_card_" + slots[c]).addClass("update_possible");
           }
         }
+
+        this.connectClass("tapestry_slot", "onclick", (event) => {
+          dojo.stopEvent(event);
+          var tid = event.target.id;
+          if (!this.isActiveSlot(tid)) return;
+
+          this.clientStateArgs.extra = tid;
+          this.ajaxClientStateAction();
+        });
 
         if (gamedatas.cards) {
           for (var id in gamedatas.cards) {
@@ -936,6 +949,17 @@ define([
                 dojo.addClass(node, "active_slot");
               }
             });
+            break;
+          case this.CON.CIV_ADVISORS:
+            if (this.getAdjustmentLevel() >= 8) {
+              const targets = bene.targets;
+              for (var li in targets) {
+                dojo.addClass(targets[li], "active_slot");
+              }
+              this.clientStateArgs.action = "civTokenAdvance";
+              this.clientStateArgs.cid = civ;
+              this.clientStateArgs.spot = 0;
+            }
             break;
           case 7:
             break;
@@ -1720,6 +1744,28 @@ define([
             // discard
             this.setDescriptionOnMyTurn(_("${you} must discard a tapestry card from your hand"));
             dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot");
+          } else if (args.bid == 338) { //BE_ADVISORS_OVERTAKE_ADVISE
+            this.setDescriptionOnMyTurn(_("${you} must select a when played tapesry card to give to opponent (ADVISORS)"));
+            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").forEach(node=>{
+
+              const tap_type = node.dataset.typeArg;
+              const info = this.tapestry_data[tap_type];
+              if (info.type == 'now') {
+                node.classList.add('active_slot');
+              };
+            });
+          } else if (args.bid == 339) { //BE_ADVISORS_OVERTAKE_ADVISE_SELECTED
+            this.setDescriptionOnMyTurn(_("${you} must select to play your tapestry card or one proposed by ADVISORS"));
+            const node1 = $(`card_${args.targets[0]}`);
+            node1.classList.add('active_slot');
+            const node2 = $(`card_${args.targets[1]}`);
+            node2?.classList.add('active_slot');
+            this.addActionButton("button_1", _("Accept"), () => {
+              this.ajaxcallwrapper("playCard", { card_id: args.targets[1] });
+            });
+            this.addActionButton("button_0", _("Decline"), () => {
+              this.ajaxcallwrapper("playCard", { card_id: args.targets[0] });
+            });
           } else {
             dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot");
           }
@@ -6211,7 +6257,7 @@ define([
           if (location.startsWith("land") && this.ownsCiv(this.CON.CIV_INFILTRATORS, player_id)) {
             location = card.card_location;
           }
-          if (location.startsWith("tapestry")) {
+          if (location.startsWith("tapestry") && !$(location)) {
             location = "card_" + getPart(location, 1);
           }
           if (!$(location)) {

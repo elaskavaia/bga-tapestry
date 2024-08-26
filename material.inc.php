@@ -154,6 +154,12 @@ if (!defined('TAPESTRY')) { // guard since this included multiple times
         define("BE_CONQ_DIE_RED", 331);
         define("BE_RESEARCH_DIE", 332);
         define("BE_MYSTIC_TAP", 333);
+        define("BE_MYSTIC_TAP_GAIN", 334);
+        define("BE_ADVISORS_FALLBACK", 335);
+        define("BE_ADVISORS_OVERTAKE", 336);
+        define("BE_ADVISORS_OVERTAKE_APPROVE", 337);
+        define("BE_ADVISORS_OVERTAKE_ADVISE", 338);
+        define("BE_ADVISORS_OVERTAKE_ADVISE_SELECTED", 339);
         define("BE_OP_UNIQUE", 600);
 
         // TERRAIN
@@ -1741,6 +1747,26 @@ $this->benefit_types = [ //
  334 => [  // BE_MYSTIC_TAP_GAIN
   'name' => clienttranslate("Mystic tapestry setup"),
   'civ'=>CIV_MYSTICS,
+],
+ 335 => [  // BE_ADVISORS_FALLBACK
+  'name' => clienttranslate("Advisors fallback benefit"),
+  'alias' => [BE_ANYRES, BE_INVENT, BE_TAPESTRY, BE_TERRITORY],
+],
+ 336 => [  // BE_ADVISORS_OVERTAKE
+  'name' => clienttranslate("Advisors tapestry overtake"),
+  'civ'=>CIV_ADVISORS,
+],
+ 337 => [  // BE_ADVISORS_OVERTAKE_APPROVE
+  'name' => clienttranslate("Approve Tapestry card"),
+  'civ'=>CIV_ADVISORS,
+],
+ 338 => [  // BE_ADVISORS_OVERTAKE_ADVISE
+  'name' => clienttranslate("Advise on new Tapestry card (WHEN PLAYED)"),
+  'civ'=>CIV_ADVISORS,
+],
+ 339 => [  // BE_ADVISORS_OVERTAKE_ADVISE_SELECTED
+  'name' => clienttranslate("Opponent decides on Tapestry card"),
+  'civ'=>CIV_ADVISORS,
 ],
  502 => [  //
   'name' => clienttranslate("2 VP"),
@@ -3693,11 +3719,15 @@ clienttranslate("<i>If you gain this civilization in the middle of the game, pro
                 ],
                 "start_benefit" => ["m" => 3, "g" => BE_TAPESTRY], //
                 "income_trigger" => ["from" => 2, "to" => 5, "decline" => false], //
+                "income_trigger@a8" => ["from" => 1, "to" => 4, "decline" => true], //
                 "midgame_setup" => true,
+                "midgame_ben@a8" => ["or" => [174, 173]],
                 "slot_choice" => "any",
                 "slots_description" => '',
                 "slots" => [1 => ["top" => 80, "left" => 80, "benefit" => [136], "w" => 13, "h" => 8.5],], //
                 "exp" => "PP",
+                "automa" => false,
+                "al" => 8,
         ],
         CIV_ALIENS => [
                 "name" => clienttranslate("ALIENS"),

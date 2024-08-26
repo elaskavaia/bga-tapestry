@@ -19,6 +19,7 @@
 require_once('tapcommon.php');
 require_once "civs/AbsCivilization.php";
 require_once "civs/BasicCivilization.php";
+require_once "civs/Advisors.php";
 
 abstract class PGameXBody extends tapcommon {
     // material
@@ -428,7 +429,7 @@ abstract class PGameXBody extends tapcommon {
         }
         $this->cards->createCards($cards, 'deck_civ');
         $this->cards->shuffle('deck_civ');
-        //$this->debug_insertCard(CARD_CIVILIZATION, CIV_HISTORIANS);
+    
         // Capitals
         $cards = array();
         foreach ($this->capitals as $cid => $c) {
@@ -2798,28 +2799,51 @@ abstract class PGameXBody extends tapcommon {
         return $this->getGameStateValue('income_turn_phase');
     }
 
-    function playTapestryCard($card_id, $player_id = null) {
+    function playTapestryCard($card_id, $player_id = null, $canOvertake = true) {
         if (!$player_id)
             $player_id = $this->getActivePlayerId();
-        $opargs = $this->argTapestryCard();
+
         $era = $this->getCurrentEra($player_id);
         $ben = $this->getCurrentBenefitType();
-        $era_string = 'era' . $era;
-        $tap_type = $this->getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_id='$card_id'");
-        $card_effect = array_get($this->tapestry_card_data[$tap_type], 'benefit', null);
-        if ($ben) {
-            $this->userAssertTrue(totranslate('Cannot play tapestry card from hand, select a card to copy from the mat'), $ben != 112);
-            $this->clearCurrentBenefit($ben);
-        } else {
-            $this->warn("suspicious tapestry played no benefit $card_id era $era");
+
+        $card = $this->getCardInfoById($card_id);
+        $tap_type = $card['card_type_arg'];
+        $tapvar = $this->getRulesCard(CARD_TAPESTRY, $tap_type, 'type');
+        $card_effect = $this->getRulesCard(CARD_TAPESTRY, $tap_type);
+
+        $advisors = new Advisors($this);
+
+        if ($ben == BE_ADVISORS_OVERTAKE_ADVISE) {
+            return $advisors->playAdvise($player_id, $card_id);
         }
+        if ($ben == BE_ADVISORS_OVERTAKE_ADVISE_SELECTED) {
+            return $advisors->playAdviseResponse($player_id, $card_id);
+        }
+
+        if ($canOvertake) {
+            if ($advisors->isAdvisorsOvertake($card_id, $player_id, $ben, $era)) {
+                return;
+            }
+        }
+
+        $opargs = $this->argTapestryCard();
+
+        $this->systemAssertTrue("ERR:playTapestryCard:01", $ben);
+
+        if ($ben == 112) $this->userAssertTrue(totranslate('Cannot play tapestry card from hand, select a card to copy from the mat'));
+        $this->clearCurrentBenefit($ben);
+
+
+
         if ($ben == 64) {
             $message = clienttranslate('${player_name} over-plays previous tapestry card with ${card_name}');
         } else
             $message = clienttranslate('${player_name} plays a tapestry card ${card_name}');
+
+
+
         if ($era == 1 && $ben == 64 && $this->hasCiv($player_id, CIV_HERALDS)) {
             if ($this->isAdjustments4or8()) {
-                $tapvar = $this->tapestry_card_data[$tap_type]['type'];
                 $allowed = true;
                 if ($tapvar == "now" || $tapvar == "cont") {
                     $allowed = $tap_type != 33; // not RENAISSANCE
@@ -2833,6 +2857,9 @@ abstract class PGameXBody extends tapcommon {
                 $message = clienttranslate('${player_name} plays a tapestry card ${card_name} over Maker Of Fire');
             }
         }
+
+
+
         $prev = $this->getLatestTapestry($player_id, $era);
         if ($prev) {
             $prev_id = $prev['card_id'];
@@ -2843,7 +2870,9 @@ abstract class PGameXBody extends tapcommon {
             ]);
             $this->notifyWithName("tapestrycard", '', $args, $player_id);
         }
+        $era_string = "era$era";
         $this->DbQuery("UPDATE card SET card_location='$era_string',card_location_arg='$player_id' WHERE card_id='$card_id'");
+
         $tyranny = array_get($opargs, 'tyranny');
         if ($tyranny) {
             $just_played = array_get($opargs, 'just_played');
@@ -2863,6 +2892,10 @@ abstract class PGameXBody extends tapcommon {
             $this->queueBenefitInterrupt($card_effect, $player_id, reason_tapestry($tap_type));
         }
     }
+
+
+
+
 
     function research($reason) {
         $this->rollScienceDie2($reason);
@@ -4079,6 +4112,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_TRADERS:
             case CIV_ALCHEMISTS:
             case CIV_MYSTICS:
+            case CIV_ADVISORS:
                 $inst = $this->getCivilizationInstance($cid, true);
                 $inst->moveCivCube($player_id, $spot, $extra, $civ_args);
                 return;
@@ -4202,7 +4236,7 @@ abstract class PGameXBody extends tapcommon {
             $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid));
             return;
         }
-        if ($cid == CIV_ADVISORS || $cid == CIV_RECYCLERS || $cid == CIV_ISLANDERS) {
+        if ($cid == CIV_RECYCLERS || $cid == CIV_ISLANDERS) {
             $benefit = $slots_choice["benefit"];
             $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid));
             return;
@@ -4361,7 +4395,7 @@ abstract class PGameXBody extends tapcommon {
         switch ($ben) {
             case BE_TAPESTRY:
                 $civ_owner = $this->getCivOwner(CIV_ADVISORS);
-                if ($civ_owner && $civ_owner != $player_id && !$this->isIncomeTurn()) {
+                if ($civ_owner && $civ_owner != $player_id && !$this->isIncomeTurn() && $this->getAdjustmentVariant() < 8) {
                     $nei = $this->getPlayerNeighbours($civ_owner, false);
                     if (!in_array($player_id, $nei)) return true;
                     if ($this->getCardCountInHand($civ_owner, CARD_TAPESTRY) == 0) return true;
@@ -4371,13 +4405,11 @@ abstract class PGameXBody extends tapcommon {
                         $this->benefitSingleEntry('standard', $ben, $player_id, 1, $reason);
                     }
                     return false;
-                } else {
-                    return true;
                 }
-            case BE_HOUSE: {
-                    $this->triggerPreGainStructure($player_id, BUILDING_HOUSE, $ben);
-                    return true;
-                }
+                return true;
+            case BE_HOUSE:
+                $this->triggerPreGainStructure($player_id, BUILDING_HOUSE, $ben);
+                return true;
         }
         $landmark_id = $this->getRulesBenefit($ben, 'lm');
         if ($landmark_id) {
@@ -8328,6 +8360,17 @@ abstract class PGameXBody extends tapcommon {
                 $res['tyranny'] = $tyranny;
             }
         }
+    
+        $ben = $res['bid'];
+        switch ($ben) {
+            case BE_ADVISORS_OVERTAKE_ADVISE_SELECTED:
+                $benefit_data = $this->getCurrentBenefit();
+                $benefit_data_2 = $this->getCurrentBenefit(BE_ADVISORS_OVERTAKE_ADVISE);
+                $card1 = getReasonPart($benefit_data_2['benefit_data'],4);
+                $card2 = getReasonPart($benefit_data['benefit_data'],4);
+                $res['targets'] = [$card1, $card2];
+                break;
+        }
         return $res;
     }
 
@@ -8484,6 +8527,7 @@ abstract class PGameXBody extends tapcommon {
                 case CIV_COLLECTORS:
                 case CIV_INFILTRATORS:
                 case CIV_ALCHEMISTS:
+                case CIV_ADVISORS:
                     return $civinst->argCivAbilitySingle($player_id, $benefit);
                 case CIV_ENTERTAINERS:
                     $data['slots'] = array_keys($slots);
@@ -8503,15 +8547,6 @@ abstract class PGameXBody extends tapcommon {
                 case CIV_CHOSEN:
                     $token_data = $this->getStructuresOnCiv($civ, BUILDING_CUBE);
                     $data['slots'] = $this->getLinkedSlots($civ, $token_data);
-                    break;
-                case CIV_ADVISORS:
-                    $choices = [];
-                    $choices[0]['benefit'] = [];
-                    for ($i = 1; $i <= 3; $i++) {
-                        $choices[0]['benefit'][] = ['p' => 137, 'g' => 505];
-                    }
-                    $data['slots_choice'] = $choices;
-                    $data['decline'] = true;
                     break;
                 case CIV_UTILITARIENS:
                     $data['slots_choice'] = [];
@@ -8552,6 +8587,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_INFILTRATORS:
             case CIV_TRADERS:
             case CIV_ALCHEMISTS:
+            case CIV_ADVISORS:
                 return $civinst->argCivAbilitySingle($player_id, $benefit);
 
             case CIV_LEADERS:
@@ -8576,17 +8612,6 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case CIV_ARCHITECTS:
                 $data['capital'] = $this->argPlaceStructure(BUILDING_CUBE);
-                break;
-            case CIV_ADVISORS:
-                $cards = $this->getCardsInHand($player_id, CARD_TAPESTRY);
-                if (count($cards) > 4) {
-                    $count = count($cards) - 4;
-                    $data['slots_choice'][1]['benefit'] = [136,  array_fill(0, $count, 181), BE_ANYRES];
-                    $data['title'] = clienttranslate('Discard down to 4 tapestry cards and gain any resource');
-                } else {
-                    $data['title'] = clienttranslate('You have 4 or less tapestry cards in hand');
-                    $data['slots_choice'][1]['benefit'] = [136]; // 1 vp per tapestry in hand
-                }
                 break;
             case CIV_MERRYMAKERS:
                 $income_turn = $this->getCurrentEra($player_id);
@@ -10059,6 +10084,10 @@ abstract class PGameXBody extends tapcommon {
             }
             return;
         }
+        if ($type == BE_ADVISORS_OVERTAKE_ADVISE_SELECTED) { 
+            // player choise between two cards
+            return;
+        }
         if ($type == BE_PLAY_TAPESTY_INCOME) {
             if ($era < 2 || $era > 4) { // Income tap in ROUNDS 2-4 ONLY
                 $this->clearCurrentBenefit($type);
@@ -10075,14 +10104,13 @@ abstract class PGameXBody extends tapcommon {
         }
         // If only one card, play it.
         if ((count($tap_cards) == 1) && !$can_decline) {
-            foreach ($tap_cards as $tcid => $card) {
-                if (TAP_ESPIONAGE == $card['card_type_arg']) {
-                    break; // cannot auto-play
-                }
-                $this->playTapestryCard($card['card_id'], $player_id);
-                $this->nextStateBenefitManager();
-                return;
+            $card = reset($tap_cards);
+            if (TAP_ESPIONAGE == $card['card_type_arg']) {
+                return; // cannot auto-play
             }
+            $this->playTapestryCard($card['card_id'], $player_id);
+            $this->nextStateBenefitManager();
+            return;
         }
     }
 

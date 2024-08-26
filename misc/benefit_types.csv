@@ -221,6 +221,11 @@ id|-con|name|r|t|php
 332|BE_RESEARCH_DIE|Gain research die benefit|||'die'=>'research','r'=>'die'
 333|BE_MYSTIC_TAP|Mystic tapestry ability|||'civ'=>CIV_MYSTICS
 334|BE_MYSTIC_TAP_GAIN|Mystic tapestry setup|||'civ'=>CIV_MYSTICS
+335|BE_ADVISORS_FALLBACK|Advisors fallback benefit|||'alias' => [BE_ANYRES, BE_INVENT, BE_TAPESTRY, BE_TERRITORY]
+336|BE_ADVISORS_OVERTAKE|Advisors tapestry overtake|||'civ'=>CIV_ADVISORS
+337|BE_ADVISORS_OVERTAKE_APPROVE|Approve Tapestry card|||'civ'=>CIV_ADVISORS
+338|BE_ADVISORS_OVERTAKE_ADVISE|Advise on new Tapestry card (WHEN PLAYED)|||'civ'=>CIV_ADVISORS
+339|BE_ADVISORS_OVERTAKE_ADVISE_SELECTED|Opponent decides on Tapestry card|||'civ'=>CIV_ADVISORS
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

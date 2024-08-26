@@ -52,10 +52,6 @@ class Templates extends AbsCivilization {
         $this->placeCivCube($player_id, $spot);
     }
 
-    function triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance) {
-        return true;
-    }
-
     function argCivAbilitySingle($player_id, $benefit) {
         $civ = $this->civ;
         $data = $benefit;
