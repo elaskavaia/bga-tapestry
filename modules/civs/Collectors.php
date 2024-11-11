@@ -123,7 +123,8 @@ class Collectors extends AbsCivilization {
             $game->queueBenefitNormal(BE_ANYRES, $player_id, reason_civ($civ), 1);
             return true;
         }
-        if ($ben == BE_CONQUER) {
+        $rule_type = $this->game->getRulesBenefit($ben, 'r', 'x');
+        if ($rule_type == 'a') {
             $structure_id = $game->getOutpostId(null, $player_id, false); // XXX Militants
             if (!$structure_id) return false;
             $game->dbSetStructureLocation($structure_id, 'civ_21_1', null,  $message, $player_id);

@@ -35,7 +35,9 @@ class Mystics extends AbsCivilization {
             $real = $data['actual'];
             $category_name = $data['category_name'];
             $game->notifyAllPlayers('message', clienttranslate('Final MYSTICS prediction for ${category_name}: predicted ${predicted}, actual ${actual}'), [
-                'i18n' => ['category_name'], 'category_name' => $category_name, 'predicted' => $prediction,
+                'i18n' => ['category_name'],
+                'category_name' => $category_name,
+                'predicted' => $prediction,
                 'actual' => $real
             ]);
             if ($real == $prediction) {
@@ -160,8 +162,12 @@ class Mystics extends AbsCivilization {
             }
         }
         return array(
-            'awarded' => $awarded, 'value' => $prediction, 'cube_id' => $cube_id, 'location' => $civ_location,
-            'actual' => $actual, 'category_name' => $category_name
+            'awarded' => $awarded,
+            'value' => $prediction,
+            'cube_id' => $cube_id,
+            'location' => $civ_location,
+            'actual' => $actual,
+            'category_name' => $category_name
         );
     }
 
@@ -193,18 +199,7 @@ class Mystics extends AbsCivilization {
                 */
                 $game->interruptBenefit();
                 $game->awardCard($player_id, 1, CARD_TAPESTRY, false,  $reason, $game->card_types[CARD_TAPESTRY]["deck"], 'discard');
-                $cards = $game->getCardsInHand($player_id, CARD_TAPESTRY);
-                $count = count($cards);
-                $game->effect_discardCard($cards, $player_id, 'discard_13', true);
-                if ($count <= 1) {
-                    $game->notifyWithName('message', clienttranslate('${player_name} gains no reward for discarding 0-1 tapestry cards'), [], $player_id);
-                } else if ($count >= 6) {
-                    $rewards = ["or" => [74 /* conq both dice */, BE_ANYRES, 127 /* invent and upgrade */, 110 /* income building */]];
-                    $game->queueBenefitNormal($rewards, $player_id, $reason, 3);
-                } else {
-                    $rewards = ["or" => [BE_CONQUER, BE_ANYRES, BE_INVENT, 144 /* income building outside of city */]];
-                    $game->queueBenefitNormal($rewards, $player_id, $reason, $count >= 4 ? 2 : 1);
-                }
+                $this->misDiscard($player_id);
                 $game->queueBenefitNormal(BE_TAPESTRY, $player_id, $reason, 2); // gain 2 tapestry
                 return true;
             case 334:
@@ -212,7 +207,7 @@ class Mystics extends AbsCivilization {
                 $era = $game->getCurrentEra($player_id);
                 $deck = $game->card_types[CARD_TAPESTRY]["deck"];
                 $discard = 'discard';
-       
+
                 $game->dbPickCardsForLocation(8, CARD_TAPESTRY, 'deck_13', $player_id, $deck, $discard);
                 $game->notifyWithName("message", clienttranslate('${player_name} creates private tapestry deck ${reason}'), [
                     'reason' => $game->getReasonFullRec($reason)
@@ -221,9 +216,10 @@ class Mystics extends AbsCivilization {
                 $game->notifyDeckCounters($deck);
                 $game->notifyDeckCounters('deck_13');
 
-                if ($era>1) {
-                    $game->queueBenefitNormal(BE_TAPESTRY, $player_id, $reason, 1); // gain 1 tapestry
-                    $game->queueBenefitNormal(BE_MYSTIC_TAP, $player_id, $reason);
+                if ($era > 1) {
+                    $game->awardCard($player_id, 1, CARD_TAPESTRY, false,  $reason);
+                    $this->misDiscard($player_id);
+                    $game->queueBenefitNormal(BE_TAPESTRY, $player_id, $reason, 2); // gain 2 tapestry
                 } else {
                     $game->queueBenefitNormal(BE_TAPESTRY, $player_id, $reason, 2); // gain 2 tapestry
                 }
@@ -233,5 +229,25 @@ class Mystics extends AbsCivilization {
                 return true;
         }
         return true;
+    }
+
+    function misDiscard(int $player_id) {
+        $civ = $this->civ;
+        $game = $this->game;
+        $reason  = reason_civ($civ);
+        $cards = $game->getCardsInHand($player_id, CARD_TAPESTRY);
+        $count = count($cards);
+        $game->effect_discardCard($cards, $player_id, 'discard_13', true);
+        if ($count <= 1) {
+            $game->notifyWithName('message', clienttranslate('${player_name} gains no reward for discarding 0-1 tapestry cards'), [], $player_id);
+        } else if ($count >= 6) {
+            $game->notifyWithName('message', clienttranslate('${player_name} gains reward for discarding ${count} tapestry cards'), ['count' => $count], $player_id);
+            $rewards = ["or" => [74 /* conq both dice */, BE_ANYRES, 127 /* invent and upgrade */, 110 /* income building */]];
+            $game->queueBenefitNormal($rewards, $player_id, $reason, 3);
+        } else {
+            $game->notifyWithName('message', clienttranslate('${player_name} gains reward for discarding ${count} tapestry cards'), ['count' => $count], $player_id);
+            $rewards = ["or" => [BE_CONQUER, BE_ANYRES, BE_INVENT, 144 /* income building outside of city */]];
+            $game->queueBenefitNormal($rewards, $player_id, $reason, $count >= 4 ? 2 : 1);
+        }
     }
 }

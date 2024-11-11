@@ -2753,7 +2753,7 @@ abstract class PGameXBody extends tapcommon {
 
     // Gets the players current era (n.b. Changes at start of income turn)
     function getCurrentEra($player_id) {
-        return $this->getUniqueValueFromDB("SELECT player_income_turns FROM playerextra WHERE player_id='$player_id'");
+        return (int)$this->getUniqueValueFromDB("SELECT player_income_turns FROM playerextra WHERE player_id='$player_id'");
     }
 
     function isPlayerAlive($player_id) {
@@ -3142,7 +3142,7 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-    function debug_awardCard($card_type, $card_num = 0, $loc = null, $next = false, $player_id = null) {
+    function debug_awardCard(int $card_type, int $card_num = 0, string $loc = null, bool $next = false, int $player_id = null) {
         if (!$player_id)
             $player_id = $this->getActivePlayerId();
         if ($card_num)
@@ -3158,7 +3158,7 @@ abstract class PGameXBody extends tapcommon {
         return $cards;
     }
 
-    function debug_insertCard($card_type, $card_num) {
+    function debug_insertCard(int $card_type, int $card_num) {
         $deck = $this->card_types[$card_type]["deck"];
         $cards = $this->cards->getCardsOfType($card_type, $card_num);
         $card_id = array_key_first($cards);

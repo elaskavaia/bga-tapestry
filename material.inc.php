@@ -3022,11 +3022,11 @@ $this->civilizations = array(
                         clienttranslate("The Heralds proclaim their achievements worldwide. Start with 4 player tokens here."),
                         "</i>",
                         clienttranslate("If you start the game with this civilization, at the end of your first income turn, you may play a tapestry card on top of Maker of Fire."),
-                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may place 1 player token on any \"when played\" tapestry card (yours or an opponent's). Gain the benefits of that card. Each tapestry may have at most 1 token.")
+                        clienttranslate("<b>At the beginning of your income turns (2-5)</b>, you may place 1 player token on any WHEN PLAYED tapestry card (yours or an opponent's). Gain the benefits of that card. Each tapestry may have at most 1 token.")
                 ],
                 "description@a4a8" => [
                         1 => clienttranslate("The Heralds proclaim their achievements worldwide."),
-                        3 => clienttranslate("<b>At the end of your first income turn</b>, draw and discard tapestry cards until you find a \"when played\" or \"continuous\" card. Then, you may palce a \"when played\" or \"continuous\" tapestry card on top of Maker of Fire (only place it; do not gain its immediate benefit). The Heralds may not play the Renaissance card over Maker of Fire.")
+                        3 => clienttranslate("<b>At the end of your first income turn</b>, draw and discard tapestry cards until you find a WHEN PLAYED or CONTINIOUS card. Then, you may palce a WHEN PLAYED or CONTINIOUS tapestry card on top of Maker of Fire (only place it; do not gain its immediate benefit). The Heralds may not play the Renaissance card over Maker of Fire.")
                 ],
                 "tokens_count" => 4,
                 "slots_description" => '',
@@ -3364,7 +3364,7 @@ $this->civilizations = array(
 clienttranslate("<i>The Mystics boast of their ability to predict the future (they're actually just good planners).</i>"),
 clienttranslate("Start with a private, randomized deck of 8 tapestry cards (draw them from the public deck; you may look through them before shuffling them) and draw 2 of those cards. Whenever you would gain a tapestry card, instead draw the top card of your private deck. Whenever you discard or pay a tapestry card, place it in a private discard pile. If your private deck is ever empty and you are gaining a card, shuffle your discard pile to form the deck."),
 clienttranslate("After playing your tapestry card on income turns (2-4), gain the top card of the public deck and discard your entire hand of tapestry cards to your private discard pile."),
-clienttranslate("Based on the quantity of cards discarded in this way, gain the following, then gain 2 cards from your pricate deck:"),
+clienttranslate("Based on the quantity of cards discarded in this way, gain the following, then gain 2 cards from your private deck:"),
 clienttranslate("<li>2 cards --> choose one: | "),
 clienttranslate("<li>4 cards --> choose two different:   [CONQUER]/[ANY RESOURCE]/[INVENT]/[INCOME BUILDING] (do not place in the city)"),
 clienttranslate("<li>6 cards --> choose three different:   [CONQUER-BOTH DICE]/[ANY RESOURCE]/[INVENT]+[UPGRADE]/[INCOME BUILDING]"),
@@ -3717,7 +3717,20 @@ clienttranslate("<i>If you gain this civilization in the middle of the game, pro
                         clienttranslate("During advancement turns (not income turns) whenever a neighbor would gain a tapestry card, instead of them drawing from the deck, you may give them a card of your choice from your hand. If you do, after you give them a card, gain a tapestry card."),
                         clienttranslate("<it>If you gain this civilization in the middle of the game, you may immediately give any/all of the starting 3 tapestry cards to neighbors, gaining 5 per card you give</it>"),
                 ],
-                "start_benefit" => ["m" => 3, "g" => BE_TAPESTRY], //
+                "description@a8" => [
+                        clienttranslate("The Advisors dispense an endless wealth of unsolicited advice to other civilizations."),
+                        clienttranslate("Start with 3 tapestry cards."),
+                        clienttranslate("At the beginning of your income turns (1-4), place a player token on a space on an opponent's income mat that does not already have one of your player tokens."),
+                        clienttranslate("Whenever an opponent would play a tapestry card on a space containing your player token, they first return the token to you and reveal 1 card from their hand that they would like to play:"),
+                         clienttranslate("<li> If it's a WHEN PLAYED card and you agree, they play the card. Afterwards, you also gain the benefit of the card."),
+                         clienttranslate("<li> If you don't agree or if they selected a different type of card, select a WHEN PLAYED card from your hand that they may play instead. If they play it, you also gain the benefit of the card (after the opponent). If you do not have any WHEN PLAYED cards or if they disagree and proceed to play the card from their hand, you gain 1 [RESOURCE], 1 [INVENT], 1 [TAPESTRY], and 1 [TILE]."),
+                        
+                         clienttranslate("<it>If you gain this civilization in the middle of the game, you may either discard it and gain another or immediately place up to 2 player tokens on spaces that do not have your player tokens on opponents' income mats.</it>"),
+                ],
+
+
+
+               "start_benefit" => ["m" => 3, "g" => BE_TAPESTRY], //
                 "income_trigger" => ["from" => 2, "to" => 5, "decline" => false], //
                 "income_trigger@a8" => ["from" => 1, "to" => 4, "decline" => true], //
                 "midgame_setup" => true,
