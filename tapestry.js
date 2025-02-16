@@ -692,8 +692,8 @@ define([
 
       switch (stateName) {
         case "playerTurn":
+          dojo.query(".clicked").removeClass('clicked');
           this.extraMarkup();
-
           var slots = args.args.technology_updates;
           dojo.query("#tech_holder_" + this.getActivePlayerId() + " .tech_card").removeClass("update_possible");
 
@@ -4853,7 +4853,7 @@ define([
 
         default:
           if (cid == this.CON.CIV_MILITANTS) {
-            dojo.query(".clicked").removeClass("clicked");
+            dojo.query(`.clicked:not(#${holder_id})`).removeClass("clicked");
             dojo.toggleClass(holder_id, "clicked");
             dojo.query("#generalactions .bgabutton_blue").removeClass("bgabutton_blue");
             if ($("button_" + holder_id)) dojo.toggleClass("button_" + holder_id, "bgabutton_blue");
