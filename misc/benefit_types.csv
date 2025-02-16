@@ -52,7 +52,7 @@ id|-con|name|r|t|php
 51|BE_SPACE|Gain space tile|||
 52|BE_EXPLORE_SPACE|Explore space|s||'state'=>'explore_space'
 #same as 143 for now
-53|BE_REFRESH|Refresh tech cards (Optional)|||'alias'=>['or'=>[143, 401]]
+53|BE_REFRESH|Refresh tech cards (Optional)|||'alias'=>['or'=>[143, 401]],'icon'=>0
 54||VP - Markets|v||
 55||Start new tech track|||'s'=>'t','sflags'=>0,'adv'=>0
 56||Landmark - Bakery|||'lm'=>13

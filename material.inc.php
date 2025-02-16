@@ -999,7 +999,7 @@ $this->benefit_types = [ //
 // #same as 143 for now
  53 => [  // BE_REFRESH
   'name' => clienttranslate("Refresh tech cards (Optional)"),
-  'alias'=>['or'=>[143, 401]],
+  'alias'=>['or'=>[143, 401]],'icon'=>0,
 ],
  54 => [  //
   'name' => clienttranslate("VP - Markets"),
