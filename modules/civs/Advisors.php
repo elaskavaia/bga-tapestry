@@ -268,7 +268,7 @@ class Advisors extends AbsCivilization {
         $game->interruptBenefit();
         if ($game->isRealPlayer($opponent_id)) {
             $args = $game->notifArgsAddCardInfo($card_id);
-            $game->notifyWithName("message", clienttranslate('${player_name} attempts to play ${card_name}'), $args, $player_id);
+            $game->notifyWithName("message_info", clienttranslate('${player_name} attempts to play ${card_name}'), $args, $player_id);
             $card = $game->getCardInfo($card_id);
             $card['card_location'] = 'draw';
             $card['card_location_arg'] = $player_id;

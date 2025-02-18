@@ -1755,16 +1755,23 @@ define([
               };
             });
           } else if (args.bid == 339) { //BE_ADVISORS_OVERTAKE_ADVISE_SELECTED
-            this.setDescriptionOnMyTurn(_("${you} must select to play your tapestry card or one proposed by ADVISORS"));
-            const node1 = $(`card_${args.targets[0]}`);
+            debugger;
+            this.setDescriptionOnMyTurn(_("${you} must accept tapestry card proposed by ADVISORS or decline to play your own"));
+            const tap0 = parseInt(args.targets[0]); 
+            const tap1 = parseInt(args.targets[1]);
+            const node1 = $(`card_${tap0}`);
             node1.classList.add('active_slot');
-            const node2 = $(`card_${args.targets[1]}`);
+            const node2 = $(`card_${tap1}`);
             node2?.classList.add('active_slot');
-            this.addActionButton("button_1", _("Accept"), () => {
-              this.ajaxcallwrapper("playCard", { card_id: args.targets[1] });
+
+            const tap0name = this.getTr(this.tapestry_data[node1.dataset?.typeArg]?.name);
+            const tap1name = this.getTr(this.tapestry_data[node2?.dataset?.typeArg]?.name);
+
+            this.addActionButton("button_1", _("Accept") + " " + tap1name, () => {
+              this.ajaxcallwrapper("playCard", { card_id: tap1 });
             });
-            this.addActionButton("button_0", _("Decline"), () => {
-              this.ajaxcallwrapper("playCard", { card_id: args.targets[0] });
+            this.addActionButton("button_0", _("Decline") + ". " + _('Play') + ' '+ tap0name, () => {
+              this.ajaxcallwrapper("playCard", { card_id: tap0 });
             });
           } else {
             dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot");
