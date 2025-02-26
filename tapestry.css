@@ -3928,3 +3928,8 @@ div[data-income="0"] #subtitle_bar {
 .revealCards > * {
   display: inline-block;
 }
+#deck_13 .card {
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}

@@ -1755,7 +1755,6 @@ define([
               };
             });
           } else if (args.bid == 339) { //BE_ADVISORS_OVERTAKE_ADVISE_SELECTED
-            debugger;
             this.setDescriptionOnMyTurn(_("${you} must accept tapestry card proposed by ADVISORS or decline to play your own"));
             const tap0 = parseInt(args.targets[0]); 
             const tap1 = parseInt(args.targets[1]);
@@ -2795,6 +2794,7 @@ define([
       return true;
     },
     checkActiveSlot: function (id) {
+
       if (!this.isActiveSlot(id)) {
         this.showMoveUnauthorized();
         return false;
@@ -6408,7 +6408,7 @@ define([
       const location_to = this.getCardDivLocatonId(card);
       const div = cardsman.findOrCreateDiv(card.card_type_arg, card.card_id, from, card);
       cardsman.slide(div, location_to);
-      if (location_to == cardsman.discard || location_to == 'deck_13') {
+      if (location_to == cardsman.discard) {
         cardsman.fadeOutAndDestroy(div);
       }
       return div;

@@ -768,6 +768,10 @@ abstract class PGameXBody extends tapcommon {
         }
         // any other card locations
         $result['cards'] = $this->getCardsSearch(null, null, 'draw', $current_player_id);
+        if ($this->getCivOwner(13) == $current_player_id) {
+            $deck13=$this->getCardsSearch(null, null, 'deck_13');
+            $result['cards'] += shuffle_assoc($deck13);
+        }
         $result['cards'] += $this->getCardsSearch(null, null, 'islanders', null);
         $result['cards'] += $this->getCardsSearch(null, null, 'map', null);
         $result['cards'] += $this->getCardsSearch(null, null, 'civ_21_%', null);
@@ -3428,7 +3432,7 @@ abstract class PGameXBody extends tapcommon {
         }
         $this->notifyWithName("takeIncome", '');
         $this->notifyWithName('message_info', $notif);
-        
+
         $this->setIncomeTurnPhase(INCOME_CIV, clienttranslate('${player_name} takes income turn ${turn_number}'), $player_id);
         $this->setGameStateValue('income_turn', 1);
         $this->queueIncomeTurn();
