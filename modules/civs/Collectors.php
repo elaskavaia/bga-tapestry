@@ -138,6 +138,8 @@ class Collectors extends AbsCivilization {
                 // no landmark?
                 return false;
             }
+            $bene = $this->game->getCurrentBenefitWithInfo();
+            $this->game->clearCurrentBenefit($bene, true);
             $structure_data = $game->getPendingStructure();
             $structure_id = $structure_data['card_id'];
             $game->dbSetStructureLocation($structure_id, 'civ_21_3', null,  $message, $player_id);
