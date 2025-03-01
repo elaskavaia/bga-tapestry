@@ -5062,6 +5062,7 @@ define([
 
     onCivilizationClick: function (event) {
       dojo.stopEvent(event);
+      console.log('onCivilizationClick');
 
       var id = event.currentTarget.id;
       if (this.showHelp(id)) return;
@@ -5078,6 +5079,23 @@ define([
           this.ajaxcallwrapper("activatedAbility", { ability: `civ_${civ}`, arg: getPart(event.target.id, 1) }, undefined, true);
           return;
         }
+      }
+      if (event.target?.id?.startsWith("deck")) {
+        const dia = new ebg.popindialog();
+        dia.create("reveal_hand");
+        var dest = document.createElement("div");
+        dest.className = "revealCards";
+        $("popin_reveal_hand_contents").appendChild(dest);
+
+        event.target.querySelectorAll(".card").forEach(node=>{
+          div_tile = dojo.clone(node);
+          div_tile.id += "_c";
+          dest.appendChild(div_tile);
+          this.addTooltipForToken("tapestry", node.dataset.typeArg, div_tile.id);
+        });
+  
+        dia.show();
+        return;
       }
 
       if (!this.checkActiveSlot(id)) return;

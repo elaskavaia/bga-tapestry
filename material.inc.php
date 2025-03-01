@@ -3357,6 +3357,7 @@ $this->civilizations = array(
                         30 => ["top" => 70, "left" => 40.25, "w" => 6, "h" => 5],
                         31 => ["top" => 70, "left" => 46.375, "w" => 6, "h" => 5],
                 ),
+                "slots@a8" => [],
                 "adjustment" => clienttranslate("When starting the game with the Mystics, gain [ANY RESOURCE]"),
                 "adjustment@a4" => clienttranslate("no change"),
                 "adjustment@a8" => clienttranslate("rules change"),
