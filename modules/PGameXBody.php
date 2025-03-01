@@ -3121,11 +3121,6 @@ abstract class PGameXBody extends tapcommon {
         $this->gamestate->nextState('benefit');
     }
 
-    function debug_giveCard($type, $id) {
-        $player_id = $this->getActivePlayerId();
-        $this->DbQuery("UPDATE card SET card_location='hand', card_location_arg='$player_id' WHERE card_type='$type' AND card_type_arg='$id' AND card_location LIKE 'deck%'");
-    }
-
     function searchForCard($array, $card_name) {
         foreach ($array as $cid => $info) {
             if (strcasecmp($info['name'], $card_name) == 0)
@@ -3155,10 +3150,12 @@ abstract class PGameXBody extends tapcommon {
         return;
     }
 
-    function debug_award($card_name) {
+    function debug_award(string $card_name) {
         $cid = $this->searchForCard($this->tapestry_card_data, $card_name);
         if ($cid) {
-            $this->debug_awardCard(3, $cid);
+            $deck = $this->card_types[CARD_TAPESTRY]["deck"];
+            $discard = 'discard';
+            $this->debug_awardCard(CARD_TAPESTRY, $cid, null, false, null, $deck, $discard);
             return;
         }
         $cid = $this->searchForCard($this->tech_card_data, $card_name);
@@ -3193,12 +3190,12 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-    function debug_awardCard(int $card_type, int $card_num = 0, string $loc = null, bool $next = false, int $player_id = null) {
+    function debug_awardCard(int $card_type, int $card_num = 0, string $loc = null, bool $next = false, int $player_id = null, $deck = null, $discard = null) {
         if (!$player_id)
             $player_id = $this->getActivePlayerId();
         if ($card_num)
             $this->debug_insertCard($card_type, $card_num);
-        $cards = $this->awardCard($player_id, 1, $card_type, false, reason('str', 'debug'));
+        $cards = $this->awardCard($player_id, 1, $card_type, false, reason('str', 'debug'), $deck, $discard);
         if ($loc)
             foreach ($cards as $card) {
                 $this->dbSetCardLocation($card['id'], $loc, null, '', $player_id);
@@ -5856,7 +5853,7 @@ abstract class PGameXBody extends tapcommon {
             $cube = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='tech_card_$card_type' LIMIT 1");
             if ($cube != null) {
                 $owner = $cube['card_location_arg'];
-                if ($owner != $player_id) {
+                if ($owner != $player_id && $this->hasCiv($owner, CIV_INVENTORS)) {
                     $this->queueBenefitNormal(130, $owner, reason_civ(CIV_INVENTORS));
                 }
             }
@@ -5871,7 +5868,7 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_transferTech() {
         $player_id = $this->getActivePlayerId();
-        $cubes = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_type=7 AND card_type_arg=2 AND card_location_arg=$player_id AND card_location LIKE 'tech_card_%'");
+        $cubes = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_type=7 AND card_location_arg=$player_id AND card_location LIKE 'tech_card_%'");
         $found = false;
         foreach ($cubes as $cube) {
             $card = $cube['card_location'];
@@ -7956,13 +7953,13 @@ abstract class PGameXBody extends tapcommon {
         $this->benefitCashed($benefit_data); // the civ benefit.
         // VALIDITY CHECKS
         // 1. Check player owns INVENTORS and a token is available.
-
+        $reason = reason_civ(CIV_INVENTORS);
         $cubes = $this->getStructuresOnCiv(CIV_INVENTORS, BUILDING_CUBE);
         $cube = array_shift($cubes);
         if ($cube) {
             $inventor = $cube['card_id'];
         } else {
-            $inventor = $this->addCube($player_id, 'hand');
+            $inventor = $this->addCube($player_id, 'hand', CUBE_CIV, $reason);
         }
 
         // 2. Check that $id is a technology card in play
@@ -7970,8 +7967,8 @@ abstract class PGameXBody extends tapcommon {
         $this->userAssertTrue(totranslate('Cannot use this tech card for inventor'), $tech_card != null);
         // Place token on tech card..
         $location = 'tech_card_' . $type;
-        $reason = reason_civ(CIV_INVENTORS);
-        $this->DbQuery("UPDATE structure SET card_location='$location',card_location_arg2='$reason' WHERE card_id='$inventor'");
+
+        $this->DbQuery("UPDATE structure SET card_location='$location',card_type_arg='2',card_location_arg='$player_id',card_location_arg2='$reason' WHERE card_id='$inventor'");
         $this->notifyMoveStructure(clienttranslate('${player_name} places an Inventor on ${card_name}'), $inventor, [
             'card_name' => $this->tech_card_data[$type]['name'],
         ], $player_id);
