@@ -3933,3 +3933,8 @@ div[data-income="0"] #subtitle_bar {
   width: 1px;
   height: 1px;
 }
+
+/* BGA flickering bar issue on mobile hack */
+#page-title.fixed-page-title {
+  width: calc(100% - 10px) !important;
+}

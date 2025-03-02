@@ -91,7 +91,7 @@ class material_test {
 
 
         print("id,name, description\n");
-        $this->doAdjustMaterial(2, 4);
+        //$this->doAdjustMaterial(2, 4);
         ksort($this->civilizations, SORT_NUMERIC);
         foreach ($this->civilizations as $civ => $civ_data) {
             $description = $civ_data['description'];
@@ -100,7 +100,8 @@ class material_test {
             }
             $name = $civ_data['name'];
 
-            print("$civ,$name,\"$description\"\n");
+            //print("$civ,$name,\"$description\"\n");
+            print("$civ => clienttranslate('$name'),\n");
         }
     }
 }
