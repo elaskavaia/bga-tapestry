@@ -769,7 +769,7 @@ abstract class PGameXBody extends tapcommon {
         // any other card locations
         $result['cards'] = $this->getCardsSearch(null, null, 'draw', $current_player_id);
         if ($this->getCivOwner(13) == $current_player_id) {
-            $deck13=$this->getCardsSearch(null, null, 'deck_13');
+            $deck13 = $this->getCardsSearch(null, null, 'deck_13');
             $result['cards'] += shuffle_assoc($deck13);
         }
         $result['cards'] += $this->getCardsSearch(null, null, 'islanders', null);
@@ -1747,7 +1747,7 @@ abstract class PGameXBody extends tapcommon {
                 $this->prepareUndoSavepoint();
                 $this->gamestate->nextState('loopback');
                 break;
-                //               
+            //               
             case 303:
                 //                 303||Roll the conquer dice and gain both benefits
                 $this->clearCurrentBenefit($ben);
@@ -4979,7 +4979,7 @@ abstract class PGameXBody extends tapcommon {
 
     function getMapHexData($xcoords, $map = null) {
         if ($map == null) $map = $this->getMap($xcoords);
-        return $map[$xcoords];
+        return array_get($map, $xcoords, null);
     }
 
     function isHexOwner($player_id, $coords, $map = null) {
@@ -6599,14 +6599,15 @@ abstract class PGameXBody extends tapcommon {
             $isol_token = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND (card_location LIKE 'civ_9_%') AND card_location_arg='$player_id' LIMIT 1");
             $this->systemAssertTrue('Isolation tokens not available', $isol_token);
         }
+        if (!in_array($coord, $valid_locations)) {
+            $this->userAssertTrue(totranslate('Invalid conquer location'));
+        }
         $map = $this->getMapHexData($coord);
         $owners = $map['map_owners'];
         $owner_id = array_shift($owners);
 
 
-        if (!in_array($coord, $valid_locations)) {
-            $this->userAssertTrue(totranslate('Invalid conquer location'));
-        }
+
         // GET AN AVAILABLE OUTPOST TO USE
         $outpost_id = $this->getOutpostId($oid, $player_id, true);
         // UPDATE

@@ -97,7 +97,7 @@ final class GameTest extends TestCase {
             $al = array_get($civ_data, 'al', 4);
             $inst = $m->getCivilizationInstance($civ, false);
             $this->assertEquals($civ, $inst->getType());
-
+            $this->assertNotNull($name);
             //if ($al != 8) print("$name ($civ) \n$description\n\n");
         }
     }
