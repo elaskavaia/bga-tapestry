@@ -42,18 +42,18 @@
 
         
 
-        global $g_user;
-        $player_id = $g_user->get_id();
+   
+        $g_player_id = $this->game->getCurrentPlayerId();
 
-        if( isset( $players[ $g_user->get_id() ] ) )
+        if( isset( $players[ $g_player_id ] ) )
         {
             // Order to display boards
-            $player_order = array($g_user->get_id() );
+            $player_order = array($g_player_id);
             $player_order_beforeplayer = array();
             $bBeforePlayer = true;
             foreach( $players as $player )
             {
-                if( $player['player_id'] == $g_user->get_id() )
+                if( $player['player_id'] == $g_player_id )
                     $bBeforePlayer = false;
                 else if( $bBeforePlayer )
                     $player_order[] = $player['player_id']; // Push at the end
@@ -70,14 +70,14 @@
 
         $this->page->begin_block( "tapestry_tapestry", "playerArea" );
             // Put the current player's board first.
-        if (isset($players [$player_id])) {
-            $player = $players [$player_id];
+        if (isset($players [$g_player_id])) {
+            $player = $players [$g_player_id];
             $this->page->insert_block("playerArea", array ("PLAYER_NAME" => $player ['player_name'],
                     "X" => $player ['player_id'],"C" => $player ['player_color'] ));
         }
         foreach ( $player_order as $player_id ) {
             $player = $players [$player_id];
-            if ($player_id != $g_user->get_id()) {
+            if ($g_player_id != $player_id) {
                 $this->page->insert_block("playerArea", array ("PLAYER_NAME" => $player ['player_name'],
                         "X" => $player ['player_id'],"C" => $player ['player_color'] ));
             }
