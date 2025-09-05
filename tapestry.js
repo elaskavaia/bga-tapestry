@@ -22,7 +22,7 @@ define([
   "ebg/core/gamegui",
   "ebg/counter",
   "ebg/stock",
-  g_gamethemeurl + "modules/tapantistock.js"
+  g_gamethemeurl + "modules/tapantistock.js",
 ], function (dojo, declare) {
   return declare("bgagame.tapestry", ebg.core.gamegui, {
     constructor: function () {
@@ -106,7 +106,7 @@ define([
             {
               class: "bgabutton bgabutton_blue",
               innerHTML: "hide",
-              id: "zombiehide"
+              id: "zombiehide",
             },
             "neutralized_game_panel",
             "last"
@@ -117,7 +117,7 @@ define([
         }
 
         this.clientStateArgs = {
-          action: "none"
+          action: "none",
         };
 
         var player_count = 0;
@@ -238,7 +238,7 @@ define([
 
         const tapgame = this;
         dojo.extend(bgagame.tapantistock, {
-          slide: dojo.hitch(tapgame, "placeToken")
+          slide: dojo.hitch(tapgame, "placeToken"),
         });
 
         // card manager (hold antistocks per card type)
@@ -423,10 +423,6 @@ define([
 
           // ADD TAPESTRY ERA CARDS
           this.moveCards(player_id, player_data.tapestry);
-
-
-
-
 
           // Income mat resource zones
           for (var a = 0; a < 9; a++) {
@@ -633,7 +629,7 @@ define([
 
       for (let i = 1; i <= 48; i++) {
         var div = this.format_string("<div id='territory_tile_${num}_help' class='tile territory_tile territory_tile_${num}'></div>", {
-          num: i
+          num: i,
         });
         dojo.place(div, helpnode);
         this.addTooltipForToken("territory_tile", i, "territory_tile_" + i + "_help");
@@ -658,7 +654,7 @@ define([
           civ = getPart(id, 1);
           var name = this.getTr(this.civilizations[civ]["name"]);
           var message = this.format_string(_("You are about to GAIN civilzation ${name} (This only available for testing purposes)"), {
-            name: name
+            name: name,
           });
 
           this.confirmationDialog(
@@ -690,7 +686,7 @@ define([
 
       switch (stateName) {
         case "playerTurn":
-          dojo.query(".clicked").removeClass('clicked');
+          dojo.query(".clicked").removeClass("clicked");
           this.extraMarkup();
           var slots = args.args.technology_updates;
           dojo.query("#tech_holder_" + this.getActivePlayerId() + " .tech_card").removeClass("update_possible");
@@ -801,7 +797,7 @@ define([
           return;
         }
         this.ajaxcallwrapper("keepCard", {
-          ids: ids.join(",")
+          ids: ids.join(","),
         });
       });
 
@@ -873,7 +869,7 @@ define([
           this.clientStateArgs.cid = civ;
           this.clientStateArgs.spot = 0;
           this.clientStateArgs.bid = i;
-          this.clientStateArgs.extra = '';
+          this.clientStateArgs.extra = "";
           for (let slot in bene.slots_choice) {
             const info = bene.slots_choice[slot];
             if (!info.ben_icons) info.ben_icons = this.getBenIcon(info.benefit);
@@ -904,7 +900,7 @@ define([
           case this.CON.CIV_ARCHITECTS:
             if (data == "midgame") {
               this.setClientState("client_ArchitectsSwap", {
-                descriptionmyturn: _("ARCHITECTS: You may swap two Income buildings in your capital")
+                descriptionmyturn: _("ARCHITECTS: You may swap two Income buildings in your capital"),
               });
             } else {
               this.setDescriptionOnMyTurn(_("ARCHITECTS: Place a cube in your capital"));
@@ -1045,7 +1041,7 @@ define([
                 this.ajaxcallwrapper("civTokenAdvance", {
                   cid: civ,
                   spot: tapId,
-                  extra: cardId
+                  extra: cardId,
                 });
               });
             }
@@ -1154,7 +1150,7 @@ define([
       this.clientStateArgs.extra = {
         bt: type,
         tile: tile,
-        coords: coords
+        coords: coords,
       };
       this.ajaxClientStateAction("civTokenAdvance");
     },
@@ -1328,7 +1324,7 @@ define([
           break;
         case "client_standup":
           this.setDescriptionOnMyTurn(_("Select up to ${num} of your outposts to stand up"), {
-            num: this.clientStateArgs.num
+            num: this.clientStateArgs.num,
           });
           for (var cid in args.targets) {
             var bid = args.targets[cid]["card_id"];
@@ -1399,7 +1395,7 @@ define([
 
         case "research":
           this.setDescriptionOnMyTurn(_("${benefit}: ${You} must confirm"), {
-            benefit: this.getBenTooltipStr(args.bid, true)
+            benefit: this.getBenTooltipStr(args.bid, true),
           });
           for (var adv in args.all_advances) {
             var allowed = args.all_advances[adv];
@@ -1502,7 +1498,7 @@ define([
             this.updateToolbarForBenefit(type);
           }
           if (args.count > 1) {
-            this.setMainTitle("x "+args.count, "after");
+            this.setMainTitle("x " + args.count, "after");
           }
           if (args.tracks_change) {
             for (var type in args.tracks) {
@@ -1512,11 +1508,11 @@ define([
 
             if (num == 1) {
               this.setDescriptionOnMyTurn(_("${you} must confirm track to ${advance_or_regress}"), {
-                advance_or_regress: args.tracks_change > 0 ? _("advance") : _("regress")
+                advance_or_regress: args.tracks_change > 0 ? _("advance") : _("regress"),
               });
             } else
               this.setDescriptionOnMyTurn(_("${you} must choose track to ${advance_or_regress}"), {
-                advance_or_regress: args.tracks_change > 0 ? _("advance") : _("regress")
+                advance_or_regress: args.tracks_change > 0 ? _("advance") : _("regress"),
               });
             if (bd) {
               this.setMainTitle(this.getAdvanceTypeStr(bd.flags), "after");
@@ -1632,7 +1628,7 @@ define([
           const payArr = Array(payNum).fill(this.bonusdata.pay);
           const pgIcon = this.getBenIcon({
             p: payArr,
-            g: args.benefits
+            g: args.benefits,
           });
           let cannotDecline = false;
           if (args.benefits[0] == 142) {
@@ -1747,24 +1743,25 @@ define([
             // discard
             this.setDescriptionOnMyTurn(_("${you} must discard a tapestry card from your hand"));
             dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot");
-          } else if (args.bid == 338) { //BE_ADVISORS_OVERTAKE_ADVISE
+          } else if (args.bid == 338) {
+            //BE_ADVISORS_OVERTAKE_ADVISE
             this.setDescriptionOnMyTurn(_("${you} must select a when played tapesry card to give to opponent (ADVISORS)"));
-            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").forEach(node=>{
-
+            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").forEach((node) => {
               const tap_type = node.dataset.typeArg;
               const info = this.tapestry_data[tap_type];
-              if (info.type == 'now') {
-                node.classList.add('active_slot');
-              };
+              if (info.type == "now") {
+                node.classList.add("active_slot");
+              }
             });
-          } else if (args.bid == 339) { //BE_ADVISORS_OVERTAKE_ADVISE_SELECTED
+          } else if (args.bid == 339) {
+            //BE_ADVISORS_OVERTAKE_ADVISE_SELECTED
             this.setDescriptionOnMyTurn(_("${you} must accept tapestry card proposed by ADVISORS or decline to play your own"));
-            const tap0 = parseInt(args.targets[0]); 
+            const tap0 = parseInt(args.targets[0]);
             const tap1 = parseInt(args.targets[1]);
             const node1 = $(`card_${tap0}`);
-            node1.classList.add('active_slot');
+            node1.classList.add("active_slot");
             const node2 = $(`card_${tap1}`);
-            node2?.classList.add('active_slot');
+            node2?.classList.add("active_slot");
 
             const tap0name = this.getTr(this.tapestry_data[node1.dataset?.typeArg]?.name);
             const tap1name = this.getTr(this.tapestry_data[node2?.dataset?.typeArg]?.name);
@@ -1772,7 +1769,7 @@ define([
             this.addActionButton("button_1", _("Accept") + " " + tap1name, () => {
               this.ajaxcallwrapper("playCard", { card_id: tap1 });
             });
-            this.addActionButton("button_0", _("Decline") + ". " + _('Play') + ' '+ tap0name, () => {
+            this.addActionButton("button_0", _("Decline") + ". " + _("Play") + " " + tap0name, () => {
               this.ajaxcallwrapper("playCard", { card_id: tap0 });
             });
           } else {
@@ -1873,7 +1870,7 @@ define([
                 this.addTrackSlotActionButton(i + "_0", "but_spot", () => {
                   this.ajaxcallwrapper("selectTrackSpot", {
                     track: track,
-                    spot: 0
+                    spot: 0,
                   });
                 });
               }
@@ -2149,7 +2146,7 @@ define([
         "/tapestry/tapestry/formAlliance.html",
         {
           lock: true,
-          pid: pid
+          pid: pid,
         },
         this,
         function (result) {},
@@ -2195,7 +2192,7 @@ define([
         {
           pid: pid,
           tid: tid,
-          token_id: token_id
+          token_id: token_id,
         },
         () => {
           if (selected) dojo.removeClass(selected, "clicked");
@@ -2244,7 +2241,7 @@ define([
       if (id != "button_confirm") type = id.split("_")[3];
       this.ajaxcallwrapper("choose_resources", {
         resources: payment,
-        type: type
+        type: type,
       });
     },
 
@@ -2262,7 +2259,7 @@ define([
             duration: 500,
             properties: {
               top: { start: node_coords.t, end: top },
-              left: { start: node_coords.l, end: left }
+              left: { start: node_coords.l, end: left },
             },
             onEnd: function () {
               dojo
@@ -2272,14 +2269,14 @@ define([
                   delay: 500,
                   properties: {
                     top: { start: top, end: node_coords.t },
-                    left: { start: left, end: node_coords.l }
+                    left: { start: left, end: node_coords.l },
                   },
                   onEnd: function () {
                     dojo.style(node, "zIndex", "1");
-                  }
+                  },
                 })
                 .play();
-            }
+            },
           })
           .play();
       }
@@ -2321,7 +2318,7 @@ define([
       this.ajaxcall(
         "/tapestry/tapestry/decline_tapestry.html",
         {
-          lock: true
+          lock: true,
         },
         this,
         function (result) {},
@@ -2333,13 +2330,13 @@ define([
       dojo.stopEvent(event);
       var ids = [];
       dojo.forEach(dojo.query(".clicked"), function (node) {
-        var coords = getPart(node.id,2);
+        var coords = getPart(node.id, 2);
         ids.push(coords);
       });
-      this.ajaxcallwrapper('civTokenAdvance', {
+      this.ajaxcallwrapper("civTokenAdvance", {
         cid: this.CON.CIV_MYSTICS,
         spot: 0,
-        extra_js:JSON.stringify(ids) 
+        extra_js: JSON.stringify(ids),
       });
     },
 
@@ -2398,7 +2395,7 @@ define([
           U: u,
           V: v,
           isol: isol,
-          outpost: outpost_id
+          outpost: outpost_id,
         },
         () => {
           dojo.query(".possible").removeClass("possible");
@@ -2429,7 +2426,7 @@ define([
           this.ajaxcallwrapper("place_structure", {
             x: this.capitalx,
             y: this.capitaly,
-            rot: this.capitalRot
+            rot: this.capitalRot,
           });
         });
         return;
@@ -2438,7 +2435,7 @@ define([
       this.ajaxcallwrapper("place_structure", {
         x: this.capitalx,
         y: this.capitaly,
-        rot: this.capitalRot
+        rot: this.capitalRot,
       });
     },
 
@@ -2641,7 +2638,7 @@ define([
           {
             cid: this.CON.CIV_ARCHITECTS,
             spot: this.capitalx,
-            extra: this.capitaly
+            extra: this.capitaly,
           },
           () => {
             dojo.removeClass(id, "clicked");
@@ -2670,7 +2667,7 @@ define([
         this.ajaxcallwrapper("civTokenAdvance", {
           cid: this.CON.CIV_ARCHITECTS,
           spot: getIntPart(prevbuilding.id, 1),
-          extra: getIntPart(incomebuilding.id, 1)
+          extra: getIntPart(incomebuilding.id, 1),
         });
 
         return;
@@ -2703,7 +2700,7 @@ define([
         this.setClientState("client_militarism");
       } else if (this.gamedatas.gamestate.args.exploitation) {
         this.setClientState("client_exploitation", {
-          descriptionmyturn: _("EXPLOITATION: ${you} can forgo the exploration VP for a doubled benefit")
+          descriptionmyturn: _("EXPLOITATION: ${you} can forgo the exploration VP for a doubled benefit"),
         });
       } else {
         this.processExplore(false, false);
@@ -2759,7 +2756,7 @@ define([
         rot: this.selectedRot,
         militarism: militarism,
         exploitation: exploitation,
-        outpost_id: outpost_id
+        outpost_id: outpost_id,
       });
       this.selectedTile = 0;
       this.hideRotators();
@@ -2797,7 +2794,6 @@ define([
       return true;
     },
     checkActiveSlot: function (id) {
-
       if (!this.isActiveSlot(id)) {
         this.showMoveUnauthorized();
         return false;
@@ -2839,7 +2835,7 @@ define([
       var div = this.format_string_recursive(jstpl_score, {
         id: scoring_marker_id,
         value: value,
-        classes: classes
+        classes: classes,
       });
 
       dojo.place(div, animNodeId);
@@ -2987,7 +2983,7 @@ define([
       // console.log("place " + x + "," + y);
       dojo.style(mobileObj, {
         left: x + "px",
-        top: y + "px"
+        top: y + "px",
       });
       mobileObj.offsetLeft; // force re-flow
     },
@@ -3523,7 +3519,7 @@ define([
             this.format_block("jstpl_capital_cell", {
               cid: player_id + "_" + a + "_" + b,
               left: b * cell,
-              top: a * cell
+              top: a * cell,
             }),
             "capital_grid_" + player_id
           );
@@ -3825,7 +3821,7 @@ define([
         if (!target) continue;
 
         dojo.setAttr(target, `data-deck-count`, count);
-        if (dscount!==undefined) dojo.setAttr(target, `data-discard-count`, dscount);
+        if (dscount !== undefined) dojo.setAttr(target, `data-discard-count`, dscount);
       }
       console.log("counters=", counters);
     },
@@ -3920,7 +3916,7 @@ define([
         dojo.place('<div id="islanders" class="islanders_map"></div>', div_id);
         this.setupLandOther(1, "islanders", "islanders");
       }
-      if (civ_id == this.CON.CIV_MYSTICS && this.getAdjustmentLevel()>=8) {
+      if (civ_id == this.CON.CIV_MYSTICS && this.getAdjustmentLevel() >= 8) {
         dojo.place('<div id="deck_13" class="tapestry_deck"></div>', div_id);
       }
 
@@ -4000,7 +3996,7 @@ define([
                 type: type,
                 lid: coord,
                 top: 3 * dy + y,
-                left: 1.75 * dx + x //
+                left: 1.75 * dx + x, //
               }),
               location
             );
@@ -4787,7 +4783,7 @@ define([
         {
           id: argid,
           class: "breadcrumbs_element",
-          innerHTML: divImgOp
+          innerHTML: divImgOp,
         },
         "breadcrumbs"
       );
@@ -4840,7 +4836,7 @@ define([
               // if (!this.checkActiveSlot(holder_id)) return;
               this.ajaxcallwrapper("civTokenAdvance", {
                 cid: cid,
-                spot: getPart(holder_id, 2)
+                spot: getPart(holder_id, 2),
               });
               this.selectedCiv = 0;
               break;
@@ -4852,7 +4848,7 @@ define([
           switch (cid) {
             case 3:
               this.ajaxcallwrapper("placeCraftsmen", {
-                slot: getPart(holder_id, 2)
+                slot: getPart(holder_id, 2),
               });
               break;
             default:
@@ -4889,7 +4885,7 @@ define([
           dojo.toggleClass(id, "selected");
           this.clientStateArgs.num = 3 - document.querySelectorAll(".selected").length;
           this.setDescriptionOnMyTurn(_("Select up to ${num} of your outposts to stand up"), {
-            num: this.clientStateArgs.num
+            num: this.clientStateArgs.num,
           });
           break;
         default:
@@ -4909,7 +4905,7 @@ define([
             var coords = land_id.split("_");
             this.ajaxcallwrapper("colonialism", {
               U: coords[1],
-              V: coords[2]
+              V: coords[2],
             });
           } else {
             if (!dojo.hasClass(land_id, "active_slot") || !this.checkAction("explore")) {
@@ -4967,7 +4963,7 @@ define([
           }
           if (this.ownsCiv(this.CON.CIV_ISOLATIONISTS) && this.emptyTerritory() && this.hasIsolationTokens()) {
             this.setClientState("client_isolationist", {
-              descriptionmyturn: _("Do ${you} wish to place an isolationist token?")
+              descriptionmyturn: _("Do ${you} wish to place an isolationist token?"),
             });
           } else {
             this.processConquer(false);
@@ -4982,7 +4978,7 @@ define([
           var coords = land_id.split("_");
           this.ajaxcallwrapper("conquer_structure", {
             u: coords[1],
-            v: coords[2]
+            v: coords[2],
           });
           //  dojo.query(".possible").removeClass("possible");
 
@@ -4996,7 +4992,7 @@ define([
           }
           this.ajaxcallwrapper("moveStructureOnto", {
             location: land_id,
-            id: outpost_id
+            id: outpost_id,
           });
           break;
         case "client_threasureHunterChoice":
@@ -5065,7 +5061,7 @@ define([
 
     onCivilizationClick: function (event) {
       dojo.stopEvent(event);
-      console.log('onCivilizationClick');
+      console.log("onCivilizationClick");
 
       var id = event.currentTarget.id;
       if (this.showHelp(id)) return;
@@ -5090,13 +5086,13 @@ define([
         dest.className = "revealCards";
         $("popin_reveal_hand_contents").appendChild(dest);
 
-        event.target.querySelectorAll(".card").forEach(node=>{
+        event.target.querySelectorAll(".card").forEach((node) => {
           div_tile = dojo.clone(node);
           div_tile.id += "_c";
           dest.appendChild(div_tile);
           this.addTooltipForToken("tapestry", node.dataset.typeArg, div_tile.id);
         });
-  
+
         dia.show();
         return;
       }
@@ -5279,7 +5275,7 @@ define([
         "chooseCivilization",
         {
           civ: civ,
-          cap: cap
+          cap: cap,
         },
         undefined,
         true
@@ -5359,7 +5355,7 @@ define([
 
           this.ajaxcallwrapper("selectTrackSpot", {
             track: this.clientStateArgs.track,
-            spot: this.clientStateArgs.spot
+            spot: this.clientStateArgs.spot,
           });
 
           break;
@@ -5379,7 +5375,7 @@ define([
           this.ajaxcallwrapper(this.clientStateArgs.action, {
             bid: bid,
             track: this.clientStateArgs.track,
-            spot: this.clientStateArgs.spot
+            spot: this.clientStateArgs.spot,
           });
 
           break;
@@ -5426,14 +5422,14 @@ define([
 
       this.territoryPopup = new dijit.TooltipDialog({
         id: "territoryPopup",
-        content: html
+        content: html,
       });
 
       dijit.popup.open({
         popup: this.territoryPopup,
         around: $(this.selectedland),
         //orient: {BL:'TL', TL:'BL',BR: 'TR'},
-        closable: true
+        closable: true,
       });
 
       $("territory_select").appendChild($("territory_tiles_" + this.player_id));
@@ -5507,7 +5503,7 @@ define([
             const targets = this.gamedatas.gamestate.args.benefits[bid].slots_choice[id].targets;
             const terindex = this.civilizations[this.CON.CIV_TREASURE_HUNTERS].slots[id].ter;
             const args = {
-              territory_name: this.gamedatas.terrain_types[terindex].name
+              territory_name: this.gamedatas.terrain_types[terindex].name,
             };
             this.setClientStateUpd("client_threasureHunterChoice", () => {
               this.clientStateArgs.cid = this.CON.CIV_TREASURE_HUNTERS;
@@ -5530,7 +5526,7 @@ define([
         this.showError("Cannot determine the action to take, reload the browser");
         return;
       }
-      if (args.extra &&  typeof args.extra == "object") {
+      if (args.extra && typeof args.extra == "object") {
         args.extra_js = JSON.stringify(args.extra);
         delete args.extra;
       }
@@ -5805,8 +5801,8 @@ define([
           player_id: player_id || this.player_id,
           cards: [card],
           count: 1,
-          type: card_type
-        }
+          type: card_type,
+        },
       };
       this.notif_newCards(notif);
     },
@@ -6182,7 +6178,7 @@ define([
         card.card_type_arg,
         card.card_location,
         card.card_location_arg,
-        card.card_location_arg2
+        card.card_location_arg2,
       ];
 
       var player_id = card_location_arg;
@@ -6532,7 +6528,7 @@ define([
         card.card_type_arg,
         card.card_location,
         card.card_location_arg,
-        card.card_location_arg2
+        card.card_location_arg2,
       ];
 
       switch (parseInt(card_type)) {
@@ -6710,14 +6706,14 @@ define([
       if (placeNode) {
         var name = this.divPlayerName(player_id);
         var messsage = this.format_string_recursive(_("${player} may undo up to this point"), {
-          player: name
+          player: name,
         });
         var div = dojo.create("div", {
           id: undoButId,
           innerHTML: messsage,
           class: "undomarker",
           title: _("Click to undo your move up to this point"),
-          onclick: "return false"
+          onclick: "return false",
         });
         dojo.place(div, placeNode, place);
         dojo.connect(div, "onclick", this, "onUndo");
@@ -6761,7 +6757,7 @@ define([
     onLoadingLogsComplete: function () {
       console.log("Loading logs complete");
       this.setUndoMove(this.gamedatas.undo_move, this.gamedatas.partial_undo, this.gamedatas.undo_player_id);
-    }
+    },
   });
 });
 
