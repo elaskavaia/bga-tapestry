@@ -9666,7 +9666,7 @@ abstract class PGameXBody extends tapcommon {
                     break;
                 case 5: // FUTURISTS
                     // lose 1 resource and 1 culture
-                    $this->awardBenefits($player_id, 4, -1, $reason); // -1 culture
+                    $this->queueBenefitNormal(BE_GAIN_CULTURE, $player_id, $reason, -1);
                     // lose 1 resource
                     $this->queueBenefitNormal(['p' => RES_ANY, 'g' => 142], $player_id, $reason);
                     break;
@@ -10523,10 +10523,6 @@ abstract class PGameXBody extends tapcommon {
                 case 'standard':
                     $count = $b['benefit_quantity'];
                     $data = $b['benefit_data'];
-                    if ($count <= 0) {
-                        $this->error("benefit $ben quantify $count $data");
-                        $count = 1;
-                    }
                     $completed = $this->awardBenefits($bplayer, $ben, $count, $data);
                     if (!$completed)
                         return; // prev call makes state transition
