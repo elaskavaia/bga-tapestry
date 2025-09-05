@@ -4,11 +4,11 @@
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
  * tapestry implementation : © Adam Dewbery <adam@dewbs.co.uk>
- * 
+ *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
- * 
+ *
  * tapestry.game.php
  *
  * This is the main file for your game logic.
@@ -16,7 +16,7 @@
  * In this PHP file, you are going to defines the rules of the game.
  *
  */
-require_once('tapcommon.php');
+require_once "tapcommon.php";
 require_once "civs/AbsCivilization.php";
 require_once "civs/BasicCivilization.php";
 require_once "civs/Advisors.php";
@@ -53,7 +53,6 @@ abstract class PGameXBody extends tapcommon {
     protected array $player_bots;
     protected bool $token_types_adjusted;
 
-
     function __construct() {
         // Your global variables labels:
         //  Here, you can assign labels to global variables you are using for this game.
@@ -62,7 +61,7 @@ abstract class PGameXBody extends tapcommon {
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
-        $this->initGameStateLabels(array(
+        $this->initGameStateLabels([
             "conquer_die_red" => 10,
             "conquer_die_black" => 11,
             "science_die" => 12,
@@ -99,7 +98,7 @@ abstract class PGameXBody extends tapcommon {
             "income_version" => 150, // removed
             "automa_level" => 151,
             "shadow_level" => 152,
-        ));
+        ]);
         $this->cards = $this->getNew("module.common.deck");
         $this->cards->init("card");
         $this->structures = $this->getNew("module.common.deck");
@@ -132,9 +131,10 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getAdjustmentVariant() {
-        $variant = $this->getGameStateValue('variant_adjustments');
-        if ($variant == 3)
+        $variant = $this->getGameStateValue("variant_adjustments");
+        if ($variant == 3) {
             $variant = 4;
+        }
         return $variant;
     }
 
@@ -143,13 +143,13 @@ abstract class PGameXBody extends tapcommon {
             $exp = $exp_flag;
             $exp_flag = EXP_BA_FLAG;
             switch ($exp) {
-                case 'AA':
+                case "AA":
                     $exp_flag = EXP_AA_FLAG;
                     break;
-                case 'PP':
+                case "PP":
                     $exp_flag = EXP_PP_FLAG;
                     break;
-                case 'BA':
+                case "BA":
                     $exp_flag = EXP_BA_FLAG;
                     break;
                 default:
@@ -157,13 +157,14 @@ abstract class PGameXBody extends tapcommon {
                     break;
             }
         }
-        return is_flag_set($this->getGameStateValue('expansion_civ', 0b001), $exp_flag);
+        return is_flag_set($this->getGameStateValue("expansion_civ", 0b001), $exp_flag);
     }
 
     function adjustMaterial($force = false) {
         $all_tables = [&$this->civilizations];
-        if (!$force && $this->token_types_adjusted)
+        if (!$force && $this->token_types_adjusted) {
             return $all_tables;
+        }
         $this->token_types_adjusted = true;
         $adj = $this->getAdjustmentVariant();
         $num = $this->getPlayersNumberWithBots();
@@ -176,9 +177,10 @@ abstract class PGameXBody extends tapcommon {
         foreach ($all_tables as &$token_types) {
             foreach ($token_types as $index => &$table) {
                 foreach ($table as $key => $civ_info) {
-                    $vars = explode('@', $key, 2);
-                    if (count($vars) <= 1)
+                    $vars = explode("@", $key, 2);
+                    if (count($vars) <= 1) {
                         continue;
+                    }
                     $primary = $vars[0];
                     $variant = $vars[1];
                     // if variant matches
@@ -194,7 +196,7 @@ abstract class PGameXBody extends tapcommon {
                         $variant = preg_replace("/a[0-9]/", "", $variant);
                     }
 
-                    if ($variant !== '') {
+                    if ($variant !== "") {
                         $table["$primary@$variant"] = $table[$key]; // want not reduces, incompatible with this game
                     } else {
                         // override existing value
@@ -204,71 +206,81 @@ abstract class PGameXBody extends tapcommon {
                                 $this->systemAssertTrue("Expecting array for $primary on $index");
                             }
                             $table[$primary] = array_replace_recursive($prev, $table[$key]);
-                        } else
+                        } else {
                             $table[$primary] = $table[$key];
-                        if ($key != $primary)
+                        }
+                        if ($key != $primary) {
                             unset($table[$key]);
+                        }
                     }
                 }
             }
         }
         foreach ($this->civilizations as $key => &$civ_info) {
-            if (!array_key_exists('automa', $civ_info)) {
-                $civ_info['automa'] = true;
+            if (!array_key_exists("automa", $civ_info)) {
+                $civ_info["automa"] = true;
             }
-            if (!array_key_exists('exp', $civ_info)) {
-                $civ_info['exp'] = 'BA';
+            if (!array_key_exists("exp", $civ_info)) {
+                $civ_info["exp"] = "BA";
             }
-            if (!array_key_exists('adjustment', $civ_info)) {
-                $civ_info['adjustment'] = '';
+            if (!array_key_exists("adjustment", $civ_info)) {
+                $civ_info["adjustment"] = "";
             }
-            $slots = array_get($civ_info, 'slots', null);
-            if (!$slots)
+            $slots = array_get($civ_info, "slots", null);
+            if (!$slots) {
                 continue;
+            }
             $has_benefits = false;
             $i = 0;
             $prev = [0, 0];
-            $dir = ['LR', 'TB'];
+            $dir = ["LR", "TB"];
             foreach ($slots as $index => &$slot_info) {
-                $benefit = array_get($slot_info, 'benefit', null);
-                if ($benefit)
+                $benefit = array_get($slot_info, "benefit", null);
+                if ($benefit) {
                     $has_benefits = true;
-                $curr = [array_get($slot_info, 'left', 0), array_get($slot_info, 'top', 0)];
+                }
+                $curr = [array_get($slot_info, "left", 0), array_get($slot_info, "top", 0)];
                 if ($i == 1) {
-                    if ($curr[1] < $prev[1])
-                        $dir = ['BT', 'LR'];
-                    if ($curr[1] > $prev[1])
-                        $dir = ['TB', 'LR'];
+                    if ($curr[1] < $prev[1]) {
+                        $dir = ["BT", "LR"];
+                    }
+                    if ($curr[1] > $prev[1]) {
+                        $dir = ["TB", "LR"];
+                    }
                 }
                 if ($i > 0) {
-                    if ($dir[1] == 'LR') {
+                    if ($dir[1] == "LR") {
                         if ($curr[0] != $prev[0]) {
-                            $civ_info['slots'][$index]['wrap'] = 1;
+                            $civ_info["slots"][$index]["wrap"] = 1;
                         }
                     } else {
                         if ($curr[1] != $prev[1]) {
-                            $civ_info['slots'][$index]['wrap'] = 1;
+                            $civ_info["slots"][$index]["wrap"] = 1;
                         }
                     }
                 }
                 $prev = $curr;
                 $i++;
             }
-            $civ_info['slots_benefits'] = $has_benefits;
-            $civ_info['slots_dir'] = $dir;
+            $civ_info["slots_benefits"] = $has_benefits;
+            $civ_info["slots_dir"] = $dir;
             $dir_tr = [];
             foreach ($dir as $one) {
-                if ($one === 'LR')
-                    $dir_tr[] = clienttranslate('left to right');
-                if ($one === 'TB')
-                    $dir_tr[] = clienttranslate('top to bottom');
-                if ($one === 'BT')
-                    $dir_tr[] = clienttranslate('bottom to top');
+                if ($one === "LR") {
+                    $dir_tr[] = clienttranslate("left to right");
+                }
+                if ($one === "TB") {
+                    $dir_tr[] = clienttranslate("top to bottom");
+                }
+                if ($one === "BT") {
+                    $dir_tr[] = clienttranslate("bottom to top");
+                }
             }
-            if (!isset($civ_info['slots_description']))
-                $civ_info['slots_description'] = $dir_tr;
+            if (!isset($civ_info["slots_description"])) {
+                $civ_info["slots_description"] = $dir_tr;
+            }
         }
-        $this->card_types[CARD_CIVILIZATION]['data'] = $this->civilizations;
+        $this->card_types[CARD_CIVILIZATION]["data"] = $this->civilizations;
         return $all_tables;
     }
 
@@ -279,25 +291,35 @@ abstract class PGameXBody extends tapcommon {
      * In this method, you must setup the game according to the game rules, so that
      * the game is ready to be played.
      */
-    protected function setupNewGame($players, $options = array()) {
+    protected function setupNewGame($players, $options = []) {
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
         $gameinfos = $this->getGameinfos();
-        $default_colors = $gameinfos['player_colors'];
+        $default_colors = $gameinfos["player_colors"];
         shuffle($default_colors);
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
-        $values = array();
+        $values = [];
         foreach ($players as $player_id => $player) {
             $color = array_shift($default_colors);
-            $values[] = "('" . $player_id . "','$color','" . $player['player_canal'] . "','" . addslashes($player['player_name']) . "','" . addslashes($player['player_avatar']) . "')";
+            $values[] =
+                "('" .
+                $player_id .
+                "','$color','" .
+                $player["player_canal"] .
+                "','" .
+                addslashes($player["player_name"]) .
+                "','" .
+                addslashes($player["player_avatar"]) .
+                "')";
         }
-        $sql .= implode(',', $values);
+        $sql .= implode(",", $values);
         $this->DbQuery($sql);
-        if ($gameinfos['favorite_colors_support'])
-            $this->reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
+        if ($gameinfos["favorite_colors_support"]) {
+            $this->reattributeColorsBasedOnPreferences($players, $gameinfos["player_colors"]);
+        }
         $this->reloadPlayersBasicInfos();
         $this->activeNextPlayer();
         $this->setupNewGameTables();
@@ -317,8 +339,8 @@ abstract class PGameXBody extends tapcommon {
             $this->error($e);
         }
         $newGameDatas = $this->getAllTableDatas(); // this is framework function
-        $this->notifyPlayer($this->getActivePlayerId(), 'resetInterfaceWithAllDatas', '', $newGameDatas); // this is notification to reset all data
-        $this->notifyAllPlayers("message", 'setup called', []);
+        $this->notifyPlayer($this->getActivePlayerId(), "resetInterfaceWithAllDatas", "", $newGameDatas); // this is notification to reset all data
+        $this->notifyAllPlayers("message", "setup called", []);
     }
 
     protected function setupNewGameTables() {
@@ -330,61 +352,71 @@ abstract class PGameXBody extends tapcommon {
         $playerswithbots = $this->loadPlayersBasicInfosWithBots(true);
         $values = [];
         $sql = "INSERT INTO playerextra (player_id, player_color, player_name, player_avatar) VALUES ";
-        $values = array();
+        $values = [];
         foreach ($playerswithbots as $player_id => $player) {
-            $values[] = "('" . $player_id . "','" . $player['player_color'] . "','" . addslashes($player['player_name']) . "','" . addslashes($player['player_avatar']) . "')";
+            $values[] =
+                "('" .
+                $player_id .
+                "','" .
+                $player["player_color"] .
+                "','" .
+                addslashes($player["player_name"]) .
+                "','" .
+                addslashes($player["player_avatar"]) .
+                "')";
         }
-        $sql .= implode(',', $values);
+        $sql .= implode(",", $values);
         $this->DbQuery($sql);
-        $this->initStat('table', 'turns_number', 0);
-        $this->initStat('player', 'turns_total', 0);
-        $this->initStat('player', 'turns_era_1', 0);
-        $this->initStat('player', 'turns_era_2', 0);
-        $this->initStat('player', 'turns_era_3', 0);
-        $this->initStat('player', 'turns_era_4', 0);
-        $this->initStat('player', 'bonuses', 0);
-        $this->initStat('player', 'track1', 0);
-        $this->initStat('player', 'track2', 0);
-        $this->initStat('player', 'track3', 0);
-        $this->initStat('player', 'track4', 0);
-        $this->initStat('player', 'capital', 0);
-        $this->initStat('player', 'civ', 0);
+        $this->initStat("table", "turns_number", 0);
+        $this->initStat("player", "turns_total", 0);
+        $this->initStat("player", "turns_era_1", 0);
+        $this->initStat("player", "turns_era_2", 0);
+        $this->initStat("player", "turns_era_3", 0);
+        $this->initStat("player", "turns_era_4", 0);
+        $this->initStat("player", "bonuses", 0);
+        $this->initStat("player", "track1", 0);
+        $this->initStat("player", "track2", 0);
+        $this->initStat("player", "track3", 0);
+        $this->initStat("player", "track4", 0);
+        $this->initStat("player", "capital", 0);
+        $this->initStat("player", "civ", 0);
         $all_stats = $this->getStatTypes();
-        $player_stats = $all_stats['player'];
+        $player_stats = $all_stats["player"];
         // auto-initialize all stats that starts with game_
         // we need a prefix because there is some other system stuff
         foreach ($player_stats as $key => $value) {
-            if (startsWith($key, 'game_')) {
-                $this->initStat('player', $key, 0);
+            if (startsWith($key, "game_")) {
+                $this->initStat("player", $key, 0);
             }
         }
-        $game_stats = $all_stats['table'];
+        $game_stats = $all_stats["table"];
         // auto-initialize all stats that starts with game_
         // we need a prefix because there is some other system stuff
         foreach ($game_stats as $key => $value) {
-            if (startsWith($key, 'game_')) {
-                $this->initStat('table', $key, 0);
+            if (startsWith($key, "game_")) {
+                $this->initStat("table", $key, 0);
             }
         }
         // TILE / CARD SETUP
         // Territory tiles
-        $cards = array();
+        $cards = [];
         foreach ($this->territory_tiles as $ttid => $tt) {
-            if ($ttid < 49) { // Higher numbers are printed on the map, not tiles...
-                $cards[] = array('type' => CARD_TERRITORY, 'type_arg' => $ttid, 'nbr' => 1);
+            if ($ttid < 49) {
+                // Higher numbers are printed on the map, not tiles...
+                $cards[] = ["type" => CARD_TERRITORY, "type_arg" => $ttid, "nbr" => 1];
             }
         }
-        $this->cards->createCards($cards, 'deck_territory');
-        $this->cards->shuffle('deck_territory');
+        $this->cards->createCards($cards, "deck_territory");
+        $this->cards->shuffle("deck_territory");
         // Space tiles
-        $cards = array();
+        $cards = [];
         foreach ($this->space_tiles as $stid => $st) {
-            $cards[] = array('type' => CARD_SPACE, 'type_arg' => $stid, 'nbr' => 1);
+            $cards[] = ["type" => CARD_SPACE, "type_arg" => $stid, "nbr" => 1];
         }
-        $this->cards->createCards($cards, 'deck_space');
-        $this->cards->shuffle('deck_space');
+        $this->cards->createCards($cards, "deck_space");
+        $this->cards->shuffle("deck_space");
         // Tapestry Cards
-        //Age of Sail*, Alliance, Coal Baron*, Dictatorship,        Diplomacy*, Espionage*, Marriage of State, Oil Magnate, 
+        //Age of Sail*, Alliance, Coal Baron*, Dictatorship,        Diplomacy*, Espionage*, Marriage of State, Oil Magnate,
         // Olympic Host, Steam Tycoon*, Trade  Economy*, and 2 traps.
         $atoma_tap_exclusions = [
             TAP_AGE_OF_SAIL,
@@ -397,79 +429,88 @@ abstract class PGameXBody extends tapcommon {
             28,
             29,
             TAP_STEAM_TYCOON,
-            41
+            41,
         ];
         $traps = 7;
-        if ($automa)
+        if ($automa) {
             $traps -= 2;
-        $cards = array();
+        }
+        $cards = [];
         foreach ($this->tapestry_card_data as $tcid => $tc) {
-            if ($tcid == 0)
-                continue; // face down card should not be in the deck
-            if ($automa && in_array($tcid, $atoma_tap_exclusions))
+            if ($tcid == 0) {
                 continue;
-            $nbr = ($tcid == TAP_TRAP) ? $traps : 1; // 7 trap cards
-            $cards[] = array('type' => CARD_TAPESTRY, 'type_arg' => $tcid, 'nbr' => $nbr);
+            } // face down card should not be in the deck
+            if ($automa && in_array($tcid, $atoma_tap_exclusions)) {
+                continue;
+            }
+            $nbr = $tcid == TAP_TRAP ? $traps : 1; // 7 trap cards
+            $cards[] = ["type" => CARD_TAPESTRY, "type_arg" => $tcid, "nbr" => $nbr];
         }
-        $this->cards->createCards($cards, 'deck_tapestry');
-        $this->cards->shuffle('deck_tapestry');
+        $this->cards->createCards($cards, "deck_tapestry");
+        $this->cards->shuffle("deck_tapestry");
         // Technology Cards
-        $cards = array();
+        $cards = [];
         foreach ($this->tech_card_data as $tcid => $tc) {
-            $cards[] = array('type' => CARD_TECHNOLOGY, 'type_arg' => $tcid, 'nbr' => 1);
+            $cards[] = ["type" => CARD_TECHNOLOGY, "type_arg" => $tcid, "nbr" => 1];
         }
-        $this->cards->createCards($cards, 'deck_tech');
-        $this->cards->shuffle('deck_tech');
+        $this->cards->createCards($cards, "deck_tech");
+        $this->cards->shuffle("deck_tech");
         //
         // CIVILIZATIONS
         //
         $adj = $this->getAdjustmentVariant();
-        $cards = array();
+        $cards = [];
         foreach ($this->civilizations as $cid => $c) {
-            if (array_get($c, 'exclude', false) === true)
+            if (array_get($c, "exclude", false) === true) {
                 continue;
-            if ($automa && !$this->isTestEnv() && array_get($c, 'automa', true) === false)
+            }
+            if ($automa && !$this->isTestEnv() && array_get($c, "automa", true) === false) {
                 continue;
-            $exp = array_get($c, 'exp', 'BA');
+            }
+            $exp = array_get($c, "exp", "BA");
             if (!$this->isExpansionIncluded($exp)) {
                 continue;
             }
 
-            $max_adjustement_level = (int) array_get($c, 'al', 4);
-            if ($adj > $max_adjustement_level) continue;
-            $cards[] = array('type' => CARD_CIVILIZATION, 'type_arg' => $cid, 'nbr' => 1);
+            $max_adjustement_level = (int) array_get($c, "al", 4);
+            if ($adj > $max_adjustement_level) {
+                continue;
+            }
+            $cards[] = ["type" => CARD_CIVILIZATION, "type_arg" => $cid, "nbr" => 1];
         }
-        $this->cards->createCards($cards, 'deck_civ');
-        $this->cards->shuffle('deck_civ');
+        $this->cards->createCards($cards, "deck_civ");
+        $this->cards->shuffle("deck_civ");
 
         // Capitals
-        $cards = array();
+        $cards = [];
         foreach ($this->capitals as $cid => $c) {
-            $cards[] = array('type' => 6, 'type_arg' => $cid, 'nbr' => 1);
+            $cards[] = ["type" => 6, "type_arg" => $cid, "nbr" => 1];
         }
-        $this->cards->createCards($cards, 'deck_capital');
+        $this->cards->createCards($cards, "deck_capital");
         // remove components if needed
         $this->removeSomeComponents();
         // Draw technology cards
-        $this->cards->pickCardsForLocation(3, 'deck_tech', 'deck_tech_vis', 0, true);
+        $this->cards->pickCardsForLocation(3, "deck_tech", "deck_tech_vis", 0, true);
         $automa_civ = 0;
         // PICK STARTING CAPITAL/CIV CHOICES
         // randomize player_no for automa games XXX TODO
-        $this->setGameStateValue('automa_no', 3);
+        $this->setGameStateValue("automa_no", 3);
         if ($automa) {
             $order = bga_rand(0, 2);
             $no = $order + 1;
-            $this->setGameStateValue('automa_no', $no);
+            $this->setGameStateValue("automa_no", $no);
             $keys = array_keys($players);
             $index = 0;
-            if ($automa && $no == 3)
+            if ($automa && $no == 3) {
                 $index = 1;
+            }
             foreach ($keys as $player_id) {
                 $index += 1;
                 if ($index == $no) {
                     $index++;
-                    if ($automa)
+                    if ($automa) {
                         $index++;
+                    }
                 }
                 $this->DbQuery("UPDATE player SET player_no='$index' WHERE player_id='$player_id'");
             }
@@ -480,16 +521,20 @@ abstract class PGameXBody extends tapcommon {
         $pairs = [1 => 6, 2 => 4, 3 => 5];
         $index = 0;
         $this->DbQuery("UPDATE player SET player_no=player_no + 100"); // to avoid duplicate PRIMARY key
-        $allcount = $this->cards->countCardsInLocation('deck_civ');
+        $allcount = $this->cards->countCardsInLocation("deck_civ");
         foreach ($playerswithbots as $player_id => $player) {
             $index += 1;
             $capital = $mats[$index];
             //$this->debugConsole("Player $player_id $index $capital");
             if ($this->isRealPlayer($player_id) && $numPlayers < 4) {
                 $second = $pairs[$capital];
-                $this->DbQuery("UPDATE card SET card_location='choice', card_location_arg='$player_id' WHERE card_type='6' AND card_type_arg IN ('$capital', '$second')");
+                $this->DbQuery(
+                    "UPDATE card SET card_location='choice', card_location_arg='$player_id' WHERE card_type='6' AND card_type_arg IN ('$capital', '$second')"
+                );
             } else {
-                $this->DbQuery("UPDATE card SET card_location='hand', card_location_arg='$player_id' WHERE card_type='6' AND card_type_arg='$capital'");
+                $this->DbQuery(
+                    "UPDATE card SET card_location='hand', card_location_arg='$player_id' WHERE card_type='6' AND card_type_arg='$capital'"
+                );
             }
             if ($this->isRealPlayer($player_id)) {
                 // civs
@@ -498,21 +543,21 @@ abstract class PGameXBody extends tapcommon {
                 } else {
                     $numciv = 2;
                 }
-                $this->cards->pickCardsForLocation($numciv, 'deck_civ', 'choice', $player_id, false);
+                $this->cards->pickCardsForLocation($numciv, "deck_civ", "choice", $player_id, false);
                 // income buildings
-                $structures = array();
+                $structures = [];
                 for ($a = 1; $a < 5; $a++) {
-                    $structures[] = array('type' => $a, 'type_arg' => 0, 'nbr' => 6);
+                    $structures[] = ["type" => $a, "type_arg" => 0, "nbr" => 6];
                 }
-                $this->structures->createCards($structures, 'income', $player_id);
+                $this->structures->createCards($structures, "income", $player_id);
                 $this->DbQuery("UPDATE player SET player_no='$capital' WHERE player_id='$player_id'");
             }
-            $structures = array();
-            $structures[] = array('type' => BUILDING_OUTPOST, 'type_arg' => 0, 'nbr' => 10);
-            $structures[] = array('type' => BUILDING_CUBE, 'type_arg' => 0, 'nbr' => 8);
-            $this->structures->createCards($structures, 'hand', $player_id);
+            $structures = [];
+            $structures[] = ["type" => BUILDING_OUTPOST, "type_arg" => 0, "nbr" => 10];
+            $structures[] = ["type" => BUILDING_CUBE, "type_arg" => 0, "nbr" => 8];
+            $this->structures->createCards($structures, "hand", $player_id);
             for ($a = 1; $a <= 4; $a++) {
-                $this->dbAddCube($player_id, 'tech_spot_' . $a . '_0');
+                $this->dbAddCube($player_id, "tech_spot_" . $a . "_0");
             }
         }
         $this->reloadPlayersBasicInfos();
@@ -522,35 +567,37 @@ abstract class PGameXBody extends tapcommon {
         //
         // landmarks
         foreach ($this->landmark_data as $a => $info) {
-            $this->DbQuery("INSERT INTO structure (card_type, card_type_arg, card_location, card_location_arg2) VALUES ('6', '0', 'landmark_mat_slot$a', '$a')");
+            $this->DbQuery(
+                "INSERT INTO structure (card_type, card_type_arg, card_location, card_location_arg2) VALUES ('6', '0', 'landmark_mat_slot$a', '$a')"
+            );
         }
         //Initialise Map
-        $map_data = $this->getInitMapData('map');
+        $map_data = $this->getInitMapData("map");
         foreach ($map_data as $coords => $info) {
-            $tile_id = array_get($info, 'map_tile_id', 0);
-            $tile_orient = array_get($info, 'map_tile_orient', 0);
+            $tile_id = array_get($info, "map_tile_id", 0);
+            $tile_orient = array_get($info, "map_tile_orient", 0);
             $this->DbQuery("INSERT INTO map (map_coords, map_tile_id, map_tile_orient) VALUES ('$coords', '$tile_id', '$tile_orient')");
         }
         if ($automa) {
             $cards = [];
             for ($i = 8; $i <= 22; $i++) {
-                $cards[] = array('type' => CARD_DECISION, 'type_arg' => $i, 'nbr' => 1);
+                $cards[] = ["type" => CARD_DECISION, "type_arg" => $i, "nbr" => 1];
             }
-            $this->cards->createCards($cards, 'deck_progress');
-            $this->cards->shuffle('deck_progress');
-            $this->cards->pickCardsForLocation(1, 'deck_progress', 'deck_decision', 0, true);
+            $this->cards->createCards($cards, "deck_progress");
+            $this->cards->shuffle("deck_progress");
+            $this->cards->pickCardsForLocation(1, "deck_progress", "deck_decision", 0, true);
             $cards = [];
             for ($i = 1; $i <= 7; $i++) {
-                $cards[] = array('type' => CARD_DECISION, 'type_arg' => $i, 'nbr' => 1);
+                $cards[] = ["type" => CARD_DECISION, "type_arg" => $i, "nbr" => 1];
             }
-            $this->cards->createCards($cards, 'deck_decision');
-            $this->cards->shuffle('deck_decision');
+            $this->cards->createCards($cards, "deck_decision");
+            $this->cards->shuffle("deck_decision");
             // pick civ automa
             $automa_civ = bga_rand(1, 4);
             $this->effect_automaChangeFavoriteTrack(PLAYER_AUTOMA, $automa_civ);
-            $this->setGameStateValue('automa_civ', $automa_civ);
-            $this->setStat($automa_civ, 'automa_civ');
-            $this->setStat(0, 'automa_score');
+            $this->setGameStateValue("automa_civ", $automa_civ);
+            $this->setStat($automa_civ, "automa_civ");
+            $this->setStat(0, "automa_score");
             // pick fav shadow
             $shadow_fav_track = bga_rand(1, 4);
             while ($shadow_fav_track == $automa_civ) {
@@ -561,10 +608,10 @@ abstract class PGameXBody extends tapcommon {
         if ($shadow) {
             $cards = [];
             for ($i = 1; $i <= 12; $i++) {
-                $cards[] = array('type' => CARD_DECISION, 'type_arg' => $i, 'nbr' => 1);
+                $cards[] = ["type" => CARD_DECISION, "type_arg" => $i, "nbr" => 1];
             }
-            $this->cards->createCards($cards, 'deck_decision');
-            $this->cards->shuffle('deck_decision');
+            $this->cards->createCards($cards, "deck_decision");
+            $this->cards->shuffle("deck_decision");
             // pick fav
             $shadow_fav_track = bga_rand(1, 4);
             $this->effect_automaChangeFavoriteTrack(PLAYER_SHADOW, $shadow_fav_track);
@@ -574,59 +621,62 @@ abstract class PGameXBody extends tapcommon {
     function loadPlayersBasicInfosWithBots($new = false) {
         $player_basic = $this->loadPlayersBasicInfos();
         if ($new) {
-            if (!$this->isAutoma())
+            if (!$this->isAutoma()) {
                 return $player_basic;
+            }
             return $player_basic + $this->addAutomaPlayer();
         }
         if ($this->isAutoma()) {
             if (!isset($this->player_bots)) {
-                $no = (int) $this->getGameStateValue('automa_no');
+                $no = (int) $this->getGameStateValue("automa_no");
                 $sql = "SELECT player_id, player_color,player_name,player_avatar,player_ai,player_score FROM playerextra";
                 $this->player_bots = $this->getCollectionFromDb($sql);
                 if ($this->isSolo()) {
-                    $this->player_bots[PLAYER_AUTOMA]['player_no'] = $no;
-                    $this->player_bots[PLAYER_SHADOW]['player_no'] = ($no % 3) + 1;
-                } else if ($this->isShadowEmpireOnly()) {
-                    $this->player_bots[PLAYER_SHADOW]['player_no'] = $no;
+                    $this->player_bots[PLAYER_AUTOMA]["player_no"] = $no;
+                    $this->player_bots[PLAYER_SHADOW]["player_no"] = ($no % 3) + 1;
+                } elseif ($this->isShadowEmpireOnly()) {
+                    $this->player_bots[PLAYER_SHADOW]["player_no"] = $no;
                 }
             }
             foreach ($this->player_bots as $player_id => $info) {
-                if (!isset($player_basic[$player_id]))
+                if (!isset($player_basic[$player_id])) {
                     $player_basic[$player_id] = $info;
+                }
             }
         }
-        uksort($player_basic, fn($x, $y) => ((int) $player_basic[$x]['player_no']) <=> ((int) $player_basic[$y]['player_no']));
+        uksort($player_basic, fn($x, $y) => ((int) $player_basic[$x]["player_no"]) <=> ((int) $player_basic[$y]["player_no"]));
         //$this->warn("basci ".toJson($player_basic));
         return $player_basic;
     }
 
     function addAutomaPlayer() {
-        if (!$this->isAutoma())
+        if (!$this->isAutoma()) {
             return [];
+        }
         $playerswithbots = [];
         $numPlayers = $this->getPlayersNumber();
         $gameinfos = $this->getGameinfos();
-        $default_colors = $gameinfos['player_colors'];
+        $default_colors = $gameinfos["player_colors"];
         shuffle($default_colors);
         if ($this->isSolo()) {
             $playerswithbots[PLAYER_AUTOMA] = [
-                'player_id' => PLAYER_AUTOMA,
-                'player_color' => 0,
-                'player_name' => clienttranslate('Automa'),
-                'player_avatar' => '',
-                'player_no' => $numPlayers,
-                'player_ai' => 1,
-                'player_color' => '69c9c9'
+                "player_id" => PLAYER_AUTOMA,
+                "player_color" => 0,
+                "player_name" => clienttranslate("Automa"),
+                "player_avatar" => "",
+                "player_no" => $numPlayers,
+                "player_ai" => 1,
+                "player_color" => "69c9c9",
             ];
         }
         $playerswithbots[PLAYER_SHADOW] = [
-            'player_id' => PLAYER_SHADOW,
-            'player_color' => 0,
-            'player_name' => clienttranslate('Shadow Empire'),
-            'player_avatar' => '',
-            'player_no' => $numPlayers + 1,
-            'player_ai' => 1,
-            'player_color' => '777777'
+            "player_id" => PLAYER_SHADOW,
+            "player_color" => 0,
+            "player_name" => clienttranslate("Shadow Empire"),
+            "player_avatar" => "",
+            "player_no" => $numPlayers + 1,
+            "player_ai" => 1,
+            "player_color" => "777777",
         ];
         return $playerswithbots;
     }
@@ -640,15 +690,17 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function isShadowEmpireOnly() {
-        return $this->getPlayersNumber() == 2 && $this->getGameStateValue('shadow_level') > 0;
+        return $this->getPlayersNumber() == 2 && $this->getGameStateValue("shadow_level") > 0;
     }
 
     function getAutomaLevel() {
-        if (!$this->isAutoma())
+        if (!$this->isAutoma()) {
             return 0;
-        $level = (int) $this->getGameStateValue('automa_level');
-        if ($level == 0)
+        }
+        $level = (int) $this->getGameStateValue("automa_level");
+        if ($level == 0) {
             $level = 2;
+        }
         return $level;
     }
 
@@ -685,8 +737,8 @@ abstract class PGameXBody extends tapcommon {
      * _ when the game starts
      * _ when a player refreshes the game page (F5)
      */
-    protected function getAllDatas() {
-        $result = array();
+    protected function getAllDatas(): array {
+        $result = [];
         $current_player_id = $this->getCurrentPlayerId(); // !! We must only return informations visible by this player !!
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
@@ -697,122 +749,128 @@ abstract class PGameXBody extends tapcommon {
                         player_income_turns, player_ai is_ai
                         FROM playerextra ";
         $player_basic = $this->loadPlayersBasicInfosWithBots();
-        $result['playerorder_withbots'] = array_keys($player_basic);
-        $result['starting_player'] = $this->getGameStateValue('starting_player');
-        $result['players'] = array();
+        $result["playerorder_withbots"] = array_keys($player_basic);
+        $result["starting_player"] = $this->getGameStateValue("starting_player");
+        $result["players"] = [];
         $player_data = $this->getCollectionFromDb($sql);
-        $setupphase = ($this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='choice'") != 0);
+        $setupphase = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='choice'") != 0;
         foreach ($player_data as $player_id => $player) {
-            $result['players'][$player_id] = array();
-            $result['players'][$player_id]['id'] = $player['id'];
-            $result['players'][$player_id]['score'] = $player['score'];
-            $result['players'][$player_id]['color'] = $player['color'];
-            $result['players'][$player_id]['name'] = $player['name'];
-            $result['players'][$player_id]['is_ai'] = $player['is_ai'];
-            $result['players'][$player_id]['no'] = $player_basic[$player_id]['player_no'];
-            $result['players'][$player_id]['basic'] = $player;
-            $result['players'][$player_id]['alive'] = $this->isPlayerAlive($player_id);
-            $result['players'][$player_id]['hand'] = array();
-            $result['players'][$player_id]['structures'] = $this->getObjectListFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id'");
-            $result['players'][$player_id]['capital'] = $this->getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_type='6' AND card_location='hand' AND card_location_arg='$player_id'");
-            $result['players'][$player_id]['track_fav'] = $this->structures->getCardsInLocation([
-                'track_fav_1',
-                'track_fav_2',
-                'track_fav_3',
-                'track_fav_4'
-            ], $player_id);
+            $result["players"][$player_id] = [];
+            $result["players"][$player_id]["id"] = $player["id"];
+            $result["players"][$player_id]["score"] = $player["score"];
+            $result["players"][$player_id]["color"] = $player["color"];
+            $result["players"][$player_id]["name"] = $player["name"];
+            $result["players"][$player_id]["is_ai"] = $player["is_ai"];
+            $result["players"][$player_id]["no"] = $player_basic[$player_id]["player_no"];
+            $result["players"][$player_id]["basic"] = $player;
+            $result["players"][$player_id]["alive"] = $this->isPlayerAlive($player_id);
+            $result["players"][$player_id]["hand"] = [];
+            $result["players"][$player_id]["structures"] = $this->getObjectListFromDB(
+                "SELECT * FROM structure WHERE card_location_arg='$player_id'"
+            );
+            $result["players"][$player_id]["capital"] = $this->getUniqueValueFromDB(
+                "SELECT card_type_arg FROM card WHERE card_type='6' AND card_location='hand' AND card_location_arg='$player_id'"
+            );
+            $result["players"][$player_id]["track_fav"] = $this->structures->getCardsInLocation(
+                ["track_fav_1", "track_fav_2", "track_fav_3", "track_fav_4"],
+                $player_id
+            );
             if (!$setupphase) {
-                $result['players'][$player_id]['civilizations'] = $this->getCardsInHand($player_id, CARD_CIVILIZATION);
-                $result['players'][$player_id]['tapestry'] = $this->getCollectionFromDB("SELECT *  FROM card WHERE card_type='3' AND card_location <> 'hand' AND card_location_arg='$player_id'");
-                $result['players'][$player_id]['technology'] = $this->getCardsInHand($player_id, 4);
-                $result['players'][$player_id]['technology_updates'] = $this->argUpdateCardList($player_id);
-                $result['players'][$player_id]['space'] = $this->getCollectionFromDB("SELECT * FROM card WHERE card_type='2' AND card_location<>'hand' AND card_location_arg='$player_id'");
-                $result['players'][$player_id]['hand']['territory'] = $this->getCardsInHand($player_id, 1);
-                $result['players'][$player_id]['hand']['space'] = $this->getCardsInHand($player_id, 2);
+                $result["players"][$player_id]["civilizations"] = $this->getCardsInHand($player_id, CARD_CIVILIZATION);
+                $result["players"][$player_id]["tapestry"] = $this->getCollectionFromDB(
+                    "SELECT *  FROM card WHERE card_type='3' AND card_location <> 'hand' AND card_location_arg='$player_id'"
+                );
+                $result["players"][$player_id]["technology"] = $this->getCardsInHand($player_id, 4);
+                $result["players"][$player_id]["technology_updates"] = $this->argUpdateCardList($player_id);
+                $result["players"][$player_id]["space"] = $this->getCollectionFromDB(
+                    "SELECT * FROM card WHERE card_type='2' AND card_location<>'hand' AND card_location_arg='$player_id'"
+                );
+                $result["players"][$player_id]["hand"]["territory"] = $this->getCardsInHand($player_id, 1);
+                $result["players"][$player_id]["hand"]["space"] = $this->getCardsInHand($player_id, 2);
                 if ($player_id == $current_player_id) {
-                    $result['players'][$player_id]['hand']['tapestry'] = $this->getCardsInHand($player_id, 3);
+                    $result["players"][$player_id]["hand"]["tapestry"] = $this->getCardsInHand($player_id, 3);
                 } else {
-                    $result['players'][$player_id]['hand']['tapestry'] = [];
+                    $result["players"][$player_id]["hand"]["tapestry"] = [];
                 }
-                $result['players'][$player_id]['counters']['tapestry'] = $this->getCardCountInHand($player_id, 3);
+                $result["players"][$player_id]["counters"]["tapestry"] = $this->getCardCountInHand($player_id, 3);
             }
         }
         if ($this->isSolo()) {
             $player_id = PLAYER_AUTOMA;
-            $civ = $this->getGameStateValue('automa_civ');
-            $result['players'][$player_id]['automa_civ'] = $civ;
+            $civ = $this->getGameStateValue("automa_civ");
+            $result["players"][$player_id]["automa_civ"] = $civ;
         }
         if ($this->isAutoma()) {
-            $result['decision_pair'] = $this->cards->getCardsInLocation('decision_pair');
+            $result["decision_pair"] = $this->cards->getCardsInLocation("decision_pair");
         }
-        $result['deck_counters'] = $this->getDeckCounters();
-        $result['landmarks'] = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_type='6' AND card_location_arg=0");
-        $result['landmark_data'] = $this->landmark_data;
-        $result['tech_track_types'] = $this->tech_track_types;
-        $result['tech_track_data'] = $this->tech_track_data;
-        $result['income_track_data'] = $this->income_tracks;
-        $result['benefit_types'] = $this->benefit_types;
-        $result['terrain_types'] = $this->terrain_types;
-        $result['dice_names'] = $this->dice_names;
-        $result['card_types'] = $this->card_types;
-        $result['map'] = $this->getMapData();
-        $result['dice'] = array();
-        $result['dice']['red'] = $this->getGameStateValue('conquer_die_red');
-        $result['dice']['black'] = $this->getGameStateValue('conquer_die_black');
-        $result['dice']['science'] = $this->getGameStateValue('science_die');
-        $result['dice']['empiricism'] = $this->getGameStateValue('science_die_empiricism');
+        $result["deck_counters"] = $this->getDeckCounters();
+        $result["landmarks"] = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_type='6' AND card_location_arg=0");
+        $result["landmark_data"] = $this->landmark_data;
+        $result["tech_track_types"] = $this->tech_track_types;
+        $result["tech_track_data"] = $this->tech_track_data;
+        $result["income_track_data"] = $this->income_tracks;
+        $result["benefit_types"] = $this->benefit_types;
+        $result["terrain_types"] = $this->terrain_types;
+        $result["dice_names"] = $this->dice_names;
+        $result["card_types"] = $this->card_types;
+        $result["map"] = $this->getMapData();
+        $result["dice"] = [];
+        $result["dice"]["red"] = $this->getGameStateValue("conquer_die_red");
+        $result["dice"]["black"] = $this->getGameStateValue("conquer_die_black");
+        $result["dice"]["science"] = $this->getGameStateValue("science_die");
+        $result["dice"]["empiricism"] = $this->getGameStateValue("science_die_empiricism");
         $this->addConstants($result);
-        $result['tech_deck_visible'] = $this->getCollectionFromDb("SELECT * FROM card WHERE card_location='deck_tech_vis'");
+        $result["tech_deck_visible"] = $this->getCollectionFromDb("SELECT * FROM card WHERE card_location='deck_tech_vis'");
         if ($setupphase) {
-            $result['setup'] = $this->getSetupChoice($current_player_id);
+            $result["setup"] = $this->getSetupChoice($current_player_id);
         }
         // any other card locations
-        $result['cards'] = $this->getCardsSearch(null, null, 'draw', $current_player_id);
+        $result["cards"] = $this->getCardsSearch(null, null, "draw", $current_player_id);
         if ($this->getCivOwner(13) == $current_player_id) {
-            $deck13 = $this->getCardsSearch(null, null, 'deck_13');
-            $result['cards'] += shuffle_assoc($deck13);
+            $deck13 = $this->getCardsSearch(null, null, "deck_13");
+            $result["cards"] += shuffle_assoc($deck13);
         }
-        $result['cards'] += $this->getCardsSearch(null, null, 'islanders', null);
-        $result['cards'] += $this->getCardsSearch(null, null, 'map', null);
-        $result['cards'] += $this->getCardsSearch(null, null, 'civ_21_%', null);
+        $result["cards"] += $this->getCardsSearch(null, null, "islanders", null);
+        $result["cards"] += $this->getCardsSearch(null, null, "map", null);
+        $result["cards"] += $this->getCardsSearch(null, null, "civ_21_%", null);
         $inorder = $this->dbGetBenefitQueue();
-        $result['benefitQueueList'] = $inorder;
-        $result['income_turn_phase'] = $this->getIncomeTurnPhase();
-        $result['main_player'] = $this->getGameStateValue('current_player_turn');
+        $result["benefitQueueList"] = $inorder;
+        $result["income_turn_phase"] = $this->getIncomeTurnPhase();
+        $result["main_player"] = $this->getGameStateValue("current_player_turn");
         // game variants
-        $keys = ['automa_level', 'shadow_level'];
+        $keys = ["automa_level", "shadow_level"];
         foreach ($keys as $key) {
-            $result['variants'][$key] = $this->getGameStateValue($key);
+            $result["variants"][$key] = $this->getGameStateValue($key);
         }
-        $result['variants']['variant_adjustments'] = $this->getAdjustmentVariant();
-        $result['variants']['automa_in_play'] = $this->isSolo();
-        $result['variants']['shadow_in_play'] = $this->isAutoma();
+        $result["variants"]["variant_adjustments"] = $this->getAdjustmentVariant();
+        $result["variants"]["automa_in_play"] = $this->isSolo();
+        $result["variants"]["shadow_in_play"] = $this->isAutoma();
         // undo
         $result += $this->argUndo();
         //  $result['canceledNotifIds'] = $this->getCanceledNotifIds();
-        $result['testenv'] = $this->isTestEnv();
+        $result["testenv"] = $this->isTestEnv();
         return $result;
     }
 
     function getInitMapData($location) {
         $map = []; //
-        if ($location == 'land' || $location == 'map') {
+        if ($location == "land" || $location == "map") {
             $numPlayers = $this->getPlayersNumber();
-            $map_size = ($numPlayers > 3) ? 4 : 3;
-            $map_data = ($map_size == 4) ? $this->map["large"] : $this->map["small"];
+            $map_size = $numPlayers > 3 ? 4 : 3;
+            $map_data = $map_size == 4 ? $this->map["large"] : $this->map["small"];
             for ($a = -$map_size; $a <= $map_size; $a++) {
                 for ($b = -$map_size; $b <= $map_size; $b++) {
                     if (abs($a - $b) <= $map_size) {
-                        $coords = $a . '_' . $b;
-                        if (($map_size == 4) || (($coords != '0_-3') && ($coords != '-3_0') && ($coords != '3_3'))) {
+                        $coords = $a . "_" . $b;
+                        if ($map_size == 4 || ($coords != "0_-3" && $coords != "-3_0" && $coords != "3_3")) {
                             if (array_key_exists($coords, $map_data)) {
-                                $tile_id = array_get($map_data[$coords], 'id', 0);
-                                $tile_orient = array_get($map_data[$coords], 'orient', 0);
+                                $tile_id = array_get($map_data[$coords], "id", 0);
+                                $tile_orient = array_get($map_data[$coords], "orient", 0);
                             } else {
                                 $tile_id = 0;
                                 $tile_orient = 0;
                             }
-                            $map[$coords] = ['map_tile_id' => $tile_id, 'map_tile_orient' => $tile_orient, 'map_coords' => $coords];
+                            $map[$coords] = ["map_tile_id" => $tile_id, "map_tile_orient" => $tile_orient, "map_coords" => $coords];
                         }
                     }
                 }
@@ -821,9 +879,9 @@ abstract class PGameXBody extends tapcommon {
             $map_data = $this->map[$location];
             foreach ($map_data as $coords => $info) {
                 $map[$coords] = $info;
-                $map[$coords]['map_tile_id'] = array_get($info, 'id', 0);
-                $map[$coords]['map_tile_orient'] = array_get($info, 'orient', 0);
-                $map[$coords]['map_coords'] = $coords;
+                $map[$coords]["map_tile_id"] = array_get($info, "id", 0);
+                $map[$coords]["map_tile_orient"] = array_get($info, "orient", 0);
+                $map[$coords]["map_coords"] = $coords;
             }
         }
         return $map;
@@ -833,16 +891,18 @@ abstract class PGameXBody extends tapcommon {
         $res = [];
 
         foreach ($this->card_types as $type => $deckinfo) {
-            $deck = $deckinfo['deck'];
-            $discard = $deckinfo['discard'];
-            if ($discard == 'limbo') {
+            $deck = $deckinfo["deck"];
+            $discard = $deckinfo["discard"];
+            if ($discard == "limbo") {
                 continue;
             }
             if ($onedeck == null || $onedeck == $deck) {
                 $res[$deck] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='$deck' ");
-                if ($discard == 'discard') {
+                if ($discard == "discard") {
                     $discard_name = str_replace("deck", "discard", $deck);
-                    $res[$discard_name] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='$discard' AND card_type=$type");
+                    $res[$discard_name] = $this->getUniqueValueFromDB(
+                        "SELECT COUNT(*) FROM card WHERE card_location='$discard' AND card_type=$type"
+                    );
                 } else {
                     $res[$discard] = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='$discard'");
                 }
@@ -851,31 +911,31 @@ abstract class PGameXBody extends tapcommon {
         if ($onedeck == null) {
             $playerswithbots = $this->loadPlayersBasicInfosWithBots();
             foreach ($playerswithbots as $player_id => $info) {
-                $res['players'][$player_id]['tapestry'] = $this->getCardCountInHand($player_id, 3);
+                $res["players"][$player_id]["tapestry"] = $this->getCardCountInHand($player_id, 3);
             }
         }
         return $res;
     }
 
     function notifyDeckCounters($deck = null) {
-        $this->notifyAllPlayers('deckCounters', '', $this->getDeckCounters($deck));
+        $this->notifyAllPlayers("deckCounters", "", $this->getDeckCounters($deck));
     }
 
     private function addConstants(&$result) {
-        $cc = get_defined_constants(true)['user'];
+        $cc = get_defined_constants(true)["user"];
         foreach ($cc as $key => $value) {
-            $im = explode('_', $key);
+            $im = explode("_", $key);
             switch ($im[0]) {
-                case 'CARD':
-                case 'BE':
-                case 'TERRAIN':
-                case 'CIV':
-                case 'TRACK':
-                case 'RES':
-                case 'INCOME':
-                case 'TAP':
-                case 'FLAG':
-                    $result['constants'][$key] = $value;
+                case "CARD":
+                case "BE":
+                case "TERRAIN":
+                case "CIV":
+                case "TRACK":
+                case "RES":
+                case "INCOME":
+                case "TAP":
+                case "FLAG":
+                    $result["constants"][$key] = $value;
                     break;
                 default:
                     break;
@@ -897,32 +957,32 @@ abstract class PGameXBody extends tapcommon {
         $player_data = $this->getCollectionFromDB("SELECT player_id, player_income_turns FROM playerextra");
         $sum = 0;
         foreach ($player_data as $player_id => $player) {
-            $sum += $player['player_income_turns'];
+            $sum += $player["player_income_turns"];
         }
         return (20 * $sum) / $this->getPlayersNumber();
     }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
-    ////////////    
-    function __UTILS__() {
-    }
+    ////////////
+    function __UTILS__() {}
 
     // my anchor for IDE
     function notifArgsAddBen($benefit_data = null, $arr = null) {
-        if (!$arr)
+        if (!$arr) {
             $arr = [];
+        }
         if (!$benefit_data) {
             $benefit_data = $this->getCurrentBenefit();
         }
         if ($benefit_data) {
-            $bid = $arr['bid'] = $benefit_data['benefit_type'];
-            $arr['count'] = $benefit_data['benefit_quantity'];
-            $data = $arr['data'] = $benefit_data['benefit_data'];
+            $bid = $arr["bid"] = $benefit_data["benefit_type"];
+            $arr["count"] = $benefit_data["benefit_quantity"];
+            $data = $arr["data"] = $benefit_data["benefit_data"];
             if (!$data) {
                 $data = ":be:$bid";
             }
-            $arr['reason'] = $this->getReasonFullRec($data);
+            $arr["reason"] = $this->getReasonFullRec($data);
             $this->argAddTrackChoice($bid, $arr);
         }
         return $arr;
@@ -933,48 +993,53 @@ abstract class PGameXBody extends tapcommon {
         return $arr;
     }
 
-    public function getPlayerNameById($player_id) {
-        if ($player_id == PLAYER_AUTOMA)
-            return clienttranslate('Automa');
-        if ($player_id == PLAYER_SHADOW)
-            return clienttranslate('Shadow Empire');
+    public function getPlayerNameById($player_id): ?string {
+        if ($player_id == PLAYER_AUTOMA) {
+            return clienttranslate("Automa");
+        }
+        if ($player_id == PLAYER_SHADOW) {
+            return clienttranslate("Shadow Empire");
+        }
         $players = self::loadPlayersBasicInfos();
-        if (!isset($players[$player_id]))
+        if (!isset($players[$player_id])) {
             return null;
-        return $players[$player_id]['player_name'];
+        }
+        return $players[$player_id]["player_name"];
     }
 
     function notifyWithTokenName($type, $message, $id, $player_id = -1) {
-        $this->notifyWithName('message', $message, ['i18n' => ['name'], 'name' => $this->getTokenName($type, $id)], $player_id);
+        $this->notifyWithName("message", $message, ["i18n" => ["name"], "name" => $this->getTokenName($type, $id)], $player_id);
     }
 
     function notifArgsAddTokenName($type, $id, $args = null) {
-        if (!$args)
+        if (!$args) {
             $args = [];
-        $i18n = array_get($args, 'i18n', []);
-        $i18n[] = 'name';
-        $args['i18n'] = $i18n;
-        $args['name'] = $this->getTokenName($type, $id);
+        }
+        $i18n = array_get($args, "i18n", []);
+        $i18n[] = "name";
+        $args["i18n"] = $i18n;
+        $args["name"] = $this->getTokenName($type, $id);
         return $args;
     }
 
     function notifArgsAddCardInfo($card_id, $args = null) {
-        if (!$args)
+        if (!$args) {
             $args = [];
+        }
         if (is_array($card_id)) {
             $info = $card_id;
-            $card_id = $info['card_id'];
+            $card_id = $info["card_id"];
         } else {
             $info = $this->getCardInfoById($card_id);
         }
         $args = array_merge($info, $args);
-        $args['card_name'] = $this->getTokenName($info['card_type'], $info['card_type_arg']);
-        $args['card_type_name'] = $this->card_types[$info['card_type']]['name'];
-        $card_location_arg = $info['card_location_arg'];
+        $args["card_name"] = $this->getTokenName($info["card_type"], $info["card_type_arg"]);
+        $args["card_type_name"] = $this->card_types[$info["card_type"]]["name"];
+        $card_location_arg = $info["card_location_arg"];
         $name = $this->getPlayerNameById($card_location_arg);
         if ($name) {
-            $args['player_name2'] = $name;
-            $args['player_id2'] = $card_location_arg;
+            $args["player_name2"] = $name;
+            $args["player_id2"] = $card_location_arg;
         }
         return $args;
     }
@@ -984,55 +1049,57 @@ abstract class PGameXBody extends tapcommon {
             $args = $track;
             $track = null;
         }
-        if (!$args)
+        if (!$args) {
             $args = [];
-        $preserve = array_get($args, 'preserve', []);
-        $i18n = array_get($args, 'i18n', []);
-        if ($track === null && isset($args['track'])) {
-            $track = $args['track'];
+        }
+        $preserve = array_get($args, "preserve", []);
+        $i18n = array_get($args, "i18n", []);
+        if ($track === null && isset($args["track"])) {
+            $track = $args["track"];
         }
         if ($track) {
-            $args['track'] = $track;
+            $args["track"] = $track;
             $this->checkTrack($track);
-            $preserve[] = 'track';
-            $i18n[] = 'track_name';
-            $track_name = $this->tech_track_types[$track]['description'];
-            $args['track_name'] = $track_name;
+            $preserve[] = "track";
+            $i18n[] = "track_name";
+            $track_name = $this->tech_track_types[$track]["description"];
+            $args["track_name"] = $track_name;
         }
-        if ($spot === null && isset($args['spot'])) {
-            $spot = array_get($args, 'spot', null);
+        if ($spot === null && isset($args["spot"])) {
+            $spot = array_get($args, "spot", null);
         }
         if ($spot !== null) {
-            $args['spot'] = $spot;
+            $args["spot"] = $spot;
             $this->checkSpot($spot);
-            $preserve[] = 'spot';
-            $i18n[] = 'spot_name';
-            $spot_name = $this->tech_track_data[$track][$spot]['name'];
-            $args['spot_name'] = $spot_name;
+            $preserve[] = "spot";
+            $i18n[] = "spot_name";
+            $spot_name = $this->tech_track_data[$track][$spot]["name"];
+            $args["spot_name"] = $spot_name;
         }
-        if (isset($args['advance_regress'])) {
-            $i18n[] = 'advance_regress';
-        } else if (isset($args['adv'])) {
-            $change = $args['adv'];
-            $advance_regress = ($change > 0) ? clienttranslate('advances') : clienttranslate('regresses');
-            $args['advance_regress'] = $advance_regress;
-            $i18n[] = 'advance_regress';
+        if (isset($args["advance_regress"])) {
+            $i18n[] = "advance_regress";
+        } elseif (isset($args["adv"])) {
+            $change = $args["adv"];
+            $advance_regress = $change > 0 ? clienttranslate("advances") : clienttranslate("regresses");
+            $args["advance_regress"] = $advance_regress;
+            $i18n[] = "advance_regress";
         }
         if (count($i18n) > 0) {
-            $args['i18n'] = $i18n;
+            $args["i18n"] = $i18n;
         }
         if (count($preserve) > 0) {
-            $args['preserve'] = $preserve;
+            $args["preserve"] = $preserve;
         }
         return $args;
     }
 
     function notifyWithTrack($type, $message, $more_args = [], $player_id = -1) {
         $args = $this->notifArgsAddTrackSpot(null, null, $more_args);
-        if (isset($args['throw']))
+        if (isset($args["throw"])) {
             throw new BgaUserException(varsub(self::_($message), $args));
-        else
+        } else {
             $this->notifyWithName($type, $message, $args, $player_id);
+        }
     }
 
     function notifyMoveStructure($message, $id, $args = [], $player_id = null, $reason = null) {
@@ -1041,21 +1108,25 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getCardsInHand($player_id, $card_type, $card_type_arg = null, $card_ids = null) {
-        $sql = $this->querySelectCardDataFromTable('card', $card_type, $card_type_arg, 'hand', $player_id);
-        if ($card_ids)
-            $sql .= $this->queryExpression('card_id', $card_ids);
+        $sql = $this->querySelectCardDataFromTable("card", $card_type, $card_type_arg, "hand", $player_id);
+        if ($card_ids) {
+            $sql .= $this->queryExpression("card_id", $card_ids);
+        }
         return $this->getCollectionFromDB($sql);
     }
 
     function getCardCountInHand($player_id, $type) {
-        return $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_type='$type' AND card_location='hand' AND card_location_arg='$player_id'");
+        return $this->getUniqueValueFromDB(
+            "SELECT COUNT(*) FROM card WHERE card_type='$type' AND card_location='hand' AND card_location_arg='$player_id'"
+        );
     }
 
     function getStructuresOnCivExceptArg($cid, $type, $income_turn) {
         $location_like = "civ_$cid\\_%";
         $sql = "SELECT * FROM structure WHERE card_type='$type' AND card_location LIKE '$location_like'";
-        if ($income_turn !== null)
+        if ($income_turn !== null) {
             $sql .= " AND card_location_arg2 != $income_turn";
+        }
         return $this->getCollectionFromDB($sql);
     }
 
@@ -1065,8 +1136,9 @@ abstract class PGameXBody extends tapcommon {
         if ($type !== null) {
             $sql .= " AND card_type = '$type'";
         }
-        if ($arg2 !== null)
+        if ($arg2 !== null) {
             $sql .= " AND card_location_arg2 = $arg2";
+        }
         return $this->getCollectionFromDB($sql);
     }
 
@@ -1077,32 +1149,68 @@ abstract class PGameXBody extends tapcommon {
         return $this->getObjectFromDB($sql);
     }
 
-    function querySelectCardDataFromTable($table, $card_type, $card_type_arg = null, $card_location = null, $card_location_arg = null, $card_location_arg2 = null, $selector = '*') {
+    function querySelectCardDataFromTable(
+        $table,
+        $card_type,
+        $card_type_arg = null,
+        $card_location = null,
+        $card_location_arg = null,
+        $card_location_arg2 = null,
+        $selector = "*"
+    ) {
         $sql = "SELECT $selector FROM $table WHERE 1 ";
-        $sql .= $this->queryExpression('card_type', $card_type);
-        $sql .= $this->queryExpression('card_type_arg', $card_type_arg);
-        $sql .= $this->queryExpression('card_location', $card_location, 2);
-        $sql .= $this->queryExpression('card_location_arg', $card_location_arg);
-        $sql .= $this->queryExpression('card_location_arg2', $card_location_arg2, 2);
+        $sql .= $this->queryExpression("card_type", $card_type);
+        $sql .= $this->queryExpression("card_type_arg", $card_type_arg);
+        $sql .= $this->queryExpression("card_location", $card_location, 2);
+        $sql .= $this->queryExpression("card_location_arg", $card_location_arg);
+        $sql .= $this->queryExpression("card_location_arg2", $card_location_arg2, 2);
         return $sql;
     }
 
-    function getCardInfoSearch($card_type, $card_type_arg = null, $card_location = null, $card_location_arg = null, $card_location_arg2 = null) {
-        $sql = $this->querySelectCardDataFromTable('card', $card_type, $card_type_arg, $card_location, $card_location_arg, $card_location_arg2);
+    function getCardInfoSearch(
+        $card_type,
+        $card_type_arg = null,
+        $card_location = null,
+        $card_location_arg = null,
+        $card_location_arg2 = null
+    ) {
+        $sql = $this->querySelectCardDataFromTable(
+            "card",
+            $card_type,
+            $card_type_arg,
+            $card_location,
+            $card_location_arg,
+            $card_location_arg2
+        );
         $sql .= " LIMIT 1";
         return $this->getObjectFromDB($sql);
     }
 
-    function getCardsSearch($card_type, $card_type_arg = null, $card_location = null, $card_location_arg = null, $card_location_arg2 = null) {
-        $sql = $this->querySelectCardDataFromTable('card', $card_type, $card_type_arg, $card_location, $card_location_arg, $card_location_arg2);
+    function getCardsSearch(
+        $card_type,
+        $card_type_arg = null,
+        $card_location = null,
+        $card_location_arg = null,
+        $card_location_arg2 = null
+    ) {
+        $sql = $this->querySelectCardDataFromTable(
+            "card",
+            $card_type,
+            $card_type_arg,
+            $card_location,
+            $card_location_arg,
+            $card_location_arg2
+        );
         return $this->getCollectionFromDB($sql);
     }
 
     function getCardInfoById($card_id, $aliased = false) {
-        if ($aliased)
-            $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg, card_location_arg2 location_arg2 ";
-        else
+        if ($aliased) {
+            $sql =
+                "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg, card_location_arg2 location_arg2 ";
+        } else {
             $sql = "SELECT *";
+        }
         $sql .= " FROM card";
         $sql .= " WHERE card_id='$card_id' ";
         return $this->getObjectFromDB($sql);
@@ -1114,37 +1222,67 @@ abstract class PGameXBody extends tapcommon {
         } else {
             $info = $this->getCardInfoById($card);
         }
-        $this->checkNumber(array_get($info, 'card_id'));
+        $this->checkNumber(array_get($info, "card_id"));
         return $info;
     }
 
     function getStructureInfoById($structure_id, $aliased = false) {
-        if ($aliased)
-            $sql = "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg, card_location_arg2 location_arg2 ";
-        else
+        if ($aliased) {
+            $sql =
+                "SELECT card_id id, card_type type, card_type_arg type_arg, card_location location, card_location_arg location_arg, card_location_arg2 location_arg2 ";
+        } else {
             $sql = "SELECT *";
+        }
         $sql .= " FROM structure";
         $sql .= " WHERE card_id='$structure_id' ";
         $dbres = self::DbQuery($sql);
         return mysql_fetch_assoc($dbres);
     }
 
-    function getStructureInfoSearch($card_type, $card_type_arg = null, $card_location = null, $card_location_arg = null, $card_location_arg2 = null) {
-        $sql = $this->querySelectCardDataFromTable('structure', $card_type, $card_type_arg, $card_location, $card_location_arg, $card_location_arg2);
+    function getStructureInfoSearch(
+        $card_type,
+        $card_type_arg = null,
+        $card_location = null,
+        $card_location_arg = null,
+        $card_location_arg2 = null
+    ) {
+        $sql = $this->querySelectCardDataFromTable(
+            "structure",
+            $card_type,
+            $card_type_arg,
+            $card_location,
+            $card_location_arg,
+            $card_location_arg2
+        );
         $sql .= " LIMIT 1";
         return $this->getObjectFromDB($sql);
     }
 
-    function getStructuresSearch($card_type, $card_type_arg = null, $card_location = null, $card_location_arg = null, $card_location_arg2 = null) {
-        $sql = $this->querySelectCardDataFromTable('structure', $card_type, $card_type_arg, $card_location, $card_location_arg, $card_location_arg2);
+    function getStructuresSearch(
+        $card_type,
+        $card_type_arg = null,
+        $card_location = null,
+        $card_location_arg = null,
+        $card_location_arg2 = null
+    ) {
+        $sql = $this->querySelectCardDataFromTable(
+            "structure",
+            $card_type,
+            $card_type_arg,
+            $card_location,
+            $card_location_arg,
+            $card_location_arg2
+        );
         return $this->getCollectionFromDB($sql);
     }
 
     function addStructure($player_id, $destination, $type, $type_arg = 0, $arg2 = 0) {
-        $structure = $this->getStructureInfoSearch($type, null, 'hand', $player_id);
+        $structure = $this->getStructureInfoSearch($type, null, "hand", $player_id);
         if ($structure) {
-            $structure_id = $structure['card_id'];
-            $this->DbQuery("UPDATE structure SET card_location='$destination', card_type_arg=$type_arg, card_location_arg2='$arg2'  WHERE card_id='$structure_id'");
+            $structure_id = $structure["card_id"];
+            $this->DbQuery(
+                "UPDATE structure SET card_location='$destination', card_type_arg=$type_arg, card_location_arg2='$arg2'  WHERE card_id='$structure_id'"
+            );
             return $structure_id;
         }
         if ($type == 7) {
@@ -1173,38 +1311,47 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function dbAddStructure($player_id, $type, $type_arg, $destination, $arg2 = 0) {
-        $this->DbQuery("INSERT INTO structure (card_type, card_location, card_location_arg, card_type_arg, card_location_arg2) VALUES ('$type', '$destination', '$player_id', '$type_arg', '$arg2')");
-        $structure_id = $this->getLastId('structure');
+        $this->DbQuery(
+            "INSERT INTO structure (card_type, card_location, card_location_arg, card_type_arg, card_location_arg2) VALUES ('$type', '$destination', '$player_id', '$type_arg', '$arg2')"
+        );
+        $structure_id = $this->getLastId("structure");
         return $structure_id;
     }
 
     function addTapestryClone($player_id, $destination, $type_arg, $arg2 = 0) {
-
         $clone = $this->getCardInfoSearch(CARD_TAPESTRY, null, $destination, null, $arg2);
-        if ($clone) {  // remove previous clone
-            $this->effect_discardCard($clone['card_id'], $player_id, 'limbo');
+        if ($clone) {
+            // remove previous clone
+            $this->effect_discardCard($clone["card_id"], $player_id, "limbo");
         }
 
-        $this->DbQuery("INSERT INTO card (card_type, card_location, card_location_arg, card_type_arg, card_location_arg2) VALUES ('3', '$destination', '$player_id', '$type_arg', '$arg2')");
-        $structure_id = $this->getLastId('card');
+        $this->DbQuery(
+            "INSERT INTO card (card_type, card_location, card_location_arg, card_type_arg, card_location_arg2) VALUES ('3', '$destination', '$player_id', '$type_arg', '$arg2')"
+        );
+        $structure_id = $this->getLastId("card");
         return $structure_id;
     }
 
     function addCivToken($player_id, $slot, $civ) {
-        $slot_id = 'civ_' . $civ . "_" . $slot;
+        $slot_id = "civ_" . $civ . "_" . $slot;
         $reason = reason_civ($civ);
         return $this->addCube($player_id, $slot_id, CUBE_CIV, $reason);
     }
 
     function getSetupChoice($player_id) {
-        $fields  = "card_type_arg, card_type, card_location, card_location_arg, card_location_arg2";
-        $capitals = $this->getCollectionFromDB("SELECT $fields FROM card WHERE card_type='6' AND card_location IN ('choice', 'hand') AND card_location_arg='$player_id'");
-        if (sizeOf($capitals) <= 1)
-            $capitals = null; // don't offer a choice if only 1!
-        return array(
-            'capitals' => $capitals,
-            'civilizations' => $this->getCollectionFromDB("SELECT $fields FROM card WHERE card_type='5' AND card_location IN ('choice', 'hand') AND card_location_arg='$player_id'")
+        $fields = "card_type_arg, card_type, card_location, card_location_arg, card_location_arg2";
+        $capitals = $this->getCollectionFromDB(
+            "SELECT $fields FROM card WHERE card_type='6' AND card_location IN ('choice', 'hand') AND card_location_arg='$player_id'"
         );
+        if (sizeOf($capitals) <= 1) {
+            $capitals = null;
+        } // don't offer a choice if only 1!
+        return [
+            "capitals" => $capitals,
+            "civilizations" => $this->getCollectionFromDB(
+                "SELECT $fields FROM card WHERE card_type='5' AND card_location IN ('choice', 'hand') AND card_location_arg='$player_id'"
+            ),
+        ];
     }
 
     function getMapData() {
@@ -1212,15 +1359,16 @@ abstract class PGameXBody extends tapcommon {
         return $this->getCollectionFromDB("SELECT map_tile_id id, map_tile_orient rot, map_coords coord FROM map WHERE map_tile_id != 0");
     }
 
-    function awardBenefitsAutoma($player_id, $ben, $count = 1, $reason = '') {
-        if ($player_id != PLAYER_AUTOMA)
+    function awardBenefitsAutoma($player_id, $ben, $count = 1, $reason = "") {
+        if ($player_id != PLAYER_AUTOMA) {
             return false;
-        $action = $this->getRulesBenefit($ben, 'r', 'x');
-        if ($action == 'e') {
+        }
+        $action = $this->getRulesBenefit($ben, "r", "x");
+        if ($action == "e") {
             $this->effect_automaExplore();
             return true;
         }
-        if ($action == 'a') {
+        if ($action == "a") {
             $this->effect_automaConquer();
             return true;
         }
@@ -1228,35 +1376,38 @@ abstract class PGameXBody extends tapcommon {
             case 5:
                 return true; // Automa does not gain resources
             case 140: // topple TODO Automa
-                $cards = $this->getCollectionFromDB("SELECT * FROM card WHERE card_type='3' AND card_location='hand' AND card_location_arg='$player_id'");
+                $cards = $this->getCollectionFromDB(
+                    "SELECT * FROM card WHERE card_type='3' AND card_location='hand' AND card_location_arg='$player_id'"
+                );
                 $values = array_values($cards);
                 shuffle($values);
                 while (count($values) > 0) {
                     $card = array_shift($values);
                     // play card on display
-                    $card_id = $card['card_id'];
-                    if ($card['card_type_arg'] == 42) {
+                    $card_id = $card["card_id"];
+                    if ($card["card_type_arg"] == 42) {
                         $this->effect_trap($card_id, $player_id);
                         return true;
                     } else {
                         $this->effect_discardCard($card_id, $player_id);
                     }
                 }
-                $this->notifyWithName('message', clienttranslate('${player_name} does not play a trap'), [], $player_id);
+                $this->notifyWithName("message", clienttranslate('${player_name} does not play a trap'), [], $player_id);
                 return true;
         }
         return false;
     }
 
-    function awardBenefits($player_id, $ben, $count = 1, $reason = '') {
-        $be_reason = reason('be', $ben);
-        if (!$reason)
+    function awardBenefits($player_id, $ben, $count = 1, $reason = "") {
+        $be_reason = reason("be", $ben);
+        if (!$reason) {
             $reason = $be_reason;
+        }
         //$this->notifyWithName('message', "award $ben x $count to $player_id $reason");
         if ($this->awardBenefitsAutoma($player_id, $ben, $count, $reason)) {
             return true;
         }
-        $state = $this->getRulesBenefit($ben, 'state', null);
+        $state = $this->getRulesBenefit($ben, "state", null);
         switch ($ben) {
             case 1:
             case 2:
@@ -1280,11 +1431,11 @@ abstract class PGameXBody extends tapcommon {
             case 11:
                 return $this->claimIncomeStructure(BUILDING_ARMORY);
             case 13:
-                $this->setIncomeTurnPhase(INCOME_TAPESTRY, '', $player_id);
-                $this->gamestate->nextState('upgradeTech');
+                $this->setIncomeTurnPhase(INCOME_TAPESTRY, "", $player_id);
+                $this->gamestate->nextState("upgradeTech");
                 return false;
             case 14:
-                $this->gamestate->nextState('upgradeTech');
+                $this->gamestate->nextState("upgradeTech");
                 return false;
             case 15: // Gain VP for various reasons
                 $this->awardVP($player_id, $count, $reason, null, $ben);
@@ -1303,42 +1454,43 @@ abstract class PGameXBody extends tapcommon {
                 return true;
             case 17: // EXPLORE
                 $this->ageOfSailCheck($player_id);
-                $this->gamestate->nextState('explore');
+                $this->gamestate->nextState("explore");
                 return false;
             case 46: // EXPLORE anywhere
                 $this->ageOfSailCheck($player_id);
-                $this->gamestate->nextState('explore');
+                $this->gamestate->nextState("explore");
                 return false;
             case 18: // RESEARCH - WITH BENEFIT
             case 19: // RESEARCH - NO BENEFIT
                 $this->research($reason);
                 return false;
             case 20:
-
-                $this->setGameStateValue('invent_face_up', 0);
-                $this->gamestate->nextState('invent');
+                $this->setGameStateValue("invent_face_up", 0);
+                $this->gamestate->nextState("invent");
                 return false;
             case 21:
-                $this->setGameStateValue('conquer_bonus', 0);
-                $this->gamestate->nextState('conquer');
+                $this->setGameStateValue("conquer_bonus", 0);
+                $this->gamestate->nextState("conquer");
                 return false;
             case 22:
             case 23:
             case 24:
             case 25:
-                $track = (int) array_get_def($this->benefit_types, $ben, 't', 0);
+                $track = (int) array_get_def($this->benefit_types, $ben, "t", 0);
                 return $this->trackMovementInteractive($track, SPOT_SELECT, +1, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, false, $player_id);
             case BE_PLAY_TAPESTY_INCOME: // case 128
                 $this->setIncomeTurnPhase(INCOME_TAPESTRY);
                 // play tapestry in income turn
-                $this->gamestate->nextState('tapestryChoice');
+                $this->gamestate->nextState("tapestryChoice");
                 return false;
             case 26:
-                $this->gamestate->nextState('invent');
+                $this->gamestate->nextState("invent");
                 return false;
             case 27:
                 // VP tech
-                $tech_card_count = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='hand' AND card_type='4' AND card_location_arg='$player_id'");
+                $tech_card_count = $this->getUniqueValueFromDB(
+                    "SELECT COUNT(*) FROM card WHERE card_location='hand' AND card_type='4' AND card_location_arg='$player_id'"
+                );
                 $this->awardVP($player_id, $tech_card_count * $count, $reason, null, $ben);
                 return true;
             case 28:
@@ -1357,10 +1509,10 @@ abstract class PGameXBody extends tapcommon {
                 $this->VPincomeStructure($player_id, BUILDING_ARMORY, $count, $reason, null, $ben);
                 return true;
             case 32:
-                $this->gamestate->nextState('techBenefit');
+                $this->gamestate->nextState("techBenefit");
                 return false;
             case 33:
-                $this->gamestate->nextState('techBenefit');
+                $this->gamestate->nextState("techBenefit");
                 return false;
             case 34:
             case 35:
@@ -1374,7 +1526,7 @@ abstract class PGameXBody extends tapcommon {
             case 43:
             case 44:
             case 45:
-                $landmark_id = $this->getRulesBenefit($ben, 'lm');
+                $landmark_id = $this->getRulesBenefit($ben, "lm");
                 return $this->claimLandmark($landmark_id, $player_id);
             case 47:
             case 48:
@@ -1389,7 +1541,7 @@ abstract class PGameXBody extends tapcommon {
                 $this->VPincomeStructure($player_id, 1, $count, $reason, null, $ben);
                 return true;
             case 55:
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
             case 56:
             case 57:
@@ -1398,10 +1550,10 @@ abstract class PGameXBody extends tapcommon {
             case 60:
             case 61:
             case 315:
-                $landmark_id = $this->getRulesBenefit($ben, 'lm');
+                $landmark_id = $this->getRulesBenefit($ben, "lm");
                 return $this->claimLandmark($landmark_id, $player_id);
             case 62:
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
                 break;
             case 63:
@@ -1410,12 +1562,16 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case 64:
                 if ($this->getCardCountInHand($player_id, CARD_TAPESTRY) == 0) {
-                    $this->notifyWithName("message_error", clienttranslate('${player_name} has no valid targets, effect is void ${reason}'), [
-                        'reason' => $this->getReasonFullRec($reason)
-                    ]);
+                    $this->notifyWithName(
+                        "message_error",
+                        clienttranslate('${player_name} has no valid targets, effect is void ${reason}'),
+                        [
+                            "reason" => $this->getReasonFullRec($reason),
+                        ]
+                    );
                     return true;
                 } else {
-                    $this->gamestate->nextState('tapestryChoice');
+                    $this->gamestate->nextState("tapestryChoice");
                     return false;
                 }
             case 65: // BE_GAIN_CIV
@@ -1428,15 +1584,17 @@ abstract class PGameXBody extends tapcommon {
                 return true;
             case 66:
                 // VPterritoryTileCount($player_id, $value, $reason)
-                $value = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location_arg='$player_id' AND (card_type='1') AND (card_location='hand')");
+                $value = $this->getUniqueValueFromDB(
+                    "SELECT COUNT(*) FROM card WHERE card_location_arg='$player_id' AND (card_type='1') AND (card_location='hand')"
+                );
                 $this->awardVP($player_id, $value * $count, $reason, "territory_tiles_$player_id", $ben);
                 return true;
             case 67:
             case 68:
             case 69:
             case 70:
-                $track = (int) $this->getRulesBenefit($ben, 't', 0);
-                $flags = (int) $this->getRulesBenefit($ben, 'flags', 0);
+                $track = (int) $this->getRulesBenefit($ben, "t", 0);
+                $flags = (int) $this->getRulesBenefit($ben, "flags", 0);
                 return $this->trackMovementInteractive($track, SPOT_SELECT, ACTION_REGRESS, $flags, false, $player_id);
             case 71:
                 $this->VPTapestryCards($player_id, $count, $reason, null, $ben);
@@ -1448,28 +1606,28 @@ abstract class PGameXBody extends tapcommon {
                 $this->research($reason); // RESEARCH - NO BENEFIT, BUT MAXOUT BONUS
                 return false;
             case 73:
-                $this->setGameStateValue('conquer_bonus', 1);
-                $this->gamestate->nextState('conquer');
+                $this->setGameStateValue("conquer_bonus", 1);
+                $this->gamestate->nextState("conquer");
                 return false;
             case 74:
-                $this->setGameStateValue('conquer_bonus', 2);
-                $this->gamestate->nextState('conquer');
+                $this->setGameStateValue("conquer_bonus", 2);
+                $this->gamestate->nextState("conquer");
                 return false;
             case 75:
-                $this->setGameStateValue('conquer_bonus', 0);
-                $this->gamestate->nextState('conquer');
+                $this->setGameStateValue("conquer_bonus", 0);
+                $this->gamestate->nextState("conquer");
                 return false;
             case 76:
             case 77:
             case 78:
             case 79:
-                $track = (int) $this->getRulesBenefit($ben, 't', 0);
+                $track = (int) $this->getRulesBenefit($ben, "t", 0);
                 return $this->trackMovementInteractive($track, SPOT_SELECT, ACTION_ADVANCE, 0, false, $player_id);
             case 80:
             case 81:
             case 82:
             case 83:
-                $track = (int) $this->getRulesBenefit($ben, 't', 0);
+                $track = (int) $this->getRulesBenefit($ben, "t", 0);
                 return $this->trackMovementInteractive($track, SPOT_SELECT, ACTION_ADVANCE, FLAG_GAIN_BENFIT, false, $player_id);
             case 84:
             case 85:
@@ -1483,9 +1641,9 @@ abstract class PGameXBody extends tapcommon {
             case 98:
             case 99:
             case 100:
-                $track = (int) $this->getRulesBenefit($ben, 't', 0);
-                $this->setGameStateValue('science_die', $track);
-                $this->gamestate->nextState('research');
+                $track = (int) $this->getRulesBenefit($ben, "t", 0);
+                $this->setGameStateValue("science_die", $track);
+                $this->gamestate->nextState("research");
                 return false;
             case 92:
             case 93:
@@ -1499,19 +1657,19 @@ abstract class PGameXBody extends tapcommon {
             case 157:
             case 158:
             case 159:
-                $track = (int) $this->getRulesBenefit($ben, 't', 0);
-                $flags = (int) $this->getRulesBenefit($ben, 'flags', 0);
-                $adv = (int) $this->getRulesBenefit($ben, 'adv', +1);
+                $track = (int) $this->getRulesBenefit($ben, "t", 0);
+                $flags = (int) $this->getRulesBenefit($ben, "flags", 0);
+                $adv = (int) $this->getRulesBenefit($ben, "adv", +1);
                 return $this->trackMovementInteractive($track, SPOT_SELECT, $adv, $flags, false, $player_id);
             case 96:
-                $this->setGameStateValue('invent_face_up', 1);
-                $this->gamestate->nextState('invent');
+                $this->setGameStateValue("invent_face_up", 1);
+                $this->gamestate->nextState("invent");
                 return false;
             case 127:
-                $this->setGameStateValue('invent_face_up', 0);
-                $this->gamestate->nextState('invent');
+                $this->setGameStateValue("invent_face_up", 0);
+                $this->gamestate->nextState("invent");
                 return false;
-                // TAPESTRY CARD BENEFITS:
+            // TAPESTRY CARD BENEFITS:
             case 101:
                 $this->effect_ageOfDiscovery($player_id);
                 return true;
@@ -1529,17 +1687,17 @@ abstract class PGameXBody extends tapcommon {
                 return true;
                 break;
             case 105: // COLONIALISM
-                $this->gamestate->nextState('explore');
+                $this->gamestate->nextState("explore");
                 return false;
             case 106:
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
             case 107:
                 $this->democracy();
                 return true;
                 break;
             case 108:
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
             case 109:
                 $this->resourceForAll();
@@ -1547,23 +1705,25 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case 144:
             case BE_GAIN_ANY_INCOME_BUILDING: // 110
-                $lm = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_location='income' AND card_location_arg='$player_id' LIMIT 1");
+                $lm = $this->getUniqueValueFromDB(
+                    "SELECT card_id FROM structure WHERE card_location='income' AND card_location_arg='$player_id' LIMIT 1"
+                );
                 if (!$lm) {
-                    $this->notifyWithName('message_error', clienttranslate('No more buildings left'));
+                    $this->notifyWithName("message_error", clienttranslate("No more buildings left"));
                     return true;
                 }
-                $this->gamestate->nextState('buildingChoice');
+                $this->gamestate->nextState("buildingChoice");
                 return false;
             case 111:
                 $lm = $this->getObjectFromDB("SELECT card_id FROM structure WHERE card_location LIKE 'landmark_mat_slot%' LIMIT 1");
                 if (!$lm) {
-                    $this->notifyWithName('message_error', clienttranslate('No more landmarks left'));
+                    $this->notifyWithName("message_error", clienttranslate("No more landmarks left"));
                     return true;
                 }
-                $this->gamestate->nextState('buildingChoice');
+                $this->gamestate->nextState("buildingChoice");
                 return false;
             case 112:
-                $this->gamestate->nextState('tapestryChoice');
+                $this->gamestate->nextState("tapestryChoice");
                 return false;
             case 113:
                 $this->VPforLandmarks($player_id, 3, $reason, $ben);
@@ -1575,10 +1735,10 @@ abstract class PGameXBody extends tapcommon {
                 $this->effect_automaToppleShadow($player_id, $count, $reason, $ben);
                 return true;
             case 114:
-                $this->gamestate->nextState('any_resource');
+                $this->gamestate->nextState("any_resource");
                 return false;
             case 115:
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
             case 116:
                 $this->olympicHostSetup();
@@ -1586,13 +1746,13 @@ abstract class PGameXBody extends tapcommon {
             case 117:
                 return $this->pleaForAid();
             case 118:
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
             case 119:
-                $this->gamestate->nextState('conquer');
+                $this->gamestate->nextState("conquer");
                 return false;
             case 120:
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
             case 121: // steam tycoon
                 //WHEN PLAYED: Invent a face-up ${tech} and upgrade it. Your neighbours (right, then left) then each invent ${tech} from top of deck.
@@ -1603,13 +1763,13 @@ abstract class PGameXBody extends tapcommon {
                 }
                 return true;
             case 122:
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
             case 123:
                 $this->effect_technocracy();
                 return true;
             case 124:
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
             case 125:
                 $this->olympicHostEnd($player_id, $ben, $reason);
@@ -1624,12 +1784,12 @@ abstract class PGameXBody extends tapcommon {
             case 132:
             case 133:
             case 134: // regress without benefit
-                $track = (int) array_get_def($this->benefit_types, $ben, 't', 0);
-                $flags = (int) array_get_def($this->benefit_types, $ben, 'flags', 0);
-                $adv = (int) array_get_def($this->benefit_types, $ben, 'adv', +1);
+                $track = (int) array_get_def($this->benefit_types, $ben, "t", 0);
+                $flags = (int) array_get_def($this->benefit_types, $ben, "flags", 0);
+                $adv = (int) array_get_def($this->benefit_types, $ben, "adv", +1);
                 return $this->trackMovementInteractive($track, SPOT_SELECT, $adv, $flags, true, $player_id);
             case 140: // topple
-                $this->gamestate->nextState('trap');
+                $this->gamestate->nextState("trap");
                 return false;
             case 141:
                 $this->effect_endOfConquer($player_id);
@@ -1637,7 +1797,7 @@ abstract class PGameXBody extends tapcommon {
             case 142:
                 // ajustement, nothing is given
                 return true;
-                //case 144 : listed above
+            //case 144 : listed above
             case 143:
                 // refresh tech cards
                 $this->effect_techRefresh($player_id);
@@ -1654,31 +1814,36 @@ abstract class PGameXBody extends tapcommon {
                 // automa income stage
                 $this->effect_automaIncomeStage($player_id, $ben - 160);
                 return true;
-                //case 170:
-                //case 171: // infiltrators abilities hadled with default case
+            //case 170:
+            //case 171: // infiltrators abilities hadled with default case
             case 172:
             case 175:
-                $card_type = $this->getRulesBenefit($ben, 'ct', 0);
-                $draw = $this->getRulesBenefit($ben, 'draw', 1);
+                $card_type = $this->getRulesBenefit($ben, "ct", 0);
+                $draw = $this->getRulesBenefit($ben, "draw", 1);
                 $type_info = $this->card_types[$card_type];
-                $cards = $this->dbPickCardsForLocation($count * $draw, $card_type, 'draw', $player_id);
+                $cards = $this->dbPickCardsForLocation($count * $draw, $card_type, "draw", $player_id);
                 if (count($cards) == 0) {
                     return true; // cancel action
                 }
-                $this->notifyWithName("moveCard", clienttranslate('${player_name} draws ${count} x ${type_name} ${reason}'), [
-                    'cards' => $cards,
-                    'count' => count($cards),
-                    'type_name' => $type_info['name'],
-                    '_private' => true,
-                    'from' => $type_info['deck'],
-                    'reason' => $this->getReasonFullRec($reason)
-                ], $player_id);
-                $this->gamestate->nextState('keepCard');
+                $this->notifyWithName(
+                    "moveCard",
+                    clienttranslate('${player_name} draws ${count} x ${type_name} ${reason}'),
+                    [
+                        "cards" => $cards,
+                        "count" => count($cards),
+                        "type_name" => $type_info["name"],
+                        "_private" => true,
+                        "from" => $type_info["deck"],
+                        "reason" => $this->getReasonFullRec($reason),
+                    ],
+                    $player_id
+                );
+                $this->gamestate->nextState("keepCard");
                 return false;
             case 173:
                 //Discard Civilization, gain another
-                $card_type = $this->getRulesBenefit($ben, 'ct', 0);
-                $draw = $this->getRulesBenefit($ben, 'draw', 1);
+                $card_type = $this->getRulesBenefit($ben, "ct", 0);
+                $draw = $this->getRulesBenefit($ben, "draw", 1);
                 $bene = $this->getCurrentBenefitWithInfo();
                 $this->effect_keepCard([], $player_id, $bene);
                 $this->awardCard($player_id, $draw, $card_type);
@@ -1700,76 +1865,80 @@ abstract class PGameXBody extends tapcommon {
             case 200:
                 // confirm or undo state
                 $this->clearCurrentBenefit($ben);
-                $this->gamestate->nextState('confirm');
+                $this->gamestate->nextState("confirm");
                 return false;
             case 201:
-                // resume player turn 
+                // resume player turn
                 $this->clearCurrentBenefit($ben);
 
                 $this->gamestate->jumpToState(13);
                 return false;
             case 202:
                 $this->clearCurrentBenefit($ben);
-                $del = $this->getRulesBenefit($ben, 'del', null);
-                if ($del) $this->clearCurrentBenefit($del);
+                $del = $this->getRulesBenefit($ben, "del", null);
+                if ($del) {
+                    $this->clearCurrentBenefit($del);
+                }
                 $this->gamestate->nextState($state);
                 return false;
             case 301:
                 //                 301||Roll the black conquer die twice and gain one benefit of your choice
                 $this->clearCurrentBenefit($ben);
                 $this->rollBlackConquerDie($player_id, false);
-                $b1 = $this->getConquerDieBenefit('black', $player_id);
+                $b1 = $this->getConquerDieBenefit("black", $player_id);
                 if (!$b1) {
-                    $this->notifyAllPlayers('message', clienttranslate('this die roll results in no benefit'), []);
+                    $this->notifyAllPlayers("message", clienttranslate("this die roll results in no benefit"), []);
                 }
                 $this->rollBlackConquerDie($player_id, false);
-                $b2 = $this->getConquerDieBenefit('black', $player_id);
+                $b2 = $this->getConquerDieBenefit("black", $player_id);
                 if (!$b2) {
-                    $this->notifyAllPlayers('message', clienttranslate('this die roll results in no benefit'), []);
+                    $this->notifyAllPlayers("message", clienttranslate("this die roll results in no benefit"), []);
                 }
                 if ($b1 && $b2) {
                     // XXX there could be 2 tiles
-                    $this->queueBenefitNormal(['or' => [$b1[0], $b2[0]]], $player_id, reason('die', clienttranslate('Conquer die')));
-                } else if ($b1) {
-                    $this->queueBenefitNormal($b1, $player_id, reason('die', clienttranslate('Conquer die')));
-                } else if ($b2) {
-                    $this->queueBenefitNormal($b2, $player_id, reason('die', clienttranslate('Conquer die')));
+                    $this->queueBenefitNormal(["or" => [$b1[0], $b2[0]]], $player_id, reason("die", clienttranslate("Conquer die")));
+                } elseif ($b1) {
+                    $this->queueBenefitNormal($b1, $player_id, reason("die", clienttranslate("Conquer die")));
+                } elseif ($b2) {
+                    $this->queueBenefitNormal($b2, $player_id, reason("die", clienttranslate("Conquer die")));
                 }
                 $this->prepareUndoSavepoint();
-                $this->gamestate->nextState('loopback');
+                $this->gamestate->nextState("loopback");
                 break;
             case 302:
                 //302||Roll the research die twice and gain one benefit of your choice
                 $this->clearCurrentBenefit($ben);
-                $b1 = $this->rollScienceDie($reason, 'science_die', $player_id, false);
-                $b2 = $this->rollScienceDie($reason, 'science_die', $player_id, false);
-                $this->queueBenefitNormal(['or' => [21 + $b1, 21 + $b2]], $player_id, $reason);
+                $b1 = $this->rollScienceDie($reason, "science_die", $player_id, false);
+                $b2 = $this->rollScienceDie($reason, "science_die", $player_id, false);
+                $this->queueBenefitNormal(["or" => [21 + $b1, 21 + $b2]], $player_id, $reason);
                 $this->prepareUndoSavepoint();
-                $this->gamestate->nextState('loopback');
+                $this->gamestate->nextState("loopback");
                 break;
-            //               
+            //
             case 303:
                 //                 303||Roll the conquer dice and gain both benefits
                 $this->clearCurrentBenefit($ben);
                 $this->rollRedConquerDie($player_id, false);
-                $this->conquerDieBenefit('red', $player_id);
+                $this->conquerDieBenefit("red", $player_id);
                 $this->rollBlackConquerDie($player_id, false);
-                $this->conquerDieBenefit('black', $player_id);
+                $this->conquerDieBenefit("black", $player_id);
                 $this->prepareUndoSavepoint();
-                $this->gamestate->nextState('loopback');
+                $this->gamestate->nextState("loopback");
                 return false;
             case 304:
                 //                 304||Roll the red conquer die twice and gain both benefits
                 $this->clearCurrentBenefit($ben);
                 $this->rollRedConquerDie($player_id, false);
-                $this->conquerDieBenefit('red', $player_id);
+                $this->conquerDieBenefit("red", $player_id);
                 $this->rollRedConquerDie($player_id, false);
-                $this->conquerDieBenefit('red', $player_id);
+                $this->conquerDieBenefit("red", $player_id);
                 $this->prepareUndoSavepoint();
-                $this->gamestate->nextState('loopback');
+                $this->gamestate->nextState("loopback");
                 return false;
             case 306: //    BE_ALIEN_D
-                $token_data = $this->getCollectionFromDB("SELECT * FROM card WHERE card_location_arg='$player_id' AND card_type='2' AND card_location='civilization_31'");
+                $token_data = $this->getCollectionFromDB(
+                    "SELECT * FROM card WHERE card_location_arg='$player_id' AND card_type='2' AND card_location='civilization_31'"
+                );
                 if ($token_data) {
                     $space_tile = array_key_first($token_data);
                     $this->effect_discardCard($space_tile, $player_id);
@@ -1783,20 +1952,19 @@ abstract class PGameXBody extends tapcommon {
                 //$this->debugConsole("be_spot $reason $flags $trsp $track $spot $player_id");
                 $this->processSpotBenefits($track, $spot, $player_id, $flags, $reason);
                 return true;
-                //case 310: //BE_RENEGADES_ADV - handled by default case
+            //case 310: //BE_RENEGADES_ADV - handled by default case
             case 311: //BE_GAMBLES_PICK
             case 319:
                 $cards = $this->effect_drawFromBenefit($player_id, $ben);
                 if (count($cards) == 0) {
                     return true; // cancel action, notif already sent
                 }
-                $this->gamestate->nextState('keepCard');
+                $this->gamestate->nextState("keepCard");
                 return false;
-                //case 312: // BE_COLLECTORS_GRAB  structure   - handled by default case             
-                //case 313: // BE_COLLECTORS_CARD  card - handled by default case
+            //case 312: // BE_COLLECTORS_GRAB  structure   - handled by default case
+            //case 313: // BE_COLLECTORS_CARD  card - handled by default case
 
             case 314: //BE_CARD_PLAY_TRIGGER
-
                 $card_id = $this->getReasonArg($reason, 3);
                 $this->effect_cardComesInPlayTriggerResolve($card_id, $player_id, $reason);
                 return true;
@@ -1806,7 +1974,7 @@ abstract class PGameXBody extends tapcommon {
                 $this->interruptBenefit();
 
                 if ($count > 1) {
-                    $this->queueBenefitNormal(['or' => [330, 202]], $player_id, $reason);
+                    $this->queueBenefitNormal(["or" => [330, 202]], $player_id, $reason);
                     $this->queueBenefitNormal(603, $player_id, $reason, 1);
                     $this->queueBenefitNormal($ben, $player_id, $reason, $count - 1);
                 } else {
@@ -1815,11 +1983,11 @@ abstract class PGameXBody extends tapcommon {
                 return true;
 
             case 325:
-                $this->rollScienceDie($reason, 'science_die', $player_id, true);
+                $this->rollScienceDie($reason, "science_die", $player_id, true);
                 $this->interruptBenefit();
 
                 if ($count > 1) {
-                    $this->queueBenefitNormal(['or' => [332, 202]], $player_id, $reason);
+                    $this->queueBenefitNormal(["or" => [332, 202]], $player_id, $reason);
                     $this->queueBenefitNormal(603, $player_id, $reason, 1);
                     $this->queueBenefitNormal($ben, $player_id, $reason, $count - 1);
                 } else {
@@ -1828,33 +1996,40 @@ abstract class PGameXBody extends tapcommon {
                 return true;
 
             case 328: // BE_TERRITORY_BE_SELECT:
-
                 $data = $this->getControlHexes($player_id);
-                $bens = array();
+                $bens = [];
                 foreach ($data as $coords => $hex) {
-                    $tile_id = $hex['map_tile_id'];
-                    $ben = $this->getRulesCard(CARD_TERRITORY, $tile_id, 'benefit', []);
+                    $tile_id = $hex["map_tile_id"];
+                    $ben = $this->getRulesCard(CARD_TERRITORY, $tile_id, "benefit", []);
                     $bens = array_merge($bens, $ben);
                 }
                 if (count($bens) == 0) {
-                    $this->notifyWithName('message', clienttranslate('${player_name} uses one of benefits from controlled territories, but none of them have benefits'), []);
+                    $this->notifyWithName(
+                        "message",
+                        clienttranslate('${player_name} uses one of benefits from controlled territories, but none of them have benefits'),
+                        []
+                    );
                 } else {
-                    $this->notifyWithName('message', clienttranslate('${player_name} uses one of benefits from controlled territories'), []);
-                    $this->queueBenefitInterrupt(['or' => $bens], $player_id, $reason);
+                    $this->notifyWithName(
+                        "message",
+                        clienttranslate('${player_name} uses one of benefits from controlled territories'),
+                        []
+                    );
+                    $this->queueBenefitInterrupt(["or" => $bens], $player_id, $reason);
                 }
 
                 return true;
-            case 330: // 
-                $b1 = $this->getConquerDieBenefit('black', $player_id);
+            case 330: //
+                $b1 = $this->getConquerDieBenefit("black", $player_id);
                 if (!$b1) {
-                    $this->notifyAllPlayers('message', clienttranslate('this die roll results in no benefit'), []);
+                    $this->notifyAllPlayers("message", clienttranslate("this die roll results in no benefit"), []);
                 } else {
-                    $reason = reason('die', clienttranslate('Conquer die'));
+                    $reason = reason("die", clienttranslate("Conquer die"));
                     $this->queueBenefitNormal($b1, $player_id, $reason);
                 }
                 return true;
             case 332: // research die benefit
-                $b1 = $this->getGameStateValue('science_die');
+                $b1 = $this->getGameStateValue("science_die");
                 $this->queueBenefitNormal(21 + $b1, $player_id, $reason);
                 return true;
             case 401:
@@ -1868,18 +2043,20 @@ abstract class PGameXBody extends tapcommon {
                 $this->clearCurrentBenefit($ben);
                 $next_benefit = $this->getCurrentBenefit();
                 $this->benefitCashed($next_benefit);
-                $this->gamestate->nextState('loopback');
+                $this->gamestate->nextState("loopback");
                 return false; // no cleanup
             default:
                 //$this->debugConsole("default ben $ben");
-                $del = $this->getRulesBenefit($ben, 'del', null);
-                if ($del) $this->clearCurrentBenefit($del);
+                $del = $this->getRulesBenefit($ben, "del", null);
+                if ($del) {
+                    $this->clearCurrentBenefit($del);
+                }
 
                 if ($state !== null) {
                     $this->gamestate->nextState($state);
                     return false;
                 }
-                $alias = $this->getRulesBenefit($ben, 'alias', null);
+                $alias = $this->getRulesBenefit($ben, "alias", null);
                 if ($alias !== null) {
                     $this->queueBenefitInterrupt($alias, $player_id, $reason, 1);
                     return true;
@@ -1888,7 +2065,7 @@ abstract class PGameXBody extends tapcommon {
                     $this->awardVP($player_id, $ben - 500, $reason);
                     return true;
                 }
-                $civ = $this->getRulesBenefit($ben, 'civ', null);
+                $civ = $this->getRulesBenefit($ben, "civ", null);
                 if ($civ !== null) {
                     $inst = $this->getCivilizationInstance($civ, true);
                     return $inst->awardBenefits($player_id, $ben, $count, $reason);
@@ -1898,12 +2075,12 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function awardBaseResource($player_id, $benefit_id, $increase, $reason) {
-        $newCount = $this->dbIncResourceCount($benefit_id, '*', null, $increase, $player_id, $reason);
+        $newCount = $this->dbIncResourceCount($benefit_id, "*", null, $increase, $player_id, $reason);
         // triggers
         if ($this->hasCiv($player_id, CIV_CHOSEN) && $this->isAdjustments4or8()) {
-            $achi = $this->getRulesCiv(CIV_CHOSEN, 'achi', []);
+            $achi = $this->getRulesCiv(CIV_CHOSEN, "achi", []);
             $category = 1;
-            $max = $achi[$category]['c'];
+            $max = $achi[$category]["c"];
             if ($newCount >= $max) {
                 $this->effect_triggerPrivateAchievement($player_id, $category);
             }
@@ -1911,59 +2088,73 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_triggerPrivateAchievement($player_id, $pos, $civ = CIV_CHOSEN, $data = null) {
-        if (!$this->hasCiv($player_id, $civ))  return;
+        if (!$this->hasCiv($player_id, $civ)) {
+            return;
+        }
         $destination = "civa_{$civ}_$pos";
         $achievements = $this->getCollectionFromDB("SELECT card_location_arg FROM structure WHERE card_location = '$destination'");
         if (count($achievements) > 0) {
             return; // player already has it
         }
         $token_id = $this->addCube($player_id, $destination);
-        $achi = $this->civilizations[$civ]['achi'];
-        $this->notifyMoveStructure('', $token_id, [], $player_id);
-        $this->notifyWithName('message_info', clienttranslate('${player_name} achieves ${achi_name} (${civ_name})'), [
-            'achi_name' => $achi[$pos]['tooltip'],
-            'civ_name' => $this->getTokenName('civ', $civ)
-        ], $player_id);
+        $achi = $this->civilizations[$civ]["achi"];
+        $this->notifyMoveStructure("", $token_id, [], $player_id);
+        $this->notifyWithName(
+            "message_info",
+            clienttranslate('${player_name} achieves ${achi_name} (${civ_name})'),
+            [
+                "achi_name" => $achi[$pos]["tooltip"],
+                "civ_name" => $this->getTokenName("civ", $civ),
+            ],
+            $player_id
+        );
         $this->interruptBenefit();
         $this->benefitCivEntry($civ, $player_id, $data);
     }
 
     function dbIncResourceCount($benefit_id, $notif, $new_count, $increase, $player_id, $reason = null) {
         $this->systemAssertTrue("invalid resource type $benefit_id", $this->checkValidIncomeType($benefit_id));
-        if ($notif == '*') {
-            if ($increase < 0)
+        if ($notif == "*") {
+            if ($increase < 0) {
                 $notif = clienttranslate('${player_name} pays ${mod} ${res_type} ${reason}');
-            else
+            } else {
                 $notif = clienttranslate('${player_name} gains ${increase} ${res_type} ${reason}');
+            }
         }
-        if ($reason == null)
-            $reason = reason('str', 'unknown reason');
-        $resname = $this->income_tracks[$benefit_id]['resource'];
+        if ($reason == null) {
+            $reason = reason("str", "unknown reason");
+        }
+        $resname = $this->income_tracks[$benefit_id]["resource"];
         $res_field = "player_res_$resname";
         if ($new_count === null) {
             $base_count = $this->getUniqueValueFromDB("SELECT $res_field FROM playerextra WHERE player_id='$player_id'");
             $new_count = min($base_count + $increase, 8);
             $this->userAssertTrue(totranslate("You cannot afford this payment combination"), $new_count >= 0);
             if ($base_count + $increase > $new_count) {
-                $this->notifyWithName('message_error', clienttranslate('${player_name} is maxed out on ${res_type}'), [
-                    'i18n' => ['res_type'],
-                    'res_type' => $this->getBenefitName($benefit_id),
+                $this->notifyWithName("message_error", clienttranslate('${player_name} is maxed out on ${res_type}'), [
+                    "i18n" => ["res_type"],
+                    "res_type" => $this->getBenefitName($benefit_id),
                 ]);
             }
             $increase = $new_count - $base_count; // adjusted increase
         }
-        $this->notifyWithName("resource", $notif, [
-            'i18n' => ['res_type'],
-            'res_type' => $this->getBenefitName($benefit_id),
-            'increase' => $increase,
-            'mod' => ($increase < 0 ? -$increase : $increase),
-            'count' => $new_count,
-            'benefit_id' => $benefit_id,
-            'reason' => $this->getReasonFullRec($reason)
-        ], $player_id);
+        $this->notifyWithName(
+            "resource",
+            $notif,
+            [
+                "i18n" => ["res_type"],
+                "res_type" => $this->getBenefitName($benefit_id),
+                "increase" => $increase,
+                "mod" => $increase < 0 ? -$increase : $increase,
+                "count" => $new_count,
+                "benefit_id" => $benefit_id,
+                "reason" => $this->getReasonFullRec($reason),
+            ],
+            $player_id
+        );
         $this->DbQuery("UPDATE playerextra SET $res_field='$new_count' WHERE player_id='$player_id'");
         if ($increase < 0) {
-            $this->incStat(-$increase, 'game_resource_spent', $player_id);
+            $this->incStat(-$increase, "game_resource_spent", $player_id);
         }
         return $new_count;
     }
@@ -1971,8 +2162,9 @@ abstract class PGameXBody extends tapcommon {
     function getMaxTrackSlot($track, $player_id = null) {
         $cubes = $this->dbGetCubesOnTrack($player_id, $track);
         $spots = $this->getTrackPositions($cubes);
-        if (count($spots) == 0)
+        if (count($spots) == 0) {
             return 0;
+        }
         return $spots[count($spots) - 1];
     }
 
@@ -1983,21 +2175,23 @@ abstract class PGameXBody extends tapcommon {
         } else {
             $message = clienttranslate('${player_name} loses ${increase} ${what} ${reason}');
         }
-        $source = '';
+        $source = "";
         if ($ben) {
-            if (is_numeric($ben))
+            if (is_numeric($ben)) {
                 $source = $this->getBenefitName($ben);
-            else
+            } else {
                 $source = $ben;
+            }
         } else {
-            $source = clienttranslate('VP');
+            $source = clienttranslate("VP");
         }
         // stats by reason
         $reason_type = $this->getReasonId($reason);
-        if ($reason_type == 'be') {
-            $reason_type = 'other';
-            if (!$ben)
+        if ($reason_type == "be") {
+            $reason_type = "other";
+            if (!$ben) {
                 $ben = $this->getReasonValue($reason);
+            }
         }
         $this->dbIncStatChecked($count, "game_points_reason_$reason_type", $player_id);
         // stats by method
@@ -2005,12 +2199,12 @@ abstract class PGameXBody extends tapcommon {
             if ($this->isRealPlayer($player_id)) {
                 if ($ben > 500 && $ben < 599) {
                     $this->dbIncStatChecked($count, "game_points_be_15", $player_id);
-                } else if (!$this->dbIncStatChecked($count, "game_points_be_$ben", $player_id)) {
+                } elseif (!$this->dbIncStatChecked($count, "game_points_be_$ben", $player_id)) {
                     $this->warn("vp benefit is not defined for ben $ben");
                     $this->dbIncStatChecked($count, "game_points_be_15", $player_id);
                 }
             }
-        } else if ($ben) {
+        } elseif ($ben) {
             $this->warn("vp benefit is not number $ben for $reason");
             $e = new Exception($reason);
             $this->warn($e->getTraceAsString());
@@ -2019,62 +2213,71 @@ abstract class PGameXBody extends tapcommon {
         }
         // stats by era
         $era = $this->getCurrentEra($player_id);
-        if ($era)
+        if ($era) {
             $this->dbIncStatChecked($count, "game_points_era_$era", $player_id);
-        $this->notifyWithName("VP", $message, array(
-            'increase' => $count,
-            'what' => $source,
-            'i18n' => ['what'],
-            'reason' => $this->getReasonFullRec($reason),
-            'reason_data' => $reason,
-            'place' => $place
-        ), $player_id);
+        }
+        $this->notifyWithName(
+            "VP",
+            $message,
+            [
+                "increase" => $count,
+                "what" => $source,
+                "i18n" => ["what"],
+                "reason" => $this->getReasonFullRec($reason),
+                "reason_data" => $reason,
+                "place" => $place,
+            ],
+            $player_id
+        );
     }
 
     function getBenefitName($benefit_id) {
-        if (!$benefit_id)
-            return '';
-        $name = $this->benefit_types[$benefit_id]['name'];
+        if (!$benefit_id) {
+            return "";
+        }
+        $name = $this->benefit_types[$benefit_id]["name"];
         return $name;
     }
 
     private function getCapitalScoreVP($player_id) {
         $rows_cols = 0;
         // Get this data from capital table.
-        $rows = array();
-        $cols = array();
+        $rows = [];
+        $cols = [];
         for ($a = 3; $a < 12; $a++) {
-            $rows[$a] = array('count' => 0, 'values' => array());
-            $cols[$a] = array('count' => 0, 'values' => array());
+            $rows[$a] = ["count" => 0, "values" => []];
+            $cols[$a] = ["count" => 0, "values" => []];
         }
-        $grid_data = $this->getCollectionFromDB("SELECT capital_id, capital_x x, capital_y y, capital_occupied v FROM capital WHERE player_id='$player_id' AND (capital_x > 2) AND (capital_x<12) AND (capital_y > 2) AND (capital_y < 12) AND (capital_occupied > 0)");
+        $grid_data = $this->getCollectionFromDB(
+            "SELECT capital_id, capital_x x, capital_y y, capital_occupied v FROM capital WHERE player_id='$player_id' AND (capital_x > 2) AND (capital_x<12) AND (capital_y > 2) AND (capital_y < 12) AND (capital_occupied > 0)"
+        );
         foreach ($grid_data as $cell) {
-            $v = $cell['v'];
-            $x = $cell['x'];
-            $y = $cell['y'];
-            $rows[$x]['count'] = $rows[$x]['count'] + 1;
-            $cols[$y]['count'] = $cols[$y]['count'] + 1;
-            $v = $cell['v'];
-            if (($v > 1) && ($v < 6)) {
-                if (!in_array($v, $rows[$x]['values'])) {
-                    array_push($rows[$x]['values'], $v);
+            $v = $cell["v"];
+            $x = $cell["x"];
+            $y = $cell["y"];
+            $rows[$x]["count"] = $rows[$x]["count"] + 1;
+            $cols[$y]["count"] = $cols[$y]["count"] + 1;
+            $v = $cell["v"];
+            if ($v > 1 && $v < 6) {
+                if (!in_array($v, $rows[$x]["values"])) {
+                    array_push($rows[$x]["values"], $v);
                 }
-                if (!in_array($v, $cols[$y]['values'])) {
-                    array_push($cols[$y]['values'], $v);
+                if (!in_array($v, $cols[$y]["values"])) {
+                    array_push($cols[$y]["values"], $v);
                 }
             }
         }
         $architect = $this->hasCiv($player_id, CIV_ARCHITECTS);
         for ($a = 3; $a < 12; $a++) {
-            if ($rows[$a]['count'] == 9) {
+            if ($rows[$a]["count"] == 9) {
                 $rows_cols++;
-                if (($architect) && (sizeOf($rows[$a]['values']) == 1)) {
+                if ($architect && sizeOf($rows[$a]["values"]) == 1) {
                     $rows_cols++;
                 }
             }
-            if ($cols[$a]['count'] == 9) {
+            if ($cols[$a]["count"] == 9) {
                 $rows_cols++;
-                if (($architect) && (sizeOf($cols[$a]['values']) == 1)) {
+                if ($architect && sizeOf($cols[$a]["values"]) == 1) {
                     $rows_cols++;
                 }
             }
@@ -2082,15 +2285,20 @@ abstract class PGameXBody extends tapcommon {
         return $rows_cols;
     }
 
-    function VPincomeStructure($player_id, $type, $value, $reason = '', $place = null, $ben = null) {
-        $count = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM structure WHERE card_location_arg='$player_id' AND (card_type='$type') AND ((card_location LIKE 'capital_cell%') OR (card_location LIKE 'civ_3\\_%') OR (card_location LIKE 'land_%'))");
+    function VPincomeStructure($player_id, $type, $value, $reason = "", $place = null, $ben = null) {
+        $count = $this->getUniqueValueFromDB(
+            "SELECT COUNT(*) FROM structure WHERE card_location_arg='$player_id' AND (card_type='$type') AND ((card_location LIKE 'capital_cell%') OR (card_location LIKE 'civ_3\\_%') OR (card_location LIKE 'land_%'))"
+        );
         $this->awardVP($player_id, $value * $count, $reason, $place, $ben);
     }
 
     function VPTapestryCards($player_id = 0, $value = 1, $reason = null, $place = null, $ben = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
-        $count = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location_arg='$player_id' AND (card_type='3') AND (card_location LIKE 'era%' OR card_location='hand')");
+        }
+        $count = $this->getUniqueValueFromDB(
+            "SELECT COUNT(*) FROM card WHERE card_location_arg='$player_id' AND (card_type='3') AND (card_location LIKE 'era%' OR card_location='hand')"
+        );
         $this->awardVP($player_id, $value * $count, $reason, $place, $ben);
     }
 
@@ -2101,8 +2309,9 @@ abstract class PGameXBody extends tapcommon {
 
     function VPtrack($player_id, $track, $count, $reason = null, $ben = 0) {
         // How far along the track are you?
-        if (!$ben)
+        if (!$ben) {
             $ben = 46 + $track;
+        }
         $spot = $this->getMaxTrackSlot($track, $player_id);
         $this->awardVP($player_id, $spot * $count, $reason, "tech_spot_{$track}_{$spot}", $ben);
     }
@@ -2118,16 +2327,23 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function debug_moveCard($card_type, $card_class, $location = null, $location_arg = 0) {
-        if (!$location)
+        if (!$location) {
             $location = $this->card_types[$card_type]["deck"];
+        }
         //$this->cards->moveCard($card_id, $deck, $location_arg);
         $this->error("moving $card_class to $location state $location_arg");
-        $this->DbQuery("UPDATE card SET card_location='$location', card_location_arg='$location_arg' WHERE card_type_arg='$card_class' AND card_type='$card_type'");
+        $this->DbQuery(
+            "UPDATE card SET card_location='$location', card_location_arg='$location_arg' WHERE card_type_arg='$card_class' AND card_type='$card_type'"
+        );
     }
 
     function dbPickCardsForLocation($count, $card_type, $to_location, $location_arg = 0, $deck = null, $discard = null) {
-        if ($deck === null) $deck = $this->card_types[$card_type]["deck"];
-        if ($discard === null) $discard = 'discard';
+        if ($deck === null) {
+            $deck = $this->card_types[$card_type]["deck"];
+        }
+        if ($discard === null) {
+            $discard = "discard";
+        }
 
         $cards = $this->cards->pickCardsForLocation($count, $deck, $to_location, $location_arg, true);
         $missing = $count - count($cards);
@@ -2137,14 +2353,14 @@ abstract class PGameXBody extends tapcommon {
             $this->cards->shuffle($deck);
             $cards += $this->cards->pickCardsForLocation($missing, $deck, $to_location, $location_arg, true);
             $missing = $count - count($cards);
-            $this->notifyAllPlayers('message', clienttranslate('Card deck is reshuffled'), []);
+            $this->notifyAllPlayers("message", clienttranslate("Card deck is reshuffled"), []);
         }
         if ($missing) {
-            $this->notifyAllPlayers('message', clienttranslate('Insufficient number of cards in deck'), []);
+            $this->notifyAllPlayers("message", clienttranslate("Insufficient number of cards in deck"), []);
         }
         foreach ($cards as $cd => $card) {
-            $card_id = $card['id'];
-            $cards[$cd]['location_arg2'] = 0;
+            $card_id = $card["id"];
+            $cards[$cd]["location_arg2"] = 0;
             $this->DbQuery("UPDATE card SET card_location_arg2=0 WHERE card_id='$card_id'");
         }
         if (count($cards) > 0) {
@@ -2153,70 +2369,92 @@ abstract class PGameXBody extends tapcommon {
         return $cards;
     }
 
-
-    function awardCard($player_id, $count, $card_type, $face_down = false, $reason = '', $deck = null, $discard = null) {
-        if (!$player_id)
+    function awardCard($player_id, $count, $card_type, $face_down = false, $reason = "", $deck = null, $discard = null) {
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
-
-
-        if ($card_type == CARD_TAPESTRY && $this->isAdjustments8() && $this->hasCiv($player_id, CIV_MYSTICS)) {
-            if ($deck === null) $deck = 'deck_13';
-            if ($discard === null) $discard = 'discard_13';
         }
 
-        if ($deck === null) $deck = $this->card_types[$card_type]["deck"];
-        if ($discard === null) $discard = 'discard';
+        if ($card_type == CARD_TAPESTRY && $this->isAdjustments8() && $this->hasCiv($player_id, CIV_MYSTICS)) {
+            if ($deck === null) {
+                $deck = "deck_13";
+            }
+            if ($discard === null) {
+                $discard = "discard_13";
+            }
+        }
+
+        if ($deck === null) {
+            $deck = $this->card_types[$card_type]["deck"];
+        }
+        if ($discard === null) {
+            $discard = "discard";
+        }
 
         $type_name = $this->card_types[$card_type]["name"];
         //$this->error("award card $player_id, $count, $card_type, $face_down, $deck|");
         //$dc= $this->getCollectionFromDB("SELECT * FROM card WHERE card_location='$deck'");
         //$this->error(json_encode($dc, JSON_PRETTY_PRINT));
         if ($card_type != CARD_CIVILIZATION) {
-            $cards = $this->dbPickCardsForLocation($count, $card_type, 'hand', $player_id, $deck, $discard);
+            $cards = $this->dbPickCardsForLocation($count, $card_type, "hand", $player_id, $deck, $discard);
         } else {
-            $cards = $this->dbPickCardsForLocation($count, $card_type, 'draw', $player_id);
+            $cards = $this->dbPickCardsForLocation($count, $card_type, "draw", $player_id);
         }
         if (count($cards) == 0) {
-            $this->notifyWithName('message_error', clienttranslate('No more ${type_name} left'), [
-                'type_name' => $type_name
-            ], $player_id);
+            $this->notifyWithName(
+                "message_error",
+                clienttranslate('No more ${type_name} left'),
+                [
+                    "type_name" => $type_name,
+                ],
+                $player_id
+            );
             return [];
         }
         $send_cards = $cards;
         if ($card_type == CARD_CIVILIZATION) {
-            $this->notifyWithName("moveCard", clienttranslate('${player_name} draws ${count} x ${type_name} ${reason}'), [
-                'count' => $count,
-                'type_name' => $type_name,
-                'cards' => $cards,
-                'reason' => $this->getReasonFullRec($reason),
-                '_private' => true
-            ], $player_id);
+            $this->notifyWithName(
+                "moveCard",
+                clienttranslate('${player_name} draws ${count} x ${type_name} ${reason}'),
+                [
+                    "count" => $count,
+                    "type_name" => $type_name,
+                    "cards" => $cards,
+                    "reason" => $this->getReasonFullRec($reason),
+                    "_private" => true,
+                ],
+                $player_id
+            );
             $send_cards = [];
-        } else if ($card_type == CARD_TAPESTRY) {
+        } elseif ($card_type == CARD_TAPESTRY) {
             if ($face_down) {
                 foreach ($cards as $cd => $card) {
-                    $cards[$cd]['type_arg'] = 0;
-                    $cid = $card['id'];
+                    $cards[$cd]["type_arg"] = 0;
+                    $cid = $card["id"];
                     $this->DbQuery("UPDATE card SET card_type_arg=0 WHERE card_id='$cid'");
                 }
             }
-            $this->notifyPlayer($player_id, "newCardsMine", '', array(
-                'player_id' => $player_id,
-                'count' => $count,
-                'card_type' => $card_type,
-                'cards' => $cards,
-            ));
+            $this->notifyPlayer($player_id, "newCardsMine", "", [
+                "player_id" => $player_id,
+                "count" => $count,
+                "card_type" => $card_type,
+                "cards" => $cards,
+            ]);
             $send_cards = null; // suppress sending public notif
         }
-        $this->notifyWithName("newCards", clienttranslate('${player_name} draws ${count} x ${type_name} ${reason}'), [
-            'count' => $count,
-            'type_name' => $type_name,
-            'card_type' => $card_type,
-            'cards' => $send_cards,
-            'reason' => $this->getReasonFullRec($reason)
-        ], $player_id);
+        $this->notifyWithName(
+            "newCards",
+            clienttranslate('${player_name} draws ${count} x ${type_name} ${reason}'),
+            [
+                "count" => $count,
+                "type_name" => $type_name,
+                "card_type" => $card_type,
+                "cards" => $send_cards,
+                "reason" => $this->getReasonFullRec($reason),
+            ],
+            $player_id
+        );
         foreach ($cards as $cd => $card) {
-            $this->effect_cardComesInPlay($card['id'], $player_id, $reason);
+            $this->effect_cardComesInPlay($card["id"], $player_id, $reason);
         }
         $this->notifyDeckCounters($deck);
         return $cards;
@@ -2224,7 +2462,7 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_cardComesInPlay($card_id, $player_id, $reason) {
         $card = $this->cards->getCard($card_id);
-        $card_type = $card['type'];
+        $card_type = $card["type"];
         if ($this->triggerPreKeepCard($player_id, $card_id, $card_type)) {
             $data = $this->withReasonDataArg($reason, $card_id);
             $this->queueBenefitStandardOne(BE_CARD_PLAY_TRIGGER, $player_id, $data);
@@ -2235,31 +2473,31 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_cardComesInPlayTriggerResolve($card_id, $player_id, $reason) {
         $card = $this->cards->getCard($card_id);
-        $card_type = $card['type'];
-        $card_type_arg = $card['type_arg'];
-        $location = $card['location'];
+        $card_type = $card["type"];
+        $card_type_arg = $card["type_arg"];
+        $location = $card["location"];
         // Process triggered abilities
         switch ($card_type) {
             case CARD_CIVILIZATION:
                 $civ_id = $card_type_arg;
-                if ($location == 'hand') {
-                    $additions = array('tokens' => [], 'outposts' => []);
+                if ($location == "hand") {
+                    $additions = ["tokens" => [], "outposts" => []];
                     $this->notifyWithTokenName("civ", clienttranslate('${player_name} gets new Civilization ${name}'), $civ_id, $player_id);
                     $this->interruptBenefit();
                     $additions = $this->setupCiv($civ_id, $player_id, false);
                     // Notify players with extra stuff
-                    $this->notifyAllPlayers("setupComplete", '', array(
-                        'capitals' => [],
-                        'civilizations' => [],
-                        'outposts' => $this->structures->getCards($additions['outposts']),
-                        'tokens' => $this->structures->getCards($additions['tokens']),
-                    ));
-                    $main_player = $this->getGameStateValue('current_player_turn');
+                    $this->notifyAllPlayers("setupComplete", "", [
+                        "capitals" => [],
+                        "civilizations" => [],
+                        "outposts" => $this->structures->getCards($additions["outposts"]),
+                        "tokens" => $this->structures->getCards($additions["tokens"]),
+                    ]);
+                    $main_player = $this->getGameStateValue("current_player_turn");
                     if ($this->isIncomeTurn() && $this->getIncomeTurnPhase() <= INCOME_CIV && $main_player == $player_id) {
                         // we are in phase 1 of income turn, trigger benefit of just drawn card
                         $this->queueEraCivAbility($civ_id, $player_id);
                     }
-                } else if ($location == 'draw') {
+                } elseif ($location == "draw") {
                     $choice = array_get($this->civilizations[$civ_id], "midgame_ben", [174]);
                     $era = $this->getCurrentEra($player_id);
                     if ($civ_id == CIV_HISTORIANS && $this->isAdjustments4or8() && $era <= 2) {
@@ -2279,16 +2517,18 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case CARD_TECHNOLOGY:
                 $tech_type = $card_type_arg;
-                $args = $this->notifArgsAddTokenName('tech', $tech_type, [
-                    'card_id' => $tech_type,
-                    'reason' => $this->getReasonFullRec($reason)
+                $args = $this->notifArgsAddTokenName("tech", $tech_type, [
+                    "card_id" => $tech_type,
+                    "reason" => $this->getReasonFullRec($reason),
                 ]);
-                $this->notifyWithName('invent', clienttranslate('${player_name} invents ${name} ${reason}'), $args, $player_id);
-                if ($this->isTapestryActive($player_id, TAP_ACADEMIA)) { // ACADEMIA
+                $this->notifyWithName("invent", clienttranslate('${player_name} invents ${name} ${reason}'), $args, $player_id);
+                if ($this->isTapestryActive($player_id, TAP_ACADEMIA)) {
+                    // ACADEMIA
                     $this->awardVP($player_id, 3, reason_tapestry(TAP_ACADEMIA));
                 }
-                if ($this->isTapestryActive($player_id, 22)) { // INDUSTRIALISM
-                    $benefit = $this->tech_card_data[$tech_type]['circle']['benefit'];
+                if ($this->isTapestryActive($player_id, 22)) {
+                    // INDUSTRIALISM
+                    $benefit = $this->tech_card_data[$tech_type]["circle"]["benefit"];
                     $this->queueBenefitInterrupt($benefit, $player_id, reason_tapestry(22));
                 }
                 $this->checkMysticPrediction(1 /* tech cards */, $player_id);
@@ -2304,7 +2544,6 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-
     function effect_ageOfDiscovery($player_id = null) {
         $reason = reason_tapestry(TAP_AGE_OF_DISCOVERY);
         $track = $this->rollScienceDie2($reason);
@@ -2316,8 +2555,9 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getOpponentsStartingFromLeft($player_id = null) {
-        if (!$player_id)
-            $player_id = $this->getActivePlayerId(); // default to the active player
+        if (!$player_id) {
+            $player_id = $this->getActivePlayerId();
+        } // default to the active player
         $players = $this->loadPlayersBasicInfosWithBots();
         $next_player_table = $this->createNextPlayerTable(array_keys($players), true);
         $other = $next_player_table[$player_id];
@@ -2332,20 +2572,21 @@ abstract class PGameXBody extends tapcommon {
     function boastOfSuperiority() {
         $player_id = $this->getActivePlayerId();
         $count = $this->furthestOnTracks($player_id);
-        $this->notifyAllPlayers("message", clienttranslate('${player_name} is leading on ${count} tracks'), array(
-            'player_id' => $this->getActivePlayerId(),
-            'player_name' => $this->getActivePlayerName(),
-            'count' => $count,
-        ));
-        $this->awardVP($player_id, $count * 4, clienttranslate('BOAST OF SUPERIORITY'));
+        $this->notifyAllPlayers("message", clienttranslate('${player_name} is leading on ${count} tracks'), [
+            "player_id" => $this->getActivePlayerId(),
+            "player_name" => $this->getActivePlayerName(),
+            "count" => $count,
+        ]);
+        $this->awardVP($player_id, $count * 4, clienttranslate("BOAST OF SUPERIORITY"));
     }
 
-    function coalBaron() { // Draw territory and explore with it. Then give neighbours each 1 territory.
+    function coalBaron() {
+        // Draw territory and explore with it. Then give neighbours each 1 territory.
         $player_id = $this->getActivePlayerId();
         $reason = reason_tapestry(TAP_COAL_BARON);
         $cards = $this->awardCard($player_id, 1, CARD_TERRITORY, false, $reason);
         foreach ($cards as $card) {
-            $this->setGameStateValue('coal_baron', $card['id']);
+            $this->setGameStateValue("coal_baron", $card["id"]);
         }
         $this->queueBenefitNormal(17, $player_id, $reason);
         $neighbours = $this->getPlayerNeighbours($player_id, false);
@@ -2361,25 +2602,28 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function ageOfSailCheck($player_id) {
-        if ($this->isTapestryActive($player_id, TAP_AGE_OF_SAIL)) { // AGE OF SAIL
+        if ($this->isTapestryActive($player_id, TAP_AGE_OF_SAIL)) {
+            // AGE OF SAIL
             $this->awardCard($player_id, 3, CARD_TERRITORY, false, reason_tapestry(TAP_AGE_OF_SAIL));
         }
     }
 
     function pleaForAid() {
         $player_id = $this->getActivePlayerId();
-        $cubes = $this->getCollectionFromDB("SELECT card_id, card_location, card_location_arg FROM structure WHERE card_type='7' AND card_location LIKE 'tech_spot_%'");
-        $me = array();
-        $others = array();
+        $cubes = $this->getCollectionFromDB(
+            "SELECT card_id, card_location, card_location_arg FROM structure WHERE card_type='7' AND card_location LIKE 'tech_spot_%'"
+        );
+        $me = [];
+        $others = [];
         for ($a = 1; $a <= 4; $a++) {
             $me[$a] = 0;
             $others[$a] = 13;
         }
         foreach ($cubes as $cube) {
-            $coords = explode("_", $cube['card_location']);
+            $coords = explode("_", $cube["card_location"]);
             $track = $coords[2];
             $spot = $coords[3];
-            if ($cube['card_location_arg'] == $player_id) {
+            if ($cube["card_location_arg"] == $player_id) {
                 // mine
                 $spot = max($spot, $me[$track]); // highest
                 $me[$track] = $spot;
@@ -2391,8 +2635,9 @@ abstract class PGameXBody extends tapcommon {
         }
         $count = 0;
         for ($a = 1; $a <= 4; $a++) {
-            if ($me[$a] < $others[$a])
+            if ($me[$a] < $others[$a]) {
                 $count++;
+            }
         }
         // award benefits.
         $this->awardVP($player_id, 2 * $count, reason_tapestry(32));
@@ -2408,9 +2653,9 @@ abstract class PGameXBody extends tapcommon {
         // Get each player to choose whether to pay a worker for 10VP.
         $next_player_list = $this->getOpponentsStartingFromLeft($player_id);
         $reason = reason_tapestry(TAP_OLYMPIC_HOST);
-        $this->queueBenefitNormal(['p' => RES_WORKER, 'g' => 510], $player_id, $reason);
+        $this->queueBenefitNormal(["p" => RES_WORKER, "g" => 510], $player_id, $reason);
         foreach ($next_player_list as $other_id) {
-            $this->queueBenefitNormal(['p' => RES_WORKER, 'g' => 510], $other_id, $reason);
+            $this->queueBenefitNormal(["p" => RES_WORKER, "g" => 510], $other_id, $reason);
         }
         // queue the final check:
         $this->queueBenefitNormal(125, $player_id, $reason);
@@ -2437,7 +2682,7 @@ abstract class PGameXBody extends tapcommon {
         $num = $this->getPlayersNumberWithBots();
         foreach ($others as $other_era) {
             if ($other_era >= $era) {
-                // Not first to era: 3VP per opp 
+                // Not first to era: 3VP per opp
                 $this->awardVP($player_id, 3 * ($num - 1), reason_tapestry(38));
                 return;
             }
@@ -2449,12 +2694,14 @@ abstract class PGameXBody extends tapcommon {
     function resourceForAll() {
         $player_data = $this->loadPlayersBasicInfos();
         foreach ($player_data as $player) {
-            $this->queueBenefitNormal(5, $player['player_id'], reason_tapestry(14)); // DIPLOMACY
+            $this->queueBenefitNormal(5, $player["player_id"], reason_tapestry(14)); // DIPLOMACY
         }
     }
 
     function VPforLandmarks($player_id, $count, $reason = null, $ben = 0) {
-        $landmark_count = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM structure WHERE card_type='6' AND card_location_arg='$player_id'");
+        $landmark_count = $this->getUniqueValueFromDB(
+            "SELECT COUNT(*) FROM structure WHERE card_type='6' AND card_location_arg='$player_id'"
+        );
         $this->awardVP($player_id, $count * $landmark_count, $reason, null, $ben);
     }
 
@@ -2463,18 +2710,22 @@ abstract class PGameXBody extends tapcommon {
         //WHEN PLAYED: Gain 2 ${any} if you have the fewest landmarks. If you have the most landmarks, gain 12 ${VP}. Otherwise (and for ties), gain 1 ${any} and 6 ${VP}
         $player_id = $this->getActivePlayerId();
         $player_data = $this->loadPlayersBasicInfosWithBots();
-        $landmark_data = $this->getCollectionFromDB("SELECT card_location_arg, COUNT(*) c FROM structure WHERE card_type='6' GROUP BY card_location_arg");
+        $landmark_data = $this->getCollectionFromDB(
+            "SELECT card_location_arg, COUNT(*) c FROM structure WHERE card_type='6' GROUP BY card_location_arg"
+        );
         foreach ($player_data as $pid => $info) {
-            if (!isset($landmark_data[$pid]))
-                $landmark_data[(int) $pid]['c'] = 0;
+            if (!isset($landmark_data[$pid])) {
+                $landmark_data[(int) $pid]["c"] = 0;
+            }
         }
-        $landmark_count = $landmark_data[$player_id]['c'];
+        $landmark_count = $landmark_data[$player_id]["c"];
         $highest = 0;
         $lowest = 99;
         foreach ($landmark_data as $pid => $ld) {
-            if ($pid == 0)
+            if ($pid == 0) {
                 continue;
-            $count = $ld['c'];
+            }
+            $count = $ld["c"];
             if ($pid != $player_id) {
                 if ($count < $lowest) {
                     $lowest = $count;
@@ -2483,33 +2734,40 @@ abstract class PGameXBody extends tapcommon {
                     $highest = $count;
                 }
             }
-            $this->notifyWithName('message', clienttranslate('${player_name} landmark count: ${count}'), [
-                'count' => $count
-            ], $pid);
+            $this->notifyWithName(
+                "message",
+                clienttranslate('${player_name} landmark count: ${count}'),
+                [
+                    "count" => $count,
+                ],
+                $pid
+            );
         }
         $reason = reason_tapestry(4); // AGE OF WONDERS
         if ($landmark_count < $lowest) {
             // lowest
-            $this->queueBenefitNormal(array(5, 5), $player_id, $reason);
-        } else if ($landmark_count > $highest) {
+            $this->queueBenefitNormal([5, 5], $player_id, $reason);
+        } elseif ($landmark_count > $highest) {
             // highest
-            $this->queueBenefitNormal(array(15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15), $player_id, $reason);
+            $this->queueBenefitNormal([15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15], $player_id, $reason);
         } else {
             //tie or other
-            $this->queueBenefitNormal(array(15, 15, 15, 15, 15, 15, 5), $player_id, $reason);
+            $this->queueBenefitNormal([15, 15, 15, 15, 15, 15, 5], $player_id, $reason);
         }
     }
 
     function benefitCashed($benefit_table_id) {
-        if (is_array($benefit_table_id) && isset($benefit_table_id['benefit_id']))
-            $benefit_table_id = $benefit_table_id['benefit_id'];
+        if (is_array($benefit_table_id) && isset($benefit_table_id["benefit_id"])) {
+            $benefit_table_id = $benefit_table_id["benefit_id"];
+        }
         $this->DbQuery("DELETE FROM benefit WHERE benefit_id='$benefit_table_id'");
         $this->notifyBenefitQueue();
     }
 
     function dbGetIncomeTrackLevel($track, $player_id = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $field = $this->getIncomeTrackDbColumn($track);
         $income_level = $this->getUniqueValueFromDB("SELECT $field FROM playerextra WHERE player_id='$player_id'");
         return (int) $income_level;
@@ -2517,31 +2775,35 @@ abstract class PGameXBody extends tapcommon {
 
     function getIncomeTrackDbColumn($track) {
         $this->systemAssertTrue("invalid income track $track", $track >= 1 && $track <= 4);
-        $field = "player_income_" . $this->income_tracks[$track]['field'];
+        $field = "player_income_" . $this->income_tracks[$track]["field"];
         return $field;
     }
 
     function dbGetIncomeBuildingOfType($type, $throw = false, $notify = true, $player_id = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $income_level = $this->dbGetIncomeTrackLevel($type, $player_id);
-        $sid = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_location='income' AND card_location_arg='$player_id' AND (card_type='$type') LIMIT 1");
+        $sid = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM structure WHERE card_location='income' AND card_location_arg='$player_id' AND (card_type='$type') LIMIT 1"
+        );
         if ($income_level >= 6 || $sid == null) {
             if ($throw) {
-                $this->userAssertTrue(totranslate('No more income buildings of this type'));
+                $this->userAssertTrue(totranslate("No more income buildings of this type"));
                 return null;
             }
-            if ($notify)
-                $this->notifyWithName('message_error', clienttranslate('No more income buildings of this type [${structure_type}]'), [
-                    'i18n' => array('structure_type'),
-                    'structure_type' => $this->structure_types[$type]["name"],
+            if ($notify) {
+                $this->notifyWithName("message_error", clienttranslate('No more income buildings of this type [${structure_type}]'), [
+                    "i18n" => ["structure_type"],
+                    "structure_type" => $this->structure_types[$type]["name"],
                 ]);
+            }
             return null;
         }
         return $sid;
     }
 
-    function claimIncomeStructure($type, $transition = 'structure') {
+    function claimIncomeStructure($type, $transition = "structure") {
         $player_id = $this->getActivePlayerId();
         $field = $this->getIncomeTrackDbColumn($type);
         $sid = $this->dbGetIncomeBuildingOfType($type);
@@ -2551,14 +2813,15 @@ abstract class PGameXBody extends tapcommon {
         $curr = $this->getPendingStructure();
         if ($curr != null) {
             // we have problem
-            $this->error("Claiming income building while another building is not resolved " . $curr['card_type_arg']);
+            $this->error("Claiming income building while another building is not resolved " . $curr["card_type_arg"]);
             $this->DbQuery("UPDATE structure SET card_location='hand' WHERE card_location='capital_structure'");
         }
         $this->DbQuery("UPDATE structure SET card_location='capital_structure' WHERE card_id='$sid'");
         $this->DbQuery("UPDATE playerextra SET " . $field . "=" . $field . "+1 WHERE player_id='$player_id'");
         $this->notifyMoveStructure(clienttranslate('${player_name} claims one ${structure_name}'), $sid, [], $player_id);
-        if (($type == BUILDING_MARKET) && ($this->isTapestryActive($player_id, 8))) { // CAPITALISM
-            $this->awardBaseResource($player_id, RES_COIN, 1, $this->getTokenName('tapestry', 8));
+        if ($type == BUILDING_MARKET && $this->isTapestryActive($player_id, 8)) {
+            // CAPITALISM
+            $this->awardBaseResource($player_id, RES_COIN, 1, $this->getTokenName("tapestry", 8));
         }
         if ($this->hasCiv($player_id, CIV_RELENTLESS)) {
             /** @var Relentless */
@@ -2566,42 +2829,45 @@ abstract class PGameXBody extends tapcommon {
             $inst->relentlessBenefitOnGainBuilding($player_id);
         }
 
-        if ($transition != null)
+        if ($transition != null) {
             $this->gamestate->nextState($transition);
+        }
         return false;
     }
 
     function getLandmarkFromSlot($track, $spot) {
         $data = $this->tech_track_data[$track][$spot];
-        $landmark_arr = array_get($data, 'landmark', null);
-        if (!$landmark_arr)
+        $landmark_arr = array_get($data, "landmark", null);
+        if (!$landmark_arr) {
             return null;
+        }
         $landmark_be = reset($landmark_arr);
-        $landmark_id = array_get_def($this->benefit_types, $landmark_be, 'lm');
+        $landmark_id = array_get_def($this->benefit_types, $landmark_be, "lm");
         $landmark = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location_arg2='$landmark_id' AND (card_type='6')");
         if (!$landmark) {
             $this->debugConsole("Landmark $landmark_id is missing in action - skipping (send bug)"); // NOI18N
             return null;
         } else {
-            $landmark['be'] = $landmark_be;
+            $landmark["be"] = $landmark_be;
             return $landmark;
         }
     }
 
     function processLandmarkSlot($track, $spot, $player_id) {
         $landmark = $this->getLandmarkFromSlot($track, $spot);
-        if (!$landmark)
+        if (!$landmark) {
             return true;
-        $landmark_be = $landmark['be'];
-        $landmark_type = $landmark['card_location_arg2'];
+        }
+        $landmark_be = $landmark["be"];
+        $landmark_type = $landmark["card_location_arg2"];
 
-        $owner = $landmark['card_location_arg'];
+        $owner = $landmark["card_location_arg"];
         if ($owner == 0) {
-            $reason = reason('spot', $track . "_" . $spot);
+            $reason = reason("spot", $track . "_" . $spot);
             // gain landmark
             $this->queueBenefitNormal($landmark_be, $player_id, $reason);
         } else {
-            $revisionism = ($landmark_type < 13) && $this->isTapestryActive($player_id, TAP_REVISIONISM);
+            $revisionism = $landmark_type < 13 && $this->isTapestryActive($player_id, TAP_REVISIONISM);
             if ($revisionism) {
                 $this->queueBenefitNormal(11, $player_id, reason_tapestry(TAP_REVISIONISM));
             }
@@ -2609,18 +2875,20 @@ abstract class PGameXBody extends tapcommon {
         return true; // complete
     }
 
-    function claimLandmark($landmark_id, $player_id, $transition = 'structure') {
+    function claimLandmark($landmark_id, $player_id, $transition = "structure") {
         $bene = $this->getCurrentBenefitWithInfo();
-        $this->systemAssertTrue("non landmark benefit on stack", isset($bene['lm']));
-        $this->systemAssertTrue("inconsistnet landmark benefit", $bene['lm'] == $landmark_id);
+        $this->systemAssertTrue("non landmark benefit on stack", isset($bene["lm"]));
+        $this->systemAssertTrue("inconsistnet landmark benefit", $bene["lm"] == $landmark_id);
 
-        $landmark = $this->getObjectFromDB("SELECT card_id, card_location_arg FROM structure WHERE card_location_arg2='$landmark_id' AND (card_type='6')");
+        $landmark = $this->getObjectFromDB(
+            "SELECT card_id, card_location_arg FROM structure WHERE card_location_arg2='$landmark_id' AND (card_type='6')"
+        );
         if (!$landmark) {
             $this->systemAssertTrue("Landmark $landmark_id is missing in action - skipping (send bug)"); // NOI18N
             return true;
         }
-        $sid = $landmark['card_id'];
-        $owner = $landmark['card_location_arg'];
+        $sid = $landmark["card_id"];
+        $owner = $landmark["card_location_arg"];
         //$this->debugConsole("claim land $landmark_id $player_id $owner $revisionism");
         $self = $owner == $player_id;
         if ($owner == 0 || $self) {
@@ -2628,14 +2896,21 @@ abstract class PGameXBody extends tapcommon {
                 $curr = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
                 if ($curr != null) {
                     // we have problem
-                    $this->error("Claiming landmark while another building is not resolved " . $curr['card_type_arg']);
+                    $this->error("Claiming landmark while another building is not resolved " . $curr["card_type_arg"]);
                     $this->DbQuery("UPDATE structure SET card_location='hand' WHERE card_location='capital_structure'");
                 }
-                $this->DbQuery("UPDATE structure SET card_location='capital_structure', card_location_arg='$player_id' WHERE card_id='$sid'");
-                $this->notifyWithName("claimLandmarkStructure", clienttranslate('${player_name} claims the ${landmark_name}'), [
-                    'landmark_name' => $this->landmark_data[$landmark_id]["name"]
-                ], $player_id);
-                $this->notifyMoveStructure('', $sid, [], $player_id);
+                $this->DbQuery(
+                    "UPDATE structure SET card_location='capital_structure', card_location_arg='$player_id' WHERE card_id='$sid'"
+                );
+                $this->notifyWithName(
+                    "claimLandmarkStructure",
+                    clienttranslate('${player_name} claims the ${landmark_name}'),
+                    [
+                        "landmark_name" => $this->landmark_data[$landmark_id]["name"],
+                    ],
+                    $player_id
+                );
+                $this->notifyMoveStructure("", $sid, [], $player_id);
 
                 $this->clearCurrentBenefit($bene, true);
                 $this->interruptBenefit();
@@ -2643,19 +2918,26 @@ abstract class PGameXBody extends tapcommon {
                 // re-insert landmark ben
                 $this->interruptBenefit();
                 $this->benefitSingleEntryReinsert($bene);
-                if ($transition != null)
+                if ($transition != null) {
                     $this->gamestate->nextState($transition);
+                }
                 return false;
             } else {
                 $claim_player_id = $player_id;
 
-                if ($this->isSolo())
+                if ($this->isSolo()) {
                     $player_id = PLAYER_AUTOMA;
+                }
                 $this->DbQuery("UPDATE structure SET card_location='hand', card_location_arg='$player_id' WHERE card_id='$sid'");
-                $this->notifyWithName("claimLandmarkStructure", clienttranslate('${player_name} claims the ${landmark_name}'), [
-                    'landmark_name' => $this->landmark_data[$landmark_id]["name"]
-                ], $player_id);
-                $this->notifyMoveStructure('', $sid, [], $player_id);
+                $this->notifyWithName(
+                    "claimLandmarkStructure",
+                    clienttranslate('${player_name} claims the ${landmark_name}'),
+                    [
+                        "landmark_name" => $this->landmark_data[$landmark_id]["name"],
+                    ],
+                    $player_id
+                );
+                $this->notifyMoveStructure("", $sid, [], $player_id);
                 $this->gainLandmarkTriggers($claim_player_id, $landmark_id);
             }
         }
@@ -2663,7 +2945,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function gainLandmarkTriggers($player_id, $landmark_type) {
-        $revisionism = ($landmark_type < 13) && $this->isTapestryActive($player_id, TAP_REVISIONISM);
+        $revisionism = $landmark_type < 13 && $this->isTapestryActive($player_id, TAP_REVISIONISM);
         if ($revisionism) {
             $this->queueBenefitNormal(RES_ANY, $player_id, reason_tapestry(TAP_REVISIONISM));
         }
@@ -2674,7 +2956,7 @@ abstract class PGameXBody extends tapcommon {
             }
             $to_spot = $this->getCivSlotWithValue(CIV_UTILITARIENS, "lm", $landmark_type);
             if ($to_spot) {
-                $this->notif('message', $player_id)->notifyAll(clienttranslate('${player_name} triggered power of Utilitarias'));
+                $this->notif("message", $player_id)->notifyAll(clienttranslate('${player_name} triggered power of Utilitarias'));
                 $this->benefitCivEntry(CIV_UTILITARIENS, $player_id, "triggered::$landmark_type");
             }
         }
@@ -2684,7 +2966,6 @@ abstract class PGameXBody extends tapcommon {
         // placing landmark trigger historian benefits
         $inst->historianBenefits($player_id, $landmark_type);
 
-
         if ($this->hasCiv($player_id, CIV_RELENTLESS)) {
             /** @var Relentless */
             $inst = $this->getCivilizationInstance(CIV_RELENTLESS, true);
@@ -2692,20 +2973,21 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-
-
-
     function hasCiv($player_id, $civ_id) {
-        $card_id = $this->getUniqueValueFromDB("SELECT card_id FROM card WHERE card_type='5' AND card_type_arg='$civ_id' AND card_location='hand' AND card_location_arg='$player_id'");
-        return ($card_id != null);
+        $card_id = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM card WHERE card_type='5' AND card_type_arg='$civ_id' AND card_location='hand' AND card_location_arg='$player_id'"
+        );
+        return $card_id != null;
     }
 
     function getAllCivs($player_id) {
-        return $this->getCardsSearch(CARD_CIVILIZATION, null, 'hand', $player_id);
+        return $this->getCardsSearch(CARD_CIVILIZATION, null, "hand", $player_id);
     }
 
     function getCivOwner($civ_id) {
-        $player_id = $this->getUniqueValueFromDB("SELECT card_location_arg FROM card WHERE card_type='5' AND card_type_arg='$civ_id' AND card_location='hand'");
+        $player_id = $this->getUniqueValueFromDB(
+            "SELECT card_location_arg FROM card WHERE card_type='5' AND card_type_arg='$civ_id' AND card_location='hand'"
+        );
         return $player_id;
     }
 
@@ -2717,7 +2999,7 @@ abstract class PGameXBody extends tapcommon {
         $owners = [];
         if (is_flag_set($sflags, FLAG_NEIGHBOUR)) {
             $owners = $this->getPlayerNeighbours($player_id, false);
-        } else if (is_flag_set($sflags, FLAG_OPPONENT)) {
+        } elseif (is_flag_set($sflags, FLAG_OPPONENT)) {
             $all = $this->loadPlayersBasicInfosWithBots();
             unset($all[$player_id]);
             $owners = array_keys($all);
@@ -2734,8 +3016,9 @@ abstract class PGameXBody extends tapcommon {
             $type_arg = null;
             $sflags &= ~FLAG_VIRTUAL_ALLOWED;
         }
-        if ($sflags == 0)
+        if ($sflags == 0) {
             $sflags = FLAG_OPPONENT | FLAG_SELF;
+        }
         $mask = $this->getTrackLocationLike($track);
         $owners = $this->getOwnersWithSFlags($player_id, $sflags);
         $this->systemAssertTrue("no owners for $player_id $sflags", count($owners) > 0);
@@ -2748,7 +3031,7 @@ abstract class PGameXBody extends tapcommon {
         foreach ($players as $player_id => $info) {
             $tap = $this->isTapestryActive($player_id, $tapestry_id);
             if ($tap) {
-                $taps[$tap['card_id']] = $tap;
+                $taps[$tap["card_id"]] = $tap;
             }
         }
         return $taps;
@@ -2759,12 +3042,14 @@ abstract class PGameXBody extends tapcommon {
         $taps = [];
         $era = $this->getCurrentEra($player_id);
         $current_tapestry = $this->getLatestTapestry($player_id, $era);
-        if ($current_tapestry)
+        if ($current_tapestry) {
             $taps[] = $current_tapestry;
+        }
         if ($this->hasCiv($player_id, CIV_HERALDS)) {
-            $current_tapestry2 = $this->getTapestryOn($player_id, 'civilization_6'); // special case for heralds
-            if ($current_tapestry2)
+            $current_tapestry2 = $this->getTapestryOn($player_id, "civilization_6"); // special case for heralds
+            if ($current_tapestry2) {
                 $taps[] = $current_tapestry2;
+            }
         }
         //         if ($this->hasCiv($player_id, CIV_SPIES)) {
         //             $current_tapestry2 = $this->getTapestryOn($player_id, 'civilization_36'); // special case for spies
@@ -2773,14 +3058,18 @@ abstract class PGameXBody extends tapcommon {
         //         }
         $tap_type = 0;
         foreach ($taps as $current_tapestry) {
-            $tap_type = $current_tapestry['card_type_arg'];
-            if ($tap_type == $tapestry_id)
+            $tap_type = $current_tapestry["card_type_arg"];
+            if ($tap_type == $tapestry_id) {
                 return $current_tapestry;
+            }
             if ($tap_type == TAP_ESPIONAGE) {
-                $card_id = $current_tapestry['card_id'];
-                $clone = $this->getObjectFromDB("SELECT * FROM card WHERE card_type='3' AND card_location = 'tapestry_$card_id' AND card_location_arg='$player_id' LIMIT 1");
-                if ($clone && $clone['card_type_arg'] == $tapestry_id)
+                $card_id = $current_tapestry["card_id"];
+                $clone = $this->getObjectFromDB(
+                    "SELECT * FROM card WHERE card_type='3' AND card_location = 'tapestry_$card_id' AND card_location_arg='$player_id' LIMIT 1"
+                );
+                if ($clone && $clone["card_type_arg"] == $tapestry_id) {
                     return $clone;
+                }
             }
         }
         if ($current_tapestry == null) {
@@ -2792,17 +3081,21 @@ abstract class PGameXBody extends tapcommon {
     }
 
     // Gets the last played tapestry card
-    function getLatestTapestry($player_id, $era = '%') {
-        return $this->getObjectFromDB("SELECT * FROM card WHERE card_type='3' AND card_location LIKE 'era$era' AND card_location_arg='$player_id' ORDER BY card_location, card_id DESC LIMIT 1");
+    function getLatestTapestry($player_id, $era = "%") {
+        return $this->getObjectFromDB(
+            "SELECT * FROM card WHERE card_type='3' AND card_location LIKE 'era$era' AND card_location_arg='$player_id' ORDER BY card_location, card_id DESC LIMIT 1"
+        );
     }
 
     function getTapestryOn($player_id, $loc) {
-        return $this->getObjectFromDB("SELECT * FROM card WHERE card_type='3' AND card_location ='$loc' AND card_location_arg='$player_id' ORDER BY card_location, card_id DESC LIMIT 1");
+        return $this->getObjectFromDB(
+            "SELECT * FROM card WHERE card_type='3' AND card_location ='$loc' AND card_location_arg='$player_id' ORDER BY card_location, card_id DESC LIMIT 1"
+        );
     }
 
     // Gets the players current era (n.b. Changes at start of income turn)
     function getCurrentEra($player_id) {
-        return (int)$this->getUniqueValueFromDB("SELECT player_income_turns FROM playerextra WHERE player_id='$player_id'");
+        return (int) $this->getUniqueValueFromDB("SELECT player_income_turns FROM playerextra WHERE player_id='$player_id'");
     }
 
     function isPlayerAlive($player_id) {
@@ -2810,54 +3103,63 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function isPlayerFinished($player_id) {
-        if ($this->isRealPlayer($player_id) && $this->isZombiePlayer($player_id))
+        if ($this->isRealPlayer($player_id) && $this->isZombiePlayer($player_id)) {
             return true;
+        }
         $era = $this->getCurrentEra($player_id);
-        if ($era <= 5)
+        if ($era <= 5) {
             return false;
+        }
         return true;
     }
 
     function isIncomeTurn() {
-        return $this->getGameStateValue('income_turn_phase') != 0;
+        return $this->getGameStateValue("income_turn_phase") != 0;
     }
 
-    function setIncomeTurnPhase($phase, $message = '', $player_id = 0) {
-        if (!$player_id)
+    function setIncomeTurnPhase($phase, $message = "", $player_id = 0) {
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
-        if ($phase > 0) {
-            $this->setGameStateValue('income_turn_phase', $phase);
-        } else {
-            $this->setGameStateValue('income_turn_phase', 0);
         }
-        $this->notifyWithName('income', $message, [
-            'turn_number' => $this->getCurrentEra($player_id),
-            'income_turn_phase' => $this->getIncomeTurnPhase()
-        ], $player_id);
+        if ($phase > 0) {
+            $this->setGameStateValue("income_turn_phase", $phase);
+        } else {
+            $this->setGameStateValue("income_turn_phase", 0);
+        }
+        $this->notifyWithName(
+            "income",
+            $message,
+            [
+                "turn_number" => $this->getCurrentEra($player_id),
+                "income_turn_phase" => $this->getIncomeTurnPhase(),
+            ],
+            $player_id
+        );
     }
 
     function setTargetPlayer($player_id) {
-        $this->setGameStateValue('target_player', $player_id);
+        $this->setGameStateValue("target_player", $player_id);
     }
 
     function getTargetPlayer() {
-        return $this->getGameStateValue('target_player');
+        return $this->getGameStateValue("target_player");
     }
 
     function getIncomeTurnPhase() {
-        return $this->getGameStateValue('income_turn_phase');
+        return $this->getGameStateValue("income_turn_phase");
     }
 
     function playTapestryCard($card_id, $player_id = null, $canOvertake = true) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
 
         $era = $this->getCurrentEra($player_id);
         $ben = $this->getCurrentBenefitType();
 
         $card = $this->getCardInfoById($card_id);
-        $tap_type = $card['card_type_arg'];
-        $tapvar = $this->getRulesCard(CARD_TAPESTRY, $tap_type, 'type');
+        $tap_type = $card["card_type_arg"];
+        $tapvar = $this->getRulesCard(CARD_TAPESTRY, $tap_type, "type");
         $card_effect = $this->getRulesCard(CARD_TAPESTRY, $tap_type);
 
         $advisors = new Advisors($this);
@@ -2879,17 +3181,16 @@ abstract class PGameXBody extends tapcommon {
 
         $this->systemAssertTrue("ERR:playTapestryCard:01", $ben);
 
-        if ($ben == 112) $this->userAssertTrue(totranslate('Cannot play tapestry card from hand, select a card to copy from the mat'));
+        if ($ben == 112) {
+            $this->userAssertTrue(totranslate("Cannot play tapestry card from hand, select a card to copy from the mat"));
+        }
         $this->clearCurrentBenefit($ben);
-
-
 
         if ($ben == 64) {
             $message = clienttranslate('${player_name} over-plays previous tapestry card with ${card_name}');
-        } else
+        } else {
             $message = clienttranslate('${player_name} plays a tapestry card ${card_name}');
-
-
+        }
 
         if ($era == 1 && $ben == 64 && $this->hasCiv($player_id, CIV_HERALDS)) {
             if ($this->isAdjustments4or8()) {
@@ -2899,7 +3200,7 @@ abstract class PGameXBody extends tapcommon {
                 } else {
                     $allowed = false;
                 }
-                $this->userAssertTrue(totranslate('HERALDS cannot play this type of card over Marker of Fire'), $allowed);
+                $this->userAssertTrue(totranslate("HERALDS cannot play this type of card over Marker of Fire"), $allowed);
                 $card_effect = null;
                 $message = clienttranslate('${player_name} plays a tapestry card ${card_name} over Maker Of Fire - no benefits');
             } else {
@@ -2907,34 +3208,32 @@ abstract class PGameXBody extends tapcommon {
             }
         }
 
-
-
         $prev = $this->getLatestTapestry($player_id, $era);
         if ($prev) {
-            $prev_id = $prev['card_id'];
+            $prev_id = $prev["card_id"];
             $this->DbQuery("UPDATE card SET card_location='era_6' WHERE card_id='$prev_id'");
             $args = $this->notifArgsAddCardInfo($prev_id, [
-                'espionage' => false,
-                'destination' => "tapestry_slot_{$player_id}_6"
+                "espionage" => false,
+                "destination" => "tapestry_slot_{$player_id}_6",
             ]);
-            $this->notifyWithName("tapestrycard", '', $args, $player_id);
+            $this->notifyWithName("tapestrycard", "", $args, $player_id);
         }
         $era_string = "era$era";
         $this->DbQuery("UPDATE card SET card_location='$era_string',card_location_arg='$player_id' WHERE card_id='$card_id'");
 
-        $tyranny = array_get($opargs, 'tyranny');
+        $tyranny = array_get($opargs, "tyranny");
         if ($tyranny) {
-            $just_played = array_get($opargs, 'just_played');
+            $just_played = array_get($opargs, "just_played");
             if ($just_played) {
                 if ($tap_type != $just_played) {
-                    throw new BgaUserException($this->_('You can only play a just drawn card'));
+                    throw new BgaUserException($this->_("You can only play a just drawn card"));
                 }
                 $this->awardVP($player_id, 5, reason_tapestry(TAP_TYRANNY));
             }
         }
         $args = $this->notifArgsAddCardInfo($card_id, [
-            'espionage' => false,
-            'destination' => "tapestry_slot_{$player_id}_$era"
+            "espionage" => false,
+            "destination" => "tapestry_slot_{$player_id}_$era",
         ]);
         $this->notifyWithName("tapestrycard", $message, $args, $player_id);
         if ($card_effect) {
@@ -2942,36 +3241,40 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-
-
-
-
     function research($reason) {
         $this->rollScienceDie2($reason);
-        $this->gamestate->nextState('research');
+        $this->gamestate->nextState("research");
         return false;
     }
 
     function rollScienceDie2($reason) {
         $player_id = $this->getActivePlayerId();
-        $this->setGameStateValue('science_die_empiricism', 0);
-        $roll1 = $this->rollScienceDie($reason, 'science_die', $player_id, false);
-        if ($this->isTapestryActive($player_id, TAP_EMPIRICISM)) { // EMPIRICISM
-            $this->rollScienceDie(reason_tapestry(TAP_EMPIRICISM), 'science_die_empiricism', $player_id, false);
+        $this->setGameStateValue("science_die_empiricism", 0);
+        $roll1 = $this->rollScienceDie($reason, "science_die", $player_id, false);
+        if ($this->isTapestryActive($player_id, TAP_EMPIRICISM)) {
+            // EMPIRICISM
+            $this->rollScienceDie(reason_tapestry(TAP_EMPIRICISM), "science_die_empiricism", $player_id, false);
         }
         $this->prepareUndoSavepoint();
         return $roll1;
     }
 
-    function rollScienceDie($data, $dievar = 'science_die', $player_id = -1, $undosave = true) {
+    function rollScienceDie($data, $dievar = "science_die", $player_id = -1, $undosave = true) {
         $die_roll = bga_rand(1, 4);
         $this->setGameStateValue($dievar, $die_roll);
-        $this->notifyWithTrack("science_roll", clienttranslate('${player_name} rolls the science die with result ${track_name} ${reason}'), [
-            'die' => $die_roll,
-            'track' => $die_roll,
-            'reason' => $this->getReasonFullRec($data)
-        ], $player_id);
-        if ($undosave) $this->prepareUndoSavepoint();
+        $this->notifyWithTrack(
+            "science_roll",
+            clienttranslate('${player_name} rolls the science die with result ${track_name} ${reason}'),
+            [
+                "die" => $die_roll,
+                "track" => $die_roll,
+                "reason" => $this->getReasonFullRec($data),
+            ],
+            $player_id
+        );
+        if ($undosave) {
+            $this->prepareUndoSavepoint();
+        }
         return $die_roll;
     }
 
@@ -2997,8 +3300,9 @@ abstract class PGameXBody extends tapcommon {
         if ($player_id < 0) {
             $player_id = -$player_id;
             $sql .= " AND card_location_arg!='$player_id'";
-        } else if ($player_id)
+        } elseif ($player_id) {
             $sql .= " AND card_location_arg='$player_id'";
+        }
         if ($type_arg !== null) {
             $sql .= " AND card_type_arg='$type_arg'";
         } else {
@@ -3006,9 +3310,9 @@ abstract class PGameXBody extends tapcommon {
         }
         $cubes = $this->getCollectionFromDB($sql);
         foreach ($cubes as &$cube) {
-            $spot = (int) getPart($cube['card_location'], 3); // tech_spot_1_3
-            $cube['spot'] = $spot;
-            $cube['virtual'] = $cube['card_type_arg'] == CUBE_AI;
+            $spot = (int) getPart($cube["card_location"], 3); // tech_spot_1_3
+            $cube["spot"] = $spot;
+            $cube["virtual"] = $cube["card_type_arg"] == CUBE_AI;
         }
         $this->sortTrackCubes($cubes);
         return $cubes;
@@ -3016,15 +3320,16 @@ abstract class PGameXBody extends tapcommon {
 
     function sortTrackCubes(array &$cubes) {
         uasort($cubes, function ($a, $b) {
-            $track_a = (int) getPart($a['card_location'], 2); // tech_spot_1_3
-            $track_b = (int) getPart($b['card_location'], 2);
+            $track_a = (int) getPart($a["card_location"], 2); // tech_spot_1_3
+            $track_b = (int) getPart($b["card_location"], 2);
             $track_dist = $track_a <=> $track_b;
-            if ($track_dist != 0)
+            if ($track_dist != 0) {
                 return $track_dist;
-            $spot_a = (int) getPart($a['card_location'], 3);
-            $spot_b = (int) getPart($b['card_location'], 3);
+            }
+            $spot_a = (int) getPart($a["card_location"], 3);
+            $spot_b = (int) getPart($b["card_location"], 3);
             $dist = $spot_a <=> $spot_b;
-            $vdist = ($a['card_type_arg'] - $b['card_type_arg']) <=> 0;
+            $vdist = $a["card_type_arg"] - $b["card_type_arg"] <=> 0;
             if ($dist == 0) {
                 return $vdist;
             }
@@ -3037,14 +3342,14 @@ abstract class PGameXBody extends tapcommon {
         $count = count($cubes);
         if ($count == 0) {
             if ($flags & FLAG_SELF) {
-                $mess = totranslate('Cannot find a cube on this spot');
+                $mess = totranslate("Cannot find a cube on this spot");
             } else {
                 $mess = totranslate('Cannot find an opponent\'s cube on this spot');
             }
             $this->userAssertTrue($mess);
         }
-        if (($flags & FLAG_SINGLE) && $count > 1 && ($flags & FLAG_OPPONENT)) {
-            $this->userAssertTrue(totranslate('Cannot determine which cube you are targeting, select the cube, not the spot'));
+        if ($flags & FLAG_SINGLE && $count > 1 && $flags & FLAG_OPPONENT) {
+            $this->userAssertTrue(totranslate("Cannot determine which cube you are targeting, select the cube, not the spot"));
         }
         $cube = reset($cubes);
         return $cube;
@@ -3053,8 +3358,9 @@ abstract class PGameXBody extends tapcommon {
     function cubeChoiceForTrackSingle($track, $player_id, $change = 0, $choice = -1) {
         $arr = $this->cubeChoiceForTrack($track, $player_id, $change, $choice);
         $cube = reset($arr);
-        if ($cube)
-            $this->userAssertTrue(totranslate('Cannot select virtual cube'), !$cube['virtual']);
+        if ($cube) {
+            $this->userAssertTrue(totranslate("Cannot select virtual cube"), !$cube["virtual"]);
+        }
         return $cube;
     }
 
@@ -3067,12 +3373,13 @@ abstract class PGameXBody extends tapcommon {
         $count = count($cubes);
         $this->systemAssertTrue("Has to be cubes on track $track", $count > 0);
         $first_cube = reset($cubes);
-        $first = $first_cube['spot'];
+        $first = $first_cube["spot"];
         $same = 0;
         foreach ($cubes as $cube) {
-            $spot = $cube['spot'];
-            if ($spot == $first)
+            $spot = $cube["spot"];
+            if ($spot == $first) {
                 $same++;
+            }
         }
         if ($choice == -1) {
             if ($count == 1 || $same == $count) {
@@ -3084,14 +3391,17 @@ abstract class PGameXBody extends tapcommon {
             return [$first_cube];
         }
         foreach ($cubes as $cube) {
-            $spot = $cube['spot'];
-            if ($spot == $choice)
+            $spot = $cube["spot"];
+            if ($spot == $choice) {
                 return [$cube];
+            }
         }
         foreach ($cubes as $cube) {
-            $spot = $cube['spot'];
-            if ($spot + $change == $choice) // XXX
+            $spot = $cube["spot"];
+            if ($spot + $change == $choice) {
+                // XXX
                 return [$cube];
+            }
         }
         return [null];
     }
@@ -3106,7 +3416,7 @@ abstract class PGameXBody extends tapcommon {
         if (!$cube) {
             return -1;
         }
-        return $cube['spot'];
+        return $cube["spot"];
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -3115,16 +3425,17 @@ abstract class PGameXBody extends tapcommon {
     function debug_bene(string $benefit = null, int $count = 1) {
         $player_id = $this->getCurrentPlayerId();
         if ($benefit) {
-            $benefit = explode(':', $benefit);
+            $benefit = explode(":", $benefit);
             $this->queueBenefitInterrupt($benefit, $player_id, reason("str", "debug"), $count);
         }
-        $this->gamestate->nextState('benefit');
+        $this->gamestate->nextState("benefit");
     }
 
     function searchForCard($array, $card_name) {
         foreach ($array as $cid => $info) {
-            if (strcasecmp($info['name'], $card_name) == 0)
+            if (strcasecmp($info["name"], $card_name) == 0) {
                 return $cid;
+            }
         }
         return 0;
     }
@@ -3141,8 +3452,8 @@ abstract class PGameXBody extends tapcommon {
         $data = $this->getCardDataByType(CARD_CIVILIZATION, $cid);
         if (!$data) {
             $cards = [];
-            $cards[] = array('type' => CARD_CIVILIZATION, 'type_arg' => $cid, 'nbr' => 1);
-            $this->cards->createCards($cards, 'deck_civ');
+            $cards[] = ["type" => CARD_CIVILIZATION, "type_arg" => $cid, "nbr" => 1];
+            $this->cards->createCards($cards, "deck_civ");
         }
         $this->debug_awardCard(CARD_CIVILIZATION, $cid);
 
@@ -3154,7 +3465,7 @@ abstract class PGameXBody extends tapcommon {
         $cid = $this->searchForCard($this->tapestry_card_data, $card_name);
         if ($cid) {
             $deck = $this->card_types[CARD_TAPESTRY]["deck"];
-            $discard = 'discard';
+            $discard = "discard";
             $this->debug_awardCard(CARD_TAPESTRY, $cid, null, false, null, $deck, $discard);
             return;
         }
@@ -3182,27 +3493,41 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function debug_discardHand($type, $player_id = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $cards = $this->getCardsInHand($player_id, $type);
         foreach (array_keys($cards) as $card_id) {
             $this->effect_discardCard($card_id, $player_id);
         }
     }
 
-    function debug_awardCard(int $card_type, int $card_num = 0, string $loc = null, bool $next = false, int $player_id = null, $deck = null, $discard = null) {
-        if (!$player_id)
+    function debug_awardCard(
+        int $card_type,
+        int $card_num = 0,
+        string $loc = null,
+        bool $next = false,
+        int $player_id = null,
+        $deck = null,
+        $discard = null
+    ) {
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
-        if ($card_num)
+        }
+        if ($card_num) {
             $this->debug_insertCard($card_type, $card_num);
-        $cards = $this->awardCard($player_id, 1, $card_type, false, reason('str', 'debug'), $deck, $discard);
-        if ($loc)
+        }
+        $cards = $this->awardCard($player_id, 1, $card_type, false, reason("str", "debug"), $deck, $discard);
+        if ($loc) {
             foreach ($cards as $card) {
-                $this->dbSetCardLocation($card['id'], $loc, null, '', $player_id);
+                $this->dbSetCardLocation($card["id"], $loc, null, "", $player_id);
+            };
+        }
+        if ($next) {
+            if ($this->getCurrentBenefit()) {
+                $this->gamestate->nextState("next");
             }
-        if ($next)
-            if ($this->getCurrentBenefit())
-                $this->gamestate->nextState('next');
+        }
         return $cards;
     }
 
@@ -3212,7 +3537,7 @@ abstract class PGameXBody extends tapcommon {
         $card_id = array_key_first($cards);
         if (!$card_id) {
             $cards = [];
-            $cards[] = array('type' => $card_type, 'type_arg' => $card_num, 'nbr' => 1);
+            $cards[] = ["type" => $card_type, "type_arg" => $card_num, "nbr" => 1];
             $this->cards->createCards($cards, $deck);
             $cards = $this->cards->getCardsOfType($card_type, $card_num);
             $card_id = array_key_first($cards);
@@ -3231,64 +3556,100 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function debug_res($coin, $worker, $food, $culture, $player_id = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
-        $this->dbIncResourceCount(RES_COIN, '', $coin, 0, $player_id);
-        $this->dbIncResourceCount(RES_WORKER, '', $worker, 0, $player_id);
-        $this->dbIncResourceCount(RES_FOOD, '', $food, 0, $player_id);
-        $this->dbIncResourceCount(RES_CULTURE, '', $culture, 0, $player_id);
+        }
+        $this->dbIncResourceCount(RES_COIN, "", $coin, 0, $player_id);
+        $this->dbIncResourceCount(RES_WORKER, "", $worker, 0, $player_id);
+        $this->dbIncResourceCount(RES_FOOD, "", $food, 0, $player_id);
+        $this->dbIncResourceCount(RES_CULTURE, "", $culture, 0, $player_id);
     }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
-    //////////// 
+    ////////////
     function chooseCivilization($civ, $cap) {
-        $this->gamestate->checkPossibleAction('chooseCivilization');
+        $this->gamestate->checkPossibleAction("chooseCivilization");
         $player_id = $this->getCurrentPlayerId();
         $setup_choice = $this->getSetupChoice($player_id);
         // CIVILIZATION
-        $civs = $setup_choice['civilizations'];
-        $this->systemAssertTrue("civ not found $civ", array_key_exists($civ,   $civs));
+        $civs = $setup_choice["civilizations"];
+        $this->systemAssertTrue("civ not found $civ", array_key_exists($civ, $civs));
         $this->DbQuery("UPDATE card SET card_location='choice' WHERE card_type='5' AND card_location_arg='$player_id'");
         $this->DbQuery("UPDATE card SET card_location='hand',card_location_arg='$player_id' WHERE card_type='5' AND card_type_arg='$civ'");
         // CAPITAL
-        if (($cap == 0) && ($setup_choice['capitals'] != null)) {
-            $this->systemAssertTrue('capital choice not made');
+        if ($cap == 0 && $setup_choice["capitals"] != null) {
+            $this->systemAssertTrue("capital choice not made");
         }
         if ($cap > 0) {
-            if (!array_key_exists($cap, $setup_choice['capitals'])) {
-                $this->systemAssertTrue('capital not found');
+            if (!array_key_exists($cap, $setup_choice["capitals"])) {
+                $this->systemAssertTrue("capital not found");
             } else {
                 $this->DbQuery("UPDATE card SET card_location='choice' WHERE card_type='6' AND card_location_arg='$player_id'");
-                $this->DbQuery("UPDATE card SET card_location='hand',card_location_arg='$player_id' WHERE card_type='6' AND card_type_arg='$cap'");
+                $this->DbQuery(
+                    "UPDATE card SET card_location='hand',card_location_arg='$player_id' WHERE card_type='6' AND card_type_arg='$cap'"
+                );
             }
         }
-        $cap = $this->getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='6'");
-        $name = $this->capitals[$cap]['name'];
-        $this->notifyWithName('message', clienttranslate('${player_name} choses ${civ_name} on ${cap_name}'), [
-            'civ_name' => $this->getTokenName('civ', $civ),
-            'cap_name' => $name,
-            '_private' => true
-        ], $player_id);
-        $this->gamestate->setPlayerNonMultiactive($player_id, '');
+        $cap = $this->getUniqueValueFromDB(
+            "SELECT card_type_arg FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='6'"
+        );
+        $name = $this->capitals[$cap]["name"];
+        $this->notifyWithName(
+            "message",
+            clienttranslate('${player_name} choses ${civ_name} on ${cap_name}'),
+            [
+                "civ_name" => $this->getTokenName("civ", $civ),
+                "cap_name" => $name,
+                "_private" => true,
+            ],
+            $player_id
+        );
+        $this->gamestate->setPlayerNonMultiactive($player_id, "");
     }
 
     function importCapitalGrids() {
-        $chosen_capitals = $this->getCollectionFromDB("SELECT card_type_arg, card_location_arg FROM card WHERE card_type='6' AND card_location='hand'");
+        $chosen_capitals = $this->getCollectionFromDB(
+            "SELECT card_type_arg, card_location_arg FROM card WHERE card_type='6' AND card_location='hand'"
+        );
         foreach ($chosen_capitals as $cap) {
-            $cap_id = $cap['card_type_arg'];
-            $player_id = $cap['card_location_arg'];
-            $grid_data = $this->capitals[$cap_id]['grid'];
+            $cap_id = $cap["card_type_arg"];
+            $player_id = $cap["card_location_arg"];
+            $grid_data = $this->capitals[$cap_id]["grid"];
             for ($x = 0; $x < 15; $x++) {
                 for ($y = 0; $y < 3; $y++) {
-                    $this->DbQuery("INSERT INTO capital (player_id, capital_x, capital_y, capital_occupied) VALUES ('" . $player_id . "', '" . $x . "', '" . $y . "', '0')");
+                    $this->DbQuery(
+                        "INSERT INTO capital (player_id, capital_x, capital_y, capital_occupied) VALUES ('" .
+                            $player_id .
+                            "', '" .
+                            $x .
+                            "', '" .
+                            $y .
+                            "', '0')"
+                    );
                 }
                 for ($y = 12; $y < 15; $y++) {
-                    $this->DbQuery("INSERT INTO capital (player_id, capital_x, capital_y, capital_occupied) VALUES ('" . $player_id . "', '" . $x . "', '" . $y . "', '0')");
+                    $this->DbQuery(
+                        "INSERT INTO capital (player_id, capital_x, capital_y, capital_occupied) VALUES ('" .
+                            $player_id .
+                            "', '" .
+                            $x .
+                            "', '" .
+                            $y .
+                            "', '0')"
+                    );
                 }
-                if (($x < 3) || ($x > 11)) {
+                if ($x < 3 || $x > 11) {
                     for ($y = 3; $y < 12; $y++) {
-                        $this->DbQuery("INSERT INTO capital (player_id, capital_x, capital_y, capital_occupied) VALUES ('" . $player_id . "', '" . $x . "', '" . $y . "', '0')");
+                        $this->DbQuery(
+                            "INSERT INTO capital (player_id, capital_x, capital_y, capital_occupied) VALUES ('" .
+                                $player_id .
+                                "', '" .
+                                $x .
+                                "', '" .
+                                $y .
+                                "', '0')"
+                        );
                     }
                 }
             }
@@ -3296,7 +3657,17 @@ abstract class PGameXBody extends tapcommon {
             foreach ($grid_data as $g) {
                 for ($y = 0; $y < 9; $y++) {
                     $value = substr($g, $y, 1);
-                    $this->DbQuery("INSERT INTO capital (player_id, capital_x, capital_y, capital_occupied) VALUES ('" . $player_id . "', '" . $x . "', '" . ($y + 3) . "', '" . $value . "')");
+                    $this->DbQuery(
+                        "INSERT INTO capital (player_id, capital_x, capital_y, capital_occupied) VALUES ('" .
+                            $player_id .
+                            "', '" .
+                            $x .
+                            "', '" .
+                            ($y + 3) .
+                            "', '" .
+                            $value .
+                            "')"
+                    );
                 }
                 $x++;
             }
@@ -3304,9 +3675,11 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function action_playTapestryCard($card_id) {
-        $this->checkAction('playCard');
+        $this->checkAction("playCard");
         $player_id = $this->getActivePlayerId();
-        $check_card_id = $this->getUniqueValueFromDB("SELECT card_id FROM card WHERE card_type='3' AND card_id='$card_id' AND card_location='hand' AND card_location_arg='$player_id'");
+        $check_card_id = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM card WHERE card_type='3' AND card_id='$card_id' AND card_location='hand' AND card_location_arg='$player_id'"
+        );
         $this->systemAssertTrue("invalid card selected $card_id not in hand", $check_card_id);
         $ben = $this->getCurrentBenefitType();
         if ($ben == 181) {
@@ -3316,107 +3689,120 @@ abstract class PGameXBody extends tapcommon {
         } else {
             $this->playTapestryCard($card_id, $player_id);
         }
-        $this->gamestate->nextState('benefit');
+        $this->gamestate->nextState("benefit");
     }
 
     function removeHeraldTapestryClone($player_id = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $this->systemAssertTrue("player has no HERALDS", $this->hasCiv($player_id, CIV_HERALDS));
         $cards = $this->getCollectionFromDB("SELECT * FROM card WHERE card_type='3' AND card_location = 'civilization_6'");
         foreach ($cards as $tap_card_data) {
-            $card_id = $tap_card_data['card_id'];
-            $this->effect_discardCard($card_id, $player_id, 'limbo');
+            $card_id = $tap_card_data["card_id"];
+            $this->effect_discardCard($card_id, $player_id, "limbo");
         }
     }
 
     function copy_card($card_id) {
         $player_id = $this->getActivePlayerId();
         $this->clearCurrentBenefit(112); // espionage
-        $tap_card_data = $this->getObjectFromDB("SELECT * FROM card WHERE card_id='$card_id' AND card_type='3' AND card_location LIKE 'era%'");
+        $tap_card_data = $this->getObjectFromDB(
+            "SELECT * FROM card WHERE card_id='$card_id' AND card_type='3' AND card_location LIKE 'era%'"
+        );
         $this->systemAssertTrue("invalid card selected $card_id not in era", $tap_card_data != null);
-        $tap_type = $tap_card_data['card_type_arg'];
-        $location = $tap_card_data['card_location'];
-        $this->userAssertTrue("Cannot select covered up tapestry card to copy", $location != 'era_6');
+        $tap_type = $tap_card_data["card_type_arg"];
+        $location = $tap_card_data["card_location"];
+        $this->userAssertTrue("Cannot select covered up tapestry card to copy", $location != "era_6");
         if ($tap_type == TAP_ESPIONAGE) {
             $all_taps = $this->getCollectionFromDB("SELECT * FROM card WHERE card_type='3' AND card_location LIKE 'era%'");
             if (count($all_taps) == 1) {
                 // no other targets, nothing to copy
-                $this->notifyWithName('message', clienttranslate('ESPIONAGE has not valid targets, no copy is made'));
-                $this->gamestate->nextState('benefit');
+                $this->notifyWithName("message", clienttranslate("ESPIONAGE has not valid targets, no copy is made"));
+                $this->gamestate->nextState("benefit");
                 return;
             }
-            $this->userAssertTrue(totranslate('Cannot copy itself'));
+            $this->userAssertTrue(totranslate("Cannot copy itself"));
             return;
         }
         $espionage = $this->isTapestryActive($player_id, TAP_ESPIONAGE, false);
-        if (!$espionage)
+        if (!$espionage) {
             $espionage = $this->getCardInfoSearch(CARD_TAPESTRY, TAP_ESPIONAGE, "era%");
-        $this->systemAssertTrue('cannot find ESPIONAGE', $espionage);
-        $eid = $espionage['card_id'];
-        $loc = $espionage['card_location'];
-        //$this->debugConsole("$loc", $espionage);
-        if ($loc == 'civilization_6') { // on heralds
-            $this->removeHeraldTapestryClone($player_id);
-            $clone_id = $this->addTapestryClone($player_id, 'civilization_6', $tap_type, 'clone');
-        } else {
-            $clone_id = $this->addTapestryClone($player_id, "tapestry_$eid", $tap_type, 'clone');
         }
-        $args = $this->notifArgsAddCardInfo($clone_id, ['espionage' => $espionage]);
+        $this->systemAssertTrue("cannot find ESPIONAGE", $espionage);
+        $eid = $espionage["card_id"];
+        $loc = $espionage["card_location"];
+        //$this->debugConsole("$loc", $espionage);
+        if ($loc == "civilization_6") {
+            // on heralds
+            $this->removeHeraldTapestryClone($player_id);
+            $clone_id = $this->addTapestryClone($player_id, "civilization_6", $tap_type, "clone");
+        } else {
+            $clone_id = $this->addTapestryClone($player_id, "tapestry_$eid", $tap_type, "clone");
+        }
+        $args = $this->notifArgsAddCardInfo($clone_id, ["espionage" => $espionage]);
         $this->notifyWithName("tapestrycard", clienttranslate('${player_name} uses ESPIONAGE to copy ${card_name}'), $args);
-        $card_effect = array_get($this->tapestry_card_data[$tap_type], 'benefit', null);
+        $card_effect = array_get($this->tapestry_card_data[$tap_type], "benefit", null);
         if ($card_effect) {
             $this->queueBenefitInterrupt($card_effect, $player_id, reason_tapestry($tap_type));
         }
-        $this->gamestate->nextState('benefit');
+        $this->gamestate->nextState("benefit");
     }
 
-    function tapestryChoice($card_id) { // Selected a tapestry card for herald power.
+    function tapestryChoice($card_id) {
+        // Selected a tapestry card for herald power.
         $ben = $this->getCurrentBenefitType();
-        if ($ben == 112) { // espionage
+        if ($ben == 112) {
+            // espionage
             $this->copy_card($card_id);
             return;
         }
         // HERALD ABILITY
-        $this->checkAction('tapestryChoice');
-        $benefit_data = $this->getCurrentBenefit(CIV_HERALDS, 'civ');
+        $this->checkAction("tapestryChoice");
+        $benefit_data = $this->getCurrentBenefit(CIV_HERALDS, "civ");
         $this->systemAssertTrue("cannot find HERALDS", $benefit_data);
         $this->benefitCashed($benefit_data); // the civ benefit.
         $player_id = $this->getActivePlayerId();
         // VALIDITY CHECKS
         // 1. Check player owns HERALDS and has available tokens.
-        $herald_token = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND (card_location LIKE 'civ_6_%') AND card_location_arg='$player_id' LIMIT 1");
-        $this->systemAssertTrue('Herald tokens not available', $herald_token);
+        $herald_token = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM structure WHERE card_type='7' AND (card_location LIKE 'civ_6_%') AND card_location_arg='$player_id' LIMIT 1"
+        );
+        $this->systemAssertTrue("Herald tokens not available", $herald_token);
         // 2. Check era card
-        $card_data = $this->getObjectFromDB("SELECT * FROM card WHERE card_type='3' AND card_id='$card_id' AND (card_location LIKE 'era%')");
-        $this->systemAssertTrue('Not an era card', $card_data);
+        $card_data = $this->getObjectFromDB(
+            "SELECT * FROM card WHERE card_type='3' AND card_id='$card_id' AND (card_location LIKE 'era%')"
+        );
+        $this->systemAssertTrue("Not an era card", $card_data);
         // 3. Check no existing token on card
         $tapestry_id = "tapestry_$card_id";
-        $existing_token = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND (card_location = '$tapestry_id')");
-        $this->userAssertTrue(totranslate('You cannot place a second HERALD token on a card'), $existing_token == null);
+        $existing_token = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM structure WHERE card_type='7' AND (card_location = '$tapestry_id')"
+        );
+        $this->userAssertTrue(totranslate("You cannot place a second HERALD token on a card"), $existing_token == null);
         // 4. Check WHEN PLAYED card
-        $tap_type = $card_data['card_type_arg'];
+        $tap_type = $card_data["card_type_arg"];
         $card_data = $this->tapestry_card_data[$tap_type];
-        if ($card_data['type'] != "now") {
-            throw new BgaUserException($this->_('Ability can only be used on WHEN PLAYED cards'));
+        if ($card_data["type"] != "now") {
+            throw new BgaUserException($this->_("Ability can only be used on WHEN PLAYED cards"));
         } // Check a WHEN PLAYED
         // PROCESS ACTION
         $this->DbQuery("UPDATE structure SET card_location='$tapestry_id' WHERE card_id='$herald_token'");
-        $this->notifyMoveStructure('', $herald_token, [], $player_id);
+        $this->notifyMoveStructure("", $herald_token, [], $player_id);
         // create clone and put on herald
         $clone_id = $this->addTapestryClone($player_id, "civilization_6", $tap_type);
-        $args = $this->notifArgsAddCardInfo($clone_id, ['espionage' => true, 'card_id' => $clone_id]);
+        $args = $this->notifArgsAddCardInfo($clone_id, ["espionage" => true, "card_id" => $clone_id]);
         $this->notifyWithName("tapestrycard", clienttranslate('${player_name} places a HERALD token on ${card_name}'), $args);
         // APPLY BENEFITS
-        $card_effect = array_get($this->tapestry_card_data[$tap_type], 'benefit', null);
+        $card_effect = array_get($this->tapestry_card_data[$tap_type], "benefit", null);
         if ($card_effect) {
             $this->queueBenefitInterrupt($card_effect, $player_id, reason_tapestry($tap_type));
         }
-        $this->gamestate->nextState('benefit');
+        $this->gamestate->nextState("benefit");
     }
 
     function takeIncome() {
-        $this->checkAction('takeIncome');
+        $this->checkAction("takeIncome");
         $this->takeIncomeAuto(false);
     }
 
@@ -3427,22 +3813,25 @@ abstract class PGameXBody extends tapcommon {
         if ($auto) {
             $notif = clienttranslate('${player_name} takes an income turn (auto-trigger)');
         }
-        $this->notifyWithName("takeIncome", '');
-        $this->notifyWithName('message_info', $notif);
+        $this->notifyWithName("takeIncome", "");
+        $this->notifyWithName("message_info", $notif);
 
         $this->setIncomeTurnPhase(INCOME_CIV, clienttranslate('${player_name} takes income turn ${turn_number}'), $player_id);
-        $this->setGameStateValue('income_turn', 1);
+        $this->setGameStateValue("income_turn", 1);
         $this->queueIncomeTurn();
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function queueIncomeTurn() {
         $player_id = $this->getActivePlayerId();
         $income_turn_count = $this->getCurrentEra($player_id);
         $this->queueEraCivAbilities();
-        $reason = reason('str', clienttranslate('income'));
+        $reason = reason("str", clienttranslate("income"));
         if ($income_turn_count >= 2 && $income_turn_count <= 4) {
             $this->queueBenefitNormal(BE_PLAY_TAPESTY_INCOME, $player_id, $reason);
+            if ($this->hasCiv($player_id, CIV_MYSTICS) && $this->isAdjustments8()) {
+                $this->queueBenefitNormal(BE_MYSTIC_TAP, $player_id, reason_civ(CIV_MYSTICS));
+            }
         }
         if ($income_turn_count >= 2) {
             $this->queueBenefitNormal(BE_UPGRADE_TECH_INCOME, $player_id, $reason);
@@ -3450,10 +3839,10 @@ abstract class PGameXBody extends tapcommon {
         }
         if ($income_turn_count >= 2 && $income_turn_count < 5) {
             // Resource Income / Cards Income - choice which is first - also acts as Undo prompt
-            $this->queueBenefitNormal(['choice' => [16, 129]], $player_id, $reason);
-        } else if ($income_turn_count == 1) {
+            $this->queueBenefitNormal(["choice" => [16, 129]], $player_id, $reason);
+        } elseif ($income_turn_count == 1) {
             $this->queueBenefitNormal([16, 129], $player_id, $reason);
-        } else if ($income_turn_count == 5) {
+        } elseif ($income_turn_count == 5) {
             $this->queueBenefitNormal(BE_CONFIRM, $player_id, $reason); // confirm
         }
         if ($income_turn_count == 1) {
@@ -3462,93 +3851,101 @@ abstract class PGameXBody extends tapcommon {
                 $this->queueBenefitNormal(64, $player_id, reason_civ(CIV_HERALDS));
             }
             // civ adjustments can process now
-            $civ_id = $this->getUniqueValueFromDB("SELECT card_type_arg FROM card WHERE card_type='5'  AND card_location='hand' AND card_location_arg='$player_id' LIMIT 1");
+            $civ_id = $this->getUniqueValueFromDB(
+                "SELECT card_type_arg FROM card WHERE card_type='5'  AND card_location='hand' AND card_location_arg='$player_id' LIMIT 1"
+            );
             $this->civAdjustments($player_id, $civ_id);
         }
         $this->queueBenefitNormal(602, $player_id, $reason); // end of income
     }
 
-    function choose_resources($resources, $type) { // $type can be used for guilds...
-        $this->checkAction('choose_resources');
+    function choose_resources($resources, $type) {
+        // $type can be used for guilds...
+        $this->checkAction("choose_resources");
         $player_id = $this->getActivePlayerId();
         $benefit_data = $this->getCurrentBenefit();
-        $this->benefitCashed($benefit_data['benefit_id']);
-        $data = $benefit_data['benefit_data'];
-        switch ($benefit_data['benefit_type']) {
+        $this->benefitCashed($benefit_data["benefit_id"]);
+        $data = $benefit_data["benefit_data"];
+        switch ($benefit_data["benefit_type"]) {
             case BE_ANYRES:
-                if (sizeOf($resources) != $benefit_data['benefit_quantity']) {
-                    throw new feException('Invalid resource quantity');
+                if (sizeOf($resources) != $benefit_data["benefit_quantity"]) {
+                    throw new feException("Invalid resource quantity");
                 }
-                if ($data == reason_tapestry(TAP_MERCANTILISM)) { // MERCANTILISM
+                if ($data == reason_tapestry(TAP_MERCANTILISM)) {
+                    // MERCANTILISM
                     foreach ($resources as $rtype) {
-                        if (!$rtype)
+                        if (!$rtype) {
                             continue;
-                        if ($rtype == RES_FOOD)
+                        }
+                        if ($rtype == RES_FOOD) {
                             continue;
+                        }
                         $count = 1;
                         $this->awardBaseResource($player_id, RES_FOOD, -$count, $data);
                         $this->awardBaseResource($player_id, $rtype, +$count, $data);
                         $this->awardVP($player_id, 2 * $count, $data);
                     }
-                } else
+                } else {
                     foreach ($resources as $rtype) {
                         $this->awardBaseResource($player_id, $rtype, +1, $data);
-                    }
+                    };
+                }
                 break;
-            case '114':
+            case "114":
                 $vp = 5 * sizeOf($resources);
                 $reason = reason_tapestry(21); // GUILDS
                 $increase = $type == 1 ? -1 : 1;
                 $curScore = $this->dbGetScore($player_id);
                 $maxres = $this->getResourceCountAll($player_id);
                 if ($maxres == 0 && $curScore < 5) {
-                    $this->notifyWithName('message_error', clienttranslate('${player_name} is too poor for the GUILDS, benefit is void'));
+                    $this->notifyWithName("message_error", clienttranslate('${player_name} is too poor for the GUILDS, benefit is void'));
                     break;
                 }
                 foreach ($resources as $rtype) {
                     $this->awardBaseResource($player_id, $rtype, $increase, $reason);
                 }
-                if ($type == 1) { // Gain VP.
+                if ($type == 1) {
+                    // Gain VP.
                     $this->awardVP($player_id, $vp, $reason);
-                } else { // Gain res
+                } else {
+                    // Gain res
                     if ($curScore < $vp) {
-                        throw new BgaUserException($this->_('You do not have that many victory points'));
+                        throw new BgaUserException($this->_("You do not have that many victory points"));
                     } else {
                         $this->awardVP($player_id, -$vp, $reason);
                     }
                 }
                 break;
             default:
-                throw new feException('Invalid benefit type');
+                throw new feException("Invalid benefit type");
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
-
 
     function matFindBenefit($options) {
         foreach ($this->benefit_types as $ben => $info) {
             $allmatched = true;
             foreach ($options as $key => $value) {
                 switch ($key) {
-                    case 'adv':
+                    case "adv":
                         $current = array_get($info, $key, 1);
                         break;
                     default:
                         $current = array_get($info, $key, null);
                         break;
                 }
-                if ($current == $value)
+                if ($current == $value) {
                     continue;
+                }
                 $allmatched = false;
                 break;
             }
-            if ($allmatched)
+            if ($allmatched) {
                 return $ben;
+            }
         }
         $this->systemAssertTrue("No matching benefit for " . toJson($options));
     }
-
-
 
     function checkTrack($track) {
         $this->systemAssertTrue("invalid track $track", $track > 0 && $track <= 4);
@@ -3565,68 +3962,80 @@ abstract class PGameXBody extends tapcommon {
 
     function action_debug(array $args) {
         // $this->checkAction('acdebug'); unchecked
-        $this->systemAssertTrue('Unathorized dev action', $this->isTestEnv());
+        $this->systemAssertTrue("Unathorized dev action", $this->isTestEnv());
 
-        if (count($args) == 0) return;
-        $civ = array_get($args, 'civ', 0);
+        if (count($args) == 0) {
+            return;
+        }
+        $civ = array_get($args, "civ", 0);
         if ($civ) {
-            $this->notifyWithName('message', 'debug action gain civ');
+            $this->notifyWithName("message", "debug action gain civ");
             $this->debug_civ($civ);
         } else {
-            $this->systemAssertTrue('Unsupported dev action');
+            $this->systemAssertTrue("Unsupported dev action");
         }
     }
 
     function action_selectCube($cube_id) {
-        $this->checkAction('select_cube');
+        $this->checkAction("select_cube");
         $player_id = $this->getActivePlayerId();
         $current_benefit = $this->getCurrentBenefit();
         $cube = $cube_data = $this->getStructureInfoById($cube_id);
         $this->systemAssertTrue("invalid cube $cube_id", $cube_data);
         // Get location
-        $location = $cube_data['card_location'];
-        $owner = $cube_data['card_location_arg'];
+        $location = $cube_data["card_location"];
+        $owner = $cube_data["card_location_arg"];
         $coords = explode("_", $location);
         $track = $coords[2];
         $spot = $coords[3];
-        $ben = (int) $current_benefit['benefit_type'];
-        $selectrule = $this->getRulesBenefit($ben, 's');
-        $trackrule = $this->getRulesBenefit($ben, 't');
+        $ben = (int) $current_benefit["benefit_type"];
+        $selectrule = $this->getRulesBenefit($ben, "s");
+        $trackrule = $this->getRulesBenefit($ben, "t");
         if ($selectrule == null && $trackrule) {
             // we play this to disambiguate track selector
             //$btext = (json_encode($current_benefit, JSON_PRETTY_PRINT));
             //$this->debugConsole("track choice $btext $player_id => $track $spot");
-            $this->systemAssertTrue("unknown benefit " . $current_benefit['benefit_category'], $current_benefit['benefit_category'] == 'standard');
-            $this->setGameStateValue('cube_choice', $spot);
-            $complete = $this->awardBenefits($current_benefit['benefit_player_id'], $current_benefit['benefit_type'], $current_benefit['benefit_quantity'], $current_benefit['benefit_data']);
-            if (!$complete)
+            $this->systemAssertTrue(
+                "unknown benefit " . $current_benefit["benefit_category"],
+                $current_benefit["benefit_category"] == "standard"
+            );
+            $this->setGameStateValue("cube_choice", $spot);
+            $complete = $this->awardBenefits(
+                $current_benefit["benefit_player_id"],
+                $current_benefit["benefit_type"],
+                $current_benefit["benefit_quantity"],
+                $current_benefit["benefit_data"]
+            );
+            if (!$complete) {
                 return;
-            $this->benefitCashed($current_benefit['benefit_id']);
-            $this->gamestate->nextState('next');
+            }
+            $this->benefitCashed($current_benefit["benefit_id"]);
+            $this->gamestate->nextState("next");
             return;
         }
         if ($ben == 122) {
-            $owner = $cube_data['card_location_arg'];
+            $owner = $cube_data["card_location_arg"];
             $this->formAlliance($owner);
             return;
         }
         $this->systemAssertTrue("Unexpected track choice action for $ben", $selectrule);
-        $this->benefitCashed($current_benefit['benefit_id']);
-        $reason = $current_benefit['benefit_data'];
+        $this->benefitCashed($current_benefit["benefit_id"]);
+        $reason = $current_benefit["benefit_data"];
         $this->interruptBenefit();
-        $flags = $this->getRulesBenefit($ben, 'sflags');
+        $flags = $this->getRulesBenefit($ben, "sflags");
         if (!($flags & FLAG_VIRTUAL_ALLOWED)) {
-            $this->userAssertTrue(totranslate('Cannot select virtual cube'), $cube['card_type_arg'] != CUBE_AI);
+            $this->userAssertTrue(totranslate("Cannot select virtual cube"), $cube["card_type_arg"] != CUBE_AI);
         }
         switch ($ben) {
             case 106: // DARK AGES
                 // WHEN PLAYED: Regress once on 3 difference advancement tracks if possible,
                 // then advance three times on the remaining track. Do not gain any benefits or bonuses.
-                $this->userAssertTrue(totranslate('Can only select your own cube'), $owner == $player_id);
+                $this->userAssertTrue(totranslate("Can only select your own cube"), $owner == $player_id);
                 $reason = reason_tapestry(TAP_DARK_AGES);
                 for ($x = 1; $x <= 4; $x++) {
-                    if ($track == $x)
+                    if ($track == $x) {
                         continue;
+                    }
                     $this->queueBenefitNormal(130 + $x, $player_id, $reason); // regress without benefit
                 }
                 // Advance the selected cube..
@@ -3637,7 +4046,7 @@ abstract class PGameXBody extends tapcommon {
                     }
                     break;
                 }
-                $this->setGameStateValue('cube_choice', -1);
+                $this->setGameStateValue("cube_choice", -1);
                 break;
             case 118: // MARRIAGE OF STATE
                 // THIS ERA: Choose a track and an opponent.
@@ -3645,45 +4054,56 @@ abstract class PGameXBody extends tapcommon {
                 $track = explode("_", $location)[2];
                 $data = $owner . "_" . $track;
                 $tap_data = $this->isTapestryActive($player_id, TAP_MARRIAGE_OF_STATE);
-                $this->systemAssertTrue('Player does not have marriage of state', $tap_data);
-                $this->userAssertTrue(totranslate('Cannot select your own cube'), $owner != $player_id);
-                $card_id = $tap_data['card_id'];
+                $this->systemAssertTrue("Player does not have marriage of state", $tap_data);
+                $this->userAssertTrue(totranslate("Cannot select your own cube"), $owner != $player_id);
+                $card_id = $tap_data["card_id"];
                 $this->DbQuery("UPDATE card SET card_location_arg2='$data' WHERE card_id='$card_id'");
                 $args = $this->notifArgsAddCardInfo($card_id);
                 $args = $this->notifArgsAddTrackSpot($track, null, $args);
                 $era = $this->getCurrentEra($player_id);
                 $args += [
-                    'opp_name' => $this->getPlayerNameById($owner),
-                    'destination' => "tapestry_slot_{$player_id}_$era"
+                    "opp_name" => $this->getPlayerNameById($owner),
+                    "destination" => "tapestry_slot_{$player_id}_$era",
                 ];
-                $this->notifyWithName("tapestrycard", clienttranslate('${player_name} selects to benefit from ${opp_name} advancing their ${track_name} (${card_name})'), $args, $player_id);
+                $this->notifyWithName(
+                    "tapestrycard",
+                    clienttranslate('${player_name} selects to benefit from ${opp_name} advancing their ${track_name} (${card_name})'),
+                    $args,
+                    $player_id
+                );
                 break;
             case 124: //  TRADE ECONOMY:
                 //  Choose the current position of an opponent on any advancement track.
                 //  You gain the corresponding benefit.
                 //  If there is a bonus, that opponent gains it for free.
                 // Check cube belongs to opponent
-                $owner = $cube_data['card_location_arg'];
-                $this->userAssertTrue(totranslate('Cannot select your own cube'), $owner != $player_id);
-                $this->userAssertTrue(totranslate('Cannot repeat virtual AI Singularity'), $cube_data['card_type_arg'] != CUBE_AI);
+                $owner = $cube_data["card_location_arg"];
+                $this->userAssertTrue(totranslate("Cannot select your own cube"), $owner != $player_id);
+                $this->userAssertTrue(totranslate("Cannot repeat virtual AI Singularity"), $cube_data["card_type_arg"] != CUBE_AI);
                 $reason = reason_tapestry(TAP_TRADE_ECONOMY);
-                $this->notif()->withPlayer2($owner)->withTrackSpot($track, $spot)->withReason($reason)-> //
-                    notifyAll(clienttranslate('${player_name} selects ${player_name2} on ${spot_name} ${reason}'));
+                $this->notif()
+                    ->withPlayer2($owner)
+                    ->withTrackSpot($track, $spot)
+                    ->withReason($reason) //
+                    ->notifyAll(clienttranslate('${player_name} selects ${player_name2} on ${spot_name} ${reason}'));
                 // You gain the benefit
                 $this->assertCanUseBenefitOnTrackSpot($player_id, $track, $spot);
                 $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENFIT, $reason);
                 // If bonus, opponent gets for free
-                if (array_key_exists('option', $this->tech_track_data[$track][$spot])) {
+                if (array_key_exists("option", $this->tech_track_data[$track][$spot])) {
                     $this->processSpotBenefits($track, $spot, $owner, FLAG_FREE_BONUS, $reason);
                 }
                 break;
             case 190:
                 // repeat neighbour's benefit
-                $owner = $cube_data['card_location_arg'];
+                $owner = $cube_data["card_location_arg"];
                 $neight = $this->getPlayerNeighbours($player_id, false);
-                $this->userAssertTrue(totranslate('Cannot select your own cube'), $owner != $player_id);
-                $this->userAssertTrue(totranslate('Can only select a neighbour'), in_array($owner, $neight));
-                $this->notif()->withPlayer2($owner)->withTrackSpot($track, $spot)->withReason($reason) /* */
+                $this->userAssertTrue(totranslate("Cannot select your own cube"), $owner != $player_id);
+                $this->userAssertTrue(totranslate("Can only select a neighbour"), in_array($owner, $neight));
+                $this->notif()
+                    ->withPlayer2($owner)
+                    ->withTrackSpot($track, $spot)
+                    ->withReason($reason) /* */
                     ->notifyAll(clienttranslate('${player_name} selects ${player_name2} on ${spot_name} ${reason}'));
                 // You gain the benefit
                 $this->assertCanUseBenefitOnTrackSpot($player_id, $track, $spot);
@@ -3693,26 +4113,29 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case BE_TINKERERS_1: // 195
                 //  Gain resources equal to the cost of advancing into its current position
-                $this->userAssertTrue(totranslate('Can only select your own cube'), $owner == $player_id);
-                $this->notif()->withTrackSpot($track, $spot)->withReason($reason) /* */
+                $this->userAssertTrue(totranslate("Can only select your own cube"), $owner == $player_id);
+                $this->notif()
+                    ->withTrackSpot($track, $spot)
+                    ->withReason($reason) /* */
                     ->notifyAll(clienttranslate('${player_name} selects ${spot_name} ${reason}'));
                 // You gain the benefit
-                $cost = $this->tech_track_data[$track][$spot]['cost'];
-                $this->queueBenefitNormal($cost, $player_id, reason('be', $ben));
+                $cost = $this->tech_track_data[$track][$spot]["cost"];
+                $this->queueBenefitNormal($cost, $player_id, reason("be", $ben));
                 break;
             case 108: // DICTATORSHIP:  Advance on any track and gain the benefit (you may pay to gain the bonus). Opponents may not advance on that track until after your next turn.
                 $this->trackMovementProper($track, $spot, ACTION_ADVANCE, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, true, $player_id);
                 $turn = $this->getPlayerTurn($player_id);
                 $data = "dic_{$turn}_{$track}";
                 $this->DbQuery("UPDATE structure SET card_location_arg2='$data' WHERE card_id='$cube_id'");
-                $this->notifyMoveStructure('', $cube_id, [], $player_id);
+                $this->notifyMoveStructure("", $cube_id, [], $player_id);
                 break;
             case 115: // OIL MAGNATE
                 $this->queueBenefitNormal(BE_ADVANCE_EXPLORATION_BENEFIT_OPT + $track - 1, $player_id, reason_tapestry(28));
                 $neighbours = $this->getPlayerNeighbours($player_id, false);
                 foreach ($neighbours as $neighbour) {
-                    if ($this->isRealPlayer($neighbour))
+                    if ($this->isRealPlayer($neighbour)) {
                         $this->queueBenefitNormal(BE_ADVANCE_EXPLORATION_NOBENEFIT_OPT + $track - 1, $neighbour, reason_tapestry(28));
+                    }
                 }
                 break;
             case 120: // SOCIALISM
@@ -3740,29 +4163,32 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case BE_TINKERERS_4:
                 //Advance to the next bonus on any track and gain that bonus for free. Do not gain the benefit or any landmarks you pass
-                $this->userAssertTrue(totranslate('Cannot select AI Singularity'), $cube_data['card_type_arg'] != CUBE_AI);
+                $this->userAssertTrue(totranslate("Cannot select AI Singularity"), $cube_data["card_type_arg"] != CUBE_AI);
                 $cubesmap = $this->getClosestBonus($player_id, $track, $cube_id);
-                $this->userAssertTrue(totranslate('Cannot determine bonus for this selection'), (count($cubesmap) == 1));
-                $this->userAssertTrue(totranslate('Cannot determine bonus for this selection'), getPart(array_key_first($cubesmap), 1) == $cube_id);
+                $this->userAssertTrue(totranslate("Cannot determine bonus for this selection"), count($cubesmap) == 1);
+                $this->userAssertTrue(
+                    totranslate("Cannot determine bonus for this selection"),
+                    getPart(array_key_first($cubesmap), 1) == $cube_id
+                );
                 $change = getPart($cubesmap["cube_$cube_id"], 1) - $spot;
                 $this->trackMovementProper($track, $spot, $change, FLAG_NO_BENEFIT | FLAG_FREE_BONUS | FLAG_JUMP, true, $player_id);
                 break;
             case 62: // repeater.
                 // Make sure player has token on that spot then repeat the bonus!
-                $this->userAssertTrue(totranslate('Cannot repeat virtual AI Singularity'), $cube['card_type_arg'] != CUBE_AI);
+                $this->userAssertTrue(totranslate("Cannot repeat virtual AI Singularity"), $cube["card_type_arg"] != CUBE_AI);
                 $this->assertCanUseBenefitOnTrackSpot($player_id, $track, $spot);
-                $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, $current_benefit['benefit_data']);
+                $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, $current_benefit["benefit_data"]);
                 break;
             default:
                 throw new feException("Invalid benefit type for select_cube $ben");
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function getTrackPositions($cubes) {
         $spots = [];
         foreach ($cubes as $cube) {
-            $loc = getPart($cube['card_location'], 3);
+            $loc = getPart($cube["card_location"], 3);
             $spots[] = $loc;
         }
         sort($spots);
@@ -3777,15 +4203,17 @@ abstract class PGameXBody extends tapcommon {
         $stay = ($aflags & FLAG_STAY) != 0;
         $self = is_flag_set(FLAG_SELF, $sflags);
         for ($t = 1; $t <= 4; $t++) {
-            if ($track != 0 && $track != $t)
+            if ($track != 0 && $track != $t) {
                 continue;
+            }
             $curr_spots = $this->getTrackPositions($this->getCubeInfoWithFlags($player_id, FLAG_SELF, $t));
             $other_cubes = $this->getCubeInfoWithFlags($player_id, $sflags, $t);
-            if (count($other_cubes) == 0)
+            if (count($other_cubes) == 0) {
                 continue;
+            }
             $other_cubes_pos = [];
             foreach ($other_cubes as $cube) {
-                $loc = getPart($cube['card_location'], 3);
+                $loc = getPart($cube["card_location"], 3);
                 $other_cubes_pos[$loc] = $cube;
             }
             if (is_flag_set($aflags, FLAG_POSCLOSEST)) {
@@ -3799,7 +4227,7 @@ abstract class PGameXBody extends tapcommon {
                             if ($best_regress == -1 || $best_regress < $spot) {
                                 $best_regress = $spot;
                             }
-                        } else if ($change > 0) {
+                        } elseif ($change > 0) {
                             if ($best_advance == -1 || $best_advance > $spot) {
                                 $best_advance = $spot;
                             }
@@ -3817,13 +4245,14 @@ abstract class PGameXBody extends tapcommon {
                         $res[] = $other_cubes_pos[$best_stay];
                     }
                 }
-            } else if (is_flag_set($aflags, FLAG_POSEXACT)) {
+            } elseif (is_flag_set($aflags, FLAG_POSEXACT)) {
                 foreach ($curr_spots as $start) {
                     $best_advance = $start + $adv;
                     if ($self) {
-                        if ($best_advance >= 0 && $best_advance <= 12)
+                        if ($best_advance >= 0 && $best_advance <= 12) {
                             $res[] = $other_cubes_pos[$start];
-                    } else if (array_key_exists($best_advance, $other_cubes_pos)) {
+                        }
+                    } elseif (array_key_exists($best_advance, $other_cubes_pos)) {
                         $res[] = $other_cubes_pos[$best_advance];
                     }
                 }
@@ -3836,19 +4265,21 @@ abstract class PGameXBody extends tapcommon {
 
     function checkClosestOpponent($player_id, $track, $spot, $flags = FLAG_POSALL) {
         $mask = $this->getTrackLocationLike($track);
-        $cubes = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_type='7' AND card_type_arg = 0  AND card_location LIKE '$mask'");
-        $opp_spots = array();
-        $my_spots = array();
+        $cubes = $this->getCollectionFromDB(
+            "SELECT * FROM structure WHERE card_type='7' AND card_type_arg = 0  AND card_location LIKE '$mask'"
+        );
+        $opp_spots = [];
+        $my_spots = [];
         foreach ($cubes as $cube_id => $cube) {
-            $loc = explode("_", $cube['card_location'])[3];
-            if ($cube['card_location_arg'] == $player_id) {
+            $loc = explode("_", $cube["card_location"])[3];
+            if ($cube["card_location_arg"] == $player_id) {
                 $my_spots[] = $loc;
             } else {
                 $opp_spots[] = $loc;
             }
         }
-        $this->userAssertTrue(totranslate('You must select the cube of nearest opponent'), in_array($spot, $opp_spots));
-        $this->userAssertTrue(totranslate('You do not have cubes on this track'), count($my_spots) > 0);
+        $this->userAssertTrue(totranslate("You must select the cube of nearest opponent"), in_array($spot, $opp_spots));
+        $this->userAssertTrue(totranslate("You do not have cubes on this track"), count($my_spots) > 0);
         $flags = (int) $flags;
         $advance = ($flags & FLAG_ADVANCE) != 0;
         $regress = ($flags & FLAG_REGRESS) != 0;
@@ -3858,203 +4289,247 @@ abstract class PGameXBody extends tapcommon {
         foreach ($my_spots as $start) {
             $change = $spot - $start;
             $invalid = false;
-            if ($change > 0 && $advance) { // Check not an opponent spot in between.
+            if ($change > 0 && $advance) {
+                // Check not an opponent spot in between.
                 for ($a = 1; $a < $change; $a++) {
                     if (in_array($start + $a, $opp_spots) || in_array($start + $a, $my_spots)) {
                         $invalid = true;
                         break;
                     }
                 }
-            } else if ($change < 0 && $regress) {
+            } elseif ($change < 0 && $regress) {
                 for ($a = $change; $a >= 1; $a--) {
                     if (in_array($start + $a, $opp_spots) || in_array($start + $a, $my_spots)) {
                         $invalid = true;
                         break;
                     }
                 }
-            } else if ($change == 0 && !$stay) {
+            } elseif ($change == 0 && !$stay) {
                 $invalid = true;
             } else {
                 $invalid = true;
             }
-            if ($invalid == false)
+            if ($invalid == false) {
                 break;
+            }
         }
-        $this->userAssertTrue(totranslate('You must select the cube of nearest opponent'), !$invalid);
+        $this->userAssertTrue(totranslate("You must select the cube of nearest opponent"), !$invalid);
         return $start;
     }
 
     function action_selectTrackSpot($track, $spot, $cube_id = 0) {
-        $this->checkAction('selectTrackSpot');
+        $this->checkAction("selectTrackSpot");
         $player_id = $this->getActivePlayerId();
         // VALIDITY CHECKS
         // This could be called for 3 different reasons.. need to check current benefit.getUniqueValueFromDB
         $current_benefit = $this->getCurrentBenefit();
-        $ben = $current_benefit['benefit_type'];
+        $ben = $current_benefit["benefit_type"];
         $this->checkTrack($track);
-        $selectrule = $this->getRulesBenefit($ben, 's');
-        $trackrule = $this->getRulesBenefit($ben, 't');
+        $selectrule = $this->getRulesBenefit($ben, "s");
+        $trackrule = $this->getRulesBenefit($ben, "t");
         if ($selectrule == null && $trackrule) {
             // we play this to disambiguate track selector
             //$btext = (json_encode($current_benefit, JSON_PRETTY_PRINT));
             //$this->debugConsole("track choice $btext $player_id => $track $spot");
-            if ($spot != 13)
+            if ($spot != 13) {
                 $this->checkSpot($spot);
-            $this->systemAssertTrue("unknown benefit " . $current_benefit['benefit_category'], $current_benefit['benefit_category'] == 'standard');
-            $this->setGameStateValue('cube_choice', $spot);
-            $complete = $this->awardBenefits($current_benefit['benefit_player_id'], $current_benefit['benefit_type'], $current_benefit['benefit_quantity'], $current_benefit['benefit_data']);
-            if (!$complete)
+            }
+            $this->systemAssertTrue(
+                "unknown benefit " . $current_benefit["benefit_category"],
+                $current_benefit["benefit_category"] == "standard"
+            );
+            $this->setGameStateValue("cube_choice", $spot);
+            $complete = $this->awardBenefits(
+                $current_benefit["benefit_player_id"],
+                $current_benefit["benefit_type"],
+                $current_benefit["benefit_quantity"],
+                $current_benefit["benefit_data"]
+            );
+            if (!$complete) {
                 return;
-            $this->benefitCashed($current_benefit['benefit_id']);
-            $this->gamestate->nextState('next');
+            }
+            $this->benefitCashed($current_benefit["benefit_id"]);
+            $this->gamestate->nextState("next");
             return;
         }
         $this->checkSpot($spot);
         $this->systemAssertTrue("Unexpected track choice action for $ben", $selectrule);
-        if ($selectrule == 'o') {
+        if ($selectrule == "o") {
             // we target opponents not cubes per ce
-            $this->userAssertTrue(totranslate('You must select the cube not the spot'));
+            $this->userAssertTrue(totranslate("You must select the cube not the spot"));
             return;
         }
-        if ($selectrule == 't') {
+        if ($selectrule == "t") {
             // we select the track
-            $this->benefitCashed($current_benefit['benefit_id']);
+            $this->benefitCashed($current_benefit["benefit_id"]);
             if ($ben == 55) {
                 // AI singlularity new track
                 $cubes = $this->dbGetCubesOnTrack($player_id, 4, null, 0);
                 $cube_id = array_key_first($cubes);
                 if (!$cube_id) {
-                    $this->notifyWithName('message_error', clienttranslate('${player_name} does not have cube on technology track'));
+                    $this->notifyWithName("message_error", clienttranslate('${player_name} does not have cube on technology track'));
                 } else {
-                    $track_stub = 'tech_spot_' . $track . '_';
-                    $new_location = $track_stub . '0';
+                    $track_stub = "tech_spot_" . $track . "_";
+                    $new_location = $track_stub . "0";
                     $was = $this->getStructureInfoById($cube_id, false);
-                    $was_at_end = $was['card_location'] == 'tech_spot_4_12';
+                    $was_at_end = $was["card_location"] == "tech_spot_4_12";
                     $this->DbQuery("UPDATE structure SET card_location='$new_location' WHERE card_id='$cube_id'");
-                    $this->notifyMoveStructure(clienttranslate('${player_name} moves their token to the start of the ${track_name} track'), $cube_id, [
-                        'track_name' => $this->tech_track_types[$track]['description']
-                    ], $player_id);
+                    $this->notifyMoveStructure(
+                        clienttranslate('${player_name} moves their token to the start of the ${track_name} track'),
+                        $cube_id,
+                        [
+                            "track_name" => $this->tech_track_types[$track]["description"],
+                        ],
+                        $player_id
+                    );
                     if ($was_at_end) {
-                        $structure_id = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type_arg = 1 AND card_location = 'tech_spot_4_12' AND card_location_arg = '$player_id' LIMIT 1");
+                        $structure_id = $this->getUniqueValueFromDB(
+                            "SELECT card_id FROM structure WHERE card_type_arg = 1 AND card_location = 'tech_spot_4_12' AND card_location_arg = '$player_id' LIMIT 1"
+                        );
                         if (!$structure_id) {
                             // place virtual cube
-                            $structure_id = $this->addCube($player_id, 'tech_spot_4_12', CUBE_AI);
-                            $this->notifyMoveStructure('', $structure_id, [], $player_id);
+                            $structure_id = $this->addCube($player_id, "tech_spot_4_12", CUBE_AI);
+                            $this->notifyMoveStructure("", $structure_id, [], $player_id);
                         }
                     }
                 }
             } else {
                 $this->systemAssertTrue("Unexpected track choice action for $ben", $selectrule);
             }
-            $this->gamestate->nextState('next');
+            $this->gamestate->nextState("next");
             return;
         }
         if ($ben == BE_TINKERERS_4) {
             //Advance to the next bonus on any track and gain that bonus for free. Do not gain the benefit or any landmarks you pass
             if (!$cube_id) {
                 $cubesmap = $this->getClosestBonus($player_id, $track);
-                $this->userAssertTrue(totranslate('Cannot determine bonus for this selection'), (count($cubesmap) > 0));
+                $this->userAssertTrue(totranslate("Cannot determine bonus for this selection"), count($cubesmap) > 0);
                 foreach ($cubesmap as $cube_iname => $pos) {
                     if ($pos == "{$track}_{$spot}") {
                         $cube_id = getPart($cube_iname, 1);
                         break;
                     }
                 }
-                $this->userAssertTrue(totranslate('Cannot determine bonus for this selection'), $cube_id);
+                $this->userAssertTrue(totranslate("Cannot determine bonus for this selection"), $cube_id);
             }
         }
         if (!$cube_id) {
-            $flags = $this->getRulesBenefit($ben, 'sflags');
+            $flags = $this->getRulesBenefit($ben, "sflags");
             $cube = $this->cubeChoiceForTrackBenefitInterractive($track, $spot, $player_id, $flags);
-            $cube_id = $cube['card_id'];
+            $cube_id = $cube["card_id"];
         }
         $this->action_selectCube($cube_id);
     }
 
     function effect_discardCard($card_id, $player_id = null, $location = null, $private = false) {
-        if (is_array($card_id))
+        if (is_array($card_id)) {
             $cards_ids = $card_id;
-        else
+        } else {
             $cards_ids = [$card_id];
+        }
 
         $mystic = false;
         if ($this->isAdjustments8() && $this->hasCiv($player_id, CIV_MYSTICS)) {
             $mystic = true;
         }
 
-        if ($location === null) $location = 'discard';
+        if ($location === null) {
+            $location = "discard";
+        }
         $notif = clienttranslate('${player_name} discards ${card_type_name} ${card_name}');
-        if ($location == 'limbo' || $private) $notif = '';
+        if ($location == "limbo" || $private) {
+            $notif = "";
+        }
         foreach ($cards_ids as $card) {
             $card_info = $this->getCardInfo($card);
-            $card_id = $card_info['card_id'];
-            if ($mystic && $card_info['card_type'] == CARD_TAPESTRY) {
-                $location = 'discard_13';
+            $card_id = $card_info["card_id"];
+            if ($mystic && $card_info["card_type"] == CARD_TAPESTRY) {
+                $location = "discard_13";
             }
             $this->DbQuery("UPDATE card SET card_location='$location',card_location_arg=0,card_location_arg2=0 WHERE card_id='$card_id'");
             $this->notif("discardCard")->withPlayer($player_id)->withCard($card_id)->notifyAll($notif);
         }
         $this->notifyDeckCounters();
-        if ($location !== 'discard') {
+        if ($location !== "discard") {
             $this->notifyDeckCounters($location);
         }
-        if ($private && $location != 'limbo') {
-            $this->notifyWithName('message', clienttranslate('${player_name} discards ${count} cards'), ['count' => count($cards_ids)], $player_id);
+        if ($private && $location != "limbo") {
+            $this->notifyWithName(
+                "message",
+                clienttranslate('${player_name} discards ${count} cards'),
+                ["count" => count($cards_ids)],
+                $player_id
+            );
         }
     }
 
-    function effect_moveCard($card_id, $player_id = null, $location = 'hand', $location_arg = 0, $location_arg2 = null, $message = null) {
-        if (is_array($card_id))
+    function effect_moveCard($card_id, $player_id = null, $location = "hand", $location_arg = 0, $location_arg2 = null, $message = null) {
+        if (is_array($card_id)) {
             $cards_ids = $card_id;
-        else
+        } else {
             $cards_ids = [$card_id];
+        }
         foreach ($cards_ids as $card_id) {
-            if (is_array($card_id))
-                $card_id = $card_id['card_id'];
+            if (is_array($card_id)) {
+                $card_id = $card_id["card_id"];
+            }
             $this->checkNumber($card_id);
             $this->DbQuery("UPDATE card SET card_location='$location',card_location_arg=$location_arg WHERE card_id='$card_id'");
-            if ($location_arg2 !== null)
+            if ($location_arg2 !== null) {
                 $this->DbQuery("UPDATE card SET card_location_arg2=$location_arg2 WHERE card_id='$card_id'");
+            }
             $args = $this->notifArgsAddCardInfo($card_id);
-            if ($location == 'hand' && $player_id != $location_arg)
-                $this->notifyWithName("moveCard", clienttranslate('${player_name} gives ${card_name} to ${player_name2}'), $args, $player_id);
-            else if ($location == 'discard')
+            if ($location == "hand" && $player_id != $location_arg) {
+                $this->notifyWithName(
+                    "moveCard",
+                    clienttranslate('${player_name} gives ${card_name} to ${player_name2}'),
+                    $args,
+                    $player_id
+                );
+            } elseif ($location == "discard") {
                 $this->notifyWithName("discardCard", clienttranslate('${player_name} moves ${card_name}'), $args, $player_id);
-            else {
-                if ($message == null) $message = clienttranslate('${player_name} gains ${card_name}');
+            } else {
+                if ($message == null) {
+                    $message = clienttranslate('${player_name} gains ${card_name}');
+                }
                 $this->notifyWithName("moveCard", $message, $args, $player_id);
             }
         }
         $this->notifyDeckCounters();
     }
 
-    function dbSetCardLocation($card_id, $loc = 'hand', $state = null, $message = '', $player_id = null) {
-        if (!$player_id)
+    function dbSetCardLocation($card_id, $loc = "hand", $state = null, $message = "", $player_id = null) {
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $this->effect_moveCard($card_id, $player_id, $loc, $player_id, $state, $message);
     }
 
-    function dbSetStructureLocation($structure_id, $location, $state = null, $message = '', $player_id = null) {
-        if ($structure_id === null)
+    function dbSetStructureLocation($structure_id, $location, $state = null, $message = "", $player_id = null) {
+        if ($structure_id === null) {
             return;
+        }
         $this->DbQuery("UPDATE structure SET card_location='$location' WHERE card_id='$structure_id'");
-        if ($state !== null)
+        if ($state !== null) {
             $this->DbQuery("UPDATE structure SET card_location_arg2='$state' WHERE card_id='$structure_id'");
-        if (startsWith($location, 'capital_cell')) {
+        }
+        if (startsWith($location, "capital_cell")) {
             //$cell = 'capital_cell_' . $player_id . '_' . $x . '_' . $y;
             $structure_data = $this->structures->getCard($structure_id);
             $player_id = getPart($location, 2);
             $cx = getPart($location, 3);
             $cy = getPart($location, 4);
-            $type = $structure_data['type'] + 1; // 1 is already a dot on the mat, so increase by 1.
+            $type = $structure_data["type"] + 1; // 1 is already a dot on the mat, so increase by 1.
             // NOTE: this won't work for landmarks
-            $this->DbQuery("UPDATE capital SET capital_occupied='$type' WHERE player_id='$player_id' AND capital_x='$cx' AND capital_y='$cy'");
+            $this->DbQuery(
+                "UPDATE capital SET capital_occupied='$type' WHERE player_id='$player_id' AND capital_x='$cx' AND capital_y='$cy'"
+            );
         }
         $this->notifyMoveStructure($message, $structure_id, [], $player_id);
     }
 
     function action_advance($track, $spot, $payment, $choice_order) {
-        $this->checkAction('advance');
+        $this->checkAction("advance");
         $player_id = $this->getActivePlayerId();
         // CHECK TRACK/SPOT
         $cube_spot = $spot - 1;
@@ -4062,10 +4537,10 @@ abstract class PGameXBody extends tapcommon {
         $this->checkSpot($spot - 1);
         // stat
         $era = $this->getCurrentEra($player_id);
-        $this->incStat(1, 'turns_era_' . $era, $player_id);
+        $this->incStat(1, "turns_era_" . $era, $player_id);
         // CHECK PAYMENT COMBINATION
         $level = 1 + floor(($spot - 1) / 3);
-        $base_type = $this->tech_track_types[$track]['resource'];
+        $base_type = $this->tech_track_types[$track]["resource"];
         $payment_count = count($payment);
         switch ($level) {
             case 1:
@@ -4087,39 +4562,49 @@ abstract class PGameXBody extends tapcommon {
         }
         $payment_name = [];
         foreach ($payment as $p) {
-            $this->dbIncResourceCount($p, '', null, -1, $player_id);
+            $this->dbIncResourceCount($p, "", null, -1, $player_id);
             $payment_name[] = $this->getBenefitName($p);
         }
-        $this->notifyWithName("message", clienttranslate('${player_name} pays ${payment_name} for advance'), array(
-            'i18n' => array('payment_name'),
-            'payment_name' => $payment_name,
-            'payment' => $payment,
-        ), $player_id);
+        $this->notifyWithName(
+            "message",
+            clienttranslate('${player_name} pays ${payment_name} for advance'),
+            [
+                "i18n" => ["payment_name"],
+                "payment_name" => $payment_name,
+                "payment" => $payment,
+            ],
+            $player_id
+        );
         $change = ACTION_ADVANCE;
         $cube = $this->cubeChoiceForTrackSingle($track, $player_id, 0, $cube_spot);
         if (!$cube) {
             if (!$this->isStudio()) {
-                throw new BgaUserException($this->_('You may only advance by a single space'));
+                throw new BgaUserException($this->_("You may only advance by a single space"));
             }
             $cube = $this->cubeChoiceForTrackSingle($track, $player_id, ACTION_ADVANCE, -2);
-            $cube_spot = $cube['spot'];
+            $cube_spot = $cube["spot"];
             $change = $spot - $cube_spot;
-            $this->notifyWithName('message', '${player_name} is cheating, can only advance one spot (this is enabled for testing)!!!');
+            $this->notifyWithName("message", '${player_name} is cheating, can only advance one spot (this is enabled for testing)!!!');
             $this->trackMovementProper($track, $cube_spot, $change, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_JUMP, true, $player_id);
         } else {
             $this->trackMovementProper($track, $cube_spot, $change, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, true, $player_id);
         }
-        $this->gamestate->nextState('advance');
+        $this->gamestate->nextState("advance");
     }
 
     function action_civDecline($cid) {
-        $this->checkAction('civDecline');
+        $this->checkAction("civDecline");
         $player_id = $this->getActivePlayerId();
         $this->systemAssertTrue("invalid civilization for decline $cid", $cid > 0);
-        $this->notifyWithName("message", clienttranslate('${player_name} declines to use their ${card_name} ability'), [
-            'card_name' => $this->civilizations[$cid]['name']
-        ], $player_id);
-        $benefit_data = $this->getCurrentBenefit($cid, 'civ');
+        $this->notifyWithName(
+            "message",
+            clienttranslate('${player_name} declines to use their ${card_name} ability'),
+            [
+                "card_name" => $this->civilizations[$cid]["name"],
+            ],
+            $player_id
+        );
+        $benefit_data = $this->getCurrentBenefit($cid, "civ");
         if ($benefit_data) {
             // its ok to decline even we did not find it, would be just no-op
             $this->benefitCashed($benefit_data);
@@ -4129,31 +4614,31 @@ abstract class PGameXBody extends tapcommon {
             $cubes = $this->structures->getCardsInLocation("civilization_2");
             if (count($cubes) > 0) {
                 foreach ($cubes as $key => $value) {
-                    $this->dbSetStructureLocation($key, 'hand', null, '', $player_id);
+                    $this->dbSetStructureLocation($key, "hand", null, "", $player_id);
                 }
             }
         }
-        $this->gamestate->nextState('benefit');
+        $this->gamestate->nextState("benefit");
     }
 
     function action_civTokenAdvance(int $cid, int $spot, $extra) {
-        $this->checkAction('civTokenAdvance');
+        $this->checkAction("civTokenAdvance");
         $player_id = $this->getActivePlayerId();
         // VALIDITY CHECK...
         //benefit_category='civ' AND benefit_type='$cid'
-        $current_benefit = $this->getCurrentBenefit($cid, 'civ');
+        $current_benefit = $this->getCurrentBenefit($cid, "civ");
         $this->systemAssertTrue("missing civ benefit for $cid", $current_benefit);
         $civ_args = $this->argCivAbilitySingle($player_id, $cid, $current_benefit);
         $this->benefitCashed($current_benefit);
-        $this->notifyWithTokenName('civ', clienttranslate('${player_name} uses ability of ${name}'), $cid, $player_id);
+        $this->notifyWithTokenName("civ", clienttranslate('${player_name} uses ability of ${name}'), $cid, $player_id);
         $this->interruptBenefit();
         $this->saction_civTokenAdvance($player_id, $cid, $spot, $extra, $civ_args);
-        $this->gamestate->nextState('benefit');
+        $this->gamestate->nextState("benefit");
     }
 
     function saction_civTokenAdvance($player_id, $cid, $spot, $extra, $civ_args) {
-        $condition = array_get($civ_args, 'benefit_data');
-        $is_midgame = ($condition == 'midgame');
+        $condition = array_get($civ_args, "benefit_data");
+        $is_midgame = $condition == "midgame";
         switch ($cid) {
             case CIV_ARCHITECTS:
             case CIV_RENEGADES:
@@ -4170,42 +4655,53 @@ abstract class PGameXBody extends tapcommon {
                 return;
         }
 
-        $slot_data = array_get($this->civilizations[$cid], 'slots', []);
+        $slot_data = array_get($this->civilizations[$cid], "slots", []);
         $this->systemAssertTrue("slot $spot does not exist for $cid", $spot <= count($slot_data));
         $civ_token_string = "civ_" . $cid . "_" . $spot;
         $token_type = BUILDING_CUBE;
         $income_turn = $this->getCurrentEra($player_id);
         if ($cid == CIV_MILITANTS) {
-            $this->systemAssertTrue('cannot use MILITAINT civ now', $is_midgame);
+            $this->systemAssertTrue("cannot use MILITAINT civ now", $is_midgame);
             $token_type = BUILDING_OUTPOST;
-            $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'");
+            $token_data = $this->getCollectionFromDB(
+                "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'"
+            );
             // CHECK SPOT VACANT
             $this->userAssertTrue(totranslate("Outpost already placed on this spot"), !$token_data);
             // it has to be placed at right-most slot, so check the slot to the right - it has to have outpost (or be last)
             if ($spot != 4 && $spot != 8) {
                 $next_spot = $spot + 1;
-                $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = 'civ_{$cid}_{$next_spot}'");
+                $token_data = $this->getCollectionFromDB(
+                    "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = 'civ_{$cid}_{$next_spot}'"
+                );
                 $this->userAssertTrue(totranslate("Outpost must be place on the right most spot in each row"), $token_data);
             }
             // get new outpost from hand
-            $tid = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_location_arg='$player_id' AND card_type='$token_type' AND card_location='hand' LIMIT 1");
+            $tid = $this->getUniqueValueFromDB(
+                "SELECT card_id FROM structure WHERE card_location_arg='$player_id' AND card_type='$token_type' AND card_location='hand' LIMIT 1"
+            );
             if ($tid !== null) {
                 //$this->benefitCivEntry($cid, $player_id,'midgame');
                 $message = clienttranslate('${player_name} places an outpost on their civilization mat (midgame setup)');
                 // count all remainig outpots
-                $coll = $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location_arg='$player_id' AND card_type='5' AND card_location='hand'");
-                if (count($coll) > 1) { // 1 is currnet one, we did not place it yet
-                    $this->benefitCivEntry($cid, $player_id, 'midgame');
+                $coll = $this->getCollectionFromDB(
+                    "SELECT card_id FROM structure WHERE card_location_arg='$player_id' AND card_type='5' AND card_location='hand'"
+                );
+                if (count($coll) > 1) {
+                    // 1 is currnet one, we did not place it yet
+                    $this->benefitCivEntry($cid, $player_id, "midgame");
                 }
                 $this->dbSetStructureLocation($tid, $civ_token_string, $income_turn, $message, $player_id);
             }
             return;
         }
         if ($cid == CIV_LEADERS) {
-            $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'");
+            $token_data = $this->getCollectionFromDB(
+                "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'"
+            );
             // CHECK SPOT VACANT
             $this->userAssertTrue(totranslate("Token already placed on this spot"), $token_data == null);
-            $tid = $this->addCube($player_id, 'hand');
+            $tid = $this->addCube($player_id, "hand");
             $this->queueBenefitNormal(79 + $spot, $player_id, reason_civ(CIV_LEADERS));
             $message = clienttranslate('${player_name} places a token on their civilization mat');
             $this->dbSetStructureLocation($tid, $civ_token_string, $income_turn, $message, $player_id);
@@ -4215,26 +4711,30 @@ abstract class PGameXBody extends tapcommon {
             if ($this->getAdjustmentVariant() >= 4) {
                 $cubes = $this->getStructuresOnCiv($cid, BUILDING_CUBE);
                 $cube = array_shift($cubes);
-                $spot = getPart($cube['card_location'], 2) + 1;
+                $spot = getPart($cube["card_location"], 2) + 1;
                 $civ_token_string = "civ_" . $cid . "_" . $spot;
-                $tid = $cube['card_id'];
-                $state = $cube['card_location_arg2'] ?? 0;
-                if ($spot == 1) $state = 0;
+                $tid = $cube["card_id"];
+                $state = $cube["card_location_arg2"] ?? 0;
+                if ($spot == 1) {
+                    $state = 0;
+                }
                 $this->systemAssertTrue("missing cube on chosen", $cube);
                 $this->systemAssertTrue("Token cannot advance to this spot $spot $cid", isset($slot_data[$spot]));
                 $benefit = $slot_data[$spot]["benefit"];
                 $this->systemAssertTrue("invalid benefot for $cid $spot", is_array($benefit));
-                if ($extra == 5) { // 5 VP instead
+                if ($extra == 5) {
+                    // 5 VP instead
                     $benefit = 505;
                 }
 
-                if ($extra == 0) { // Forfeit
-                    $this->notifyWithName('message', clienttranslate('${player_name} forfeits benefit'), [], $player_id);
+                if ($extra == 0) {
+                    // Forfeit
+                    $this->notifyWithName("message", clienttranslate('${player_name} forfeits benefit'), [], $player_id);
                 } else {
                     if ($this->isAdjustments8() && $is_midgame) {
                         // no more than 2 benefit allowed midgame
                         if ($state >= 2) {
-                            $this->userAssertTrue(totranslate('Cannot use more than 2 benefits if gaining this civilization midgame'));
+                            $this->userAssertTrue(totranslate("Cannot use more than 2 benefits if gaining this civilization midgame"));
                         }
                     }
                     $state++;
@@ -4260,22 +4760,34 @@ abstract class PGameXBody extends tapcommon {
         }
         if ($cid == CIV_MERRYMAKERS && $is_midgame && $this->isAdjustments4or8()) {
             $state = 1;
-            $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'");
+            $token_data = $this->getCollectionFromDB(
+                "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'"
+            );
             $this->userAssertTrue(totranslate("Token already placed on this spot"), $token_data == null);
-            $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='$token_type' AND card_location LIKE 'civ_$cid\\_%' AND card_location_arg2 != $state");
+            $token_data = $this->getCollectionFromDB(
+                "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='$token_type' AND card_location LIKE 'civ_$cid\\_%' AND card_location_arg2 != $state"
+            );
             $x = array_shift($token_data);
-            $tid = $x['card_id'];
+            $tid = $x["card_id"];
             $this->userAssertTrue(totranslate("Cannot find a token to place"), $tid);
             $valid = false;
-            if (!in_array($spot, [1, 5, 9]))
+            if (!in_array($spot, [1, 5, 9])) {
                 $valid = true;
+            }
             $this->userAssertTrue(totranslate("Token cannot advance to this spot"), $valid);
-            if (count($token_data) == 1)
-                $this->benefitCivEntry($cid, $player_id, 'midgame');
-            $this->dbSetStructureLocation($tid, $civ_token_string, $state, clienttranslate('${player_name} places a token on their civilization mat'), $player_id);
+            if (count($token_data) == 1) {
+                $this->benefitCivEntry($cid, $player_id, "midgame");
+            }
+            $this->dbSetStructureLocation(
+                $tid,
+                $civ_token_string,
+                $state,
+                clienttranslate('${player_name} places a token on their civilization mat'),
+                $player_id
+            );
             return;
         }
-        $slots_choice_arr = array_get($civ_args, 'slots_choice', []);
+        $slots_choice_arr = array_get($civ_args, "slots_choice", []);
         $slots_choice = array_get($slots_choice_arr, $spot, []);
         if ($cid == CIV_ALIENS) {
             // chose spot
@@ -4296,8 +4808,12 @@ abstract class PGameXBody extends tapcommon {
         if ($cid == CIV_TREASURE_HUNTERS) {
             $location = $extra;
             $cube = $this->getStructureInfoSearch(BUILDING_CUBE, null, $civ_token_string);
-            $this->effect_placeOnMap($player_id, $cube['card_id'], $location, clienttranslate('${player_name} places a token at ${coord_text}'));
-
+            $this->effect_placeOnMap(
+                $player_id,
+                $cube["card_id"],
+                $location,
+                clienttranslate('${player_name} places a token at ${coord_text}')
+            );
 
             $coord = getPart($location, 1) . "_" . getPart($location, 2);
 
@@ -4308,61 +4824,71 @@ abstract class PGameXBody extends tapcommon {
             return;
         }
         if ($cid == CIV_SPIES || $cid == CIV_TINKERERS) {
-            $tid = $this->addCube($player_id, 'hand');
-            $this->dbSetStructureLocation($tid, $civ_token_string, $income_turn, clienttranslate('${player_name} places a token on their civilization mat'), $player_id);
+            $tid = $this->addCube($player_id, "hand");
+            $this->dbSetStructureLocation(
+                $tid,
+                $civ_token_string,
+                $income_turn,
+                clienttranslate('${player_name} places a token on their civilization mat'),
+                $player_id
+            );
             $benefit = $slot_data[$spot]["benefit"];
             $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid));
             return;
         }
 
-
         if ($cid == CIV_UTILITARIENS) {
             if ($is_midgame) {
-                $count = count($civ_args['targets']);
+                $count = count($civ_args["targets"]);
                 $this->systemAssertTrue("no cubes", $count);
-                $cube_id = $civ_args['targets'][0];
+                $cube_id = $civ_args["targets"][0];
                 $this->dbSetStructureLocation($cube_id, $civ_token_string, 0);
                 if ($count > 1) {
-                    $this->benefitCivEntry($cid, $player_id, 'midgame');
+                    $this->benefitCivEntry($cid, $player_id, "midgame");
                 }
                 return;
             }
             $condtype = getReasonPart($condition, 0);
-            if ($condtype == 'triggered') {
+            if ($condtype == "triggered") {
                 $cube = $this->getStructureInfoSearch(BUILDING_CUBE, null, $civ_token_string);
                 $this->systemAssertTrue("missing cube", $cube);
                 $landmark = getReasonPart($condition, 2);
                 $to_spot = $this->getCivSlotWithValue($cid, "lm", $landmark);
-                $this->dbSetStructureLocation($cube['card_id'], $to_spot, 0);
+                $this->dbSetStructureLocation($cube["card_id"], $to_spot, 0);
                 return;
             }
             if ($this->isAdjustments8()) {
                 // place landmark
                 $structure = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='civilization_39'");
-                $type = $structure['card_location_arg2'];
-                $this->queueBenefitInterrupt($this->landmark_data[$type]['benefit'], $player_id, reason_civ(CIV_UTILITARIENS));
+                $type = $structure["card_location_arg2"];
+                $this->queueBenefitInterrupt($this->landmark_data[$type]["benefit"], $player_id, reason_civ(CIV_UTILITARIENS));
             }
             return;
         }
         if ($cid == CIV_MERRYMAKERS) {
-            $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='7' AND card_location LIKE 'civ_$cid\\_%' AND card_location_arg2 != $income_turn");
+            $token_data = $this->getCollectionFromDB(
+                "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='7' AND card_location LIKE 'civ_$cid\\_%' AND card_location_arg2 != $income_turn"
+            );
         } else {
-            $token_data = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='7' AND card_location LIKE 'civ_$cid\\_%'");
+            $token_data = $this->getCollectionFromDB(
+                "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='7' AND card_location LIKE 'civ_$cid\\_%'"
+            );
         }
         // CHECK SPOT VALID
         // Where are current tokens on this civ and how do they link to spot?
-        $slot_choice = array_get($this->civilizations[$cid], 'slot_choice', '');
+        $slot_choice = array_get($this->civilizations[$cid], "slot_choice", "");
         $valid = false;
-        if (($cid == CIV_ENTERTAINERS) && $is_midgame) {
-            if ($spot != 1)
+        if ($cid == CIV_ENTERTAINERS && $is_midgame) {
+            if ($spot != 1) {
                 $valid = true;
+            }
             $tid = array_key_first($token_data);
             $this->userAssertTrue(totranslate("Cannot find a token to place"), $tid);
-        } else if ($slot_choice) {
+        } elseif ($slot_choice) {
             $valid = true;
         } else {
             foreach ($token_data as $tid => $token) {
-                $token_location = explode("_", $token['card_location'])[2];
+                $token_location = explode("_", $token["card_location"])[2];
                 $links = array_get($slot_data[$token_location], "link");
                 if ($links && in_array($spot, $links)) {
                     $valid = true;
@@ -4372,7 +4898,7 @@ abstract class PGameXBody extends tapcommon {
         }
         $this->userAssertTrue(totranslate("Token cannot advance to this spottriggered power"), $valid);
         $token_info = $token_data[$tid];
-        $state = $token_info['card_location_arg2'];
+        $state = $token_info["card_location_arg2"];
         if ($cid == CIV_MERRYMAKERS && $this->isAdjustments4or8()) {
             $this->userAssertTrue(totranslate("Cannot move this token, it is already been moved during this era"), $state != $income_turn);
             $cube = $this->getStructureInfoSearch(BUILDING_CUBE, null, $civ_token_string);
@@ -4385,20 +4911,25 @@ abstract class PGameXBody extends tapcommon {
         $this->queueBenefitNormal($benefit, $player_id, reason_civ($cid));
         // second token
         if ($cid == CIV_MERRYMAKERS && $this->isAdjustments4or8()) {
-            $token_placed = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='$token_type' AND card_location LIKE 'civ_$cid\\_%' AND card_location_arg2 = $income_turn");
-            if (count($token_placed) == 0)
+            $token_placed = $this->getCollectionFromDB(
+                "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='$token_type' AND card_location LIKE 'civ_$cid\\_%' AND card_location_arg2 = $income_turn"
+            );
+            if (count($token_placed) == 0) {
                 $this->benefitCivEntry($cid, $player_id);
+            }
         }
         // UPDATE token
         $inst = $this->getCivilizationInstance($cid, false);
         $inst->placeCivCube($player_id, $spot, $tid, $income_turn);
     }
 
-    function checkBenefitOrder($order, $b, $cat = 'choice') {
-        if (is_string($order))
-            $order = explode(',', $order);
-        if (is_string($b))
-            $b = explode(',', $b);
+    function checkBenefitOrder($order, $b, $cat = "choice") {
+        if (is_string($order)) {
+            $order = explode(",", $order);
+        }
+        if (is_string($b)) {
+            $b = explode(",", $b);
+        }
         if ($order && count($order) > 0 && $order[0]) {
             //die("<html><body>order=[".implode(',', $order)."][".implode(",", $b)."]</body></html>");
             $count = count($order);
@@ -4427,14 +4958,14 @@ abstract class PGameXBody extends tapcommon {
 
         $this->queueBenefitNormal([RES_COIN, ["m" => 2, "g" => 324]], $player_id);
 
-
         // $this->benefitCivEntry(CIV_GAMBLERS, $player_id);
         $this->gamestate->jumpToState(18);
     }
 
     function debug_next() {
-        if ($this->getCurrentBenefit())
-            $this->gamestate->nextState('next');
+        if ($this->getCurrentBenefit()) {
+            $this->gamestate->nextState("next");
+        }
     }
 
     /**
@@ -4442,19 +4973,29 @@ abstract class PGameXBody extends tapcommon {
      *
      * @return boolean - true - proceed adding it, false - not (effect may pushing something else)
      */
-    function effect_onQueueBenefit($ben, $player_id = null, $reason = '', $count = 1) {
-        if (!$this->isRealPlayer($player_id)) return true;
+    function effect_onQueueBenefit($ben, $player_id = null, $reason = "", $count = 1) {
+        if (!$this->isRealPlayer($player_id)) {
+            return true;
+        }
         switch ($ben) {
             case BE_TAPESTRY:
                 $civ_owner = $this->getCivOwner(CIV_ADVISORS);
                 if ($civ_owner && $civ_owner != $player_id && !$this->isIncomeTurn() && $this->getAdjustmentVariant() < 8) {
                     $nei = $this->getPlayerNeighbours($civ_owner, false);
-                    if (!in_array($player_id, $nei)) return true;
-                    if ($this->getCardCountInHand($civ_owner, CARD_TAPESTRY) == 0) return true;
+                    if (!in_array($player_id, $nei)) {
+                        return true;
+                    }
+                    if ($this->getCardCountInHand($civ_owner, CARD_TAPESTRY) == 0) {
+                        return true;
+                    }
 
                     for ($i = 0; $i < $count; $i++) {
-                        $this->queueBenefitNormal(['p' => 138, 'g' => [BE_TAPESTRY, 'h' => 603]], $civ_owner, reason(CARD_CIVILIZATION, CIV_ADVISORS, $player_id));
-                        $this->benefitSingleEntry('standard', $ben, $player_id, 1, $reason);
+                        $this->queueBenefitNormal(
+                            ["p" => 138, "g" => [BE_TAPESTRY, "h" => 603]],
+                            $civ_owner,
+                            reason(CARD_CIVILIZATION, CIV_ADVISORS, $player_id)
+                        );
+                        $this->benefitSingleEntry("standard", $ben, $player_id, 1, $reason);
                     }
                     return false;
                 }
@@ -4463,26 +5004,27 @@ abstract class PGameXBody extends tapcommon {
                 $this->triggerPreGainStructure($player_id, BUILDING_HOUSE, $ben);
                 return true;
         }
-        $landmark_id = $this->getRulesBenefit($ben, 'lm');
+        $landmark_id = $this->getRulesBenefit($ben, "lm");
         if ($landmark_id) {
             $this->triggerPreGainStructure($player_id, BUILDING_LANDMARK, $ben);
             return true;
         }
-        $rule_type = $this->getRulesBenefit($ben, 'r', 'x');
-        if ($rule_type == 'a') {
+        $rule_type = $this->getRulesBenefit($ben, "r", "x");
+        if ($rule_type == "a") {
             $this->triggerPreGainStructure($player_id, BUILDING_OUTPOST, $ben);
             return true;
         }
         return true;
     }
 
-    function queueBenefitStandardOne($ben, $player_id = null, $reason = '', $count = 1) {
+    function queueBenefitStandardOne($ben, $player_id = null, $reason = "", $count = 1) {
         $this->systemAssertTrue("invalid benefit to be queue", is_numeric($ben));
-        if ($this->effect_onQueueBenefit($ben, $player_id, $reason, $count))
-            $this->benefitSingleEntry('standard', $ben, $player_id, $count, $reason);
+        if ($this->effect_onQueueBenefit($ben, $player_id, $reason, $count)) {
+            $this->benefitSingleEntry("standard", $ben, $player_id, $count, $reason);
+        }
     }
 
-    function queueBenefitInterrupt($benefit, $player_id = null, $reason = '', $orderChoice = null) {
+    function queueBenefitInterrupt($benefit, $player_id = null, $reason = "", $orderChoice = null) {
         $this->interruptBenefit();
         $this->queueBenefitNormal($benefit, $player_id, $reason, $orderChoice);
     }
@@ -4492,30 +5034,33 @@ abstract class PGameXBody extends tapcommon {
      * $benefit: the array of benefits to process
      * $after: any relevant prerequisite id
      */
-    function queueBenefitNormal($benefit, $player_id = null, $reason = '', $count = 1) {
+    function queueBenefitNormal($benefit, $player_id = null, $reason = "", $count = 1) {
         if (!$benefit) {
             $this->error("empty benefit provided $reason");
             return;
         }
         $benefit = $this->normalizeBenefitsArray($benefit);
-        if (!$player_id)
-            $player_id = $this->getActivePlayerId(); // default to the active player
+        if (!$player_id) {
+            $player_id = $this->getActivePlayerId();
+        } // default to the active player
         $vp = 0;
 
         if (!is_numeric($count)) {
             $count = 1;
         }
         foreach ($benefit as $bid => $ben) {
-            if ($ben === 0)
-                continue; // skip 0 - no-op
+            if ($ben === 0) {
+                continue;
+            } // skip 0 - no-op
             //$btext = (json_encode([$bid=>$ben], JSON_PRETTY_PRINT));
             //$this->debugConsole("queueB $bid $player_id $reason",['b'=>$ben],true);
-            $cat = 'standard';
+            $cat = "standard";
             if (is_string($bid)) {
                 $cat = $bid;
             }
-            if ($cat == 'standard') {
-                if (is_array($ben)) { // recursive
+            if ($cat == "standard") {
+                if (is_array($ben)) {
+                    // recursive
                     $this->queueBenefitNormal($ben, $player_id, $reason, $count);
                     continue;
                 }
@@ -4526,33 +5071,38 @@ abstract class PGameXBody extends tapcommon {
                 }
                 continue;
             }
-            if ($cat == 'p') { // like bonus
-                $gain = $benefit['g'];
-                if (is_array($gain))
-                    $gain = implode(',', $gain);
+            if ($cat == "p") {
+                // like bonus
+                $gain = $benefit["g"];
+                if (is_array($gain)) {
+                    $gain = implode(",", $gain);
+                }
                 $pay = $ben;
-                if (is_array($ben))
-                    $pay = implode(',', $pay);
+                if (is_array($ben)) {
+                    $pay = implode(",", $pay);
+                }
                 $this->benefitSingleEntry("p,$pay,g,$gain", 0, $player_id, $count, $reason);
                 continue;
             }
-            if ($cat == 'm') { // standard multiplier
-                $gain = $benefit['g'];
+            if ($cat == "m") {
+                // standard multiplier
+                $gain = $benefit["g"];
                 $this->systemAssertTrue("g required for m", $gain);
                 $this->systemAssertTrue("m count has to be numeric", is_numeric($ben));
                 $this->queueBenefitNormal($gain, $player_id, $reason, $ben * $count);
                 continue;
             }
-            if ($cat == 'g') {
+            if ($cat == "g") {
                 continue; // processed with 'p' or 'm'
             }
-            if ($cat == 'h') { // hidden group
+            if ($cat == "h") {
+                // hidden group
                 $this->queueBenefitNormal($ben, $player_id, $reason, $count);
                 continue;
             }
             // OR - one benefit or other
             // CHOICE - AND and can choose order
-            $op = $cat == 'choice' ? 'a' : 'o';
+            $op = $cat == "choice" ? "a" : "o";
             if (is_array($ben)) {
                 if (count($ben) == 1) {
                     $sub = reset($ben);
@@ -4569,9 +5119,9 @@ abstract class PGameXBody extends tapcommon {
                     }
                 }
 
-                $ben = implode(',', $ben);
+                $ben = implode(",", $ben);
             }
-            $this->benefitSingleEntry("$op,$ben", 0, $player_id, $op == 'o' ? $count : 1, $reason);
+            $this->benefitSingleEntry("$op,$ben", 0, $player_id, $op == "o" ? $count : 1, $reason);
         }
         if ($vp > 0) {
             $this->awardVP($player_id, $vp, $reason);
@@ -4582,8 +5132,9 @@ abstract class PGameXBody extends tapcommon {
         if (!$benefit) {
             return [0];
         }
-        if (!is_array($benefit))
+        if (!is_array($benefit)) {
             return [$benefit];
+        }
         return $benefit;
     }
 
@@ -4592,79 +5143,97 @@ abstract class PGameXBody extends tapcommon {
         $message = null;
         foreach ($benefit as $bid => $ben) {
             if ($message) {
-                if ($bThrow)
+                if ($bThrow) {
                     $this->userAssertTrue($message);
+                }
                 return $message;
             }
-            if ($ben === 0)
-                continue; // skip 0 - no-op
-            $cat = 'standard';
+            if ($ben === 0) {
+                continue;
+            } // skip 0 - no-op
+            $cat = "standard";
             if (is_string($bid)) {
                 $cat = $bid;
             }
-            if ($cat == 'p') {
+            if ($cat == "p") {
                 $message = $this->checkBenefitFeasibility($ben, $player_id, $bThrow, true);
                 continue;
             }
-            if ($cat == 'm')
+            if ($cat == "m") {
                 continue;
-            if (is_array($ben)) { // recursive
+            }
+            if (is_array($ben)) {
+                // recursive
                 $message = $this->checkBenefitFeasibility($ben, $player_id, $bThrow);
                 continue;
             }
             if ($pay == false) {
-                $type = $this->getRulesBenefit($ben, 'r');
-                if ($type == 's') { // explore space
+                $type = $this->getRulesBenefit($ben, "r");
+                if ($type == "s") {
+                    // explore space
                     $space_tiles = $this->getCardsInHand($player_id, CARD_SPACE);
                     if (count($space_tiles) == 0) {
-                        $message = totranslate('Player has not tiles to explore space');
+                        $message = totranslate("Player has not tiles to explore space");
                     }
                     continue;
                 }
-                if ($type == 'e') { // explore 
+                if ($type == "e") {
+                    // explore
                     $space_tiles = $this->getCardsInHand($player_id, CARD_TERRITORY);
                     if (count($space_tiles) == 0) {
-                        $message = totranslate('Player has not territoty tiles to explore');
+                        $message = totranslate("Player has not territoty tiles to explore");
                     }
                 }
             } else {
                 $actual = $this->getPayResourceCount($ben, $player_id);
                 if ($actual == 0) {
-                    $message = totranslate('Player cannot pay for this');
+                    $message = totranslate("Player cannot pay for this");
                     continue;
                 }
             }
         }
         if ($message) {
-            if ($bThrow)
+            if ($bThrow) {
                 $this->userAssertTrue($message);
+            }
             return $message;
         }
     }
 
     function effect_drawDecisionPair($player_id) {
         #discard and replace decision pair
-        $cards = $this->cards->pickCardsForLocation(2, 'decision_pair', 'discard_decision');
+        $cards = $this->cards->pickCardsForLocation(2, "decision_pair", "discard_decision");
         $count = count($cards);
-        if ($count > 0)
-            $this->notifyWithName("newCards", clienttranslate('${player_name} discards ${count} decision cards'), [
-                'count' => $count,
-                'card_type' => CARD_DECISION,
-                'cards' => $cards
-            ], $player_id);
-        $cards = $this->cards->pickCardsForLocation(2, 'deck_decision', 'decision_pair', 0, true);
+        if ($count > 0) {
+            $this->notifyWithName(
+                "newCards",
+                clienttranslate('${player_name} discards ${count} decision cards'),
+                [
+                    "count" => $count,
+                    "card_type" => CARD_DECISION,
+                    "cards" => $cards,
+                ],
+                $player_id
+            );
+        }
+        $cards = $this->cards->pickCardsForLocation(2, "deck_decision", "decision_pair", 0, true);
         $index = 0;
         foreach ($cards as $card_id => $card) {
             $this->DbQuery("UPDATE card SET card_location_arg='$index',card_location_arg2=0 WHERE card_id='$card_id'");
             $index += 1;
         }
         $count = count($cards);
-        $this->notifyWithName("newCards", clienttranslate('${player_name} draws ${count} decision cards'), [
-            'count' => $count,
-            'card_type' => CARD_DECISION,
-            'cards' => $cards
-        ], $player_id);
-        $this->notifyDeckCounters('deck_decision');
+        $this->notifyWithName(
+            "newCards",
+            clienttranslate('${player_name} draws ${count} decision cards'),
+            [
+                "count" => $count,
+                "card_type" => CARD_DECISION,
+                "cards" => $cards,
+            ],
+            $player_id
+        );
+        $this->notifyDeckCounters("deck_decision");
         return $count;
     }
 
@@ -4676,25 +5245,25 @@ abstract class PGameXBody extends tapcommon {
                 $this->effect_automaIncome(1);
                 return;
             }
-            $this->notifyWithName('message', clienttranslate('${player_name} takes turn ${turn}'), ['turn' => $turn], $player_id);
+            $this->notifyWithName("message", clienttranslate('${player_name} takes turn ${turn}'), ["turn" => $turn], $player_id);
             $count = $this->effect_drawDecisionPair($player_id);
             if ($count < 2) {
                 $this->effect_automaIncome();
                 return;
             }
             list($decision_card_num, $tiebreaker_card_num) = $this->getDecisionPair();
-            if ($this->getRulesCard(CARD_DECISION, $decision_card_num, 'i') && $this->cards->countCardsInLocation('deck_decision') == 0) {
+            if ($this->getRulesCard(CARD_DECISION, $decision_card_num, "i") && $this->cards->countCardsInLocation("deck_decision") == 0) {
                 $this->effect_automaIncome();
                 return;
             }
-            $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $tiebreaker_card_num, 'tt');
+            $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $tiebreaker_card_num, "tt");
             $this->interruptBenefit();
             // $this->queueBenefitNormal(BE_CONFIRM,$this->getActivePlayerId(),reason('str','automa turn'));
-            $adv = $this->getRulesCard(CARD_DECISION, $decision_card_num, 'at');
+            $adv = $this->getRulesCard(CARD_DECISION, $decision_card_num, "at");
             $this->effect_automaAdvance($player_id, $adv, $track_tiebreaker);
             $player_id = PLAYER_SHADOW;
             $turn = $this->effect_startOfTurn($player_id);
-            $adv = $this->getRulesCard(CARD_DECISION, $decision_card_num, 'st');
+            $adv = $this->getRulesCard(CARD_DECISION, $decision_card_num, "st");
             $this->effect_automaAdvance($player_id, $adv, $track_tiebreaker);
         } else {
             // shadow only
@@ -4704,30 +5273,31 @@ abstract class PGameXBody extends tapcommon {
                 $this->effect_automaIncome(1);
                 return;
             }
-            $this->notifyWithName('message', clienttranslate('${player_name} takes turn ${turn}'), ['turn' => $turn], $player_id);
+            $this->notifyWithName("message", clienttranslate('${player_name} takes turn ${turn}'), ["turn" => $turn], $player_id);
             $count = $this->effect_drawDecisionPair($player_id);
             if ($count < 2) {
                 $this->effect_automaIncome();
                 return;
             }
             list($decision_card_num, $tiebreaker_card_num) = $this->getDecisionPair();
-            $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $tiebreaker_card_num, 'tt');
-            $adv = $this->getRulesCard(CARD_DECISION, $decision_card_num, 'st');
+            $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $tiebreaker_card_num, "tt");
+            $adv = $this->getRulesCard(CARD_DECISION, $decision_card_num, "st");
             $this->effect_automaAdvance($player_id, $adv, $track_tiebreaker);
         }
     }
 
     function getFavouriteTrack($player_id) {
-        $outposts = $this->structures->getCardsInLocation(['track_fav_1', 'track_fav_2', 'track_fav_3', 'track_fav_4'], $player_id);
+        $outposts = $this->structures->getCardsInLocation(["track_fav_1", "track_fav_2", "track_fav_3", "track_fav_4"], $player_id);
         if (count($outposts) == 1) {
             $outpost = array_shift($outposts);
-            $track = getPart($outpost['location'], 2);
+            $track = getPart($outpost["location"], 2);
             return $track;
         }
         // XXX
         $this->debugConsole("cannot determin favourite track", $outposts);
-        if ($player_id == PLAYER_AUTOMA)
+        if ($player_id == PLAYER_AUTOMA) {
             return 4;
+        }
         return 3;
     }
 
@@ -4743,35 +5313,39 @@ abstract class PGameXBody extends tapcommon {
         for ($track = 1; $track <= 4; $track++) {
             $slot = $this->getMaxTrackSlot($track, $player_id);
             #$this->debugConsole("max ($player_id) slot on $track => $slot");
-            if ($slot >= 12)
+            if ($slot >= 12) {
                 continue;
+            }
             $valid[$track] = $slot;
             $landmarks[$track] = 12 - $slot;
-            if ($slot > $fur)
+            if ($slot > $fur) {
                 $fur = $slot;
+            }
             for ($i = $slot + 1; $i <= 12; $i++) {
                 $landmark = $this->getLandmarkFromSlot($track, $slot);
-                if (!$landmark)
+                if (!$landmark) {
                     continue;
-                $owner = $landmark['card_location_arg'];
+                }
+                $owner = $landmark["card_location_arg"];
                 if ($owner == 0) {
                     $dist = $i - $slot;
                     $landmarks[$track] = $dist;
                     break;
                 }
             }
-            if ($land_dist > $landmarks[$track])
+            if ($land_dist > $landmarks[$track]) {
                 $land_dist = $landmarks[$track];
+            }
         }
         $fur_dist = 12 - $fur;
         foreach ($valid as $tt_track => $slot) {
-            if ($adv == 'f' || ($adv == 'l' && $fur_dist <= $land_dist)) {
+            if ($adv == "f" || ($adv == "l" && $fur_dist <= $land_dist)) {
                 if ($slot != $fur) {
                     #$this->debugConsole("removing $adv $fur_dist => $tt_track");
                     unset($valid[$tt_track]);
                 }
             }
-            if ($adv == 'l' && $fur_dist > $land_dist) {
+            if ($adv == "l" && $fur_dist > $land_dist) {
                 if ($landmarks[$tt_track] != $land_dist) {
                     #$this->debugConsole("removing $adv $land_dist => $tt_track");
                     unset($valid[$tt_track]);
@@ -4781,49 +5355,59 @@ abstract class PGameXBody extends tapcommon {
         $fav_track = $this->getFavouriteTrack($player_id);
         $track = 0;
         foreach ($tbs as $tt_track) {
-            if ($tt_track == 5)
+            if ($tt_track == 5) {
                 $tt_track = $fav_track;
+            }
             if (array_key_exists($tt_track, $valid)) {
                 $track = $tt_track;
                 break;
             }
         }
         //$this->debugConsole("adv $adv $track_tiebreaker => $track");
-        if ($track == 0)
+        if ($track == 0) {
             $track = $fav_track;
+        }
         return $track;
     }
 
     function effect_automaAdvance($player_id, $adv, $track_tiebreaker) {
         $track = $this->getValidTracksAutoma($player_id, $adv, $track_tiebreaker);
         $spot = $this->spotChoiceForTrack($track, $player_id, +1, SPOT_SELECT);
-        $this->notifyWithTrack('message', clienttranslate('${player_name} advances on ${track_name}'), [
-            'track' => $track,
-        ], $player_id);
+        $this->notifyWithTrack(
+            "message",
+            clienttranslate('${player_name} advances on ${track_name}'),
+            [
+                "track" => $track,
+            ],
+            $player_id
+        );
         $flags = $player_id == PLAYER_AUTOMA ? FLAG_GAIN_BENFIT : 0;
         $this->interruptBenefit();
         $this->trackMovementProper($track, $spot, +1, $flags, false, $player_id);
     }
 
-    function queueBenefitAutoma($benefit, $player_id, $reason = '', $count = 1) {
-        if ($player_id != PLAYER_AUTOMA)
+    function queueBenefitAutoma($benefit, $player_id, $reason = "", $count = 1) {
+        if ($player_id != PLAYER_AUTOMA) {
             return;
+        }
         if (!$benefit) {
             $this->error("empty benefit provided $reason");
             return;
         }
-        if (!is_array($benefit))
+        if (!is_array($benefit)) {
             $benefit = [$benefit];
+        }
         $gained = [];
         foreach ($benefit as $cat => $ben) {
-            if ($cat == 'standard' || is_numeric($cat)) {
-                if (array_key_exists($ben, $gained))
-                    continue; // only 1 time
+            if ($cat == "standard" || is_numeric($cat)) {
+                if (array_key_exists($ben, $gained)) {
+                    continue;
+                } // only 1 time
                 $this->queueBenefitAutomaSingle($ben, $reason, $count);
                 $gained[$ben] = 1;
                 continue;
             }
-            if ($cat == 'or' || $cat == 'or2') {
+            if ($cat == "or" || $cat == "or2") {
                 $this->systemAssertTrue("expecting array for $cat", is_array($ben));
                 $cor = count($ben);
                 if ($cor == 2) {
@@ -4836,44 +5420,50 @@ abstract class PGameXBody extends tapcommon {
                 }
                 continue;
             }
-            if ($cat == 'choice') {
+            if ($cat == "choice") {
                 $this->queueBenefitAutoma($ben, $player_id, $reason, $count);
                 continue;
             }
         }
     }
 
-    function queueBenefitAutomaSingle($ben, $reason = '', $count = 1) {
+    function queueBenefitAutomaSingle($ben, $reason = "", $count = 1) {
         $player_id = PLAYER_AUTOMA;
-        $spotreason = startsWith($reason, ':spot:');
-        $track = (int) $this->getRulesBenefit($ben, 't', 0);
-        $action = $this->getRulesBenefit($ben, 'r', 'x');
+        $spotreason = startsWith($reason, ":spot:");
+        $track = (int) $this->getRulesBenefit($ben, "t", 0);
+        $action = $this->getRulesBenefit($ben, "r", "x");
         $recreason = $this->getReasonFullRec($reason, true);
         //$this->queueBenefitNormal(BE_CONFIRM,$this->getActivePlayerId(),$reason,1);
         switch ($action) {
-            case 'e': // explore
+            case "e": // explore
                 $this->queueBenefitNormal($ben, $player_id, $reason, $count);
                 break;
-            case 'a': // attack
+            case "a": // attack
                 $this->queueBenefitNormal($ben, $player_id, $reason, $count);
                 break;
-            case 'i': // tech
+            case "i": // tech
                 $this->effect_techRefresh($player_id);
                 break;
-            case 'g':
-                if ($ben == BE_TAPESTRY)
+            case "g":
+                if ($ben == BE_TAPESTRY) {
                     $this->queueBenefitNormal($ben, $player_id, $reason, $count);
+                }
                 break;
-            case 'r': // research
-                $this->notifyWithName('message', clienttranslate('${player_name} reseaches ${reason}'), [
-                    'reason' => $recreason
-                ], $player_id);
-                $track = $this->rollScienceDie($reason, 'science_die', $player_id);
+            case "r": // research
+                $this->notifyWithName(
+                    "message",
+                    clienttranslate('${player_name} reseaches ${reason}'),
+                    [
+                        "reason" => $recreason,
+                    ],
+                    $player_id
+                );
+                $track = $this->rollScienceDie($reason, "science_die", $player_id);
                 $spot = $this->spotChoiceForTrack($track, $player_id, +1, SPOT_SELECT);
-                $flags = (int) $this->getRulesBenefit($ben, 'flags', 0);
+                $flags = (int) $this->getRulesBenefit($ben, "flags", 0);
                 $this->trackMovementProper($track, $spot, +1, $flags, false, $player_id);
                 break;
-            case 'x': // other
+            case "x": // other
             default:
                 if ($ben == 146) {
                     $this->queueBenefitNormal($ben, $player_id, $reason, $count);
@@ -4881,12 +5471,17 @@ abstract class PGameXBody extends tapcommon {
                 }
                 if ($track > 0) {
                     if ($track < 5) {
-                        $adv = (int) $this->getRulesBenefit($ben, 'adv', 1);
-                        $this->notifyWithTrack('message', clienttranslate('${player_name} ${advance_regress} on ${track_name} ${reason}'), [
-                            'track' => $track,
-                            'adv' => $adv,
-                            'reason' => $recreason
-                        ], $player_id);
+                        $adv = (int) $this->getRulesBenefit($ben, "adv", 1);
+                        $this->notifyWithTrack(
+                            "message",
+                            clienttranslate('${player_name} ${advance_regress} on ${track_name} ${reason}'),
+                            [
+                                "track" => $track,
+                                "adv" => $adv,
+                                "reason" => $recreason,
+                            ],
+                            $player_id
+                        );
                     }
                     $this->queueBenefitNormal($ben, $player_id, $reason, $count);
                     break;
@@ -4902,7 +5497,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getMidIslandClosest($player_id, $valid_targets, $map) {
-        $mid_island = '0_0';
+        $mid_island = "0_0";
         $mid = !$this->isHexBlockedForConquer($player_id, $mid_island, $map);
         if ($mid) {
             $goals = [$mid_island];
@@ -4912,8 +5507,9 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getGoalsClosest($player_id, $valid_targets, $map, $goals) {
-        if (count($goals) == 0)
+        if (count($goals) == 0) {
             return $valid_targets;
+        }
         $ranked = [];
         foreach ($valid_targets as $coords) {
             $distmap = $this->floodPath(
@@ -4924,17 +5520,20 @@ abstract class PGameXBody extends tapcommon {
             );
             $dist = -1;
             foreach ($goals as $goal) {
-                if (!array_key_exists($goal, $distmap))
-                    continue; // unreachable
+                if (!array_key_exists($goal, $distmap)) {
+                    continue;
+                } // unreachable
                 $dist1 = $distmap[$goal];
-                if ($dist1 < $dist || $dist == -1)
+                if ($dist1 < $dist || $dist == -1) {
                     $dist = $dist1;
+                }
             }
             $a = array_get($ranked, $dist, []);
             $a[] = $coords;
             $ranked[$dist] = $a;
-            if ($dist == 0)
+            if ($dist == 0) {
                 break;
+            }
         }
         ksort($ranked, SORT_NUMERIC);
         $shortest = array_key_first($ranked);
@@ -4946,12 +5545,12 @@ abstract class PGameXBody extends tapcommon {
 
     function getMap($xcoords = null) {
         // build a map
-        $map = $this->getMapDataFromDb('map', $xcoords);
+        $map = $this->getMapDataFromDb("map", $xcoords);
         foreach ($map as $coords => $info) {
-            $map[$coords]['structures'] = [];
-            $map[$coords]['map_owners'] = [];
-            $map[$coords]['map_occupants'] = [];
-            $map[$coords]['occupancy'] = 0;
+            $map[$coords]["structures"] = [];
+            $map[$coords]["map_owners"] = [];
+            $map[$coords]["map_occupants"] = [];
+            $map[$coords]["occupancy"] = 0;
         }
 
         if ($xcoords !== null) {
@@ -4961,43 +5560,57 @@ abstract class PGameXBody extends tapcommon {
         }
 
         foreach ($structures as $struc) {
-            $coords = substr($struc['card_location'], 5); // land_
-            $map[$coords]['structures'][] = $struc;
-            $map[$coords]['occupancy'] += 1;
-            $toppled = $struc['card_type_arg'];
+            $coords = substr($struc["card_location"], 5); // land_
+            $map[$coords]["structures"][] = $struc;
+            $map[$coords]["occupancy"] += 1;
+            $toppled = $struc["card_type_arg"];
             if ($toppled != 1) {
-                $map[$coords]['map_owners'][] = $struc['card_location_arg'];
+                $map[$coords]["map_owners"][] = $struc["card_location_arg"];
             }
-            $map[$coords]['map_occupants'][] = $struc['card_location_arg'];
+            $map[$coords]["map_occupants"][] = $struc["card_location_arg"];
         }
 
-        $map[$coords]['map_owners'] = array_values(array_unique($map[$coords]['map_owners']));
-        $map[$coords]['map_occupants'] = array_values(array_unique($map[$coords]['map_occupants']));
+        $map[$coords]["map_owners"] = array_values(array_unique($map[$coords]["map_owners"]));
+        $map[$coords]["map_occupants"] = array_values(array_unique($map[$coords]["map_occupants"]));
 
         return $map;
     }
 
     function getMapHexData($xcoords, $map = null) {
-        if ($map == null) $map = $this->getMap($xcoords);
+        if ($map == null) {
+            $map = $this->getMap($xcoords);
+        }
         return array_get($map, $xcoords, null);
     }
 
     function isHexOwner($player_id, $coords, $map = null) {
         if ($map != null) {
             $info = array_get($map, $coords);
-            if (!$info) return false;
-            $owners = array_get($info, 'map_owners');
-            if (!$owners || count($owners) == 0) return false;
-            if (array_search($player_id, $owners) !== false) return true;
+            if (!$info) {
+                return false;
+            }
+            $owners = array_get($info, "map_owners");
+            if (!$owners || count($owners) == 0) {
+                return false;
+            }
+            if (array_search($player_id, $owners) !== false) {
+                return true;
+            }
             return false;
         } else {
-            $structures = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg = $player_id AND card_location = 'land_$coords' AND card_type_arg != 1");
-            if (count($structures) > 0) return true;
+            $structures = $this->getCollectionFromDB(
+                "SELECT * FROM structure WHERE card_location_arg = $player_id AND card_location = 'land_$coords' AND card_type_arg != 1"
+            );
+            if (count($structures) > 0) {
+                return true;
+            }
             return false;
         }
     }
     function getControlHexes($player_id, $map = null) {
-        if ($map == null) $map = $this->getMap();
+        if ($map == null) {
+            $map = $this->getMap();
+        }
         $owned = [];
         foreach ($map as $coords => $info) {
             if ($this->isHexOwner($player_id, $coords, $map)) {
@@ -5008,7 +5621,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function automa_getHexTiebreaker($valid_targets, $player_id = PLAYER_AUTOMA) {
-        $this->systemAssertTrue('no valid targets', count($valid_targets) > 0);
+        $this->systemAssertTrue("no valid targets", count($valid_targets) > 0);
         //$this->debugConsole('hex tb', [$valid_targets], true);
         $loc = bga_rand(0, count($valid_targets) - 1); // random valid target for now XXX automa
         $coord = $valid_targets[$loc];
@@ -5017,25 +5630,37 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_automaConquer() {
         $bene = $this->getCurrentBenefit();
-        $ben = $bene['benefit_type'];
-        $player_id = $bene['benefit_player_id'];
+        $ben = $bene["benefit_type"];
+        $player_id = $bene["benefit_player_id"];
         $opponent_id = $this->getSoloPlayerId();
-        $flags = (int) $this->getRulesBenefit($ben, 'flags', 0);
+        $flags = (int) $this->getRulesBenefit($ben, "flags", 0);
         $anywhere = ($flags & FLAG_ANYWHERE) != 0;
         $targets = $this->getConquerTargets(false, $anywhere, $player_id);
         $exp_targets = $this->getExplorationTargets($anywhere, $player_id);
-        $be_reason = reason('be', $ben);
+        $be_reason = reason("be", $ben);
         if (count($targets) + count($exp_targets) == 0) {
-            $this->notifyWithName("message_error", clienttranslate('${player_name} has no valid targets, effect is void ${reason}'), [
-                'reason' => $this->getReasonFullRec($be_reason)
-            ], $player_id);
+            $this->notifyWithName(
+                "message_error",
+                clienttranslate('${player_name} has no valid targets, effect is void ${reason}'),
+                [
+                    "reason" => $this->getReasonFullRec($be_reason),
+                ],
+                $player_id
+            );
             return;
         }
-        $outpost_id = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='5' AND card_location='hand' AND card_location_arg='$player_id' LIMIT 1");
+        $outpost_id = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM structure WHERE card_type='5' AND card_location='hand' AND card_location_arg='$player_id' LIMIT 1"
+        );
         if (!$outpost_id) {
-            $this->notifyWithName("message_error", clienttranslate('${player_name} has no more outposts, effect is void ${reason}'), [
-                'reason' => $this->getReasonFullRec($be_reason)
-            ], $player_id);
+            $this->notifyWithName(
+                "message_error",
+                clienttranslate('${player_name} has no more outposts, effect is void ${reason}'),
+                [
+                    "reason" => $this->getReasonFullRec($be_reason),
+                ],
+                $player_id
+            );
             return;
         }
         // build a map
@@ -5047,8 +5672,9 @@ abstract class PGameXBody extends tapcommon {
             //Valid territories: All territories you control, which the Automa can legally conquer, are valid.
             $valid_targets = [];
             foreach ($targets as $coord) {
-                if ($this->isHexOwner($opponent_id, $coord, $map))
+                if ($this->isHexOwner($opponent_id, $coord, $map)) {
                     $valid_targets[] = $coord;
+                }
             }
             //$this->debugConsole('conq_reduce', [$valid_targets], true);
             if (count($valid_targets) > 0) {
@@ -5066,8 +5692,9 @@ abstract class PGameXBody extends tapcommon {
             $conquer_empty = true;
         }
         list($decision_card_num, $tiebreaker_card_num) = $this->getDecisionPair();
-        $topple = $this->getRulesCard(CARD_DECISION, $tiebreaker_card_num, 't') == 1;
-        if ($conquer_empty) { //count($exp_targets) > 0
+        $topple = $this->getRulesCard(CARD_DECISION, $tiebreaker_card_num, "t") == 1;
+        if ($conquer_empty) {
+            //count($exp_targets) > 0
             // CONQUER NEUTRAL
             // 1.	All hexes that can legally be conquered or explored by the Automa are valid.
             $all_targets = array_merge($targets, $exp_targets);
@@ -5090,9 +5717,14 @@ abstract class PGameXBody extends tapcommon {
                 }
             }
             if (count($valid_targets) == 0) {
-                $this->notifyWithName("message_error", clienttranslate('${player_name} has no valid targets, effect is void ${reason}'), [
-                    'reason' => $this->getReasonFullRec($be_reason)
-                ], $player_id);
+                $this->notifyWithName(
+                    "message_error",
+                    clienttranslate('${player_name} has no valid targets, effect is void ${reason}'),
+                    [
+                        "reason" => $this->getReasonFullRec($be_reason),
+                    ],
+                    $player_id
+                );
                 return;
             }
             $valid_targets = array_values($valid_targets);
@@ -5108,8 +5740,9 @@ abstract class PGameXBody extends tapcommon {
                 foreach ($map as $coord => $info) {
                     if ($this->isHexOwner($opponent_id, $coord, $map)) {
                         $goals2[] = $coord;
-                        if (count($info['structures']) == 1)
+                        if (count($info["structures"]) == 1) {
                             $goals[] = $coord;
+                        }
                     }
                 }
                 if (count($goals) > 0) {
@@ -5128,19 +5761,20 @@ abstract class PGameXBody extends tapcommon {
             //             Actions
             $coord = $this->automa_getHexTiebreaker($valid_targets, $player_id);
             if (!$coord) {
-                $this->notifyWithName('message_error', clienttranslate('no valid targets'));
+                $this->notifyWithName("message_error", clienttranslate("no valid targets"));
                 return;
             }
             //             1.	If the Automa is conquering an empty hex: Draw a territory tile and place it face-up with a
             //             random orientation on the chosen hex.
             if (array_search($coord, $exp_targets)) {
-                $this->notifyWithName('message', clienttranslate('${player_name} conquers an empty territory'), [], PLAYER_AUTOMA);
+                $this->notifyWithName("message", clienttranslate('${player_name} conquers an empty territory'), [], PLAYER_AUTOMA);
                 $cards = $this->awardCard($player_id, 1, CARD_TERRITORY, false, $be_reason);
                 $tile_data = array_shift($cards);
-                if ($tile_data != null) // no more tiles if null
-                    $this->effect_exploreWithCard($player_id, $tile_data['id'], "land_$coord");
-                else {
-                    $this->notifyWithName('message_error', clienttranslate('no more territory tiles left'));
+                if ($tile_data != null) {
+                    // no more tiles if null
+                    $this->effect_exploreWithCard($player_id, $tile_data["id"], "land_$coord");
+                } else {
+                    $this->notifyWithName("message_error", clienttranslate("no more territory tiles left"));
                     return;
                 }
             }
@@ -5148,8 +5782,8 @@ abstract class PGameXBody extends tapcommon {
         //             2.	Place an outpost from the Automa’s supply (of its own color) on the conquered territory.
         $this->effect_conquer($player_id, $coord, [$coord], false, null, $be_reason);
         //             3.	If the     icon is on the tiebreaker card and the conquered terrain isn’t the middle island,
-        //             place one of the Shadow Empire’s outposts toppled on the territory. 
-        if ($coord != '0_0') {
+        //             place one of the Shadow Empire’s outposts toppled on the territory.
+        if ($coord != "0_0") {
             if ($topple) {
                 $location = "land_$coord";
                 $structures = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM structure WHERE (card_location = '$location') ");
@@ -5164,20 +5798,20 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function coordText($coord) {
-        if (startsWith($coord, 'land_')) {
-            $coord = str_replace('land_', '', $coord);
+        if (startsWith($coord, "land_")) {
+            $coord = str_replace("land_", "", $coord);
         }
-        $c = str_replace('_', ',', $coord);
+        $c = str_replace("_", ",", $coord);
         return "({$c})";
     }
 
     function getDecisionPair() {
-        $cards = $this->cards->getCardsInLocation('decision_pair');
+        $cards = $this->cards->getCardsInLocation("decision_pair");
         $count = count($cards);
         if ($count == 2) {
             $track_card = array_shift($cards);
             $tiebreaker_card = array_shift($cards);
-            return [$track_card['type_arg'], $tiebreaker_card['type_arg']];
+            return [$track_card["type_arg"], $tiebreaker_card["type_arg"]];
         } else {
             $random_card = bga_rand(1, 22);
             return [$random_card, $random_card];
@@ -5187,8 +5821,9 @@ abstract class PGameXBody extends tapcommon {
     function effect_automaIncome($income_turn = 0) {
         $player_id = PLAYER_AUTOMA;
         $shadow_only = $this->isShadowEmpireOnly();
-        if ($shadow_only)
+        if ($shadow_only) {
             $player_id = PLAYER_SHADOW;
+        }
         if ($income_turn == 0) {
             $this->DbQuery("UPDATE playerextra SET player_income_turns=player_income_turns+1 WHERE player_id='$player_id'");
             $income_turn = $this->getCurrentEra($player_id);
@@ -5198,7 +5833,7 @@ abstract class PGameXBody extends tapcommon {
         if ($income_turn > 5) {
             return;
         }
-        $reason = reason('str', clienttranslate('income'));
+        $reason = reason("str", clienttranslate("income"));
         $this->setIncomeTurnPhase(INCOME_CIV, clienttranslate('${player_name} takes income turn ${turn_number}'), $player_id);
         if ($shadow_only) {
             $this->effect_automaChangeFavoriteTrack(PLAYER_SHADOW, 0);
@@ -5210,18 +5845,24 @@ abstract class PGameXBody extends tapcommon {
         $this->interruptBenefit();
         $level = $this->getAutomaLevel();
         if ($income_turn == 1) {
-            if ($level > 1)
+            if ($level > 1) {
                 $this->awardCard($player_id, 1, CARD_TAPESTRY);
+            }
             return;
         }
         // first in era
         if ($income_turn <= 4) {
-            $era_string = 'era' . $income_turn;
+            $era_string = "era" . $income_turn;
             $neighbours = $this->getPlayerNeighbours($player_id, false);
-            $neighbours_in_era = $this->getUniqueValueFromDB("SELECT COUNT(*) c FROM card WHERE card_type='3' AND card_location='$era_string' AND card_location_arg IN (" . implode(',', $neighbours) . ")");
-            if ($neighbours_in_era == 0) { // own tapestry is not played yet
+            $neighbours_in_era = $this->getUniqueValueFromDB(
+                "SELECT COUNT(*) c FROM card WHERE card_type='3' AND card_location='$era_string' AND card_location_arg IN (" .
+                    implode(",", $neighbours) .
+                    ")"
+            );
+            if ($neighbours_in_era == 0) {
+                // own tapestry is not played yet
                 // If first of neighbours to play, get bonus!
-                $this->awardVP($player_id, $income_turn, reason('str', clienttranslate('first to era')));
+                $this->awardVP($player_id, $income_turn, reason("str", clienttranslate("first to era")));
             }
         }
         for ($i = 0; $i < 9; $i += 1) {
@@ -5230,10 +5871,10 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_automaIncomeStage($player_id, $stage) {
-        $reason = reason('str', clienttranslate('income'));
+        $reason = reason("str", clienttranslate("income"));
         $level = $this->getAutomaLevel();
         $income_turn = $this->getCurrentEra($player_id);
-        //         $this->notifyWithName('message', clienttranslate('${player_name} income stage ${stage}'), [ 
+        //         $this->notifyWithName('message', clienttranslate('${player_name} income stage ${stage}'), [
         //                 'stage' => ($stage + 1) ], $player_id);
         switch ($stage) {
             case 0:
@@ -5250,21 +5891,26 @@ abstract class PGameXBody extends tapcommon {
                 if ($income_turn <= 4) {
                     $cards = $this->awardCard($player_id, 1, CARD_TAPESTRY, true, $reason);
                     $card = array_shift($cards);
-                    $card_id = $card['id'];
+                    $card_id = $card["id"];
                     //$this->playTapestryCard($card_id);
                     $era = $this->getCurrentEra($player_id);
-                    $era_string = 'era' . $era;
+                    $era_string = "era" . $era;
                     $this->DbQuery("UPDATE card SET card_location='$era_string',card_location_arg='$player_id' WHERE card_id='$card_id'");
-                    $args = $this->notifArgsAddCardInfo($card_id, ['destination' => "tapestry_slot_{$player_id}_$era"]);
-                    $this->notifyWithName("tapestrycard", clienttranslate('${player_name} plays a tapestry card ${card_name}'), $args, $player_id);
+                    $args = $this->notifArgsAddCardInfo($card_id, ["destination" => "tapestry_slot_{$player_id}_$era"]);
+                    $this->notifyWithName(
+                        "tapestrycard",
+                        clienttranslate('${player_name} plays a tapestry card ${card_name}'),
+                        $args,
+                        $player_id
+                    );
                 }
                 break;
             case 3:
                 // Extra advance - levels 3+
                 if ($level >= 3) {
                     list($decision_card_num, $tiebreaker_card_num) = $this->getDecisionPair();
-                    $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $tiebreaker_card_num, 'tt');
-                    $adv = $this->getRulesCard(CARD_DECISION, $decision_card_num, 'at');
+                    $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $tiebreaker_card_num, "tt");
+                    $adv = $this->getRulesCard(CARD_DECISION, $decision_card_num, "at");
                     $this->effect_automaAdvance($player_id, $adv, $track_tiebreaker);
                 }
                 break;
@@ -5310,44 +5956,57 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_automaChangeFavoriteTrack($player_id, $track) {
         if ($track == 0) {
-            $cards = $this->cards->getCardsInLocation('decision_pair');
+            $cards = $this->cards->getCardsInLocation("decision_pair");
             $count = count($cards);
             if ($count == 2) {
                 array_shift($cards);
                 $tiebreaker_card = array_shift($cards);
-                $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $tiebreaker_card['type_arg'], 'tt');
+                $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $tiebreaker_card["type_arg"], "tt");
             } else {
-                $track_tiebreaker = $this->getRulesCard(CARD_DECISION, bga_rand(1, 22), 'tt');
+                $track_tiebreaker = $this->getRulesCard(CARD_DECISION, bga_rand(1, 22), "tt");
             }
-            $track = $this->getValidTracksAutoma($player_id, 'l', $track_tiebreaker);
+            $track = $this->getValidTracksAutoma($player_id, "l", $track_tiebreaker);
         }
         $loc = "track_fav_$track";
-        $marker_id = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND card_location LIKE 'track_fav_%' AND card_location_arg='$player_id' LIMIT 1");
-        if ($marker_id == null)
+        $marker_id = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM structure WHERE card_type='7' AND card_location LIKE 'track_fav_%' AND card_location_arg='$player_id' LIMIT 1"
+        );
+        if ($marker_id == null) {
             $marker_id = $this->addCube($player_id, $loc);
+        }
         $this->DbQuery("UPDATE structure SET card_location='$loc' WHERE card_id='$marker_id'");
-        $this->notifyWithTrack('message', clienttranslate('${player_name} changes their favorite track to ${track_name}'), [
-            'track' => $track
-        ], $player_id);
-        $this->notifyMoveStructure('', $marker_id, [], $player_id);
+        $this->notifyWithTrack(
+            "message",
+            clienttranslate('${player_name} changes their favorite track to ${track_name}'),
+            [
+                "track" => $track,
+            ],
+            $player_id
+        );
+        $this->notifyMoveStructure("", $marker_id, [], $player_id);
     }
 
     function effect_automaIncomeVP() {
-        $reason = reason('str', 'income');
+        $reason = reason("str", "income");
         $player_id = PLAYER_AUTOMA;
         $era = $this->getCurrentEra($player_id);
         $level = $this->getAutomaLevel();
         if ($level <= 4) {
-            $table = [[1, 0, 1], [2, 1, 1], [2, 1, 2], [3, 2, 3],];
+            $table = [[1, 0, 1], [2, 1, 1], [2, 1, 2], [3, 2, 3]];
         } else {
-            $table = [[1, 0, 1], [2, 1, 2], [2, 2, 2], [3, 3, 4],];
+            $table = [[1, 0, 1], [2, 1, 2], [2, 2, 2], [3, 3, 4]];
         }
         list($m1, $m2, $m3) = $table[$era - 2];
-        $this->notifyWithName("message", clienttranslate('Automa\'s VP multipliers x${m1} x${m2} x${m3}'), [
-            'm1' => $m1,
-            'm2' => $m2,
-            'm3' => $m3
-        ], $player_id);
+        $this->notifyWithName(
+            "message",
+            clienttranslate('Automa\'s VP multipliers x${m1} x${m2} x${m3}'),
+            [
+                "m1" => $m1,
+                "m2" => $m2,
+                "m3" => $m3,
+            ],
+            $player_id
+        );
         $this->VPconq($player_id, $m1, $reason, BE_VP_TERRITORY);
         $this->VPforLandmarks($player_id, $m1, $reason, 145);
         $this->VPtrack($player_id, TRACK_MILITARY, $m2, $reason);
@@ -5357,21 +6016,26 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_automaShuffleDecisionDeck($player_id = PLAYER_AUTOMA) {
-        $this->cards->pickCardsForLocation(2, 'decision_pair', 'discard_decision');
-        $this->cards->moveAllCardsInLocation('discard_decision', 'deck_decision');
-        $cards = $this->cards->getCardsInLocation('deck_decision');
-        $this->notifyWithName("newCards", clienttranslate('${player_name} reshuffles decision cards'), [
-            'count' => count($cards),
-            'card_type' => CARD_DECISION,
-            'cards' => $cards
-        ], $player_id);
-        $this->cards->shuffle('deck_decision');
+        $this->cards->pickCardsForLocation(2, "decision_pair", "discard_decision");
+        $this->cards->moveAllCardsInLocation("discard_decision", "deck_decision");
+        $cards = $this->cards->getCardsInLocation("deck_decision");
+        $this->notifyWithName(
+            "newCards",
+            clienttranslate('${player_name} reshuffles decision cards'),
+            [
+                "count" => count($cards),
+                "card_type" => CARD_DECISION,
+                "cards" => $cards,
+            ],
+            $player_id
+        );
+        $this->cards->shuffle("deck_decision");
     }
 
     function effect_automaCivAbility($income_turn) {
-        $reason = reason('str', 'income');
+        $reason = reason("str", "income");
         $player_id = PLAYER_AUTOMA;
-        $civ = $this->getGameStateValue('automa_civ');
+        $civ = $this->getGameStateValue("automa_civ");
         $this->interruptBenefit();
         if ($civ == TRACK_MILITARY) {
             if ($income_turn >= 2 && $income_turn <= 5) {
@@ -5385,34 +6049,36 @@ abstract class PGameXBody extends tapcommon {
                 // Income Turns 2-5: The Automa gains 1 VP extra for each territory it controls.
                 $this->queueBenefitAutoma(29, $player_id, $reason, 1); // vp for controlled territory
             }
-        } else if ($civ == TRACK_TECHNOLOGY) {
+        } elseif ($civ == TRACK_TECHNOLOGY) {
             if ($income_turn >= 2 && $income_turn <= 5) {
                 $this->VPforLandmarks($player_id, 1, $reason, 145);
             }
-        } else if ($civ == TRACK_SCIENCE) {
+        } elseif ($civ == TRACK_SCIENCE) {
             if ($income_turn >= 3 && $income_turn <= 5) {
                 // research
                 $this->queueBenefitAutoma(18, $player_id, $reason);
             }
-        } else if ($civ == TRACK_EXPLORATION) {
+        } elseif ($civ == TRACK_EXPLORATION) {
             if ($income_turn == 2 || $income_turn == 4) {
                 // explore
                 $this->queueBenefitAutoma(46, $player_id, $reason);
-            } else if ($income_turn == 3 || $income_turn == 5) {
+            } elseif ($income_turn == 3 || $income_turn == 5) {
                 // conquer
                 $this->queueBenefitAutoma(21, $player_id, $reason);
             }
         }
     }
 
-    function effect_automaToppleShadow($player_id = PLAYER_AUTOMA, $count = 1, $reason = null, $ben = 0) { // 146
+    function effect_automaToppleShadow($player_id = PLAYER_AUTOMA, $count = 1, $reason = null, $ben = 0) {
+        // 146
         // If more than 2 territories controlled by the Automa have only 1 token, place a toppled Shadow Empire outpost of one of those.<p>
         $map = $this->getMap();
         $goals = [];
         foreach ($map as $coord => $info) {
             if ($this->isHexOwner($player_id, $coord, $map)) {
-                if ($info['occupancy'] == 1)
+                if ($info["occupancy"] == 1) {
                     $goals[] = $coord;
+                }
             }
         }
         if (count($goals) > 2) {
@@ -5424,76 +6090,100 @@ abstract class PGameXBody extends tapcommon {
     function effect_addToppledShadowOutpost($coord) {
         $location = "land_$coord";
         $player_id = PLAYER_SHADOW;
-        $oid = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='5' AND card_location='hand' AND card_location_arg='$player_id' LIMIT 1");
+        $oid = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM structure WHERE card_type='5' AND card_location='hand' AND card_location_arg='$player_id' LIMIT 1"
+        );
         if ($oid) {
             //$this->DbQuery("UPDATE structure SET card_type_arg=1 WHERE card_id='$oid'");
             //$this->dbSetStructureLocation($oid, $location, null, '', $player_id);
             //$this->notifyWithName("topple", clienttranslate('${player_name} adds toppled outpost'), [ 'bid' => $oid ], $player_id);
             $this->effect_placeOnMap($player_id, $oid, $location, clienttranslate('${player_name} adds toppled outpost'), false);
         } else {
-            $this->notifyWithName('message', clienttranslate('${player_name} does not have more outposts'), [], $player_id);
+            $this->notifyWithName("message", clienttranslate('${player_name} does not have more outposts'), [], $player_id);
         }
     }
 
     function effect_automaAddProgressCards($num) {
-        $this->cards->pickCardsForLocation($num, 'deck_progress', 'deck_decision', 0, true);
-        $this->notifyWithName('message', clienttranslate('${player_name} adds ${num} cards to decision deck'), [
-            'num' => $num
-        ], PLAYER_AUTOMA);
-        $this->notifyDeckCounters('deck_decision');
+        $this->cards->pickCardsForLocation($num, "deck_progress", "deck_decision", 0, true);
+        $this->notifyWithName(
+            "message",
+            clienttranslate('${player_name} adds ${num} cards to decision deck'),
+            [
+                "num" => $num,
+            ],
+            PLAYER_AUTOMA
+        );
+        $this->notifyDeckCounters("deck_decision");
     }
 
     function effect_automaExplore() {
         $bene = $this->getCurrentBenefit();
-        $ben = $bene['benefit_type'];
-        $player_id = $bene['benefit_player_id'];
-        $be_reason = reason('be', $ben);
-        $flags = (int) $this->getRulesBenefit($ben, 'flags', 0);
+        $ben = $bene["benefit_type"];
+        $player_id = $bene["benefit_player_id"];
+        $be_reason = reason("be", $ben);
+        $flags = (int) $this->getRulesBenefit($ben, "flags", 0);
         $anywhere = ($flags & FLAG_ANYWHERE) != 0;
         $targets = $this->getExplorationTargets($anywhere, $player_id);
         if (count($targets) == 0) {
-            $this->notifyWithName("message_error", clienttranslate('${player_name} has no valid targets, effect is void ${reason}'), [
-                'reason' => $this->getReasonFullRec($be_reason)
-            ], $player_id);
+            $this->notifyWithName(
+                "message_error",
+                clienttranslate('${player_name} has no valid targets, effect is void ${reason}'),
+                [
+                    "reason" => $this->getReasonFullRec($be_reason),
+                ],
+                $player_id
+            );
             return;
         }
         $loc = bga_rand(0, count($targets) - 1); // random valid target for now XXX automa
         $coord = $targets[$loc];
         $cards = $this->awardCard($player_id, 1, CARD_TERRITORY, false, $be_reason);
         $tile_data = array_shift($cards);
-        if ($tile_data != null) // no more tiles if null
-            $this->effect_exploreWithCard($player_id, $tile_data['id'], "land_$coord");
+        if ($tile_data != null) {
+            // no more tiles if null
+            $this->effect_exploreWithCard($player_id, $tile_data["id"], "land_$coord");
+        }
     }
 
     function effect_exploreWithCard($player_id, $tile_id, $location, $rot = -1, $reason = null) {
-        if ($rot == -1)
+        if ($rot == -1) {
             $rot = bga_rand(0, 5);
+        }
         $tile_data = $this->getCardInfoById($tile_id);
         $this->systemAssertTrue("invalid id $tile_id", $tile_data);
-        $tile_type = $tile_data['card_type_arg'];
+        $tile_type = $tile_data["card_type_arg"];
         $this->systemAssertTrue("invalid tile " . toJson($tile_data), $tile_type);
         $u = getPart($location, 1);
         $v = getPart($location, 2);
         $map = getPart($location, 0);
-        $coord = $u . '_' . $v;
-        if ($map == 'land' || $map == 'map') {
-            $this->DbQuery("UPDATE card SET card_location='map', card_location_arg2='$coord', card_location_arg='$rot' WHERE card_id='$tile_id'");
+        $coord = $u . "_" . $v;
+        if ($map == "land" || $map == "map") {
+            $this->DbQuery(
+                "UPDATE card SET card_location='map', card_location_arg2='$coord', card_location_arg='$rot' WHERE card_id='$tile_id'"
+            );
             $mapcell = $this->getObjectListFromDB("SELECT * FROM map WHERE map_coords='$coord'");
             $this->systemAssertTrue("invalid map loc $coord", $mapcell);
             $this->DbQuery("UPDATE map SET map_tile_id='$tile_type', map_tile_orient='$rot' WHERE map_coords='$coord'");
         } else {
-            $this->DbQuery("UPDATE card SET card_location='$map', card_location_arg2='$coord', card_location_arg='$rot' WHERE card_id='$tile_id'");
+            $this->DbQuery(
+                "UPDATE card SET card_location='$map', card_location_arg2='$coord', card_location_arg='$rot' WHERE card_id='$tile_id'"
+            );
         }
         // UPDATE
         $coord_text = $this->coordText($location);
         $tile_data = $this->getCardInfoById($tile_id);
         $args = $this->notifArgsAddCardInfo($tile_data);
-        $this->notifyWithName('explore', clienttranslate('${player_name} explores territory ${card_name} at ${coord_text} ${reason}'), $args + [
-            'orient' => $rot,
-            'coord_text' => $coord_text,
-            'location' => $location,
-            'reason' => $this->getReasonFullRec($reason, false)
-        ], $player_id);
+        $this->notifyWithName(
+            "explore",
+            clienttranslate('${player_name} explores territory ${card_name} at ${coord_text} ${reason}'),
+            $args + [
+                "orient" => $rot,
+                "coord_text" => $coord_text,
+                "location" => $location,
+                "reason" => $this->getReasonFullRec($reason, false),
+            ],
+            $player_id
+        );
     }
 
     function interruptBenefit() {
@@ -5502,28 +6192,32 @@ abstract class PGameXBody extends tapcommon {
 
     function withReasonDataArg($reason, $arg) {
         $data = $reason ?? ":::";
-        $split = explode(':', $data, 4);
+        $split = explode(":", $data, 4);
         //$curr = getReasonPart($bene['benefit_data'], 3);
         for ($i = 0; $i < 4; $i++) {
-            if (!isset($split[$i]))
+            if (!isset($split[$i])) {
                 $split[$i] = "";
+            }
         }
         $split[3] = $arg;
-        return implode(':', $split);
+        return implode(":", $split);
     }
 
     function setBenefitDataArg($bene, $arg, $commit = true) {
         if (is_numeric($bene)) {
             $bene = $this->getCurrentBenefit($bene);
-            if (!$bene) return null;
+            if (!$bene) {
+                return null;
+            }
         }
         $this->systemAssertTrue("invalid arg for setBenefitDataArg", is_array($bene));
-        $beid = $bene['benefit_id'];
+        $beid = $bene["benefit_id"];
         $this->systemAssertTrue("invalid arg for setBenefitDataArg benid=$beid", $beid);
 
-        $ben_data = $bene['benefit_data'] = $this->withReasonDataArg($bene['benefit_data'], $arg);
-        if ($commit)
+        $ben_data = $bene["benefit_data"] = $this->withReasonDataArg($bene["benefit_data"], $arg);
+        if ($commit) {
             $this->DbQuery("UPDATE benefit SET benefit_data = '$ben_data' WHERE benefit_id = $beid");
+        }
         return $bene;
     }
 
@@ -5532,16 +6226,17 @@ abstract class PGameXBody extends tapcommon {
         $order = 0;
         $inorder = [];
         foreach ($benefits as $bid => &$bene) {
-            $ben_type = $bene['benefit_type'];
-            $cat = $bene['benefit_category'];
-            $bene['reason'] = $this->getReasonFullRec($bene['benefit_data'], false);
+            $ben_type = $bene["benefit_type"];
+            $cat = $bene["benefit_category"];
+            $bene["reason"] = $this->getReasonFullRec($bene["benefit_data"], false);
             if ($ben_type != 0) {
-                if ($cat == 'standard')
-                    $bene['name'] = $this->getReasonFullRec(reason('be', $ben_type), false);
-                else if ($cat == 'civ')
-                    $bene['name'] = $this->getReasonFullRec(reason_civ($ben_type), false);
+                if ($cat == "standard") {
+                    $bene["name"] = $this->getReasonFullRec(reason("be", $ben_type), false);
+                } elseif ($cat == "civ") {
+                    $bene["name"] = $this->getReasonFullRec(reason_civ($ben_type), false);
+                }
             }
-            $bene['order'] = $order;
+            $bene["order"] = $order;
             $inorder[] = $bene;
             $order++;
         }
@@ -5550,49 +6245,57 @@ abstract class PGameXBody extends tapcommon {
 
     function notifyBenefitQueue() {
         $inorder = $this->dbGetBenefitQueue();
-        $this->notifyAllPlayers('benefitQueue', '', $inorder);
+        $this->notifyAllPlayers("benefitQueue", "", $inorder);
     }
 
     function queueBonus($type, $quantity, $benefit, $after, $player_id) {
         //$this->debugConsole("bene bonus, $type, $after, $player_id, $quantity, $benefit");
         if ($this->isPlayerAlive($player_id)) {
-            $this->DbQuery("INSERT INTO benefit (benefit_category, benefit_type, benefit_prerequisite, benefit_quantity, benefit_player_id, benefit_data) VALUES ('bonus', '$type','$after', '$quantity', '$player_id', '$benefit')");
+            $this->DbQuery(
+                "INSERT INTO benefit (benefit_category, benefit_type, benefit_prerequisite, benefit_quantity, benefit_player_id, benefit_data) VALUES ('bonus', '$type','$after', '$quantity', '$player_id', '$benefit')"
+            );
             $this->notifyBenefitQueue();
-            return $this->getLastId('benefit');
+            return $this->getLastId("benefit");
         } else {
             if ($type > 0) {
-                $this->notifyAllPlayers('message', clienttranslate('${player_name} is finished, cannot get the bonus'), [
-                    'player_name' => $this->getPlayerNameById($player_id)
+                $this->notifyAllPlayers("message", clienttranslate('${player_name} is finished, cannot get the bonus'), [
+                    "player_name" => $this->getPlayerNameById($player_id),
                 ]);
             }
         }
     }
 
     function isBenefitVP($ben) {
-        if ($ben == 0)
+        if ($ben == 0) {
             return false;
-        if ($ben > 500 && $ben < 599)
+        }
+        if ($ben > 500 && $ben < 599) {
             return true;
-        $rule = $this->getRulesBenefit($ben, 'r');
-        if ($rule == 'v')
+        }
+        $rule = $this->getRulesBenefit($ben, "r");
+        if ($rule == "v") {
             return true;
+        }
         return false;
     }
 
     function checkAliveForBenefit($player_id, $ben, $cat) {
-        if ($this->isPlayerAlive($player_id))
+        if ($this->isPlayerAlive($player_id)) {
             return true;
-        if ($cat == 'standard' && $this->isBenefitVP($ben))
+        }
+        if ($cat == "standard" && $this->isBenefitVP($ben)) {
             return true;
-        $auto = $this->getRulesBenefit($ben, 'auto');
-        if ($auto)
+        }
+        $auto = $this->getRulesBenefit($ben, "auto");
+        if ($auto) {
             return true;
+        }
         if ($ben > 0) {
-            $bename = $this->getTokenName('be', $ben);
-            $this->notifyAllPlayers('message', clienttranslate('${player_name} is finished, cannot get ${bename}'), [
-                'i18n' => ['bename'],
-                'bename' => $bename,
-                'player_name' => $this->getPlayerNameById($player_id)
+            $bename = $this->getTokenName("be", $ben);
+            $this->notifyAllPlayers("message", clienttranslate('${player_name} is finished, cannot get ${bename}'), [
+                "i18n" => ["bename"],
+                "bename" => $bename,
+                "player_name" => $this->getPlayerNameById($player_id),
             ]);
         }
         return false;
@@ -5605,34 +6308,43 @@ abstract class PGameXBody extends tapcommon {
      * $after: prerequisite (other benefit id)
      * $quantity: quantity/value
      */
-    function benefitSingleEntry($cat, $type, $player_id, $quantity = 1, $data = '') {
+    function benefitSingleEntry($cat, $type, $player_id, $quantity = 1, $data = "") {
         // $this->debugConsole("bene $cat, $type, $after, $player_id, $quantity, $data");
         $this->systemAssertTrue("data is array", !is_array($data));
         $this->systemAssertTrue("ben is array", !is_array($type));
         $this->systemAssertTrue("playerid is array", !is_array($player_id));
-        $this->DbQuery("INSERT INTO benefit (benefit_category, benefit_type, benefit_prerequisite, benefit_quantity, benefit_data, benefit_player_id) VALUES ('$cat', '$type', '0', '$quantity','$data','$player_id')");
+        $this->DbQuery(
+            "INSERT INTO benefit (benefit_category, benefit_type, benefit_prerequisite, benefit_quantity, benefit_data, benefit_player_id) VALUES ('$cat', '$type', '0', '$quantity','$data','$player_id')"
+        );
         $this->notifyBenefitQueue();
     }
 
     function benefitSingleEntryReinsert($bene) {
-        $this->benefitSingleEntry($bene['benefit_category'],  $bene['benefit_type'], $bene['benefit_player_id'], $bene['benefit_quantity'], $bene['benefit_data']);
+        $this->benefitSingleEntry(
+            $bene["benefit_category"],
+            $bene["benefit_type"],
+            $bene["benefit_player_id"],
+            $bene["benefit_quantity"],
+            $bene["benefit_data"]
+        );
     }
 
-    function benefitCivEntry($cid, $player_id, $data = '') {
-        if ($data == '')
+    function benefitCivEntry($cid, $player_id, $data = "") {
+        if ($data == "") {
             $data = reason_civ($cid);
-        $this->benefitSingleEntry('civ', $cid, $player_id, 1, $data);
+        }
+        $this->benefitSingleEntry("civ", $cid, $player_id, 1, $data);
     }
 
     function stInvent() {
         //$player_id = $this->getActivePlayerId();
         $current_benefit = $this->getCurrentBenefit();
         $this->systemAssertTrue("Cannot find benefit on stack", $current_benefit);
-        $ben = $current_benefit['benefit_type'];
-        $i = $this->getRulesBenefit($ben, 'r');
+        $ben = $current_benefit["benefit_type"];
+        $i = $this->getRulesBenefit($ben, "r");
         //$flags = $this->getRulesBenefit($ben);
-        $this->systemAssertTrue("Invalid invent benefit", $i == 'i');
-        $discards = $this->cards->getCardsInLocation('deck_tech_vis');
+        $this->systemAssertTrue("Invalid invent benefit", $i == "i");
+        $discards = $this->cards->getCardsInLocation("deck_tech_vis");
         $void = false;
         if (count($discards) == 0) {
             $void = true;
@@ -5640,17 +6352,17 @@ abstract class PGameXBody extends tapcommon {
         if ($void) {
             // no more cards
             $this->notifyWithName("message_error", clienttranslate('${player_name} has no valid targets, effect is void ${reason}'), [
-                'reason' => $this->getReasonFullRec(reason('be', $this->getCurrentBenefitType()))
+                "reason" => $this->getReasonFullRec(reason("be", $this->getCurrentBenefitType())),
             ]);
             $this->clearCurrentBenefit();
-            $this->gamestate->nextState('next');
+            $this->gamestate->nextState("next");
             return false;
         }
         return true;
     }
 
     function action_invent($card_type) {
-        $this->checkAction('invent');
+        $this->checkAction("invent");
         $player_id = $this->getActivePlayerId();
         $hasRecycles = $this->hasCiv($player_id, CIV_RECYCLERS);
         if ($card_type == -1 && $hasRecycles) {
@@ -5659,33 +6371,33 @@ abstract class PGameXBody extends tapcommon {
             }
             self::DbQuery("UPDATE card SET card_location='draw' WHERE card_type=4 AND card_location='discard'");
 
-            $cards = $this->getCardsSearch(null, null, 'draw');
-            $this->notifyWithName("moveCard", '', ['cards' => $cards, '_private' => true,], $player_id);
-            $this->gamestate->nextState('next');
+            $cards = $this->getCardsSearch(null, null, "draw");
+            $this->notifyWithName("moveCard", "", ["cards" => $cards, "_private" => true], $player_id);
+            $this->gamestate->nextState("next");
             return;
         }
         $current_benefit = $this->getCurrentBenefit();
         $this->systemAssertTrue("Cannot find benefit on stack", $current_benefit);
         $card_id = 0;
         $this->clearCurrentBenefit();
-        $ben = $current_benefit['benefit_type'];
-        $i = $this->getRulesBenefit($ben, 'r');
+        $ben = $current_benefit["benefit_type"];
+        $i = $this->getRulesBenefit($ben, "r");
         $flags = $this->getRulesBenefit($ben);
-        $this->systemAssertTrue("Invalid invent benefit", $i == 'i');
+        $this->systemAssertTrue("Invalid invent benefit", $i == "i");
         if ($card_type > 0) {
             $card_data = $this->getCardInfoSearch(CARD_TECHNOLOGY, $card_type);
             $this->systemAssertTrue("invalid card selected $card_type", $card_data);
-            $location = $card_data['card_location'];
+            $location = $card_data["card_location"];
             $message = totranslate("This does not seems to be tech card from the face up display");
 
-            $card_id = $card_data['card_id'];
-            $this->dbSetCardLocation($card_id, 'hand', 0, '', $player_id);
+            $card_id = $card_data["card_id"];
+            $this->dbSetCardLocation($card_id, "hand", 0, "", $player_id);
 
-            if ($location == 'draw') {
+            if ($location == "draw") {
                 $this->userAssertTrue($message, $hasRecycles && $this->getAdjustmentVariant() < 8);
-            } else if ($location == 'discard') {
+            } elseif ($location == "discard") {
                 $this->userAssertTrue($message, $hasRecycles && $this->getAdjustmentVariant() >= 8);
-            } else if ($location == 'deck_tech_vis') {
+            } elseif ($location == "deck_tech_vis") {
                 $this->userAssertTrue(totranslate("You may not invent a face up card at this time"), $flags & FLAG_FACE_UP);
                 $this->drawTechCards(1); // replenish
             } else {
@@ -5693,78 +6405,82 @@ abstract class PGameXBody extends tapcommon {
             }
         } else {
             $this->userAssertTrue(totranslate("You may only invent a face up card at this time"), $flags & FLAG_FACE_DOWN);
-            $cards = $this->dbPickCardsForLocation(1, CARD_TECHNOLOGY, 'hand', $player_id);
+            $cards = $this->dbPickCardsForLocation(1, CARD_TECHNOLOGY, "hand", $player_id);
             if (count($cards) > 0) {
                 $new_card = array_shift($cards);
-                $card_id = $new_card['id'];
-                $card_type = $new_card['type_arg'];
-                $this->dbSetCardLocation($card_id, 'hand', 0, '', $player_id);
+                $card_id = $new_card["id"];
+                $card_type = $new_card["type_arg"];
+                $this->dbSetCardLocation($card_id, "hand", 0, "", $player_id);
             } else {
                 $card_id = 0; // void effect
             }
         }
         if ($hasRecycles) {
-            // discard cards recyclers looked at 
+            // discard cards recyclers looked at
             if ($this->getAdjustmentVariant() < 8) {
                 self::DbQuery("UPDATE card SET card_location='discard' WHERE card_type=4 AND card_location='draw'");
             }
-            $cards = $this->getCardsSearch(CARD_TECHNOLOGY, null, 'discard');
-            $this->notifyWithName("moveCard", '', ['cards' => $cards, '_private' => true,], $player_id);
+            $cards = $this->getCardsSearch(CARD_TECHNOLOGY, null, "discard");
+            $this->notifyWithName("moveCard", "", ["cards" => $cards, "_private" => true], $player_id);
         }
         if ($card_id) {
-            if ($flags & FLAG_UPGRADE) { // invent and upgrade!
+            if ($flags & FLAG_UPGRADE) {
+                // invent and upgrade!
                 // XXX when invent and upgrade cannot do delayed resolve
-                $this->effect_cardComesInPlayTriggerResolve($card_id, $player_id,  $current_benefit['benefit_data']);
+                $this->effect_cardComesInPlayTriggerResolve($card_id, $player_id, $current_benefit["benefit_data"]);
                 $this->upgradeTechCard($card_id);
             } else {
-                $this->effect_cardComesInPlay($card_id, $player_id,  $current_benefit['benefit_data']);
+                $this->effect_cardComesInPlay($card_id, $player_id, $current_benefit["benefit_data"]);
             }
         }
         $this->notifyDeckCounters();
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function drawTechCards($count, $refresh = false) {
         $discards = [];
         if ($refresh) {
-            $discards = $this->cards->getCardsInLocation('deck_tech_vis');
+            $discards = $this->cards->getCardsInLocation("deck_tech_vis");
             foreach ($discards as $card) {
-                $this->cards->playCard($card['id']);
+                $this->cards->playCard($card["id"]);
             }
         }
-        $this->notifyAllPlayers("newTechCards", '', array('cards' => [], 'discards' => $discards));
-        $this->notifyAllPlayers('simplePause', '', ['time' => 500 * count($discards)]);
+        $this->notifyAllPlayers("newTechCards", "", ["cards" => [], "discards" => $discards]);
+        $this->notifyAllPlayers("simplePause", "", ["time" => 500 * count($discards)]);
         if ($count > 0) {
-            $cards = $this->dbPickCardsForLocation($count, CARD_TECHNOLOGY, 'deck_tech_vis', 0);
-            $this->notifyAllPlayers("newTechCards", '', array('cards' => $cards, 'discards' => []));
+            $cards = $this->dbPickCardsForLocation($count, CARD_TECHNOLOGY, "deck_tech_vis", 0);
+            $this->notifyAllPlayers("newTechCards", "", ["cards" => $cards, "discards" => []]);
         }
-        $this->notifyDeckCounters('deck_tech');
+        $this->notifyDeckCounters("deck_tech");
     }
 
     function action_upgrade($card_type) {
-        $this->checkAction('upgrade');
+        $this->checkAction("upgrade");
         $player_id = $this->getActivePlayerId();
-        $card_data = $this->getCardInfoSearch(CARD_TECHNOLOGY, $card_type, 'hand', $player_id, null);
+        $card_data = $this->getCardInfoSearch(CARD_TECHNOLOGY, $card_type, "hand", $player_id, null);
         $this->userAssertTrue(totranslate("Technology card must be in player's hand"), $card_data);
-        $this->userAssertTrue(totranslate('Prerequisite for this upgrade is not met'), $this->isUpgradePrereqMet($card_type));
+        $this->userAssertTrue(totranslate("Prerequisite for this upgrade is not met"), $this->isUpgradePrereqMet($card_type));
         $b = $this->getCurrentBenefit();
         $this->systemAssertTrue("upgrade ben", $b);
-        $type = $b['benefit_type'];
+        $type = $b["benefit_type"];
         $this->systemAssertTrue("upgrade type $type", $type == BE_UPGRADE_TECH || $type == BE_UPGRADE_TECH_INCOME);
         $this->clearCurrentBenefit();
-        $this->upgradeTechCard($card_data['card_id']);
-        $this->gamestate->nextState('benefit');
+        $this->upgradeTechCard($card_data["card_id"]);
+        $this->gamestate->nextState("benefit");
     }
 
     function isUpgradePrereqMet($card_type) {
-        $card_data = $this->getCardInfoSearch(CARD_TECHNOLOGY, $card_type, 'hand', null, null);
-        if (!$card_data)
+        $card_data = $this->getCardInfoSearch(CARD_TECHNOLOGY, $card_type, "hand", null, null);
+        if (!$card_data) {
             return false;
-        $slot = $card_data['card_location_arg2'];
-        if ($slot == 1) { // upgrading to 2
+        }
+        $slot = $card_data["card_location_arg2"];
+        if ($slot == 1) {
+            // upgrading to 2
             $checkupgrade = true;
-            $player_id = $card_data['card_location_arg'];
-            if ($this->isTapestryActive($player_id, 20)) { // CAN SKIP IF GOLDEN AGE
+            $player_id = $card_data["card_location_arg"];
+            if ($this->isTapestryActive($player_id, 20)) {
+                // CAN SKIP IF GOLDEN AGE
                 $checkupgrade = false;
             }
             $card = "tech_card_$card_type";
@@ -5774,66 +6490,74 @@ abstract class PGameXBody extends tapcommon {
             }
             if ($checkupgrade) {
                 // Need to check if any of neighbours have reached the correct track/level...
-                $pre = $this->tech_card_data[$card_type]['requirement'];
-                $track = $pre['track'];
+                $pre = $this->tech_card_data[$card_type]["requirement"];
+                $track = $pre["track"];
                 $neighbours = $this->getPlayerNeighbours($player_id);
                 if ($track <= 4) {
                     foreach ($neighbours as $p) {
                         $max = $this->getMaxTrackSlot($track, $p);
-                        if ($max >= $pre['level']) {
+                        if ($max >= $pre["level"]) {
                             return true;
                         }
                     }
                     return false;
                 }
                 $track_field = $this->getIncomeTrackDbColumn($track - 4);
-                $highest = $this->getUniqueValueFromDB("SELECT MAX($track_field) FROM playerextra WHERE player_id IN (" . implode(',', $neighbours) . ")");
-                if ($highest < $pre['level']) {
+                $highest = $this->getUniqueValueFromDB(
+                    "SELECT MAX($track_field) FROM playerextra WHERE player_id IN (" . implode(",", $neighbours) . ")"
+                );
+                if ($highest < $pre["level"]) {
                     return false;
                 }
             }
             return true;
-        } else if ($slot == 2) {
-            return $this->hasCiv($card_data['card_location_arg'], CIV_RECYCLERS);
+        } elseif ($slot == 2) {
+            return $this->hasCiv($card_data["card_location_arg"], CIV_RECYCLERS);
         }
         return true;
     }
 
     function upgradeTechCard($card_id, $inventors = false) {
         $card_data = $this->getObjectFromDB("SELECT * FROM card WHERE card_id='$card_id'");
-        $player_id = $card_data['card_location_arg'];
-        $slot = $card_data['card_location_arg2'] + 1;
+        $player_id = $card_data["card_location_arg"];
+        $slot = $card_data["card_location_arg2"] + 1;
         $recyclers = $this->hasCiv($player_id, CIV_RECYCLERS);
         if ($slot == 3) {
-            if (!$recyclers)
-                throw new BgaUserException($this->_('Cards from the upper row cannot be upgraded'));
+            if (!$recyclers) {
+                throw new BgaUserException($this->_("Cards from the upper row cannot be upgraded"));
+            }
             $slot = 0;
         }
-        $card_type = $card_data['card_type_arg'];
+        $card_type = $card_data["card_type_arg"];
         $this->DbQuery("UPDATE card SET card_location_arg2 = '$slot' WHERE card_id='$card_id'");
         $active_player = $this->getActivePlayerId();
         // may not be owner of the card (if inventors used!)
-        $message = ($active_player == $player_id) ? clienttranslate('${player_name} upgrades ${card_name}') : clienttranslate('${player_name} upgrades ${card_name} for ${player_name2}');
+        $message =
+            $active_player == $player_id
+                ? clienttranslate('${player_name} upgrades ${card_name}')
+                : clienttranslate('${player_name} upgrades ${card_name} for ${player_name2}');
         $args = $this->notifArgsAddCardInfo($card_id, [
-            'player_id2' => $player_id,
-            'player_name2' => $this->getPlayerNameById($player_id)
+            "player_id2" => $player_id,
+            "player_name2" => $this->getPlayerNameById($player_id),
         ]);
         $this->notifyWithName("moveCard", $message, $args, $active_player);
-        $benefit = ($slot == 1) ? $this->tech_card_data[$card_type]['circle']['benefit'] : $this->tech_card_data[$card_type]['square']['benefit'];
+        $benefit =
+            $slot == 1 ? $this->tech_card_data[$card_type]["circle"]["benefit"] : $this->tech_card_data[$card_type]["square"]["benefit"];
         $this->interruptBenefit(); // this will go on top of everything
         $this->queueTechBenefit($card_type, $slot, $player_id);
         // IS THIS UPGRADE PART OF ALLIANCE - IF SO ALLY GETS BENEFIT
         $alliances = $this->getActiveTapestriesOfType(5);
         foreach ($alliances as $alliance) {
-            $ally = $alliance['card_location_arg2'];
-            $orig = $alliance['card_location_arg'];
-            if (($ally == $active_player) || ($ally == $player_id)) {
+            $ally = $alliance["card_location_arg2"];
+            $orig = $alliance["card_location_arg"];
+            if ($ally == $active_player || $ally == $player_id) {
                 $this->queueBenefitNormal($benefit, $orig, reason_tapestry(5));
             }
         }
         if (!$inventors) {
             // GOLDEN AGE BONUS - DOESN'T APPLY IF INVENTORS HAVE DONE THE UPGRADE FOR YOU.
-            if ($this->isTapestryActive($player_id, 20)) { // GOLDEN AGE
+            if ($this->isTapestryActive($player_id, 20)) {
+                // GOLDEN AGE
                 $this->awardVP($player_id, 3, reason_tapestry(20));
             }
             if ($this->hasCiv($player_id, CIV_UTILITARIENS) && $slot == 2) {
@@ -5844,7 +6568,8 @@ abstract class PGameXBody extends tapcommon {
             }
         } else {
             // INVENTORS
-            if ($player_id != $active_player) { // opponent gets benefit
+            if ($player_id != $active_player) {
+                // opponent gets benefit
                 $this->queueTechBenefit($card_type, $slot, $active_player);
             }
         }
@@ -5852,7 +6577,7 @@ abstract class PGameXBody extends tapcommon {
         if ($slot == 2) {
             $cube = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='tech_card_$card_type' LIMIT 1");
             if ($cube != null) {
-                $owner = $cube['card_location_arg'];
+                $owner = $cube["card_location_arg"];
                 if ($owner != $player_id && $this->hasCiv($owner, CIV_INVENTORS)) {
                     $this->queueBenefitNormal(130, $owner, reason_civ(CIV_INVENTORS));
                 }
@@ -5868,68 +6593,77 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_transferTech() {
         $player_id = $this->getActivePlayerId();
-        $cubes = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_type=7 AND card_location_arg=$player_id AND card_location LIKE 'tech_card_%'");
+        $cubes = $this->getCollectionFromDB(
+            "SELECT * FROM structure WHERE card_type=7 AND card_location_arg=$player_id AND card_location LIKE 'tech_card_%'"
+        );
         $found = false;
         foreach ($cubes as $cube) {
-            $card = $cube['card_location'];
+            $card = $cube["card_location"];
             $card_type = getPart($card, 2);
-            $card_data = $this->getCardInfoSearch(CARD_TECHNOLOGY, $card_type, 'hand', null, null);
-            if ($card_data && $card_data['card_location_arg2'] == 2) {
-                $card_id = $card_data['card_id'];
-                $owner = $card_data['card_location_arg'];
+            $card_data = $this->getCardInfoSearch(CARD_TECHNOLOGY, $card_type, "hand", null, null);
+            if ($card_data && $card_data["card_location_arg2"] == 2) {
+                $card_id = $card_data["card_id"];
+                $owner = $card_data["card_location_arg"];
                 if ($owner != $player_id) {
                     $this->DbQuery("UPDATE card SET card_location_arg='$player_id', card_location_arg2='0' WHERE card_id='$card_id'");
-                    $this->notifyWithName("techtransfer", clienttranslate('${player_name} takes ${card_name} from ${player_name2}'), array(
-                        'card_id' => $card_type,
-                        'card_name' => $this->tech_card_data[$card_type]['name'],
-                        'i18n' => array('card_name'),
-                        'player_id2' => $owner,
-                        'player_name2' => $this->getPlayerNameById($owner),
-                        'slot' => 0
-                    ));
+                    $this->notifyWithName("techtransfer", clienttranslate('${player_name} takes ${card_name} from ${player_name2}'), [
+                        "card_id" => $card_type,
+                        "card_name" => $this->tech_card_data[$card_type]["name"],
+                        "i18n" => ["card_name"],
+                        "player_id2" => $owner,
+                        "player_name2" => $this->getPlayerNameById($owner),
+                        "slot" => 0,
+                    ]);
                     $found = true;
                 }
             }
         }
         if (!$found) {
-            $this->notifyWithName('message_error', 'Inventor cube is not found'); // NOI18N
+            $this->notifyWithName("message_error", "Inventor cube is not found"); // NOI18N
         }
     }
 
     function action_techBenefit($card_type) {
-        $this->checkAction('techBenefit');
+        $this->checkAction("techBenefit");
         $player_id = $this->getActivePlayerId();
         $args = $this->argTechBenefit();
         // Check card in valid slot and owned by player...
-        $this->systemAssertTrue("invalid card for tech benefit $card_type", array_search($card_type, $args['cards']) !== false);
+        $this->systemAssertTrue("invalid card for tech benefit $card_type", array_search($card_type, $args["cards"]) !== false);
         $this->clearCurrentBenefit();
         $this->interruptBenefit();
-        $ben = $this->queueTechBenefit($card_type, $args['slot'], $player_id);
-        $this->userAssertTrue(totranslate('Card benefit is already used this turn'), $ben);
-        $this->gamestate->nextState('next');
+        $ben = $this->queueTechBenefit($card_type, $args["slot"], $player_id);
+        $this->userAssertTrue(totranslate("Card benefit is already used this turn"), $ben);
+        $this->gamestate->nextState("next");
     }
 
     function queueTechBenefit($card_type, $slot, $player_id) {
         $benefits = [];
-        if ($slot == 1)
-            $benefits = $this->tech_card_data[$card_type]['circle']['benefit'];
-        else if ($slot == 2)
-            $benefits = $this->tech_card_data[$card_type]['square']['benefit'];
-        else
+        if ($slot == 1) {
+            $benefits = $this->tech_card_data[$card_type]["circle"]["benefit"];
+        } elseif ($slot == 2) {
+            $benefits = $this->tech_card_data[$card_type]["square"]["benefit"];
+        } else {
             return;
-        $reason = reason('tech', $card_type);
+        }
+        $reason = reason("tech", $card_type);
         $once = false;
-        if ($card_type == 7 && $slot == 2) // Lithium battery
+        if ($card_type == 7 && $slot == 2) {
+            // Lithium battery
             $once = true;
+        }
         if ($once) {
             $card = "tech_card_$card_type";
             $current = $this->getStructureInfoSearch(BUILDING_MARKER, null, $card, $player_id, null);
             if ($current != null) {
-                $args = ['card_name' => $this->getTokenName(CARD_TECHNOLOGY, $card_type)];
-                $this->notifyWithName("message", clienttranslate('${player_name} attempts to take benefits of ${card_name} but it was already used this turn'), $args);
+                $args = ["card_name" => $this->getTokenName(CARD_TECHNOLOGY, $card_type)];
+                $this->notifyWithName(
+                    "message",
+                    clienttranslate('${player_name} attempts to take benefits of ${card_name} but it was already used this turn'),
+                    $args
+                );
                 return false;
             }
-            $cube_id = $this->addMarker($player_id, 'hand');
+            $cube_id = $this->addMarker($player_id, "hand");
             $this->dbSetStructureLocation($cube_id, $card);
         }
         $this->queueBenefitNormal($benefits, $player_id, $reason);
@@ -5941,19 +6675,25 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function useTrackSpot($player_id, $track, $spot, $bThrow = false, $checkOnly = false) {
-        if ($spot < 1 || $spot > 12) return true;
+        if ($spot < 1 || $spot > 12) {
+            return true;
+        }
         $loc = "tech_spot_{$track}_{$spot}";
         $current = $this->getStructureInfoSearch(BUILDING_MARKER, null, $loc, $player_id, null);
         if ($current != null) {
             if ($bThrow) {
-                $this->userAssertTrue(totranslate('Tech spot benefit or bonus is already used this turn'));
+                $this->userAssertTrue(totranslate("Tech spot benefit or bonus is already used this turn"));
             }
             $args = $this->notifArgsAddTrackSpot($track, $spot);
-            $this->notifyWithName("message", clienttranslate('${player_name} attempts to take benefits of ${spot_name} but it was already used this turn'), $args);
+            $this->notifyWithName(
+                "message",
+                clienttranslate('${player_name} attempts to take benefits of ${spot_name} but it was already used this turn'),
+                $args
+            );
             return false;
         }
         if ($checkOnly == false) {
-            $cube_id = $this->addMarker($player_id, 'hand');
+            $cube_id = $this->addMarker($player_id, "hand");
             $this->dbSetStructureLocation($cube_id, $loc);
         }
         return true;
@@ -5961,10 +6701,11 @@ abstract class PGameXBody extends tapcommon {
 
     function getColonialismTargets($player_id) {
         $data = $this->getControlHexes($player_id);
-        $valid = array();
+        $valid = [];
         foreach ($data as $coords => $hex) {
-            if ($hex['map_tile_id'] < 49)
+            if ($hex["map_tile_id"] < 49) {
                 array_push($valid, $coords);
+            }
         }
         return $valid;
     }
@@ -5975,47 +6716,49 @@ abstract class PGameXBody extends tapcommon {
         $map_data = $this->getInitMapData($location);
         $tiles = $this->getCardsSearch(CARD_TERRITORY, null, $location);
         foreach ($tiles as $card) {
-            $coord = $card['card_location_arg2'];
+            $coord = $card["card_location_arg2"];
             unset($map_data[$coord]);
         }
         foreach ($map_data as $coord => $info) {
-            if ($info['map_tile_id'] != 0)
+            if ($info["map_tile_id"] != 0) {
                 unset($map_data[$coord]);
+            }
         }
         return array_prefix_all(array_keys($map_data), "islanders_");
     }
 
     function getMapDataFromDb($location = null, $xcoords = null) {
         // card_location_arg2='$coord', card_location_arg='$rot' WHERE card_id='$tile_id'"
-        if ($location == 'land' ||  !$location)
-            $location = 'map';
+        if ($location == "land" || !$location) {
+            $location = "map";
+        }
         $map_data = $this->getInitMapData($location);
         foreach ($map_data as $coord => &$info) {
-            $info['map_coords'] = $coord;
+            $info["map_coords"] = $coord;
         }
 
         $tiles = $this->getCardsSearch(CARD_TERRITORY, null, $location, null, $xcoords);
         // if (count($tiles) == 0 && $location != 'map')
         //     $tiles = $this->getCardsSearch(CARD_TERRITORY, null, "$location%");
         foreach ($tiles as $card) {
-            $coord = $card['card_location_arg2'];
+            $coord = $card["card_location_arg2"];
             $info = &$map_data[$coord];
-            $info['map_tile_orient'] = (int) $card['card_location_arg'];
-            $info['map_tile_id'] = (int) $card['card_type_arg'];
+            $info["map_tile_orient"] = (int) $card["card_location_arg"];
+            $info["map_tile_id"] = (int) $card["card_type_arg"];
         }
         foreach ($map_data as $coord => &$info) {
-            $tile_id = $info['map_tile_id'];
+            $tile_id = $info["map_tile_id"];
             if ($tile_id == 0) {
-                $info['terrain_types'] = [];
+                $info["terrain_types"] = [];
                 continue;
             }
-            $terrains = array_get($this->territory_tiles[$tile_id], 'x', []);
+            $terrains = array_get($this->territory_tiles[$tile_id], "x", []);
             foreach ($terrains as $type) {
-                $info['terrain_types'][$type] = 1;
+                $info["terrain_types"][$type] = 1;
             }
-            $terrains = array_get($this->territory_tiles[$tile_id], 'h', []); // inside terrain
+            $terrains = array_get($this->territory_tiles[$tile_id], "h", []); // inside terrain
             foreach ($terrains as $type) {
-                $info['terrain_types'][$type] = 1;
+                $info["terrain_types"][$type] = 1;
             }
         }
         return $map_data;
@@ -6025,27 +6768,28 @@ abstract class PGameXBody extends tapcommon {
         // If anywhere, then can explore on any empty hex.
         if ($anywhere) {
             $data = $this->getCollectionFromDB("SELECT map_coords FROM map WHERE map_tile_id=0");
-            $valid = array();
+            $valid = [];
             foreach ($data as $d) {
-                array_push($valid, $d['map_coords']);
+                array_push($valid, $d["map_coords"]);
             }
             return $valid;
         }
         // If restricted, must be adjacent to 'owned' hex.
         $hex_data = $this->getMap();
-        $valid = array();
-        $checked = array();
-        $to_check = array();
+        $valid = [];
+        $checked = [];
+        $to_check = [];
 
         foreach ($hex_data as $coords => $hex) {
             // Get neighbours of owned hexes
             if ($this->isHexOwner($player_id, $coords, $hex_data)) {
-                if (!in_array($coords, $checked))
+                if (!in_array($coords, $checked)) {
                     array_push($checked, $coords);
+                }
                 // Add neighbours to 'to_check' list.
                 $neighbours = $this->getNeighbourHexes($coords);
                 foreach ($neighbours as $neighbour) {
-                    if ((!in_array($neighbour, $checked)) && (!in_array($neighbour, $to_check))) {
+                    if (!in_array($neighbour, $checked) && !in_array($neighbour, $to_check)) {
                         array_push($to_check, $neighbour);
                     }
                 }
@@ -6054,7 +6798,7 @@ abstract class PGameXBody extends tapcommon {
         // Check if neighbours are vacant
         while (sizeOf($to_check) > 0) {
             $checking = array_pop($to_check);
-            if ($hex_data[$checking]['map_tile_id'] == 0) {
+            if ($hex_data[$checking]["map_tile_id"] == 0) {
                 array_push($valid, $checking);
             }
         }
@@ -6068,8 +6812,9 @@ abstract class PGameXBody extends tapcommon {
         $left = $next_player_table[$player_id];
         $prev_player_table = $this->createPrevPlayerTable(array_keys($all), true);
         $right = $prev_player_table[$player_id];
-        if ($bSelf)
+        if ($bSelf) {
             $neighbours[$player_id] = 1;
+        }
         $neighbours[$right] = 1;
         $neighbours[$left] = 1;
         return array_keys($neighbours);
@@ -6077,40 +6822,42 @@ abstract class PGameXBody extends tapcommon {
 
     function getToppleTargets() {
         $player_id = $this->getActivePlayerId();
-        return $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location_arg='$player_id' AND (card_type=5) AND (card_type_arg=1) AND card_location LIKE 'land_%'");
+        return $this->getCollectionFromDB(
+            "SELECT card_id FROM structure WHERE card_location_arg='$player_id' AND (card_type=5) AND (card_type_arg=1) AND card_location LIKE 'land_%'"
+        );
     }
 
-
-
     function getConquerTargets($nomads = false, $anywhere = false, $player_id = -1, $only_empty = false) {
-        if ($player_id == -1)
+        if ($player_id == -1) {
             $player_id = $this->getActivePlayerId();
-        $valid = array();
+        }
+        $valid = [];
         $map_data = $this->getMap();
 
-        $checked = array();
-        $to_check = array();
+        $checked = [];
+        $to_check = [];
         foreach ($map_data as $coords => $hex) {
-            $structures = $hex['occupancy'];
+            $structures = $hex["occupancy"];
             if ($this->isHexOwner($player_id, $coords, $map_data)) {
                 if ($nomads) {
                     if ($structures < 2) {
                         array_push($valid, $coords);
                     }
                 }
-                if (!in_array($coords, $checked))
+                if (!in_array($coords, $checked)) {
                     array_push($checked, $coords);
+                }
                 // If restricted, must be adjacent to 'owned' hex.
                 // Add neighbours to 'to_check' list.
                 $neighbours = $this->getNeighbourHexes($coords);
                 foreach ($neighbours as $neighbour) {
-                    if ((!in_array($neighbour, $checked)) && (!in_array($neighbour, $to_check))) {
+                    if (!in_array($neighbour, $checked) && !in_array($neighbour, $to_check)) {
                         array_push($to_check, $neighbour);
                     }
                 }
-            } else if ($anywhere) {
+            } elseif ($anywhere) {
                 // If anywhere, then can conquer any available, non-full hex.
-                if ((!in_array($coords, $checked)) && (!in_array($coords, $to_check))) {
+                if (!in_array($coords, $checked) && !in_array($coords, $to_check)) {
                     array_push($to_check, $coords);
                 }
             }
@@ -6118,12 +6865,14 @@ abstract class PGameXBody extends tapcommon {
         while (sizeOf($to_check) > 0) {
             $coords = array_pop($to_check);
             $hex = $map_data[$coords];
-            if ($hex['map_tile_id'] == 0)  continue;
-            $structures = $hex['occupancy'];
+            if ($hex["map_tile_id"] == 0) {
+                continue;
+            }
+            $structures = $hex["occupancy"];
             if ($nomads) {
                 if ($structures < 2 && $this->isHexOwner($player_id, $coords, $map_data)) {
                     array_push($valid, $coords);
-                } else if ($structures == 0) {
+                } elseif ($structures == 0) {
                     array_push($valid, $coords);
                 }
             } else {
@@ -6131,7 +6880,10 @@ abstract class PGameXBody extends tapcommon {
                     if ($structures == 0) {
                         array_push($valid, $coords);
                     }
-                } else if ($this->isHexBlockedForConquer($player_id, $coords, $map_data) == false && !$this->isAlly($player_id, $hex['map_owners'])) {
+                } elseif (
+                    $this->isHexBlockedForConquer($player_id, $coords, $map_data) == false &&
+                    !$this->isAlly($player_id, $hex["map_owners"])
+                ) {
                     array_push($valid, $coords);
                 }
             }
@@ -6139,39 +6891,42 @@ abstract class PGameXBody extends tapcommon {
         return $valid;
     }
 
-
-
-
-
     function isHexBlockedForConquer($player_id, $x, $map) {
-        return ($map[$x]['occupancy'] >= 2 || $this->isHexOwner($player_id, $x, $map));
+        return $map[$x]["occupancy"] >= 2 || $this->isHexOwner($player_id, $x, $map);
     }
 
     function getNeighbourHexes($coords, $valid_coords = null) {
-        if ($valid_coords == null)
+        if ($valid_coords == null) {
             $valid_coords = $this->getCollectionFromDB("SELECT map_coords FROM map");
+        }
         $axis = explode("_", $coords);
-        $neighbours = array();
+        $neighbours = [];
         $x = $axis[0];
         $y = $axis[1];
         $new_coords = $x . "_" . ($y + 1);
-        if (array_key_exists($new_coords, $valid_coords))
+        if (array_key_exists($new_coords, $valid_coords)) {
             array_push($neighbours, $new_coords);
+        }
         $new_coords = $x . "_" . ($y - 1);
-        if (array_key_exists($new_coords, $valid_coords))
+        if (array_key_exists($new_coords, $valid_coords)) {
             array_push($neighbours, $new_coords);
-        $new_coords = ($x + 1) . "_" . $y;
-        if (array_key_exists($new_coords, $valid_coords))
+        }
+        $new_coords = $x + 1 . "_" . $y;
+        if (array_key_exists($new_coords, $valid_coords)) {
             array_push($neighbours, $new_coords);
-        $new_coords = ($x - 1) . "_" . $y;
-        if (array_key_exists($new_coords, $valid_coords))
+        }
+        $new_coords = $x - 1 . "_" . $y;
+        if (array_key_exists($new_coords, $valid_coords)) {
             array_push($neighbours, $new_coords);
-        $new_coords = ($x + 1) . "_" . ($y + 1);
-        if (array_key_exists($new_coords, $valid_coords))
+        }
+        $new_coords = $x + 1 . "_" . ($y + 1);
+        if (array_key_exists($new_coords, $valid_coords)) {
             array_push($neighbours, $new_coords);
-        $new_coords = ($x - 1) . "_" . ($y - 1);
-        if (array_key_exists($new_coords, $valid_coords))
+        }
+        $new_coords = $x - 1 . "_" . ($y - 1);
+        if (array_key_exists($new_coords, $valid_coords)) {
             array_push($neighbours, $new_coords);
+        }
         return $neighbours;
     }
 
@@ -6192,10 +6947,12 @@ abstract class PGameXBody extends tapcommon {
                 //print("$k = $hex\n");
                 $nei = $fn_get_neighbor($hex);
                 foreach ($nei as $neighbor) {
-                    if ($fn_blocked($neighbor))
+                    if ($fn_blocked($neighbor)) {
                         continue;
-                    if (array_key_exists($neighbor, $visited))
+                    }
+                    if (array_key_exists($neighbor, $visited)) {
                         continue;
+                    }
                     $visited[$neighbor] = $k;
                     $fringes[$k][] = $neighbor;
                 }
@@ -6207,65 +6964,66 @@ abstract class PGameXBody extends tapcommon {
 
     function stExplore() {
         $args = $this->argExplore();
-        if ($args['void']) {
+        if ($args["void"]) {
             // no valid location, skip
             $this->notifyWithName("message_error", clienttranslate('${player_name} has no valid targets, effect is void ${reason}'), [
-                'reason' => $this->getReasonFullRec(reason('be', $this->getCurrentBenefitType()))
+                "reason" => $this->getReasonFullRec(reason("be", $this->getCurrentBenefitType())),
             ]);
             $this->clearCurrentBenefit();
-            $this->gamestate->nextState('next');
+            $this->gamestate->nextState("next");
             return false;
         }
         return true;
     }
 
     function action_explore($location, $tile_type, $rot, $extra) {
-        $this->checkAction('explore');
+        $this->checkAction("explore");
         $player_id = $this->getActivePlayerId();
         $args = $this->argExplore();
         $benefit_data = $this->subtractCurrentBenefit();
         // reset coal baron
-        $this->setGameStateValue('coal_baron', 0);
+        $this->setGameStateValue("coal_baron", 0);
         // untap age of sail
         $tap_age_of_sail = $this->isTapestryActive($player_id, TAP_AGE_OF_SAIL);
         if ($tap_age_of_sail) {
-            $card_id = $tap_age_of_sail['card_id'];
+            $card_id = $tap_age_of_sail["card_id"];
             $this->DbQuery("UPDATE card SET card_location_arg2='0' WHERE card_id='$card_id'");
         }
-        $valid_locations = $args['exploration_targets'];
+        $valid_locations = $args["exploration_targets"];
         if (count($valid_locations) == 0) {
             // no valid location, skip
             $this->notifyWithName("message", clienttranslate('${player_name} has no valid targets, effect is void'));
-            $this->gamestate->nextState('next');
+            $this->gamestate->nextState("next");
             return;
         }
         if (!in_array($location, $valid_locations)) {
-            throw new feException('invalid map location');
+            throw new feException("invalid map location");
         }
         $tile_data = $this->getObjectFromDB("SELECT * FROM card WHERE card_type='1' AND card_type_arg='$tile_type'");
-        if (($tile_data == NULL) || ($tile_data['card_location'] != 'hand') || ($tile_data['card_location_arg'] != $player_id)) {
-            throw new feException('Invalid territory tile');
+        if ($tile_data == null || $tile_data["card_location"] != "hand" || $tile_data["card_location_arg"] != $player_id) {
+            throw new feException("Invalid territory tile");
         }
-        $coal_baron = $args['coal_baron'];
-        $tile_id = $tile_data['card_id'];
-        if ($coal_baron && ($coal_baron['card_id'] != $tile_id)) {
-            throw new BgaUserException($this->_('You must explore with the territory tile drawn by the Coal Baron'));
+        $coal_baron = $args["coal_baron"];
+        $tile_id = $tile_data["card_id"];
+        if ($coal_baron && $coal_baron["card_id"] != $tile_id) {
+            throw new BgaUserException($this->_("You must explore with the territory tile drawn by the Coal Baron"));
         }
         // 1. Update territory tile location.
         $u = getPart($location, 1);
         $v = getPart($location, 2);
         $map = getPart($location, 0);
-        $coord = $u . '_' . $v;
-        $this->effect_exploreWithCard($player_id, $tile_id, $location, $rot, $benefit_data['benefit_data']);
-        $flags = $this->getRulesBenefit($benefit_data['benefit_type'], 'flags');
+        $coord = $u . "_" . $v;
+        $this->effect_exploreWithCard($player_id, $tile_id, $location, $rot, $benefit_data["benefit_data"]);
+        $flags = $this->getRulesBenefit($benefit_data["benefit_type"], "flags");
         $no_benefit = ($flags & FLAG_NO_BENEFIT) != 0;
         if (!$no_benefit) {
             // 2. Queue the bonus benefit for the player.
-            $tile_benefits = $this->getRulesCard(CARD_TERRITORY, $tile_type, 'benefit');
+            $tile_benefits = $this->getRulesCard(CARD_TERRITORY, $tile_type, "benefit");
             $this->interruptBenefit();
             $reason = reason(CARD_TERRITORY, $tile_type);
             $this->queueBenefitNormal($tile_benefits, $player_id, $reason);
-            if ($extra['exploitation'] && $this->isTapestryActive($player_id, 18)) { // EXPLOITATION
+            if ($extra["exploitation"] && $this->isTapestryActive($player_id, 18)) {
+                // EXPLOITATION
                 $this->queueBenefitNormal($tile_benefits, $player_id, reason_tapestry(18));
             } else {
                 //  3. Check edges that match for bonus points.
@@ -6273,18 +7031,23 @@ abstract class PGameXBody extends tapcommon {
                 $this->awardVP($player_id, $edge_count, $reason, "{$map}_wrapper_$coord", 47);
             }
         } else {
-            $this->notifyWithName('message', clienttranslate('${player_name} no benefit for the territory'), [], $player_id);
+            $this->notifyWithName("message", clienttranslate('${player_name} no benefit for the territory'), [], $player_id);
         }
         // 4. Trigger effects of successful explore
-        if ($map == 'land' && $extra['militarism'] && $this->isTapestryActive($player_id, TAP_MILITARISM)) {
-            $oid = $extra['outpost_id'];
+        if ($map == "land" && $extra["militarism"] && $this->isTapestryActive($player_id, TAP_MILITARISM)) {
+            $oid = $extra["outpost_id"];
             $outpost_id = $this->getOutpostId($oid, $player_id);
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coord'");
             $this->DbQuery("UPDATE structure SET card_location='land_$coord' WHERE card_id='$outpost_id'");
-            $this->notifyMoveStructure(clienttranslate('${player_name} places an outpost on the new territory (MILITARISM) at ${coord_text}'), $outpost_id, [], $player_id);
+            $this->notifyMoveStructure(
+                clienttranslate('${player_name} places an outpost on the new territory (MILITARISM) at ${coord_text}'),
+                $outpost_id,
+                [],
+                $player_id
+            );
             $this->checkConqueredTerritories();
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function stSpaceExploration() {
@@ -6293,26 +7056,28 @@ abstract class PGameXBody extends tapcommon {
         if (count($space_tiles) == 0) {
             // no card, skip this
             $this->clearCurrentBenefit();
-            $this->notifyWithName('message', clienttranslate('${player_name} has no tiles to explore space, benefit is skipped'));
-            $this->gamestate->nextState('next');
+            $this->notifyWithName("message", clienttranslate('${player_name} has no tiles to explore space, benefit is skipped'));
+            $this->gamestate->nextState("next");
         }
     }
 
     function action_exploreSpace($sid) {
-        $this->checkAction('explore_space');
+        $this->checkAction("explore_space");
         $player_id = $this->getActivePlayerId();
         $ben = $this->getCurrentBenefitType();
         $this->clearCurrentBenefit();
         if ($ben == BE_EXPLORE_SPACE_ALIEN) {
-            $this->saction_exploreSpace($sid, 'civilization_31', $player_id);
+            $this->saction_exploreSpace($sid, "civilization_31", $player_id);
         } else {
-            $this->saction_exploreSpace($sid, 'hand_space', $player_id);
+            $this->saction_exploreSpace($sid, "hand_space", $player_id);
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function saction_exploreSpace($sid, $location, $player_id) {
-        $card_id = $this->getUniqueValueFromDB("SELECT card_id FROM card WHERE card_type='2' AND card_location='hand' AND card_type_arg='$sid' AND card_location_arg='$player_id'");
+        $card_id = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM card WHERE card_type='2' AND card_location='hand' AND card_type_arg='$sid' AND card_location_arg='$player_id'"
+        );
         $this->userAssertTrue(totranslate("Select unexplored space tile that you own"), $card_id);
         $this->DbQuery("UPDATE card SET card_location='$location' WHERE card_id='$card_id'");
         // UPDATE
@@ -6320,7 +7085,7 @@ abstract class PGameXBody extends tapcommon {
         $this->notifyWithName("exploreSpace", clienttranslate('${player_name} explores a space tile ${card_name}'), $args, $player_id);
         // Queue tile benefits
         $tile_benefits = $this->getRulesCard(CARD_SPACE, $sid);
-        $this->queueBenefitInterrupt($tile_benefits, $player_id, reason('space', $sid));
+        $this->queueBenefitInterrupt($tile_benefits, $player_id, reason("space", $sid));
     }
 
     function getMatchingEdgeCount($coord, $map) {
@@ -6331,42 +7096,42 @@ abstract class PGameXBody extends tapcommon {
         $calc_map = $this->getMapDataFromDb($map);
         $main_tile_data = $calc_map[$coord];
         $this->systemAssertTrue("no tile at $coord", $main_tile_data);
-        $main_tile = $main_tile_data['map_tile_id'];
+        $main_tile = $main_tile_data["map_tile_id"];
         $this->systemAssertTrue("invalid map tile id " . toJson($main_tile_data), $main_tile);
-        $main_rot = $main_tile_data['map_tile_orient'];
+        $main_rot = $main_tile_data["map_tile_orient"];
         $map_data = $calc_map;
-        $main_data = $this->territory_tiles[$main_tile]['x'];
+        $main_data = $this->territory_tiles[$main_tile]["x"];
         foreach ($map_data as $hex) {
-            $tile_id = $hex['map_tile_id'];
-            $working_rot = $hex['map_tile_orient'];
-            $working_coords = $hex['map_coords'];
+            $tile_id = $hex["map_tile_id"];
+            $working_rot = $hex["map_tile_orient"];
+            $working_coords = $hex["map_coords"];
             $working_axis = explode("_", $working_coords);
             $x = $working_axis[0];
             $y = $working_axis[1];
             $main_edge = -1;
-            if (($x == $axis_x) && ($y == $axis_y + 1)) {
+            if ($x == $axis_x && $y == $axis_y + 1) {
                 $main_edge = 2;
             }
-            if (($x == $axis_x) && ($y == $axis_y - 1)) {
+            if ($x == $axis_x && $y == $axis_y - 1) {
                 $main_edge = 5;
             }
-            if (($x == $axis_x + 1) && ($y == $axis_y)) {
+            if ($x == $axis_x + 1 && $y == $axis_y) {
                 $main_edge = 4;
             }
-            if (($x == $axis_x - 1) && ($y == $axis_y)) {
+            if ($x == $axis_x - 1 && $y == $axis_y) {
                 $main_edge = 1;
             }
-            if (($x == $axis_x + 1) && ($y == $axis_y + 1)) {
+            if ($x == $axis_x + 1 && $y == $axis_y + 1) {
                 $main_edge = 3;
             }
-            if (($x == $axis_x - 1) && ($y == $axis_y - 1)) {
+            if ($x == $axis_x - 1 && $y == $axis_y - 1) {
                 $main_edge = 0;
             }
-            if (($main_edge > -1) && ($tile_id > 0)) {
+            if ($main_edge > -1 && $tile_id > 0) {
                 $working_edge = ($main_edge + 3) % 6;
                 $main_left = (6 + $main_edge - $main_rot) % 6;
                 $main_right = ($main_left + 1) % 6;
-                $working_data = $this->territory_tiles[$tile_id]['x'];
+                $working_data = $this->territory_tiles[$tile_id]["x"];
                 if (count($working_data) > 6) {
                     // have 12 probing point instead of 6
                     $working_left = (($working_edge - $working_rot) * 2 + 12) % 12;
@@ -6376,8 +7141,9 @@ abstract class PGameXBody extends tapcommon {
                     $working_right = ($working_left + 1) % 6;
                 }
                 // $this->debugConsole("w $main_tile $tile_id " . $main_data [$main_left] . $working_data [$working_right] . $main_data [$main_right] . $working_data [$working_left]);
-                if (($main_data[$main_left] == $working_data[$working_right]) || ($main_data[$main_right] == $working_data[$working_left]))
+                if ($main_data[$main_left] == $working_data[$working_right] || $main_data[$main_right] == $working_data[$working_left]) {
                     $edge_count++;
+                }
             }
         }
         return $edge_count;
@@ -6390,72 +7156,80 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function colonialism($u, $v) {
-        $this->checkAction('colonialism');
+        $this->checkAction("colonialism");
         $player_id = $this->getActivePlayerId();
         $valid_targets = $this->getColonialismTargets($player_id);
         $this->clearCurrentBenefit(105, true);
         $coord = $u . "_" . $v;
         if (!in_array($coord, $valid_targets)) {
-            throw new BgaUserException($this->_('Choose a territory tile that you control (not pre-printed)'));
+            throw new BgaUserException($this->_("Choose a territory tile that you control (not pre-printed)"));
         }
         $map = $this->getMap();
-        $has_terrain = $map[$coord]['terrain_types'];
+        $has_terrain = $map[$coord]["terrain_types"];
         $order = "2534";
         foreach ($has_terrain as $t => $x) {
             $pos = strpos($order, (string) $t);
-            if ($pos === false) continue;
+            if ($pos === false) {
+                continue;
+            }
             $benefit = $pos + 1;
-            $this->awardBenefits($player_id, $benefit, 1, reason('be', 105));
+            $this->awardBenefits($player_id, $benefit, 1, reason("be", 105));
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function action_standup($arr) {
-        $this->checkAction('standup');
+        $this->checkAction("standup");
         $player_id = $this->getActivePlayerId();
-        $this->isTapestryActive($player_id, 35, true); // revolution    
+        $this->isTapestryActive($player_id, 35, true); // revolution
         $this->clearCurrentBenefit(119, true);
         $count = count($arr);
-        $this->userAssertTrue(totranslate('Select at least one outpost and at most 3 to stand up or Decline'), $count > 0 && $count <= 3);
+        $this->userAssertTrue(totranslate("Select at least one outpost and at most 3 to stand up or Decline"), $count > 0 && $count <= 3);
         foreach ($arr as $card_id) {
-            if ($card_id == 0)
-                break; // decline
+            if ($card_id == 0) {
+                break;
+            } // decline
             $structure_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_id='$card_id'");
-            $land_coords = $structure_data['card_location'];
-            $this->systemAssertTrue('Outpost is not toppled', $structure_data['card_type_arg'] == 1);
-            $this->systemAssertTrue('Outpost is not yours', $structure_data['card_location_arg'] == $player_id);
+            $land_coords = $structure_data["card_location"];
+            $this->systemAssertTrue("Outpost is not toppled", $structure_data["card_type_arg"] == 1);
+            $this->systemAssertTrue("Outpost is not yours", $structure_data["card_location_arg"] == $player_id);
             $u = getPart($land_coords, 1);
             $v = getPart($land_coords, 2);
-            $coords = $u . '_' . $v;
+            $coords = $u . "_" . $v;
             $this->DbQuery("UPDATE structure SET card_type_arg = 1-card_type_arg WHERE card_location='$land_coords'"); // toggle topple flag.
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coords'");
             $affected = $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location='$land_coords'");
             $this->notifyWithName("trap", clienttranslate('${player_name} stands up an outpost'), [
-                'outposts' => $affected
+                "outposts" => $affected,
             ]);
         }
         $this->checkConqueredTerritories();
         $this->checkToppleAward($player_id);
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function conquer_structure($u, $v) {
-        $this->checkAction('conquer_structure');
+        $this->checkAction("conquer_structure");
         $player_id = $this->getActivePlayerId();
         if (!$this->hasCiv($player_id, CIV_NOMADS)) {
-            $this->systemAssertTrue('Player does not have NOMADS');
+            $this->systemAssertTrue("Player does not have NOMADS");
         }
         $coord = $u . "_" . $v;
         $valid_locations = $this->getConquerTargets(true);
         if (!in_array($coord, $valid_locations)) {
-            $this->userAssertTrue(totranslate('Invalid conquer location'));
+            $this->userAssertTrue(totranslate("Invalid conquer location"));
         }
         $structure = $this->getObjectFromDB("SELECT card_id, card_type FROM structure WHERE card_location='capital_structure'");
-        $location = 'land_' . $coord;
-        $structure_id = $structure['card_id'];
+        $location = "land_" . $coord;
+        $structure_id = $structure["card_id"];
         $this->DbQuery("UPDATE structure SET card_location='$location' WHERE card_id='$structure_id'");
         $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coord'");
-        $this->notifyMoveStructure(clienttranslate('${player_name} uses the Nomad ability to place a structure on the map'), $structure_id, [], $player_id);
+        $this->notifyMoveStructure(
+            clienttranslate('${player_name} uses the Nomad ability to place a structure on the map'),
+            $structure_id,
+            [],
+            $player_id
+        );
         $this->clearCurrentBenefit();
         $structures = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM structure WHERE card_location='$location'");
         if ($structures == 2) {
@@ -6463,17 +7237,19 @@ abstract class PGameXBody extends tapcommon {
         }
         $this->checkPrivateAchievement(5, $player_id);
         $this->checkPrivateAchievement(6, $player_id);
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function getOutpostId($oid = null, $player_id = null, $bThrow = true) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $outposts = $this->getOutpostsInHand($player_id);
         $outpost_id = array_key_first($outposts);
-        if ($this->hasCiv($player_id, CIV_MILITANTS)) { // MILITANTS
+        if ($this->hasCiv($player_id, CIV_MILITANTS)) {
+            // MILITANTS
             if (count($outposts) == 0 && $this->isAdjustments4()) {
-                return $this->addCube($player_id, 'hand');
+                return $this->addCube($player_id, "hand");
             }
 
             $top = 10;
@@ -6481,44 +7257,56 @@ abstract class PGameXBody extends tapcommon {
             $top_id = null;
             $bottom_id = null;
             foreach ($outposts as $outid => $outpost) {
-                $location = $outpost['card_location'];
+                $location = $outpost["card_location"];
                 $slot_id = substr($location, -1);
-                if (($slot_id < 5) && ($slot_id < $top)) {
+                if ($slot_id < 5 && $slot_id < $top) {
                     $top = $slot_id;
-                    $top_id = $outpost['card_id'];
+                    $top_id = $outpost["card_id"];
                 }
-                if (($slot_id > 4) && ($slot_id < $bottom)) {
+                if ($slot_id > 4 && $slot_id < $bottom) {
                     $bottom = $slot_id;
-                    $bottom_id = $outpost['card_id'];
+                    $bottom_id = $outpost["card_id"];
                 }
-                if ($oid && $outpost['card_location'] == "civ_12_" . $oid) {
-                    $outpost_id = $outpost['card_id'];
+                if ($oid && $outpost["card_location"] == "civ_12_" . $oid) {
+                    $outpost_id = $outpost["card_id"];
                 }
             }
             if ($oid == null) {
-                if ($top_id) return $top_id;
-                if ($bottom_id) return $bottom_id;
-                if ($this->isAdjustments8()) return $outpost_id;
-            } else if (($oid != $top) && ($oid != $bottom)) {
-                if ($this->isAdjustments8()) return $outpost_id;
-                if ($bThrow)
-                    $this->userAssertTrue(totranslate('You must choose one of the leftmost outposts'));
+                if ($top_id) {
+                    return $top_id;
+                }
+                if ($bottom_id) {
+                    return $bottom_id;
+                }
+                if ($this->isAdjustments8()) {
+                    return $outpost_id;
+                }
+            } elseif ($oid != $top && $oid != $bottom) {
+                if ($this->isAdjustments8()) {
+                    return $outpost_id;
+                }
+                if ($bThrow) {
+                    $this->userAssertTrue(totranslate("You must choose one of the leftmost outposts"));
+                }
                 $outpost_id = null;
             }
         }
-        if ($bThrow)
-            $this->userAssertTrue(totranslate('No more outposts'), $outpost_id);
+        if ($bThrow) {
+            $this->userAssertTrue(totranslate("No more outposts"), $outpost_id);
+        }
         return $outpost_id;
     }
 
     function getOutpostChoices($player_id = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $outposts = $this->getOutpostsInHand($player_id);
-        if ($this->hasCiv($player_id, CIV_MILITANTS)) { // MILITANTS
+        if ($this->hasCiv($player_id, CIV_MILITANTS)) {
+            // MILITANTS
             $result = [];
             if (count($outposts) == 0 && $this->isAdjustments4()) {
-                $result[] = $this->addCube($player_id, 'hand');
+                $result[] = $this->addCube($player_id, "hand");
                 return $result;
             } else {
                 $top = 10;
@@ -6526,43 +7314,48 @@ abstract class PGameXBody extends tapcommon {
                 $top_outpost = null;
                 $bottom_outpost = null;
                 foreach ($outposts as $outid => $outpost) {
-                    $location = $outpost['card_location'];
+                    $location = $outpost["card_location"];
                     $slot_id = substr($location, -1);
-                    if (($slot_id < 5) && ($slot_id < $top)) {
+                    if ($slot_id < 5 && $slot_id < $top) {
                         $top = $slot_id;
                         $top_outpost = $outid;
                     }
-                    if (($slot_id > 4) && ($slot_id < $bottom)) {
+                    if ($slot_id > 4 && $slot_id < $bottom) {
                         $bottom = $slot_id;
                         $bottom_outpost = $outid;
                     }
                 }
-                if ($top_outpost)
+                if ($top_outpost) {
                     $result[] = $top_outpost;
-                if ($bottom_outpost)
+                }
+                if ($bottom_outpost) {
                     $result[] = $bottom_outpost;
+                }
                 return $result;
             }
         } else {
-            if (count($outposts) == 0)
+            if (count($outposts) == 0) {
                 return [];
+            }
             $outpost_id = array_key_first($outposts);
             return [$outpost_id];
         }
     }
 
     function isAlly($player_id, $owners) {
-        if (!$owners || count($owners) == 0)
+        if (!$owners || count($owners) == 0) {
             return false;
+        }
         $alliances = $this->getActiveTapestriesOfType(5);
         foreach ($alliances as $card) {
             $allies = [];
-            array_push($allies, $card['card_location_arg']);
-            array_push($allies, $card['card_location_arg2']);
+            array_push($allies, $card["card_location_arg"]);
+            array_push($allies, $card["card_location_arg2"]);
             if (in_array($player_id, $allies)) {
                 foreach ($owners as $owner_id) {
-                    if (in_array($owner_id, $allies))
+                    if (in_array($owner_id, $allies)) {
                         return true;
+                    }
                 }
             }
         }
@@ -6570,124 +7363,146 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function action_conquer($u, $v, $isol, $oid) {
-        $this->checkAction('conquer');
+        $this->checkAction("conquer");
         $args = $this->argConquer();
         $this->clearCurrentBenefit();
         $player_id = $this->getActivePlayerId();
         $coord = "{$u}_{$v}";
-        $valid_locations = $args['targets'];
-        $orig_reason = $args['data'];
+        $valid_locations = $args["targets"];
+        $orig_reason = $args["data"];
         $this->effect_conquer($player_id, $coord, $valid_locations, $isol, $oid, $orig_reason);
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
-    function effect_placeOnMap($player_id, $structure_id, $location, $notif = '*', $ownership = true) {
+    function effect_placeOnMap($player_id, $structure_id, $location, $notif = "*", $ownership = true) {
         $map = getPart($location, 0);
         $coord = getPart($location, 1) . "_" . getPart($location, 2);
-        if ($ownership && $map == 'land')
+        if ($ownership && $map == "land") {
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coord'");
+        }
         $this->DbQuery("UPDATE structure SET card_location='land_$coord' WHERE card_id='$structure_id'");
         if ($ownership == false) {
             $this->DbQuery("UPDATE structure SET card_type_arg=1 WHERE card_id='$structure_id'");
         }
-        $this->notifyMoveStructure(($notif == '*') ? clienttranslate('${player_name} conquers a territory at ${coord_text}') : $notif, $structure_id, [], $player_id);
+        $this->notifyMoveStructure(
+            $notif == "*" ? clienttranslate('${player_name} conquers a territory at ${coord_text}') : $notif,
+            $structure_id,
+            [],
+            $player_id
+        );
     }
 
     function effect_conquer($player_id, $coord, $valid_locations, $isol, $oid, $orig_reason) {
         $this->interruptBenefit();
-        if ($isol) { // Check player owns ISOLATIONISTS and has available tokens.
-            $isol_token = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND (card_location LIKE 'civ_9_%') AND card_location_arg='$player_id' LIMIT 1");
-            $this->systemAssertTrue('Isolation tokens not available', $isol_token);
+        if ($isol) {
+            // Check player owns ISOLATIONISTS and has available tokens.
+            $isol_token = $this->getUniqueValueFromDB(
+                "SELECT card_id FROM structure WHERE card_type='7' AND (card_location LIKE 'civ_9_%') AND card_location_arg='$player_id' LIMIT 1"
+            );
+            $this->systemAssertTrue("Isolation tokens not available", $isol_token);
         }
         if (!in_array($coord, $valid_locations)) {
-            $this->userAssertTrue(totranslate('Invalid conquer location'));
+            $this->userAssertTrue(totranslate("Invalid conquer location"));
         }
         $map = $this->getMapHexData($coord);
-        $owners = $map['map_owners'];
+        $owners = $map["map_owners"];
         $owner_id = array_shift($owners);
-
-
 
         // GET AN AVAILABLE OUTPOST TO USE
         $outpost_id = $this->getOutpostId($oid, $player_id, true);
         // UPDATE
-        $location = 'land_' . $coord;
+        $location = "land_" . $coord;
         $this->effect_placeOnMap($player_id, $outpost_id, $location);
         // ISOLATIONISTS MAY SECURE TERRITORY WITH A TOKEN
         if ($isol) {
-            $this->effect_placeOnMap($player_id, $isol_token, $location, clienttranslate('${player_name} places an isolationist token at ${coord_text}'), true);
+            $this->effect_placeOnMap(
+                $player_id,
+                $isol_token,
+                $location,
+                clienttranslate('${player_name} places an isolationist token at ${coord_text}'),
+                true
+            );
             $this->queueBenefitNormal(RES_ANY, $player_id, reason_civ(CIV_ISOLATIONISTS));
         }
         $this->setSelectedMapHex($coord);
         if ($owner_id) {
             // TOPPLE...
-            $oid = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_location='$location' AND card_location_arg='$owner_id'");
+            $oid = $this->getUniqueValueFromDB(
+                "SELECT card_id FROM structure WHERE card_location='$location' AND card_location_arg='$owner_id'"
+            );
             $this->DbQuery("UPDATE structure SET card_type_arg=1 WHERE card_id='$oid'");
-            $this->notifyAllPlayers("topple", '', array('bid' => $oid,));
-            $this->setGameStateValue('toppled_player', $owner_id);
-            $this->setGameStateValue('toppled_by', $player_id);
-            if (!$this->isTapestryActive($player_id, 30)) { // PILLAGE AND PLUNDER
+            $this->notifyAllPlayers("topple", "", ["bid" => $oid]);
+            $this->setGameStateValue("toppled_player", $owner_id);
+            $this->setGameStateValue("toppled_by", $player_id);
+            if (!$this->isTapestryActive($player_id, 30)) {
+                // PILLAGE AND PLUNDER
                 $this->queueBenefitNormal(140, $owner_id, $orig_reason); // topple pick
             } else {
-                $this->notifyWithName('message_error', clienttranslate('${player_name} has PILLAGE AND PLUNDER, trap cannot be played'));
+                $this->notifyWithName("message_error", clienttranslate('${player_name} has PILLAGE AND PLUNDER, trap cannot be played'));
             }
         } else {
-            $this->setGameStateValue('toppled_player', 0);
+            $this->setGameStateValue("toppled_player", 0);
         }
-        if ($this->isRealPlayer($player_id))
+        if ($this->isRealPlayer($player_id)) {
             $this->rollConquerDice($player_id);
+        }
         $this->queueBenefitNormal(141, $player_id, $orig_reason); // die pick
         if ($this->hasCiv($player_id, CIV_UTILITARIENS)) {
             //Barracks: Whenever you conquer, gain the result of the red die (even if you also chose that die’s benefit)
             if ($this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_39_3", $player_id)) {
-                $benefit = $this->getConquerDieBenefit('red', $player_id);
-                if ($benefit)
+                $benefit = $this->getConquerDieBenefit("red", $player_id);
+                if ($benefit) {
                     $this->queueBenefitNormal($benefit, $player_id, reason_civ(CIV_UTILITARIENS));
+                }
             }
         }
     }
 
     function action_choose_die($die) {
-        $this->checkAction('choose_die');
+        $this->checkAction("choose_die");
         $player_id = $this->getActivePlayerId();
-        $color = $die ? 'black' : 'red';
+        $color = $die ? "black" : "red";
         $this->interruptBenefit();
         $this->conquerDieBenefit($color, $player_id, true);
         // Did you conquer trader token? If so, they can claim the unclaimed die!
-        $coords = $this->getSelectedMapHex()['map_coords'];
-        $land_id = 'land_' . $coords;
+        $coords = $this->getSelectedMapHex()["map_coords"];
+        $land_id = "land_" . $coords;
         if (!$this->isAdjustments4()) {
-            $trader = $this->getUniqueValueFromDB("SELECT DISTINCT(card_location_arg) FROM structure WHERE card_location='$land_id' AND card_type='7'");
-            if ($trader && $trader != $player_id && $this->hasCiv($trader, CIV_TRADERS)) { // if player has trader civ - it is trader
-                $other_color = ($color == 'red') ? 'black' : 'red';
+            $trader = $this->getUniqueValueFromDB(
+                "SELECT DISTINCT(card_location_arg) FROM structure WHERE card_location='$land_id' AND card_type='7'"
+            );
+            if ($trader && $trader != $player_id && $this->hasCiv($trader, CIV_TRADERS)) {
+                // if player has trader civ - it is trader
+                $other_color = $color == "red" ? "black" : "red";
                 $this->conquerDieBenefit($other_color, $trader);
             }
         }
-        if ($this->isTapestryActive($player_id, 31)) { // PIRATE RULE - gain benefit of conquered territory.
+        if ($this->isTapestryActive($player_id, 31)) {
+            // PIRATE RULE - gain benefit of conquered territory.
             $tileBen = $this->getTileBenefit();
             $this->queueBenefitNormal($tileBen, $player_id, reason_tapestry(31));
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function getTileBenefit() {
-        $tile_id = $this->getSelectedMapHex()['map_tile_id'];
-        return $this->getRulesCard(CARD_TERRITORY, $tile_id, 'benefit', []);
+        $tile_id = $this->getSelectedMapHex()["map_tile_id"];
+        return $this->getRulesCard(CARD_TERRITORY, $tile_id, "benefit", []);
     }
 
     function conquerDieBenefit($die_color, $player_id, $throw = false) {
         $benefit = $this->getConquerDieBenefit($die_color);
         if ($benefit != null) {
-            $this->queueBenefitNormal($benefit, $player_id, reason('die', clienttranslate('Conquer die')));
-        } else if ($throw) {
-            $this->userAssertTrue(self::_('This die has net effect of zero. Want to try another one?'));
+            $this->queueBenefitNormal($benefit, $player_id, reason("die", clienttranslate("Conquer die")));
+        } elseif ($throw) {
+            $this->userAssertTrue(self::_("This die has net effect of zero. Want to try another one?"));
         }
     }
 
     function getConquerDieBenefit($die_color) {
         $roll = $this->getGameStateValue("conquer_die_$die_color");
         $benefit = null;
-        if (($roll == 1) && ($die_color == 'black')) {
+        if ($roll == 1 && $die_color == "black") {
             $tile_ben = $this->getTileBenefit();
             $benefit = $tile_ben;
         } else {
@@ -6697,66 +7512,71 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function action_research_decision($track, $spot) {
-        $this->checkAction('research_decision');
+        $this->checkAction("research_decision");
         $benefit_data = $this->clearCurrentBenefit();
-        if ($track > 0) { // Only need to do anything if accepting advancement.
-            $op1 = $this->getGameStateValue('science_die');
-            $op2 = $this->getGameStateValue('science_die_empiricism');
+        if ($track > 0) {
+            // Only need to do anything if accepting advancement.
+            $op1 = $this->getGameStateValue("science_die");
+            $op2 = $this->getGameStateValue("science_die_empiricism");
             if ($op1 != $track && $op2 != $track) {
-                $message = '';
+                $message = "";
                 if ($op2 > 0) {
                     $message = sprintf(
-                        self::_('You can only select %s track or %s track (EMPIRICISM) or Decline'),
-                        $this->tech_track_types[$op1]['description'], //
-                        $this->tech_track_types[$op2]['description']
+                        self::_("You can only select %s track or %s track (EMPIRICISM) or Decline"),
+                        $this->tech_track_types[$op1]["description"], //
+                        $this->tech_track_types[$op2]["description"]
                     );
                 } else {
-                    $message = sprintf(self::_('You can only select %s track or Decline'), $this->tech_track_types[$op1]['description']);
+                    $message = sprintf(self::_("You can only select %s track or Decline"), $this->tech_track_types[$op1]["description"]);
                 }
                 $this->userAssertTrue($message);
             }
-            $this->setGameStateValue('science_die', $track);
-            $this->setGameStateValue('science_die_empiricism', 0);
-            if ($spot == 0)
+            $this->setGameStateValue("science_die", $track);
+            $this->setGameStateValue("science_die_empiricism", 0);
+            if ($spot == 0) {
                 $spot = 13;
-            $this->setGameStateValue('cube_choice', $spot - 1);
+            }
+            $this->setGameStateValue("cube_choice", $spot - 1);
             $player_id = $this->getActivePlayerId();
             $cubes = $this->dbGetCubesOnTrack($player_id, $track, $spot - 1);
-            $this->userAssertTrue(totranslate('You may only advance by a single space'), count($cubes) >= 1);
-            $ben = $benefit_data['benefit_type'];
-            $flags = (int) array_get_def($this->benefit_types, $ben, 'flags', 0);
+            $this->userAssertTrue(totranslate("You may only advance by a single space"), count($cubes) >= 1);
+            $ben = $benefit_data["benefit_type"];
+            $flags = (int) array_get_def($this->benefit_types, $ben, "flags", 0);
             $this->interruptBenefit();
             $this->trackMovementProper($track, $spot - 1, ACTION_ADVANCE, $flags, false, $player_id); // advance
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function trackMovementInteractive($track, $spot, $change, $flags = 0, $mandatory = false, $player_id = null) {
         $track = (int) $track;
         $spot = (int) $spot;
         $this->checkTrack($track);
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $jump = ($flags & FLAG_JUMP) != 0;
         $advance = $change > 0 && !$jump;
         if ($advance) {
-            if ($this->triggerAdvanceCheck($player_id, $track, $mandatory))
+            if ($this->triggerAdvanceCheck($player_id, $track, $mandatory)) {
                 return true;
+            }
             // if advance is not allowed - it with throw an exception
         }
-        if ($spot == -1)
-            $choice = $this->getGameStateValue('cube_choice', -1);
+        if ($spot == -1) {
+            $choice = $this->getGameStateValue("cube_choice", -1);
+        }
         $spot = $this->spotChoiceForTrack($track, $player_id, $change, $choice);
         //$this->debugConsole("choice $track $choice => $spot");
-        $this->setGameStateValue('cube_choice', -1);
+        $this->setGameStateValue("cube_choice", -1);
         if ($spot == -1) {
             if ($jump) {
                 return true; // skip
             }
             if ($this->isRealPlayer($player_id)) {
-                $this->gamestate->nextState('trackSelect');
+                $this->gamestate->nextState("trackSelect");
                 return false;
-            } else if (!$this->isAutoma()) {
+            } elseif (!$this->isAutoma()) {
                 $this->error("Suspicious non-real player $player_id");
             }
             return true; // skip if not real player
@@ -6790,36 +7610,44 @@ abstract class PGameXBody extends tapcommon {
         $spot = (int) $spot;
         //$this->warn("track move $track, $spot, $change, $flags, $mandatory, $player_id");
         $this->checkTrackSpot($track, $spot);
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $jump = ($flags & FLAG_JUMP) != 0;
         $advance = $change > 0 && !$jump;
         if ($advance) {
-            if ($this->triggerAdvanceCheck($player_id, $track, $mandatory))
+            if ($this->triggerAdvanceCheck($player_id, $track, $mandatory)) {
                 return false;
+            }
             // if advance is not allowed - it with throw an exception
         }
-        $new_spot = (int) ($spot) + (int) ($change);
+        $new_spot = (int) $spot + (int) $change;
         $cubes = $this->dbGetCubesOnTrack($player_id, $track, $spot);
         $cube_id = array_key_first($cubes); // note this can be an AI cube
         $this->systemAssertTrue("cannot find cube on track $track $spot $player_id", $cube_id);
         if ($jump) {
-            if ($new_spot > 12)
+            if ($new_spot > 12) {
                 $new_spot = 12;
+            }
         }
         if ($new_spot < 0) {
-            $this->notifyWithTrack("message_error", clienttranslate('${player_name} cannot regress on the ${track_name} track'), [
-                'track' => $track,
-            ], $player_id);
-        } else if ($new_spot <= 12) {
-            $virtual = $cubes[$cube_id]['virtual'];
+            $this->notifyWithTrack(
+                "message_error",
+                clienttranslate('${player_name} cannot regress on the ${track_name} track'),
+                [
+                    "track" => $track,
+                ],
+                $player_id
+            );
+        } elseif ($new_spot <= 12) {
+            $virtual = $cubes[$cube_id]["virtual"];
             if ($virtual) {
                 $message = clienttranslate('${player_name} cannot ${advance_regress} on the ${track_name} track - no cubes');
                 $args = [
-                    'track' => $track,
-                    'adv' => $change,
-                    'player_id' => $player_id,
-                    'player_name' => $this->getPlayerNameById($player_id)
+                    "track" => $track,
+                    "adv" => $change,
+                    "player_id" => $player_id,
+                    "player_name" => $this->getPlayerNameById($player_id),
                 ];
                 if ($mandatory && $advance) {
                     $args = $this->notifArgsAddTrackSpot(null, null, $args);
@@ -6828,24 +7656,31 @@ abstract class PGameXBody extends tapcommon {
                     $this->notifyWithTrack("message_error", $message, $args);
                 }
             } else {
-                $this->notifyWithTrack("advance", clienttranslate('${player_name} ${advance_regress} onto ${spot_name}'), [
-                    'track' => $track,
-                    'spot' => $new_spot,
-                    'adv' => $change
-                ], $player_id);
+                $this->notifyWithTrack(
+                    "advance",
+                    clienttranslate('${player_name} ${advance_regress} onto ${spot_name}'),
+                    [
+                        "track" => $track,
+                        "spot" => $new_spot,
+                        "adv" => $change,
+                    ],
+                    $player_id
+                );
                 $location = $this->getTrackLocationLike($track, $new_spot);
-                $this->dbSetStructureLocation($cube_id, $location, null, '', $player_id);
+                $this->dbSetStructureLocation($cube_id, $location, null, "", $player_id);
                 // stats
                 $track_value = $this->getMaxTrackSlot($track, $player_id);
-                if ($this->isRealPlayer($player_id))
+                if ($this->isRealPlayer($player_id)) {
                     $this->setStat($track_value, "track$track", $player_id);
+                }
                 // triggered advance effects
-                if ($advance)
+                if ($advance) {
                     $this->triggerAdvanceResolve($player_id, $track, $new_spot);
+                }
                 // triggered end of track events
                 if ($new_spot == 12) {
                     $this->achievementEOT($player_id);
-                    $this->checkMysticPrediction(4, $player_id); // tracks 
+                    $this->checkMysticPrediction(4, $player_id); // tracks
                 }
 
                 if (!$jump) {
@@ -6861,26 +7696,34 @@ abstract class PGameXBody extends tapcommon {
                     $this->assertCanUseBenefitOnTrackSpot($player_id, $track, $new_spot);
                 }
                 if ($this->triggerPreGainBenefit($player_id, $track, $new_spot, $flags, $advance)) {
-                    $reason = reason('spot', $track . "_" . $new_spot);
+                    $reason = reason("spot", $track . "_" . $new_spot);
                     $data = $this->withReasonDataArg($reason, $flags);
                     // $this->debugConsole(">be_spot $data $flags $reason $track $new_spot $player_id");
                     $this->queueBenefitStandardOne(BE_SPOT, $player_id, $data);
                 }
             }
-        } else { // > 12
-            $this->notifyWithTrack("message_error", clienttranslate('${player_name} cannot further advance on the ${track_name} track'), [
-                'track' => $track
-            ], $player_id);
-            if (($flags & FLAG_MAXOUT_BONUS) != 0)
-                $this->awardVP($player_id, 5, reason('str', clienttranslate('end of the track bonus')));
+        } else {
+            // > 12
+            $this->notifyWithTrack(
+                "message_error",
+                clienttranslate('${player_name} cannot further advance on the ${track_name} track'),
+                [
+                    "track" => $track,
+                ],
+                $player_id
+            );
+            if (($flags & FLAG_MAXOUT_BONUS) != 0) {
+                $this->awardVP($player_id, 5, reason("str", clienttranslate("end of the track bonus")));
+            }
         }
-        $this->setGameStateValue('cube_choice', -1); // XXX why here?
+        $this->setGameStateValue("cube_choice", -1); // XXX why here?
         return true;
     }
 
     function triggerPreGainStructure($player_id, $type, $ben) {
-        if (!$this->isRealPlayer($player_id))
+        if (!$this->isRealPlayer($player_id)) {
             return false;
+        }
         if ($this->hasCiv($player_id, CIV_COLLECTORS)) {
             /** @var Collectors */
             $inst = $this->getCivilizationInstance(CIV_COLLECTORS, true);
@@ -6894,8 +7737,9 @@ abstract class PGameXBody extends tapcommon {
         return false;
     }
     function triggerPreKeepCard($player_id, $card_id, $type) {
-        if (!$this->isRealPlayer($player_id))
+        if (!$this->isRealPlayer($player_id)) {
             return false;
+        }
         if ($this->hasCiv($player_id, CIV_COLLECTORS)) {
             /** @var Collectors */
             $civinst = $this->getCivilizationInstance(CIV_COLLECTORS);
@@ -6904,11 +7748,10 @@ abstract class PGameXBody extends tapcommon {
         return false;
     }
 
-
-
     function triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance) {
-        if (!$this->isRealPlayer($player_id))
+        if (!$this->isRealPlayer($player_id)) {
             return true;
+        }
         if ($this->hasCiv($player_id, CIV_RENEGADES)) {
             $civinst = $this->getCivilizationInstance(CIV_RENEGADES);
             return $civinst->triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance);
@@ -6921,14 +7764,15 @@ abstract class PGameXBody extends tapcommon {
         if ($track == 3) {
             $bop = $this->getActiveTapestriesOfType(7); // BROKER OF PEACE - Could be multiple through espionage!
             foreach ($bop as $card) {
-                $this->awardVP($card['card_location_arg'], 3, reason_tapestry(7));
+                $this->awardVP($card["card_location_arg"], 3, reason_tapestry(7));
             }
         }
         $theocracy = $this->isTapestryActive($player_id, 40); // THOCRACY
-        if (($theocracy) && (in_array($new_spot, array(1, 4, 7, 10)))) {
+        if ($theocracy && in_array($new_spot, [1, 4, 7, 10])) {
             $this->awardVP($player_id, 4, reason_tapestry(40));
         }
-        if (($track == 2) && ($this->isTapestryActive($player_id, 16))) { // EMPIRICISM
+        if ($track == 2 && $this->isTapestryActive($player_id, 16)) {
+            // EMPIRICISM
             $this->awardVP($player_id, 2, reason_tapestry(16));
         }
         if ($this->hasCiv($player_id, CIV_UTILITARIENS) && $new_spot >= 7) {
@@ -6952,40 +7796,52 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function triggerAdvanceCheck($player_id, $track, $check) {
-        if (($track == 3) && ($this->isTapestryActive($player_id, 7))) { // BROKER OF PEACE
-            $message = clienttranslate('As BROKER OF PEACE you cannot advance on the military track');
-            if ($check)
+        if ($track == 3 && $this->isTapestryActive($player_id, 7)) {
+            // BROKER OF PEACE
+            $message = clienttranslate("As BROKER OF PEACE you cannot advance on the military track");
+            if ($check) {
                 throw new BgaUserException(self::_($message));
-            else
-                $this->notifyWithName('message', $message);
+            } else {
+                $this->notifyWithName("message", $message);
+            }
             return true;
         }
-        if (($track == 2) && ($this->isTapestryActive($player_id, 40))) { // THEOCRACY
-            $message = clienttranslate('With THEOCRACY you cannot advance on the science track');
-            if ($check)
+        if ($track == 2 && $this->isTapestryActive($player_id, 40)) {
+            // THEOCRACY
+            $message = clienttranslate("With THEOCRACY you cannot advance on the science track");
+            if ($check) {
                 throw new BgaUserException(self::_($message));
-            else
-                $this->notifyWithName('message', $message);
+            } else {
+                $this->notifyWithName("message", $message);
+            }
             return true;
         }
         $track_stub = "tech_spot_{$track}_";
-        $dictator_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location LIKE '{$track_stub}%' AND card_location_arg2 LIKE 'dic_%' LIMIT 1");
+        $dictator_data = $this->getObjectFromDB(
+            "SELECT * FROM structure WHERE card_location LIKE '{$track_stub}%' AND card_location_arg2 LIKE 'dic_%' LIMIT 1"
+        );
         if ($dictator_data) {
-            $dd = explode("_", $dictator_data['card_location_arg2']);
-            $dictator = $dictator_data['card_location_arg'];
+            $dd = explode("_", $dictator_data["card_location_arg2"]);
+            $dictator = $dictator_data["card_location_arg"];
             $turn = $this->getPlayerTurn($dictator);
             if ($turn == $dd[1] && $dictator && $player_id != $dictator) {
                 $dictName = $this->getPlayerNameById($dictator);
-                if ($check)
-                    throw new BgaUserException($this->_('Cannot advance on this track this turn due to DICTATORSHIP') . " " . $dictName);
-                $track_name = $this->tech_track_types[$track]['name'];
-                $this->notifyWithName('message_error', _('${player_name} cannot advance on ${track_name} track this turn due to DICTATORSHIP of ${opp_name}'), [
-                    'preserve' => ['track'],
-                    'track' => $track,
-                    'i18n' => array('track_name'),
-                    'opp_name' => $dictName,
-                    'track_name' => $track_name,
-                ], $player_id);
+                if ($check) {
+                    throw new BgaUserException($this->_("Cannot advance on this track this turn due to DICTATORSHIP") . " " . $dictName);
+                }
+                $track_name = $this->tech_track_types[$track]["name"];
+                $this->notifyWithName(
+                    "message_error",
+                    _('${player_name} cannot advance on ${track_name} track this turn due to DICTATORSHIP of ${opp_name}'),
+                    [
+                        "preserve" => ["track"],
+                        "track" => $track,
+                        "i18n" => ["track_name"],
+                        "opp_name" => $dictName,
+                        "track_name" => $track_name,
+                    ],
+                    $player_id
+                );
                 return true;
             }
         }
@@ -6995,43 +7851,43 @@ abstract class PGameXBody extends tapcommon {
     function achievementEOT($player_id) {
         $achievements = $this->getCollectionFromDB("SELECT card_location_arg FROM structure WHERE card_location LIKE 'achievement_1_%'");
         foreach ($achievements as $achievement) {
-            if ($achievement['card_location_arg'] == $player_id) {
+            if ($achievement["card_location_arg"] == $player_id) {
                 return; // player already has it
             }
         }
         $pos = sizeOf($achievements) + 1;
-        $destination = 'achievement_1_' . $pos;
+        $destination = "achievement_1_" . $pos;
         $player_count = $this->getPlayersNumber();
-        if (($player_count < 4) && ($pos < 3)) {
-            $points = (15 - ($pos * 5));
-        } else if (($player_count > 3) && ($pos < 4)) {
-            $points = (20 - ($pos * 5));
+        if ($player_count < 4 && $pos < 3) {
+            $points = 15 - $pos * 5;
+        } elseif ($player_count > 3 && $pos < 4) {
+            $points = 20 - $pos * 5;
         } else {
             $points = 0;
         }
         if ($points > 0) {
             $token_id = $this->addCube($player_id, $destination);
             $this->notifyMoveStructure(clienttranslate('${player_name} reaches end of track'), $token_id, [], $player_id);
-            $this->awardAchievementVP($player_id, $points, reason('achi', clienttranslate('End of track')), $destination);
+            $this->awardAchievementVP($player_id, $points, reason("achi", clienttranslate("End of track")), $destination);
         }
     }
-
-
 
     function getFinishedTracks($player_id) {
         $finished_tracks = 0;
         for ($t = 1; $t <= 4; $t++) {
             $cubes = $this->dbGetCubesOnTrack($player_id, $t, 12);
-            if (count($cubes) > 0)
+            if (count($cubes) > 0) {
                 $finished_tracks++;
+            }
         }
         return $finished_tracks;
     }
 
     function checkMysticPrediction($category, $player_id = null) {
         // Completed track - check for mystic bonus
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
 
         /** @var Mystics */
         $inst = $this->getCivilizationInstance(CIV_MYSTICS, true);
@@ -7039,16 +7895,18 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function checkPrivateAchievement($category, $player_id = null, $civ = CIV_CHOSEN, $data = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
-        if (!$this->hasCiv($player_id, $civ))
+        }
+        if (!$this->hasCiv($player_id, $civ)) {
             return;
+        }
         if (!$this->isAdjustments4or8()) {
             return;
         }
-        $achi = $this->getRulesCiv($civ, 'achi', []);
+        $achi = $this->getRulesCiv($civ, "achi", []);
         $achi_type = $category;
-        $max = $achi[$achi_type]['c'];
+        $max = $achi[$achi_type]["c"];
 
         $achieved = false;
         switch ($category) {
@@ -7064,20 +7922,22 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case 2:
                 // tap count
-                $taps = count($this->cards->getCardsOfTypeInLocation(CARD_TAPESTRY, null, 'hand', $player_id));
+                $taps = count($this->cards->getCardsOfTypeInLocation(CARD_TAPESTRY, null, "hand", $player_id));
                 if ($taps >= $max) {
                     $achieved = true;
                 }
                 break;
             case 3:
-                $tile = count($this->cards->getCardsOfTypeInLocation(CARD_TERRITORY, null, 'hand', $player_id));
+                $tile = count($this->cards->getCardsOfTypeInLocation(CARD_TERRITORY, null, "hand", $player_id));
                 if ($tile >= $max) {
                     $achieved = true;
                 }
                 break;
             case 4: // tech cards
                 if ($this->isAdjustments4()) {
-                    $levels = $this->getCollectionFromDB("SELECT DISTINCT card_location_arg2 FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type=4");
+                    $levels = $this->getCollectionFromDB(
+                        "SELECT DISTINCT card_location_arg2 FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type=4"
+                    );
                     //$this->debugConsole("tech levels " . count($levels));
                     if (count($levels) >= 3) {
                         $achieved = true;
@@ -7099,21 +7959,21 @@ abstract class PGameXBody extends tapcommon {
                     }
                 } else {
                     // buildings of the same type
-                    $player_income_data =  $this->getPlayerIncomeData($player_id);
+                    $player_income_data = $this->getPlayerIncomeData($player_id);
                     for ($track = 1; $track <= 4; $track++) {
-                        $field = $this->income_tracks[$track]['field'];
-                        $count = (int) ($player_income_data[$field]);
+                        $field = $this->income_tracks[$track]["field"];
+                        $count = (int) $player_income_data[$field];
                         if ($count - 1 >= $max) {
                             $achieved = true;
                         }
                     }
                 }
                 break;
-            case 6:  // landmarks 
+            case 6: // landmarks
                 if ($this->isAdjustments4()) {
                     break;
-                };
-                $count = count($this->getStructuresSearch(BUILDING_LANDMARK, null,  null, $player_id));
+                }
+                $count = count($this->getStructuresSearch(BUILDING_LANDMARK, null, null, $player_id));
                 if ($count >= $max) {
                     $achieved = true;
                 }
@@ -7124,46 +7984,48 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-
     function processSpotBenefits($track, $spot, $player_id, $flags = FLAG_GAIN_BENFIT, $reason = null) {
         $benefit_available = ($flags & FLAG_GAIN_BENFIT) != 0 ? 1 : 0;
         $bonus_state = ($flags & FLAG_PAY_BONUS) != 0 ? 1 : 0;
         $bonus_state = ($flags & FLAG_FREE_BONUS) != 0 ? 2 : $bonus_state;
 
-        if ($player_id == null)
+        if ($player_id == null) {
             $player_id = $this->getActivePlayerId();
+        }
         if (($benefit_available == 1 && $spot > 0) || $bonus_state >= 1) {
             if ($this->useTrackSpot($player_id, $track, $spot, false) == false) {
                 return;
             }
         }
-        if ($reason == null)
-            $reason = reason('spot', $track . "_" . $spot);
+        if ($reason == null) {
+            $reason = reason("spot", $track . "_" . $spot);
+        }
         // BENEFIT
         if ($benefit_available == 1 && $spot > 0) {
-            $ben = $this->tech_track_data[$track][$spot]['benefit'];
+            $ben = $this->tech_track_data[$track][$spot]["benefit"];
             if ($this->isRealPlayer($player_id)) {
                 $this->queueBenefitNormal($ben, $player_id, $reason);
                 // trigger marriage
                 $ma_reason = reason_tapestry(TAP_MARRIAGE_OF_STATE);
                 $mos = $this->getActiveTapestriesOfType(TAP_MARRIAGE_OF_STATE); // MARRIAGE OF STATE
                 foreach ($mos as $mos_data) {
-                    $owner = $mos_data['card_location_arg'];
-                    $mos_parts = explode("_", $mos_data['card_location_arg2']);
-                    if (($mos_parts[0] == $player_id) && ($mos_parts[1] == $track)) {
+                    $owner = $mos_data["card_location_arg"];
+                    $mos_parts = explode("_", $mos_data["card_location_arg2"]);
+                    if ($mos_parts[0] == $player_id && $mos_parts[1] == $track) {
                         $this->queueBenefitNormal($ben, $owner, $ma_reason);
                     }
                 }
-            } else
+            } else {
                 $this->queueBenefitAutoma($ben, $player_id, $reason);
+            }
         }
         // BONUS
         if ($bonus_state >= 1 && $this->isRealPlayer($player_id)) {
-            if (array_key_exists('option', $this->tech_track_data[$track][$spot])) {
-                $type = $this->tech_track_data[$track][$spot]['option']['type'];
-                $quantity = $this->tech_track_data[$track][$spot]['option']['quantity'];
-                $bonus = $this->tech_track_data[$track][$spot]['option']['benefit'];
-                $free_bonus = ($bonus_state == 2);
+            if (array_key_exists("option", $this->tech_track_data[$track][$spot])) {
+                $type = $this->tech_track_data[$track][$spot]["option"]["type"];
+                $quantity = $this->tech_track_data[$track][$spot]["option"]["quantity"];
+                $bonus = $this->tech_track_data[$track][$spot]["option"]["benefit"];
+                $free_bonus = $bonus_state == 2;
                 if ($free_bonus) {
                     $this->queueBenefitNormal(explode(",", $bonus), $player_id, $reason);
                 } else {
@@ -7177,15 +8039,16 @@ abstract class PGameXBody extends tapcommon {
         $benefit_data = $this->getCurrentBenefit($ben);
         if ($benefit_data) {
             //$this->debugConsole("clear benefit ".json_encode($benefit_data));
-            $this->benefitCashed($benefit_data['benefit_id']);
+            $this->benefitCashed($benefit_data["benefit_id"]);
             return $benefit_data;
         } else {
-            if (is_array($ben) && isset($ben['benefit_id'])) {
-                $ben = $ben['benefit_id'];
+            if (is_array($ben) && isset($ben["benefit_id"])) {
+                $ben = $ben["benefit_id"];
             }
-            if ($throw && $ben)
+            if ($throw && $ben) {
                 $this->systemAssertTrue("Benefit $ben is not on stack");
-            $e = new Exception("no benefit $ben found in " . ($this->getStateName()));
+            }
+            $e = new Exception("no benefit $ben found in " . $this->getStateName());
             $this->error($e->getTraceAsString());
         }
         return null;
@@ -7194,167 +8057,169 @@ abstract class PGameXBody extends tapcommon {
     function subtractCurrentBenefit($ben = null, $throw = false) {
         $benefit_data = $this->getCurrentBenefit($ben);
         if ($benefit_data) {
-            $benefit_table_id = $benefit_data['benefit_id'];
-            $count = $benefit_data['benefit_quantity'];
+            $benefit_table_id = $benefit_data["benefit_id"];
+            $count = $benefit_data["benefit_quantity"];
             if ($count <= 1) {
                 $this->benefitCashed($benefit_table_id);
                 return $benefit_data;
             } else {
                 $count--;
                 $this->DbQuery("UPDATE benefit SET benefit_quantity = $count  WHERE benefit_id='$benefit_table_id'");
-                $benefit_data['benefit_quantity'] = 1;
+                $benefit_data["benefit_quantity"] = 1;
                 return $benefit_data;
             }
         } else {
-            if ($throw && $ben)
+            if ($throw && $ben) {
                 $this->systemAssertTrue("Benefit $ben is not on stack");
-            $e = new Exception("no benefit $ben found in " . ($this->getStateName()));
+            }
+            $e = new Exception("no benefit $ben found in " . $this->getStateName());
             $this->error($e->getTraceAsString());
         }
         return null;
     }
 
     function getCompositeBenefit($benefit_data) {
-        $cat = $benefit_data['benefit_category'];
-        $type = $benefit_data['benefit_type'];
-        if ($cat == 'standard' || $cat == 'civ') {
-            return ['op' => $cat, 'types' => [$type]];
+        $cat = $benefit_data["benefit_category"];
+        $type = $benefit_data["benefit_type"];
+        if ($cat == "standard" || $cat == "civ") {
+            return ["op" => $cat, "types" => [$type]];
         }
         $options = explode(",", $cat); // new way category is 'o,23,45,67'
         $op = array_shift($options);
-        if ($op == 'o')
-            $op = 'or';
-        else if ($op = 'a')
-            $op = 'choice';
-        return ['op' => $op, 'types' => $options];
+        if ($op == "o") {
+            $op = "or";
+        } elseif ($op = "a") {
+            $op = "choice";
+        }
+        return ["op" => $op, "types" => $options];
     }
 
     function action_choose_benefit($bid, $spot) {
-        $this->checkAction('choose_benefit');
-        $this->setGameStateValue('cube_choice', $spot);
+        $this->checkAction("choose_benefit");
+        $this->setGameStateValue("cube_choice", $spot);
         $benefit_data = $this->getCurrentBenefitWithInfo();
         $args = $this->argBenefitChoice();
         $comp = $this->getCompositeBenefit($benefit_data);
-        $op = $comp['op'];
-        $types = $comp['types'];
+        $op = $comp["op"];
+        $types = $comp["types"];
 
-        if ($op == 'standard' && $bid == $types[0]) {
-            $track = $args['tracks'][$bid]['track'];
+        if ($op == "standard" && $bid == $types[0]) {
+            $track = $args["tracks"][$bid]["track"];
 
             $this->action_selectTrackSpot($track, $spot);
             return;
         }
-        $this->systemAssertTrue("wrong category $op", $op == 'or');
-        $player_id = $benefit_data['benefit_player_id'];
-        $data = $benefit_data['benefit_data'];
-        $cat = $benefit_data['benefit_category'];
-        $count = (int) $benefit_data['benefit_quantity'];
+        $this->systemAssertTrue("wrong category $op", $op == "or");
+        $player_id = $benefit_data["benefit_player_id"];
+        $data = $benefit_data["benefit_data"];
+        $cat = $benefit_data["benefit_category"];
+        $count = (int) $benefit_data["benefit_quantity"];
 
         $this->systemAssertTrue("Wrong player $player_id for benefit choice", $this->getActivePlayerId() == $player_id);
         $this->systemAssertTrue("Invalid benefit logged $bid $cat $data", $types);
         $this->systemAssertTrue("invalid benefit choice $bid", in_array($bid, $types));
 
-
-        $change = array_get($args, 'tracks_change', 0);
-        $this->setGameStateValue('cube_choice', $spot - $change);
+        $change = array_get($args, "tracks_change", 0);
+        $this->setGameStateValue("cube_choice", $spot - $change);
 
         $this->reinjectCompositeBenefitWithChoiceRemoved($bid, $benefit_data, $count - 1);
         $this->queueBenefitInterrupt($bid, $player_id, $data);
 
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function action_first_benefit($bid, $spot) {
-        $this->checkAction('first_benefit');
-        $this->setGameStateValue('cube_choice', $spot);
+        $this->checkAction("first_benefit");
+        $this->setGameStateValue("cube_choice", $spot);
         $benefit_data = $this->getCurrentBenefit();
         $comp = $this->getCompositeBenefit($benefit_data);
-        $op = $comp['op'];
-        $player_id = $benefit_data['benefit_player_id'];
-        $data = $benefit_data['benefit_data'];
-        $this->systemAssertTrue("wrong category $op", $op == 'choice');
+        $op = $comp["op"];
+        $player_id = $benefit_data["benefit_player_id"];
+        $data = $benefit_data["benefit_data"];
+        $this->systemAssertTrue("wrong category $op", $op == "choice");
         $this->systemAssertTrue("wrong player $player_id", $this->getActivePlayerId() == $player_id);
 
         $this->reinjectCompositeBenefitWithChoiceRemoved($bid, $benefit_data);
         $this->queueBenefitInterrupt($bid, $player_id, $data);
 
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function reinjectCompositeBenefitWithChoiceRemoved($selected_ben, $benefit_data, $count = 1) {
         $this->benefitCashed($benefit_data);
-        if ($count <= 0) return;
+        if ($count <= 0) {
+            return;
+        }
 
         $comp = $this->getCompositeBenefit($benefit_data);
-        $op = $comp['op'];
-        $options = $comp['types'];
-        $player_id = $benefit_data['benefit_player_id'];
-        $data = $benefit_data['benefit_data'];
+        $op = $comp["op"];
+        $options = $comp["types"];
+        $player_id = $benefit_data["benefit_player_id"];
+        $data = $benefit_data["benefit_data"];
 
         if (($key = array_search($selected_ben, $options)) !== false) {
             unset($options[$key]);
             $options = array_values($options);
         } else {
-            $cat = $benefit_data['benefit_category'];
+            $cat = $benefit_data["benefit_category"];
             $this->systemAssertTrue("illegal benefit choice $selected_ben $data $cat");
         }
 
-
         $this->interruptBenefit();
 
-        if (count($options) > 1)
+        if (count($options) > 1) {
             $this->queueBenefitNormal([$op => $options], $player_id, $data, $count);
-        else
+        } else {
             $this->queueBenefitNormal($options, $player_id, $data, $count);
+        }
     }
 
-
-
-
     function checkValidIncomeType($type) {
-        return (($type < 5) && ($type > 0));
+        return $type < 5 && $type > 0;
     }
 
     function selectIncomeBuilding($type) {
-        $this->checkAction('selectIncomeBuilding');
+        $this->checkAction("selectIncomeBuilding");
         $player_id = $this->getActivePlayerId();
         if (!$this->checkValidIncomeType($type)) {
-            throw new feException('Invalid Income type');
+            throw new feException("Invalid Income type");
         }
         $building_id = $this->dbGetIncomeBuildingOfType($type, true); // to check
         $current_benefit = $this->getCurrentBenefit();
         $this->clearCurrentBenefit();
-        $ben = $current_benefit['benefit_type'];
+        $ben = $current_benefit["benefit_type"];
         // PASS OFF TO 'CLAIM INCOME BUILDING'
         if ($ben == 110) {
-            $this->queueBenefitNormal(array(7 + $type), $player_id, reason('be', 110));
-        } else if ($ben == 144) {
+            $this->queueBenefitNormal([7 + $type], $player_id, reason("be", 110));
+        } elseif ($ben == 144) {
             // discard
-            $this->userAssertTrue(self::_('No more buildings left'), $building_id);
+            $this->userAssertTrue(self::_("No more buildings left"), $building_id);
             $this->claimIncomeStructure($type, null);
             $this->DbQuery("UPDATE structure SET card_location='hand', card_type_arg='0' WHERE card_id='$building_id'");
-            $this->notif("moveStructure", $player_id)->withStructure($building_id)->withReason(reason('be', $ben))-> //
-                notifyAll(clienttranslate('${player_name} gains an income building - ${structure_name} ${reason}'));
+            $this->notif("moveStructure", $player_id)
+                ->withStructure($building_id)
+                ->withReason(reason("be", $ben)) //
+                ->notifyAll(clienttranslate('${player_name} gains an income building - ${structure_name} ${reason}'));
         } else {
-            throw new BgaUserException($this->_('You cannot select an income building at this time'));
+            throw new BgaUserException($this->_("You cannot select an income building at this time"));
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function selectLandmark($type) {
-        $this->checkAction('selectBuilding');
+        $this->checkAction("selectBuilding");
         $player_id = $this->getActivePlayerId();
-        $this->userAssertTrue(totranslate('You should select a landmark on the landmark mat'), (($type > 0) && ($type <= 12)));
+        $this->userAssertTrue(totranslate("You should select a landmark on the landmark mat"), $type > 0 && $type <= 12);
         // CHECK ON THE MAT...
         $current_benefit = $this->getCurrentBenefit();
-        $location = 'landmark_mat_slot' . $type;
+        $location = "landmark_mat_slot" . $type;
         $structure = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_location='$location'");
-        $this->userAssertTrue(totranslate('You should select a landmark on the landmark mat'), $structure);
+        $this->userAssertTrue(totranslate("You should select a landmark on the landmark mat"), $structure);
         $this->clearCurrentBenefit();
-        $ben = $current_benefit['benefit_type'];
+        $ben = $current_benefit["benefit_type"];
         switch ($ben) {
             case 111:
-                $this->queueBenefitNormal($this->landmark_data[$type]['benefit'], $player_id, reason_tapestry(15)); // DYSTOPIA
+                $this->queueBenefitNormal($this->landmark_data[$type]["benefit"], $player_id, reason_tapestry(15)); // DYSTOPIA
                 break;
             case 305:
                 if ($this->isAdjustments8()) {
@@ -7362,22 +8227,28 @@ abstract class PGameXBody extends tapcommon {
                     $this->systemAssertTrue("cannot find cube on utilitariens", $cube);
                     $slot = $this->getCivSlotWithValue(CIV_UTILITARIENS, "lm", $type);
                     if ($slot) {
-                        $this->dbSetStructureLocation($cube['card_id'], $slot);
+                        $this->dbSetStructureLocation($cube["card_id"], $slot);
                     }
                     $this->DbQuery("UPDATE structure SET card_location_arg='$player_id' WHERE card_id='$structure'");
-                    $this->dbSetStructureLocation($structure, "civilization_39",  null, clienttranslate('${player_name} places ${structure_name} on their civilization mat'), $player_id);
+                    $this->dbSetStructureLocation(
+                        $structure,
+                        "civilization_39",
+                        null,
+                        clienttranslate('${player_name} places ${structure_name} on their civilization mat'),
+                        $player_id
+                    );
                 } else {
-                    $this->queueBenefitNormal($this->landmark_data[$type]['benefit'], $player_id, reason_civ(CIV_UTILITARIENS));
+                    $this->queueBenefitNormal($this->landmark_data[$type]["benefit"], $player_id, reason_civ(CIV_UTILITARIENS));
                 }
                 break;
             default:
-                throw new BgaUserException($this->_('You cannot select a landmark at this time'));
+                throw new BgaUserException($this->_("You cannot select a landmark at this time"));
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function getCivSlotWithValue($civ, $field, $value) {
-        $slots = $this->getRulesCiv($civ, 'slots');
+        $slots = $this->getRulesCiv($civ, "slots");
         foreach ($slots as $i => $info) {
             if ($info[$field] == $value) {
                 return "civ_{$civ}_$i";
@@ -7387,10 +8258,10 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getCivSlotNumberForGain($civ, $table, $type) {
-        $slots = $this->getRulesCiv($civ, 'slots');
+        $slots = $this->getRulesCiv($civ, "slots");
         $slot = -1;
         foreach ($slots as $i => $info) {
-            if ($info['tt'] == $table && $info['ct'] == $type) {
+            if ($info["tt"] == $table && $info["ct"] == $type) {
                 $slot = $i;
                 break;
             }
@@ -7399,8 +8270,8 @@ abstract class PGameXBody extends tapcommon {
         return (int) $slot;
     }
 
-    function getCivBenefit($civ, $slot, $field = 'benefit') {
-        $slots = $this->getRulesCiv($civ, 'slots');
+    function getCivBenefit($civ, $slot, $field = "benefit") {
+        $slots = $this->getRulesCiv($civ, "slots");
         return array_get($slots[$slot], $field, null);
     }
 
@@ -7411,9 +8282,9 @@ abstract class PGameXBody extends tapcommon {
         for ($x = 0; $x < 3; $x++) {
             for ($y = 0; $y < 3; $y++) {
                 $district_info = $this->getDistrictInfo(3 * $x + 4, 3 * $y + 4, $capital);
-                $complete = $district_info['complete'];
+                $complete = $district_info["complete"];
                 $districts += $complete;
-                if ($complete && array_get($district_info['build_types'], BUILDING_HOUSE, 0) >= 3) {
+                if ($complete && array_get($district_info["build_types"], BUILDING_HOUSE, 0) >= 3) {
                     $houses_complete = true;
                 }
             }
@@ -7422,31 +8293,33 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_placeOnCapitalMat($structure_id, $x, $y, $rot = 0, $player_id = 0) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $structure_data = $this->getStructureInfoById($structure_id, false);
-        $sid = $structure_data['card_id'];
-        $cell = 'capital_cell_' . $player_id . '_' . $x . '_' . $y;
-        $type = $structure_data['card_type'] + 1; // 1 is already a dot on the mat, so increase by 1.
-        $building_type = $structure_data['card_type'];
+        $sid = $structure_data["card_id"];
+        $cell = "capital_cell_" . $player_id . "_" . $x . "_" . $y;
+        $type = $structure_data["card_type"] + 1; // 1 is already a dot on the mat, so increase by 1.
+        $building_type = $structure_data["card_type"];
         $terraforming_claimed = true;
-        $unpassable = ($this->isTapestryActive($player_id, 39)) ? 1 : 0; // TERRAFORMING
-        if ($unpassable)
+        $unpassable = $this->isTapestryActive($player_id, 39) ? 1 : 0; // TERRAFORMING
+        if ($unpassable) {
             $terraforming_claimed = false;
+        }
         if ($this->hasCiv($player_id, CIV_RIVERFOLK)) {
             $unpassable = 1;
         }
         // Get structure mask
         if ($building_type == BUILDING_LANDMARK) {
             // landmark
-            $landmark_id = $structure_data['card_location_arg2'];
+            $landmark_id = $structure_data["card_location_arg2"];
             $landmark = $this->landmark_data[$landmark_id];
-            $width = $landmark['width'];
-            $height = $landmark['height'];
-            $masks = $landmark['mask'];
+            $width = $landmark["width"];
+            $height = $landmark["height"];
+            $masks = $landmark["mask"];
         } else {
-            $masks = array();
-            $masks[0] = array(0 => array(0 => 1));
+            $masks = [];
+            $masks[0] = [0 => [0 => 1]];
             $height = 1;
             $width = 1;
         }
@@ -7466,20 +8339,23 @@ abstract class PGameXBody extends tapcommon {
             $this->DbQuery("UPDATE structure SET card_location='$cell', card_type_arg='$rot' WHERE card_id='$sid'");
         }
         $this->notifyMoveStructure(clienttranslate('${player_name} places a structure'), $sid, [], $player_id);
-        if (($this->isTapestryActive($player_id, 27)) && ($type <= 5)) { // MONARCHY
+        if ($this->isTapestryActive($player_id, 27) && $type <= 5) {
+            // MONARCHY
             $this->awardVP($player_id, 3, reason_tapestry(27));
         }
         $this->checkPrivateAchievement(5, $player_id);
         $this->checkPrivateAchievement(6, $player_id);
         // Update capital mat
-        if ($oobounds)
+        if ($oobounds) {
             return;
+        }
         $riverfolk = $this->hasCiv($player_id, CIV_RIVERFOLK);
         $capital = $this->getCapitalData($player_id);
         for ($dx = 0; $dx < $width; $dx++) {
             for ($dy = 0; $dy < $height; $dy++) {
-                if ($mask[$dx][$dy] != 1)
+                if ($mask[$dx][$dy] != 1) {
                     continue;
+                }
                 $cx = $x + $dx;
                 $cy = $y + $dy;
                 $completed_block = true;
@@ -7490,40 +8366,44 @@ abstract class PGameXBody extends tapcommon {
                             $terraforming_claimed = true;
                         }
                     } else {
-                        $this->userAssertTrue(totranslate('Invalid structure placement'));
+                        $this->userAssertTrue(totranslate("Invalid structure placement"));
                     }
                     $completed_block = false; // if we are on unpassable territory it does not complete a district
                 }
                 $district_info_before = $this->getDistrictInfo($cx, $cy, $capital);
-                $this->DbQuery("UPDATE capital SET capital_occupied='$type' WHERE player_id='$player_id' AND capital_x='$cx' AND capital_y='$cy'");
-                if (!$district_info_before)
+                $this->DbQuery(
+                    "UPDATE capital SET capital_occupied='$type' WHERE player_id='$player_id' AND capital_x='$cx' AND capital_y='$cy'"
+                );
+                if (!$district_info_before) {
                     continue;
+                }
                 // Check if this cell completed a block (district). If so, need to award a resource!
                 $capital[$cx][$cy] = $type;
                 $district_info = $this->getDistrictInfo($cx, $cy, $capital);
                 if ($riverfolk) {
-                    if (array_get($district_info_before['build_types'], BUILDING_IMPASS, 0) > 0) {
-                        if (array_get($district_info['build_types'], BUILDING_IMPASS, 0) == 0) {
+                    if (array_get($district_info_before["build_types"], BUILDING_IMPASS, 0) > 0) {
+                        if (array_get($district_info["build_types"], BUILDING_IMPASS, 0) == 0) {
                             // last impassible slot is covered in district
                             $this->interruptBenefit();
                             $this->queueBenefitNormal(RES_ANY, $player_id, reason_civ(CIV_RIVERFOLK));
                         }
                     }
                 }
-                $completed_block = $completed_block && $district_info['complete'];
+                $completed_block = $completed_block && $district_info["complete"];
                 if ($completed_block) {
-                    $income_same = $district_info['unique_income'] == 1;
+                    $income_same = $district_info["unique_income"] == 1;
                     $this->interruptBenefit();
-                    $this->queueBenefitNormal(RES_ANY, $player_id, reason('str', clienttranslate('complete district')));
-                    if ($this->hasCiv($player_id, CIV_ARCHITECTS) && $income_same) { // Extra for Architect if all income types the same (and at least one).
-                        $this->queueBenefitNormal(RES_ANY, $player_id, reason('str', clienttranslate('district architect')));
+                    $this->queueBenefitNormal(RES_ANY, $player_id, reason("str", clienttranslate("complete district")));
+                    if ($this->hasCiv($player_id, CIV_ARCHITECTS) && $income_same) {
+                        // Extra for Architect if all income types the same (and at least one).
+                        $this->queueBenefitNormal(RES_ANY, $player_id, reason("str", clienttranslate("district architect")));
                     }
-                    $dn = $district_info['district'];
-                    $this->notifyAllPlayers("message", clienttranslate('${player_name} completes district #${dn}'), array(
-                        'player_id' => $player_id,
-                        'player_name' => $this->getActivePlayerName(),
-                        'dn' => $dn
-                    ));
+                    $dn = $district_info["district"];
+                    $this->notifyAllPlayers("message", clienttranslate('${player_name} completes district #${dn}'), [
+                        "player_id" => $player_id,
+                        "player_name" => $this->getActivePlayerName(),
+                        "dn" => $dn,
+                    ]);
                     $this->checkMysticPrediction(2, $player_id); // district
                     // trigger
                     $this->checkPrivateAchievement(5, $player_id);
@@ -7533,28 +8413,28 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function place_structure($rot, $x, $y) {
-        $this->checkAction('place_structure');
+        $this->checkAction("place_structure");
         $player_id = $this->getActivePlayerId();
         $bene = $this->getCurrentBenefitWithInfo();
-        $bid = $bene['benefit_id'];
+        $bid = $bene["benefit_id"];
         $ct = null;
-        if (array_get($bene, 'lm')) {
+        if (array_get($bene, "lm")) {
             // landmark ok
             $ct = BUILDING_LANDMARK;
-        } else if (array_get($bene, 'r') == 'g' && array_get($bene, 'tt') == 'structure') {
-            // income building ok   
-            $ct = (int) array_get($bene, 'ct');
+        } elseif (array_get($bene, "r") == "g" && array_get($bene, "tt") == "structure") {
+            // income building ok
+            $ct = (int) array_get($bene, "ct");
         } else {
             $this->systemAssertTrue("unexpected benefit on stack $bid");
         }
 
         $structure_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
-        $structure_id = $structure_data['card_id'];
-        $this->systemAssertTrue("unexpected structure type $ct", $ct == $structure_data['card_type']);
+        $structure_id = $structure_data["card_id"];
+        $this->systemAssertTrue("unexpected structure type $ct", $ct == $structure_data["card_type"]);
         $this->effect_placeOnCapitalMat($structure_id, $x, $y, $rot, $player_id);
         $this->clearCurrentBenefit($bene, true);
 
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function getBlockCentre($x) {
@@ -7565,8 +8445,9 @@ abstract class PGameXBody extends tapcommon {
     /* Return district info for coordinates */
     function getDistrictInfo($cx, $cy, $capital = null, $player_id = null) {
         if (!$capital) {
-            if (!$player_id)
+            if (!$player_id) {
                 $player_id = $this->getActivePlayerId();
+            }
             $capital = $this->getCapitalData($player_id);
         }
         $build_types = [];
@@ -7579,12 +8460,13 @@ abstract class PGameXBody extends tapcommon {
         for ($di = -1; $di <= 1; $di++) {
             for ($dj = -1; $dj <= 1; $dj++) {
                 $value = $capital[$rx + $di][$ry + $dj];
-                if ($value == 1)
+                if ($value == 1) {
                     $btype = BUILDING_IMPASS;
-                else if ($value == 0)
+                } elseif ($value == 0) {
                     $btype = 0;
-                else
+                } else {
                     $btype = $value - 1;
+                }
                 array_inc($build_types, $btype);
                 if ($btype >= BUILDING_MARKET && $btype <= BUILDING_ARMORY) {
                     array_inc($build_types, BUILDING_ANYINCOME);
@@ -7593,10 +8475,10 @@ abstract class PGameXBody extends tapcommon {
             }
         }
         $res = [
-            'build_types' => $build_types,
-            'unique_income' => count($income_types),
-            'complete' => array_get($build_types, 0, 0) == 0,
-            'district' => ($ry - 4) + ($rx - 4) / 3 + 1
+            "build_types" => $build_types,
+            "unique_income" => count($income_types),
+            "complete" => array_get($build_types, 0, 0) == 0,
+            "district" => $ry - 4 + ($rx - 4) / 3 + 1,
         ];
         return $res;
     }
@@ -7608,78 +8490,84 @@ abstract class PGameXBody extends tapcommon {
 
     public function getStateName() {
         $state = $this->gamestate->state();
-        return $state['name'];
+        return $state["name"];
     }
 
     function action_decline() {
-        $this->checkAction('decline');
+        $this->checkAction("decline");
         $player_id = $this->getActivePlayerId();
         $stateName = $this->getStateName();
         switch ($stateName) {
-            case 'explore': {
-                    $args = $this->argExplore();
-                    $decline = $args['decline'];
-                    if ($decline) {
-                        // no valid location, skip
-                        $benefit_data = $this->clearCurrentBenefit();
-                        $this->notifyWithName("message", clienttranslate('${player_name} declined ${ben_name}'), [
-                            'ben_name' => $this->getBenefitName($benefit_data['benefit_type'])
-                        ], $player_id);
-                        $this->gamestate->nextState('next');
-                        return;
-                    } else {
-                        $this->systemAssertTrue('Cannot decline in this state');
-                    }
-                };
-                break;
-            case 'conquer': {
-                    $args = $this->argConquer();
-                    if ($args['decline']) {
-                        // no valid location, skip
-                        $this->clearCurrentBenefit();
-                        $this->notifyAllPlayers("message", clienttranslate('${player_name} has no valid targets, action is skipped'), array(
-                            'player_id' => $player_id,
-                            'player_name' => $this->getActivePlayerName()
-                        ));
-                        $this->gamestate->nextState('decline');
-                        return;
-                    } else {
-                        $this->systemAssertTrue('Cannot decline in this state');
-                    }
+            case "explore":
+                $args = $this->argExplore();
+                $decline = $args["decline"];
+                if ($decline) {
+                    // no valid location, skip
+                    $benefit_data = $this->clearCurrentBenefit();
+                    $this->notifyWithName(
+                        "message",
+                        clienttranslate('${player_name} declined ${ben_name}'),
+                        [
+                            "ben_name" => $this->getBenefitName($benefit_data["benefit_type"]),
+                        ],
+                        $player_id
+                    );
+                    $this->gamestate->nextState("next");
+                    return;
+                } else {
+                    $this->systemAssertTrue("Cannot decline in this state");
                 }
                 break;
-            case 'upgradeTechnology':
+            case "conquer":
+                $args = $this->argConquer();
+                if ($args["decline"]) {
+                    // no valid location, skip
+                    $this->clearCurrentBenefit();
+                    $this->notifyAllPlayers("message", clienttranslate('${player_name} has no valid targets, action is skipped'), [
+                        "player_id" => $player_id,
+                        "player_name" => $this->getActivePlayerName(),
+                    ]);
+                    $this->gamestate->nextState("decline");
+                    return;
+                } else {
+                    $this->systemAssertTrue("Cannot decline in this state");
+                }
+                break;
+            case "upgradeTechnology":
                 $this->clearCurrentBenefit();
                 $this->notifyWithName("message", clienttranslate('${player_name} declines a technology upgrade'));
                 break;
             case "resourceChoice":
             default:
                 $this->clearCurrentBenefit();
-                $this->gamestate->nextState('next');
+                $this->gamestate->nextState("next");
                 return;
         }
-        $this->gamestate->nextState('benefit');
+        $this->gamestate->nextState("benefit");
     }
 
     function action_unblock() {
         if ($this->getCurrentPlayerId() == $this->getActivePlayerId()) {
             $this->notifyWithName("message", '${player_name} declines current benefit to unblock the game'); // NOI18N
-            $civ = $this->getObjectFromDB("SELECT * FROM benefit WHERE  benefit_category = 'civ' ORDER BY benefit_prerequisite, benefit_id LIMIT 1");
+            $civ = $this->getObjectFromDB(
+                "SELECT * FROM benefit WHERE  benefit_category = 'civ' ORDER BY benefit_prerequisite, benefit_id LIMIT 1"
+            );
             $bene = $this->getCurrentBenefit();
-            if ($civ && $bene && $civ['benefit_id'] != $bene['benefit_id']) {
+            if ($civ && $bene && $civ["benefit_id"] != $bene["benefit_id"]) {
                 $this->interruptBenefit();
-                $bid = $civ['benefit_id'];
+                $bid = $civ["benefit_id"];
                 $this->DbQuery("UPDATE benefit SET benefit_prerequisite='0' WHERE benefit_id='$bid'");
             } else {
                 $this->clearCurrentBenefit();
             }
-            $trans = $this->gamestate->state()['transitions'];
-            if (isset($trans['decline']))
-                $this->gamestate->nextState('decline');
-            else if (isset($trans['next']))
-                $this->gamestate->nextState('next');
-            else
-                $this->gamestate->nextState('');
+            $trans = $this->gamestate->state()["transitions"];
+            if (isset($trans["decline"])) {
+                $this->gamestate->nextState("decline");
+            } elseif (isset($trans["next"])) {
+                $this->gamestate->nextState("next");
+            } else {
+                $this->gamestate->nextState("");
+            }
         } else {
             $this->notifyWithName("message", '${player_name} only can decline the benefit'); // NOI18N
         }
@@ -7695,8 +8583,9 @@ abstract class PGameXBody extends tapcommon {
                 $this->eliminatePlayer($player_id);
             }
             $this->notifyWithName("message", clienttranslate('${player_name} leaves the game'));
-        } else
+        } else {
             $this->systemAssertTrue("Cannot eliminate player - not finished");
+        }
     }
 
     function ownsLighthouseAndCanPlayIt($player_id, $bThrow = false) {
@@ -7720,7 +8609,8 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getActivePlayerId();
         $state = 18;
         // no check action it can be out of turn
-        if ($ability == 'civ_39_5') { // Lighthouse
+        if ($ability == "civ_39_5") {
+            // Lighthouse
             $this->userAssertTrue(_("This is not your turn"), $this->getCurrentPlayerId() == $player_id);
 
             // Lighthouse: Once on each of your advancement turns you may spend 2 [TERRITORY TILE] to gain [ANY REOURCE]
@@ -7728,8 +8618,9 @@ abstract class PGameXBody extends tapcommon {
                 $curr = $this->getCurrentBenefit();
                 $this->interruptBenefit();
                 $this->queueBonus(BE_TERRITORY, 2, BE_ANYRES, ORDER_NORMAL, $player_id);
-                if ($curr == null && $this->getStateName() != 'playerTurnEnd')
+                if ($curr == null && $this->getStateName() != "playerTurnEnd") {
                     $this->queueBenefitNormal(201, $player_id);
+                }
             } else {
                 $this->systemAssertTrue("player does not have Lighthouse");
             }
@@ -7737,68 +8628,80 @@ abstract class PGameXBody extends tapcommon {
             $didit = false;
             $civs = $this->getAllCivs($player_id);
             foreach ($civs as $info) {
-                $civ = $info['card_type_arg'];
+                $civ = $info["card_type_arg"];
                 $civ = $this->getCivilizationInstance($civ);
                 if ($civ->action_activatedAbility($player_id, $ability, $arg, $state)) {
                     $didit = true;
                     break;
                 }
             }
-            if (!$didit)
+            if (!$didit) {
                 $this->systemAssertTrue("Unknown action", false);
+            }
         }
         $this->gamestate->jumpToState($state);
     }
 
     function decline_tapestry() {
-        $this->checkAction('decline_tapestry');
+        $this->checkAction("decline_tapestry");
         $player_id = $this->getActivePlayerId();
-        $this->notifyAllPlayers("message", clienttranslate('${player_name} declines to play a tapestry card'), array(
-            'player_id' => $player_id,
-            'player_name' => $this->getActivePlayerName(),
-        ));
+        $this->notifyAllPlayers("message", clienttranslate('${player_name} declines to play a tapestry card'), [
+            "player_id" => $player_id,
+            "player_name" => $this->getActivePlayerName(),
+        ]);
         $this->clearCurrentBenefit();
-        $this->gamestate->nextState('benefit');
+        $this->gamestate->nextState("benefit");
     }
 
     function placeCraftsmen($slot) {
-        $this->checkAction('placeCraftsmen');
+        $this->checkAction("placeCraftsmen");
         $player_id = $this->getActivePlayerId();
         /** @var Craftsmen */
         $inst = $this->getCivilizationInstance(CIV_CRAFTSMEN, true);
-        $inst->moveCivCube($player_id, $slot, '', []);
-        $this->gamestate->nextState('next');
+        $inst->moveCivCube($player_id, $slot, "", []);
+        $this->gamestate->nextState("next");
     }
 
     function action_moveStructureOnto($location, $structure_id) {
         $player_id = $this->getActivePlayerId();
         $bene = $this->getCurrentBenefitWithInfo();
-        $ben = $bene['benefit_type'];
+        $ben = $bene["benefit_type"];
         $args = $this->arg_moveStructureOnto();
         $this->clearCurrentBenefit($bene);
         switch ($ben) {
             case 170:
-
                 $structure_id = $this->getOutpostId($structure_id, $player_id, true);
-                if (array_search($location, $args['targets']) === false) {
+                if (array_search($location, $args["targets"]) === false) {
                     $this->userAssertTrue("Invalid location, misclicked?");
                 }
-                $this->effect_placeOnMap($player_id, $structure_id, $location, clienttranslate('${player_name} places ${structure_name} on the map at ${coord_text}'), true);
+                $this->effect_placeOnMap(
+                    $player_id,
+                    $structure_id,
+                    $location,
+                    clienttranslate('${player_name} places ${structure_name} on the map at ${coord_text}'),
+                    true
+                );
 
                 $coord = getPart($location, 1) . "_" . getPart($location, 2);
-                $tile = $this->getCardInfoSearch(CARD_TERRITORY, null, 'map', null, $coord);
+                $tile = $this->getCardInfoSearch(CARD_TERRITORY, null, "map", null, $coord);
                 if ($tile) {
-                    $tile_type = $tile['card_type_arg'];
-                    $benefit = $this->getRulesCard(CARD_TERRITORY, $tile_type, 'benefit', []);
-                    $this->queueBenefitNormal($benefit, $player_id, reason('tile', $tile_type));
+                    $tile_type = $tile["card_type_arg"];
+                    $benefit = $this->getRulesCard(CARD_TERRITORY, $tile_type, "benefit", []);
+                    $this->queueBenefitNormal($benefit, $player_id, reason("tile", $tile_type));
                 }
                 break;
             default:
-                $this->effect_placeOnMap($player_id, $structure_id, $location, clienttranslate('${player_name} places ${structure_name} on the map at ${coord_text}'), true);
+                $this->effect_placeOnMap(
+                    $player_id,
+                    $structure_id,
+                    $location,
+                    clienttranslate('${player_name} places ${structure_name} on the map at ${coord_text}'),
+                    true
+                );
 
                 break;
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function action_keepCard($ids, $dest) {
@@ -7807,17 +8710,20 @@ abstract class PGameXBody extends tapcommon {
         // action
         $this->effect_keepCard($ids, $player_id, $bene);
         $benefit_data = $this->getCurrentBenefit($bene);
-        if ($benefit_data) $this->clearCurrentBenefit($bene, false);
-        $this->gamestate->nextState('next');
+        if ($benefit_data) {
+            $this->clearCurrentBenefit($bene, false);
+        }
+        $this->gamestate->nextState("next");
     }
 
     function effect_keepCard($ids, $player_id, $bene) {
         $args = $this->arg_keepCard($bene);
-        $cards = $args['cards'];
-        $ben = $bene['benefit_type'];
-        $keep = $this->getRulesBenefit($ben, 'keep', 1);
-        if ($ids === null)
+        $cards = $args["cards"];
+        $ben = $bene["benefit_type"];
+        $keep = $this->getRulesBenefit($ben, "keep", 1);
+        if ($ids === null) {
             $ids = array_keys($cards);
+        }
         $this->systemAssertTrue("can only keep $keep cards", $keep == count($ids));
         foreach ($ids as $card_id) {
             $this->checkNumber($card_id);
@@ -7826,65 +8732,71 @@ abstract class PGameXBody extends tapcommon {
         if (count($ids) > 0) {
             $card_id = $ids[0];
             $card = $this->getCardInfoById($card_id);
-            $owner = $card['card_location_arg'];
+            $owner = $card["card_location_arg"];
         }
-        if ($ben == 191 || $ben == 321) { // gain terr/spce card benefit and do not move it
+        if ($ben == 191 || $ben == 321) {
+            // gain terr/spce card benefit and do not move it
             $this->systemAssertTrue("can only select 1", $keep == 1);
             $this->setTargetPlayer($owner);
-            $card_benefit = $this->getRulesCard($card['card_type'], $card['card_type_arg'], 'benefit');
-            $reason = reason($card['card_type'], $card['card_type_arg']);
+            $card_benefit = $this->getRulesCard($card["card_type"], $card["card_type_arg"], "benefit");
+            $reason = reason($card["card_type"], $card["card_type_arg"]);
             $this->queueBenefitNormal($card_benefit, $player_id, $reason);
             $this->queueBenefitNormal(["or" => [194, 401]], $player_id, $reason);
             return;
         }
-        if ($ben == 192  || $ben == 320) { // gain tech card benefit and do not move it
+        if ($ben == 192 || $ben == 320) {
+            // gain tech card benefit and do not move it
             $this->systemAssertTrue("can only select 1", $keep == 1);
             $this->setTargetPlayer($owner);
             if ($ben == 192) {
-                $slot = $card['card_location_arg2'];
+                $slot = $card["card_location_arg2"];
             } else {
                 $slot = 1; // circle
             }
-            $reason = reason($card['card_type'], $card['card_type_arg']);
-            $this->queueTechBenefit($card['card_type_arg'], $slot, $player_id);
+            $reason = reason($card["card_type"], $card["card_type_arg"]);
+            $this->queueTechBenefit($card["card_type_arg"], $slot, $player_id);
             $this->queueBenefitNormal(["or" => [194, 401]], $player_id, $reason);
             return;
         }
-        if ($ben == 193) { // gain tap card benefit and do not move it
+        if ($ben == 193) {
+            // gain tap card benefit and do not move it
             $this->systemAssertTrue("can only select 1", $keep == 1);
             $this->setTargetPlayer($owner);
-            $tap_type = $card['card_type_arg'];
-            $card_benefit = $this->getRulesCard($card['card_type'], $tap_type, 'benefit');
-            $reason = reason($card['card_type'], $tap_type);
-            $this->userAssertTrue(self::_('This card does not have WHEN PLAYED benefit'), $card_benefit);
+            $tap_type = $card["card_type_arg"];
+            $card_benefit = $this->getRulesCard($card["card_type"], $tap_type, "benefit");
+            $reason = reason($card["card_type"], $tap_type);
+            $this->userAssertTrue(self::_("This card does not have WHEN PLAYED benefit"), $card_benefit);
             $this->queueBenefitNormal($card_benefit, $player_id, $reason);
             $this->queueBenefitNormal(["or" => [194, 401]], $player_id, $reason);
             return;
         }
-        if ($ben == BE_GAMBLES_PICK || $ben ==  319) {
+        if ($ben == BE_GAMBLES_PICK || $ben == 319) {
             if ($this->isWhenPlayedTapestry($card)) {
                 foreach ($cards as $ocard_id => $ocard) {
-                    if ($ocard_id != $card_id)
+                    if ($ocard_id != $card_id) {
                         $this->effect_discardCard($ocard_id, $player_id);
+                    }
                 }
                 // play
                 $this->playTapestryCard($card_id, $player_id);
                 return;
             } else {
                 foreach ($cards as $ocard_id => $ocard) {
-                    if ($this->isWhenPlayedTapestry($ocard)) {       // other card has when played benefit
-                        $this->userAssertTrue(self::_('This card does not have WHEN PLAYED benefit'));
+                    if ($this->isWhenPlayedTapestry($ocard)) {
+                        // other card has when played benefit
+                        $this->userAssertTrue(self::_("This card does not have WHEN PLAYED benefit"));
                     }
                 }
             }
         }
         foreach ($ids as $card_id) {
-            if ($ben != 172) { // keep civ card in draw area
+            if ($ben != 172) {
+                // keep civ card in draw area
                 $extra = 0;
                 //if ($ben==175) $extra=4; // recyclers tech card cannot be upgraded on first income turn
-                $this->effect_moveCard($card_id, $player_id, 'hand', $player_id, $extra);
+                $this->effect_moveCard($card_id, $player_id, "hand", $player_id, $extra);
             }
-            $this->effect_cardComesInPlay($card_id, $player_id, reason('be', $ben));
+            $this->effect_cardComesInPlay($card_id, $player_id, reason("be", $ben));
             unset($cards[$card_id]);
         }
         foreach (array_keys($cards) as $card_id) {
@@ -7893,24 +8805,29 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_revealHand($owner, $player_id = null, $bene = null) {
-        if (!$bene)
+        if (!$bene) {
             $bene = $this->getCurrentBenefitWithInfo();
-        if (!$player_id)
+        }
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $cards = $this->getCardsInHand($owner, CARD_TAPESTRY);
-        $this->notif('revealCards')->withPlayer($player_id)->withArg("cards", $cards)->notifyPlayer('');
-        $this->notif()->withPlayer($player_id)->withPlayer2($owner)-> //
-            withReason($bene['benefit_data'])-> //
-            notifyAll(clienttranslate('${player_name} looks at ${player_name2} hand ${reason}'));
+        $this->notif("revealCards")->withPlayer($player_id)->withArg("cards", $cards)->notifyPlayer("");
+        $this->notif()
+            ->withPlayer($player_id)
+            ->withPlayer2($owner) //
+            ->withReason($bene["benefit_data"]) //
+            ->notifyAll(clienttranslate('${player_name} looks at ${player_name2} hand ${reason}'));
     }
 
     function effect_moveStructure($location, $building_type, $structure_id, ?int $player_id = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         if (!$building_type) {
             $info = $this->getStructureInfoById($structure_id);
             $this->systemAssertTrue("Not such structure $structure_id", $info);
-            $building_type = $info['card_type'];
+            $building_type = $info["card_type"];
         }
         switch ($building_type) {
             case BUILDING_ARMORY:
@@ -7924,8 +8841,9 @@ abstract class PGameXBody extends tapcommon {
                 $this->systemAssertTrue("landmark id required", $structure_id);
                 break;
             case BUILDING_CUBE:
-                if (!$structure_id)
-                    $structure_id = $this->addCube($player_id, 'hand');
+                if (!$structure_id) {
+                    $structure_id = $this->addCube($player_id, "hand");
+                }
                 break;
             case BUILDING_OUTPOST:
                 $structure_id = $this->getOutpostId($structure_id, $player_id);
@@ -7936,7 +8854,7 @@ abstract class PGameXBody extends tapcommon {
         }
         $this->systemAssertTrue("cannot determin structure id", $structure_id);
 
-        if (startsWith($location, 'land_')) {
+        if (startsWith($location, "land_")) {
             $this->effect_placeOnMap($player_id, $structure_id, $location, false);
             return;
         }
@@ -7945,11 +8863,10 @@ abstract class PGameXBody extends tapcommon {
         $this->notifyMoveStructure($message, $structure_id, [], $player_id);
     }
 
-
     function sendInventor($type) {
-        $this->checkAction('sendInventor');
+        $this->checkAction("sendInventor");
         $player_id = $this->getActivePlayerId();
-        $benefit_data = $this->getCurrentBenefit(CIV_INVENTORS, 'civ');
+        $benefit_data = $this->getCurrentBenefit(CIV_INVENTORS, "civ");
         $this->systemAssertTrue("cannot find civ INVENTORS", $benefit_data);
         $this->benefitCashed($benefit_data); // the civ benefit.
         // VALIDITY CHECKS
@@ -7958,144 +8875,165 @@ abstract class PGameXBody extends tapcommon {
         $cubes = $this->getStructuresOnCiv(CIV_INVENTORS, BUILDING_CUBE);
         $cube = array_shift($cubes);
         if ($cube) {
-            $inventor = $cube['card_id'];
+            $inventor = $cube["card_id"];
         } else {
-            $inventor = $this->addCube($player_id, 'hand', CUBE_CIV, $reason);
+            $inventor = $this->addCube($player_id, "hand", CUBE_CIV, $reason);
         }
 
         // 2. Check that $id is a technology card in play
-        $tech_card = $this->getObjectFromDB("SELECT card_id, card_location_arg player_id FROM card WHERE card_type='4' AND card_type_arg='$type' AND card_location='hand' AND (card_location_arg2 IS NULL OR card_location_arg2 <> 2)");
-        $this->userAssertTrue(totranslate('Cannot use this tech card for inventor'), $tech_card != null);
+        $tech_card = $this->getObjectFromDB(
+            "SELECT card_id, card_location_arg player_id FROM card WHERE card_type='4' AND card_type_arg='$type' AND card_location='hand' AND (card_location_arg2 IS NULL OR card_location_arg2 <> 2)"
+        );
+        $this->userAssertTrue(totranslate("Cannot use this tech card for inventor"), $tech_card != null);
         // Place token on tech card..
-        $location = 'tech_card_' . $type;
+        $location = "tech_card_" . $type;
 
-        $this->DbQuery("UPDATE structure SET card_location='$location',card_type_arg='2',card_location_arg='$player_id',card_location_arg2='$reason' WHERE card_id='$inventor'");
-        $this->notifyMoveStructure(clienttranslate('${player_name} places an Inventor on ${card_name}'), $inventor, [
-            'card_name' => $this->tech_card_data[$type]['name'],
-        ], $player_id);
+        $this->DbQuery(
+            "UPDATE structure SET card_location='$location',card_type_arg='2',card_location_arg='$player_id',card_location_arg2='$reason' WHERE card_id='$inventor'"
+        );
+        $this->notifyMoveStructure(
+            clienttranslate('${player_name} places an Inventor on ${card_name}'),
+            $inventor,
+            [
+                "card_name" => $this->tech_card_data[$type]["name"],
+            ],
+            $player_id
+        );
         // Upgrade the tech card...  benefits can be given to opponent!...
-        $this->upgradeTechCard($tech_card['card_id'], true);
-        $this->gamestate->nextState('benefit');
+        $this->upgradeTechCard($tech_card["card_id"], true);
+        $this->gamestate->nextState("benefit");
     }
 
     function ageOfSail($pid, $tid) {
-        $this->checkAction('ageOfSail');
+        $this->checkAction("ageOfSail");
         $player_id = $this->getActivePlayerId();
         $tap_card_data = $this->isTapestryActive($player_id, TAP_AGE_OF_SAIL);
         $this->systemAssertTrue("No tapestry ageOfSail", $tap_card_data);
-        $territory_id = $this->getUniqueValueFromDB("SELECT card_id FROM card WHERE card_type='1' AND card_type_arg='$tid' AND card_location='hand' AND card_location_arg='$player_id'");
-        $this->systemAssertTrue('Invalid territory tile', $territory_id != null);
-        if ($tap_card_data['card_location_arg2'] == 1)
-            throw new BgaUserException($this->_('You can only give away 1 territory card'));
+        $territory_id = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM card WHERE card_type='1' AND card_type_arg='$tid' AND card_location='hand' AND card_location_arg='$player_id'"
+        );
+        $this->systemAssertTrue("Invalid territory tile", $territory_id != null);
+        if ($tap_card_data["card_location_arg2"] == 1) {
+            throw new BgaUserException($this->_("You can only give away 1 territory card"));
+        }
         $players = $this->loadPlayersBasicInfosWithBots();
         $this->systemAssertTrue("invalid player id for age of sail", array_key_exists($pid, $players));
 
         $this->DbQuery("UPDATE card SET card_location_arg='$pid' WHERE card_id='$territory_id'");
 
-        $this->notif("moveCard", $player_id)->withCard($territory_id)->withPlayer2($pid)->notifyAll(clienttranslate('${player_name} gives a territory ${card_name} to ${player_name2}'));
+        $this->notif("moveCard", $player_id)
+            ->withCard($territory_id)
+            ->withPlayer2($pid)
+            ->notifyAll(clienttranslate('${player_name} gives a territory ${card_name} to ${player_name2}'));
         $this->awardVP($player_id, 3, reason_tapestry(3));
-        $card_id = $tap_card_data['card_id'];
+        $card_id = $tap_card_data["card_id"];
         $this->DbQuery("UPDATE card SET card_location_arg2='1' WHERE card_id='$card_id'");
-        $this->gamestate->nextState('loopback');
+        $this->gamestate->nextState("loopback");
     }
 
     function formAlliance($pid) {
-        $this->checkAction('formAlliance');
+        $this->checkAction("formAlliance");
         $player_id = $this->getActivePlayerId();
         $card = $this->isTapestryActive($player_id, 5, true);
-        $card_id = $card['card_id'];
+        $card_id = $card["card_id"];
         $this->DbQuery("UPDATE card SET card_location_arg2='$pid' WHERE card_id='$card_id'");
         $player_data = $this->loadPlayersBasicInfos();
-        $this->notifyAllPlayers("alliance", clienttranslate('${player_name} forms an alliance with ${opp_name}'), array(
-            'player_id' => $player_id,
-            'player_name' => $this->getActivePlayerName(),
-            'opp_name' => $player_data[$pid]['player_name'],
-            'opp_id' => $pid,
-        ));
+        $this->notifyAllPlayers("alliance", clienttranslate('${player_name} forms an alliance with ${opp_name}'), [
+            "player_id" => $player_id,
+            "player_name" => $this->getActivePlayerName(),
+            "opp_name" => $player_data[$pid]["player_name"],
+            "opp_id" => $pid,
+        ]);
         $this->clearCurrentBenefit();
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function sendHistorian($pid, $tid, $token_id) {
-        $this->checkAction('sendHistorian');
+        $this->checkAction("sendHistorian");
         /** @var Historians */
         $inst = $this->getCivilizationInstance(CIV_HISTORIANS, true);
         $inst->sendHistorian($pid, $tid, $token_id);
-        $this->gamestate->nextState('benefit');
+        $this->gamestate->nextState("benefit");
     }
 
     function declineBonus() {
-        $this->checkAction('declineBonus');
+        $this->checkAction("declineBonus");
         $player_id = $this->getActivePlayerId();
-        $this->notifyAllPlayers("message", clienttranslate('${player_name} declines the bonus'), array(
-            'player_id' => $player_id,
-            'player_name' => $this->getActivePlayerName(),
-        ));
+        $this->notifyAllPlayers("message", clienttranslate('${player_name} declines the bonus'), [
+            "player_id" => $player_id,
+            "player_name" => $this->getActivePlayerName(),
+        ]);
         $this->clearCurrentBenefit();
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function action_acceptBonus($params, $dest) {
-        $this->checkAction('acceptBonus');
+        $this->checkAction("acceptBonus");
         $player_id = $this->getActivePlayerId();
         $bonus_details = $this->getCurrentBenefit();
         $args = $this->argBonus();
-        $this->benefitCashed($bonus_details['benefit_id']);
-        $count = $args['pay_quantity'];
-        $type = (int) $args['pay'];
-        if (($count > 0) && (sizeOf($params) != $count))
-            throw new feException('Invalid quantity for bonus');
-        $this->userAssertTrue(totranslate('Cannot accept bonus without payment, use Decline'), count($params) > 0);
-        $is_bonus = $args['benefit_category'] == 'bonus';
-        $reason = $args['reason_data'];
+        $this->benefitCashed($bonus_details["benefit_id"]);
+        $count = $args["pay_quantity"];
+        $type = (int) $args["pay"];
+        if ($count > 0 && sizeOf($params) != $count) {
+            throw new feException("Invalid quantity for bonus");
+        }
+        $this->userAssertTrue(totranslate("Cannot accept bonus without payment, use Decline"), count($params) > 0);
+        $is_bonus = $args["benefit_category"] == "bonus";
+        $reason = $args["reason_data"];
         // Check the quantity and that player owns the ids..
         switch ($type) {
             case BE_GAIN_WORKER: // OLYMPIC HOST (1 worker for 10 VP) process as resources (e.g. fall through) although need to add tag to olympic host card.
                 $oliben = $this->getCurrentBenefit(125); // olympic host on stack
                 if ($oliben) {
                     // update benefit argument if opponent played it
-                    if ($oliben['benefit_player_id'] != $player_id)
+                    if ($oliben["benefit_player_id"] != $player_id) {
                         $this->setBenefitDataArg($oliben, 1);
+                    }
                 }
-                //fallthough
+            //fallthough
             case BE_ANYRES: // resources
                 foreach ($params as $res) {
-                    $this->dbIncResourceCount($res, '*', null, -1, $player_id, $reason);
+                    $this->dbIncResourceCount($res, "*", null, -1, $player_id, $reason);
                 }
                 break;
             case BE_TERRITORY: // territory tiles.
                 $items = $this->getCardsInHand($player_id, CARD_TERRITORY, $params);
-                if (sizeOf($items) != sizeOf($params))
-                    throw new feException('items do not belong to player');
+                if (sizeOf($items) != sizeOf($params)) {
+                    throw new feException("items do not belong to player");
+                }
                 $this->effect_discardCard($items, $player_id);
                 break;
             case BE_TAPESTRY: // tapestry cards.
             case 137:
             case 138:
                 $items = $this->getCardsInHand($player_id, CARD_TAPESTRY, null, $params);
-                if (sizeOf($items) != sizeOf($params))
-                    throw new feException('items do not belong to player');
-                $desttype = $this->getRulesBenefit($type, 'dest', 0);
+                if (sizeOf($items) != sizeOf($params)) {
+                    throw new feException("items do not belong to player");
+                }
+                $desttype = $this->getRulesBenefit($type, "dest", 0);
                 if ($desttype != 0) {
                     $this->systemAssertTrue("cannot pass card to yourself", $dest != $player_id);
                     // XXX validate desttype vs $dest
-                    $this->effect_moveCard($items, $player_id, 'hand', $dest);
-                } else
-                    $this->effect_discardCard($items, $player_id, 'discard', true);
+                    $this->effect_moveCard($items, $player_id, "hand", $dest);
+                } else {
+                    $this->effect_discardCard($items, $player_id, "discard", true);
+                }
                 break;
             case BE_TECH_CARD: // tech cards.
                 $items = $this->getCardsInHand($player_id, CARD_TECHNOLOGY, $params);
-                if (sizeOf($items) != sizeOf($params))
-                    throw new feException('items do not belong to player');
+                if (sizeOf($items) != sizeOf($params)) {
+                    throw new feException("items do not belong to player");
+                }
                 $this->effect_discardCard($items, $player_id);
                 break;
             default:
                 break;
         }
         if ($is_bonus) {
-            $this->incStat(1, 'bonuses', $player_id);
+            $this->incStat(1, "bonuses", $player_id);
         }
-        $benefit = $args['benefits'];
+        $benefit = $args["benefits"];
         $this->interruptBenefit();
         if ($count > 0) {
             $this->queueBenefitNormal($benefit, $player_id, $reason);
@@ -8105,19 +9043,19 @@ abstract class PGameXBody extends tapcommon {
                 $this->queueBenefitNormal($benefit, $player_id, $reason);
             }
         }
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function getSelectedMapHex() {
-        $map_id = $this->getGameStateValue('map_id');
-        $coords = $this->getGameStateValue('map_coords_selected');
+        $map_id = $this->getGameStateValue("map_id");
+        $coords = $this->getGameStateValue("map_coords_selected");
         if ($coords || $map_id == 0) {
             $x = floor($coords / 100) - 50;
-            $y = $coords % 100 - 50;
+            $y = ($coords % 100) - 50;
             return $this->getMapHexData("{$x}_{$y}");
         } else {
             $map_data = $this->getObjectFromDB("SELECT * FROM map WHERE map_id='$map_id'");
-            return $this->getMapHexData($map_data['map_coords']);
+            return $this->getMapHexData($map_data["map_coords"]);
         }
     }
 
@@ -8127,94 +9065,106 @@ abstract class PGameXBody extends tapcommon {
         // $map = $this->getObjectFromDB("SELECT * FROM map WHERE map_coords='$coord'");
         // $map_id = $map ['map_id'];
         // $this->setGameStateValue('map_id', $map_id);
-        $this->setGameStateValue('map_id', 0);
-        $this->setGameStateValue('map_coords_selected', $x * 100 + $y);
+        $this->setGameStateValue("map_id", 0);
+        $this->setGameStateValue("map_coords_selected", $x * 100 + $y);
         //$this->warn("selected hex $x * 100 + $y ".toJson($this->getSelectedMapHex()));
     }
 
     function decline_trap() {
-        $this->checkAction('decline_trap');
+        $this->checkAction("decline_trap");
         $this->clearCurrentBenefit(140);
         $player_id = $this->getActivePlayerId();
         $this->notifyWithName("message", clienttranslate('${player_name} does not play a trap'), [], $player_id);
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function trap($card_id) {
-        $this->checkAction('trap');
+        $this->checkAction("trap");
         $this->clearCurrentBenefit(140);
         $player_id = $this->getActivePlayerId();
         $this->effect_trap($card_id, $player_id);
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function effect_trap($card_id, $player_id) {
-
         $map_data = $this->getSelectedMapHex();
-        $card_data = $this->getObjectFromDB("SELECT card_id, card_type_arg FROM card WHERE card_id='$card_id' AND card_location='hand' AND card_location_arg='$player_id'");
+        $card_data = $this->getObjectFromDB(
+            "SELECT card_id, card_type_arg FROM card WHERE card_id='$card_id' AND card_location='hand' AND card_location_arg='$player_id'"
+        );
 
-        if ($card_data === null || $card_data['card_type_arg'] != 42) {
-            throw new BgaUserException($this->_('You can only use a trap card'));
+        if ($card_data === null || $card_data["card_type_arg"] != 42) {
+            throw new BgaUserException($this->_("You can only use a trap card"));
         }
 
-        $coords = $map_data['map_coords'];
+        $coords = $map_data["map_coords"];
         $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coords'");
-        $land_coords = 'land_' . $coords;
+        $land_coords = "land_" . $coords;
         $structure_data = $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location='$land_coords'");
         $this->DbQuery("UPDATE structure SET card_type_arg = 1-card_type_arg WHERE card_location='$land_coords'"); // toggle topple flag.
-        $this->notifyWithName("trap", clienttranslate('${player_name} plays a trap card'), [
-            'outposts' => $structure_data
-        ], $player_id);
+        $this->notifyWithName(
+            "trap",
+            clienttranslate('${player_name} plays a trap card'),
+            [
+                "outposts" => $structure_data,
+            ],
+            $player_id
+        );
         $this->effect_discardCard($card_id, $player_id);
-        $this->queueBenefitInterrupt(BE_ANYRES, $player_id, reason('str', clienttranslate('trap')));
+        $this->queueBenefitInterrupt(BE_ANYRES, $player_id, reason("str", clienttranslate("trap")));
     }
 
-    function getCurrentBenefit($ben = null, $cat = 'standard') {
-        if (is_array($ben) && isset($ben['benefit_id'])) {
-            $id = $ben['benefit_id'];
+    function getCurrentBenefit($ben = null, $cat = "standard") {
+        if (is_array($ben) && isset($ben["benefit_id"])) {
+            $id = $ben["benefit_id"];
             return $this->getObjectFromDB("SELECT * FROM benefit WHERE benefit_id = $id");
         }
         $this->systemAssertTrue("invalid array argument for getCurrentBenefit", !is_array($ben));
-        if ($ben !== null)
-            return $this->getObjectFromDB("SELECT * FROM benefit WHERE benefit_type = '$ben' AND benefit_category = '$cat' ORDER BY benefit_prerequisite, benefit_id LIMIT 1");
-        else
-            return $this->getObjectFromDB("SELECT * FROM benefit ORDER BY benefit_prerequisite, benefit_id LIMIT 1"); // should be current!
+        if ($ben !== null) {
+            return $this->getObjectFromDB(
+                "SELECT * FROM benefit WHERE benefit_type = '$ben' AND benefit_category = '$cat' ORDER BY benefit_prerequisite, benefit_id LIMIT 1"
+            );
+        } else {
+            return $this->getObjectFromDB("SELECT * FROM benefit ORDER BY benefit_prerequisite, benefit_id LIMIT 1");
+        } // should be current!
     }
 
     function getCurrentBenefitWithInfo() {
         $current_benefit = $this->getCurrentBenefit();
-        if (!$current_benefit)
+        if (!$current_benefit) {
             return null;
-        $ben = ($current_benefit == null) ? 0 : $current_benefit['benefit_type'];
+        }
+        $ben = $current_benefit == null ? 0 : $current_benefit["benefit_type"];
         $info = array_get($this->benefit_types, $ben, []);
         return $current_benefit + $info;
     }
 
     function getCurrentBenefitType() {
         $current_benefit = $this->getCurrentBenefit();
-        $bid = ($current_benefit == null) ? 0 : $current_benefit['benefit_type'];
+        $bid = $current_benefit == null ? 0 : $current_benefit["benefit_type"];
         return $bid;
     }
 
     function getCurrentBenefitId() {
         $current_benefit = $this->getCurrentBenefit();
-        $bid = ($current_benefit == null) ? 0 : $current_benefit['benefit_id'];
+        $bid = $current_benefit == null ? 0 : $current_benefit["benefit_id"];
         return $bid;
     }
 
     function getPlayerTurn($player_id) {
         if ($this->isRealPlayer($player_id)) {
-            return $this->getStat('turns_total', $player_id);
-        } else
+            return $this->getStat("turns_total", $player_id);
+        } else {
             return $this->getStat("game_turns_total_1");
+        }
     }
 
     function incPlayerTurn($player_id) {
-        $this->incStat(1, 'turns_number');
+        $this->incStat(1, "turns_number");
         if ($this->isRealPlayer($player_id)) {
-            $this->incStat(1, 'turns_total', $player_id);
-        } else if ($player_id == PLAYER_AUTOMA || $this->isShadowEmpireOnly())
+            $this->incStat(1, "turns_total", $player_id);
+        } elseif ($player_id == PLAYER_AUTOMA || $this->isShadowEmpireOnly()) {
             $this->incStat(1, "game_turns_total_1");
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -8230,103 +9180,114 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function argExplore($player_id = 0) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $ageOfSail = $this->isTapestryActive($player_id, TAP_AGE_OF_SAIL);
         $militarism = $this->isTapestryActive($player_id, 26);
         $exploitation = $this->isTapestryActive($player_id, 18);
         $current_benefit = $this->getCurrentBenefit();
         $res = $this->notifArgsAddBen($current_benefit);
-        $ben = $current_benefit['benefit_type'];
-        $flags = (int) $this->getRulesBenefit($ben, 'flags', 0);
+        $ben = $current_benefit["benefit_type"];
+        $flags = (int) $this->getRulesBenefit($ben, "flags", 0);
         $anywhere = ($flags & FLAG_ANYWHERE) != 0;
-        $res['decline'] = false;
-        if ($ben == 105) { // COLONIALISM        
-            $res['reason'] = $this->getReasonFullRec(reason_tapestry(10));
-            $res['colonialism'] = true;
+        $res["decline"] = false;
+        if ($ben == 105) {
+            // COLONIALISM
+            $res["reason"] = $this->getReasonFullRec(reason_tapestry(10));
+            $res["colonialism"] = true;
             $targets = $this->getColonialismTargets($player_id);
-            $res['title'] = clienttranslate("COLONIALISM: Select a territory TILE you control. Pre-printed hexes on the board are not tiles.");
+            $res["title"] = clienttranslate(
+                "COLONIALISM: Select a territory TILE you control. Pre-printed hexes on the board are not tiles."
+            );
         } else {
             $targets = $this->getExplorationTargets($anywhere, $player_id);
         }
         $targets = array_prefix_all($targets, "land_");
         if ($ageOfSail) {
-            if ($ageOfSail['card_location_arg2'] == 1)
-                $ageOfSail = false; // already played
+            if ($ageOfSail["card_location_arg2"] == 1) {
+                $ageOfSail = false;
+            } // already played
         }
-        $coal_baron = $this->getGameStateValue('coal_baron');
-        if ($coal_baron && $this->isTapestryActive($player_id, TAP_COAL_BARON))
-            $res['coal_baron'] = $this->getObjectFromDB("SELECT * FROM card WHERE card_id='$coal_baron'");
-        else
-            $res['coal_baron'] = null;
+        $coal_baron = $this->getGameStateValue("coal_baron");
+        if ($coal_baron && $this->isTapestryActive($player_id, TAP_COAL_BARON)) {
+            $res["coal_baron"] = $this->getObjectFromDB("SELECT * FROM card WHERE card_id='$coal_baron'");
+        } else {
+            $res["coal_baron"] = null;
+        }
         if ($this->hasCiv($player_id, CIV_ISLANDERS)) {
             if ($ben == 178 || $ben == 179) {
                 $targets = [];
-                $res['decline'] = true;
-                $res['title'] = $this->getBenefitName($ben);
+                $res["decline"] = true;
+                $res["title"] = $this->getBenefitName($ben);
             }
             $islander_targets = $this->getIslandersTargets();
             $targets = array_merge($targets, $islander_targets);
         }
         $tiles = $this->getCardsInHand($player_id, CARD_TERRITORY);
-        $res += array(
-            'exploration_targets' => $targets,
-            'ageOfSail' => $ageOfSail,
-            'exploitation' => $exploitation,
-            'militarism' => $militarism,
-            'tiles' => array_keys($tiles),
-            'anywhere' => $anywhere
-        );
+        $res += [
+            "exploration_targets" => $targets,
+            "ageOfSail" => $ageOfSail,
+            "exploitation" => $exploitation,
+            "militarism" => $militarism,
+            "tiles" => array_keys($tiles),
+            "anywhere" => $anywhere,
+        ];
         if ($militarism) {
-            $res['outpost'] = $this->getOutpostId(null, $player_id, false);
+            $res["outpost"] = $this->getOutpostId(null, $player_id, false);
         }
         $void = false;
         if (count($targets) == 0) {
             $void = true;
         }
-        if (count($res['tiles']) == 0 && !isset($res['colonialism'])) {
+        if (count($res["tiles"]) == 0 && !isset($res["colonialism"])) {
             $void = true;
         }
-        $res['void'] = $void;
-        if ($void)
-            $res['decline'] = true;
+        $res["void"] = $void;
+        if ($void) {
+            $res["decline"] = true;
+        }
         return $res;
     }
 
     function argConquer($player_id = -1) {
-        if ($player_id == -1)
+        if ($player_id == -1) {
             $player_id = $this->getActivePlayerId();
+        }
         $current_benefit = $this->getCurrentBenefit();
         $res = $this->notifArgsAddBen($current_benefit);
-        $ben = $current_benefit['benefit_type'];
-        $flags = (int) $this->getRulesBenefit($ben, 'flags', 0);
+        $ben = $current_benefit["benefit_type"];
+        $flags = (int) $this->getRulesBenefit($ben, "flags", 0);
         $anywhere = ($flags & FLAG_ANYWHERE) != 0;
-        $targets = ($ben == 119) ? $this->getToppleTargets() : $this->getConquerTargets(false, $anywhere, $player_id);
+        $targets = $ben == 119 ? $this->getToppleTargets() : $this->getConquerTargets(false, $anywhere, $player_id);
         $decline = false;
-        $res['outpost'] = $outpost_id = $this->getOutpostId(null, $player_id, false);
+        $res["outpost"] = $outpost_id = $this->getOutpostId(null, $player_id, false);
         if (!$outpost_id) {
             $decline = true;
         }
-        if (count($targets) == 0)
+        if (count($targets) == 0) {
             $decline = true;
-        return $res + array('targets' => $targets, 'decline' => $decline, 'anywhere' => $anywhere);
+        }
+        return $res + ["targets" => $targets, "decline" => $decline, "anywhere" => $anywhere];
     }
 
     function getOutpostsInHand($player_id) {
-        return $this->getCollectionFromDB("SELECT * FROM structure WHERE card_type='5' AND (card_location NOT LIKE 'land%' AND card_location NOT LIKE 'civ_21\_%') AND card_location_arg='$player_id'");
+        return $this->getCollectionFromDB(
+            "SELECT * FROM structure WHERE card_type='5' AND (card_location NOT LIKE 'land%' AND card_location NOT LIKE 'civ_21\_%') AND card_location_arg='$player_id'"
+        );
     }
 
     function argConquerRoll() {
         $die_red = $this->getGameStateValue("conquer_die_red");
         $die_black = $this->getGameStateValue("conquer_die_black");
-        return array('bid' => $this->getCurrentBenefitType(), 'die_red' => $die_red, 'die_black' => $die_black);
+        return ["bid" => $this->getCurrentBenefitType(), "die_red" => $die_red, "die_black" => $die_black];
     }
 
     function argPlayerTurn() {
         $all = $this->getPossibleAdvances(false);
         $advance = array_keys($all, 1);
         $updates = $this->argUpdateCardList();
-        return array('advances' => $advance, 'all_advances' => $all, 'technology_updates' => $updates);
+        return ["advances" => $advance, "all_advances" => $all, "technology_updates" => $updates];
     }
 
     function argPlayerTurnEnd() {
@@ -8335,29 +9296,29 @@ abstract class PGameXBody extends tapcommon {
 
     function argUndo() {
         $move = $this->getNextMoveId();
-        $undo_move = (int) $this->getGameStateValue('undo_move');
-        $undo_moves_player = self::getGameStateValue('undo_moves_player');
-        return array(
-            'partial_undo' => $this->getGameStateValue('partial_undo'),
-            'move' => $move,
-            'undo_move' => $undo_move,
-            'undo_player_id' => $undo_moves_player
-        );
+        $undo_move = (int) $this->getGameStateValue("undo_move");
+        $undo_moves_player = self::getGameStateValue("undo_moves_player");
+        return [
+            "partial_undo" => $this->getGameStateValue("partial_undo"),
+            "move" => $move,
+            "undo_move" => $undo_move,
+            "undo_player_id" => $undo_moves_player,
+        ];
     }
 
     function argTrackSelect() {
         $res = [];
         $this->addBenefitData($res);
-        $ben = $res['bid'];
+        $ben = $res["bid"];
         $player_id = $this->getActivePlayerId();
-        $s = $this->getRulesBenefit($ben, 's', '');
-        $res['cubes'] = [];
-        $res['spots'] = [];
-        if ($s == 'c') {
-            $sflags = (int) $this->getRulesBenefit($ben, 'sflags', 0); // defines players
-            $aflags = (int) $this->getRulesBenefit($ben, 'aflags', 0); // defines advance/regression or special
-            $adv = (int) $this->getRulesBenefit($ben, 'adv', 0); // defines exact number of steps for advance/regress if FLAG_POSEXACT is set
-            $t = (int) $this->getRulesBenefit($ben, 't', 0); // defines track, 0 all tracks
+        $s = $this->getRulesBenefit($ben, "s", "");
+        $res["cubes"] = [];
+        $res["spots"] = [];
+        if ($s == "c") {
+            $sflags = (int) $this->getRulesBenefit($ben, "sflags", 0); // defines players
+            $aflags = (int) $this->getRulesBenefit($ben, "aflags", 0); // defines advance/regression or special
+            $adv = (int) $this->getRulesBenefit($ben, "adv", 0); // defines exact number of steps for advance/regress if FLAG_POSEXACT is set
+            $t = (int) $this->getRulesBenefit($ben, "t", 0); // defines track, 0 all tracks
             $cubes_info = $this->getCubesSpecific($player_id, $sflags, $aflags, $t, $adv);
             // track/spot choosing benefit
             $cubes = [];
@@ -8365,18 +9326,18 @@ abstract class PGameXBody extends tapcommon {
                 $cube_id = $info["card_id"];
                 $cubes[] = "cube_$cube_id";
             }
-            $res['cubes'] = $cubes;
+            $res["cubes"] = $cubes;
             if (count($cubes) == 0) {
-                $res['decline'] = true;
+                $res["decline"] = true;
             }
         }
         // track spot select
         if ($ben == BE_TINKERERS_4) {
             $map = $this->getClosestBonus($player_id);
-            $res['spots'] = array_values($map);
-            $res['cubes'] = array_keys($map);
+            $res["spots"] = array_values($map);
+            $res["cubes"] = array_keys($map);
             if (count($map) == 0) {
-                $res['decline'] = true;
+                $res["decline"] = true;
             }
         }
         return $res;
@@ -8389,30 +9350,37 @@ abstract class PGameXBody extends tapcommon {
     function argBuildingSelect() {
         $player_id = $this->getActivePlayerId();
         $arr = $this->addBenefitData();
-        $ben = $arr['bid'];
-        $arr['choices'] = [];
+        $ben = $arr["bid"];
+        $arr["choices"] = [];
         switch ($ben) {
             case BE_GAIN_ANY_INCOME_BUILDING: // 110
             case 144: // select building
                 for ($type = 1; $type <= 4; $type++) {
-                    $building = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='income' AND card_location_arg='$player_id' AND (card_type='$type') LIMIT 1");
-                    if ($building)
-                        $arr['choices'][$building['card_id']] = $building;
+                    $building = $this->getObjectFromDB(
+                        "SELECT * FROM structure WHERE card_location='income' AND card_location_arg='$player_id' AND (card_type='$type') LIMIT 1"
+                    );
+                    if ($building) {
+                        $arr["choices"][$building["card_id"]] = $building;
+                    }
                 }
                 break;
             case 111: // select landmark
-                $lm = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg2 <= 12 AND card_location LIKE 'landmark_mat_slot%'");
-                $arr['choices'] = $lm;
-                $arr['title'] = clienttranslate('${You} may choose any remaining landmark from the landmark\'s mat');
+                $lm = $this->getCollectionFromDB(
+                    "SELECT * FROM structure WHERE card_location_arg2 <= 12 AND card_location LIKE 'landmark_mat_slot%'"
+                );
+                $arr["choices"] = $lm;
+                $arr["title"] = clienttranslate('${You} may choose any remaining landmark from the landmark\'s mat');
                 break;
             case 305: // select landmark tier 2
-                $lm = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location_arg2 in (2,6,9,10) AND card_location LIKE 'landmark_mat_slot%'");
-                $arr['choices'] = $lm;
-                $arr['title'] = clienttranslate('${You} may choose tier II landmark from the landmark\'s mat');
+                $lm = $this->getCollectionFromDB(
+                    "SELECT * FROM structure WHERE card_location_arg2 in (2,6,9,10) AND card_location LIKE 'landmark_mat_slot%'"
+                );
+                $arr["choices"] = $lm;
+                $arr["title"] = clienttranslate('${You} may choose tier II landmark from the landmark\'s mat');
                 break;
             default:
-                $action = $this->getRulesBenefit($ben, 'r', 'x');
-                if ($action == 'a') {
+                $action = $this->getRulesBenefit($ben, "r", "x");
+                if ($action == "a") {
                 }
                 break;
         }
@@ -8420,14 +9388,15 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function argResearch() {
-        $res = array(
-            'science' => $this->getGameStateValue('science_die'),
-            'empiricism' => $this->getGameStateValue('science_die_empiricism')
-        );
-        $res['cubes'] = [];
-        $res['all_advances'] = $this->getPossibleTrackChoices($res['science'], 1, $res['cubes']);
-        if ($res['empiricism'] != 0 && $res['empiricism'] != $res['science'])
-            $res['all_advances'] += $this->getPossibleTrackChoices($res['empiricism'], 1, $res['cubes']);
+        $res = [
+            "science" => $this->getGameStateValue("science_die"),
+            "empiricism" => $this->getGameStateValue("science_die_empiricism"),
+        ];
+        $res["cubes"] = [];
+        $res["all_advances"] = $this->getPossibleTrackChoices($res["science"], 1, $res["cubes"]);
+        if ($res["empiricism"] != 0 && $res["empiricism"] != $res["science"]) {
+            $res["all_advances"] += $this->getPossibleTrackChoices($res["empiricism"], 1, $res["cubes"]);
+        }
         $this->addBenefitData($res);
         return $res;
     }
@@ -8435,32 +9404,32 @@ abstract class PGameXBody extends tapcommon {
     function canDeclineTapestry() {
         $player_id = $this->getActivePlayerId();
         $tyranny = $this->isTapestryActive($player_id, TAP_TYRANNY);
-        $herald = ($this->getCurrentEra($player_id) == 1);
-        return ($tyranny || $herald);
+        $herald = $this->getCurrentEra($player_id) == 1;
+        return $tyranny || $herald;
     }
 
     function argTapestryCard() {
-        $res = array('decline' => $this->canDeclineTapestry());
+        $res = ["decline" => $this->canDeclineTapestry()];
         $this->addBenefitData($res);
         $player_id = $this->getActivePlayerId();
         $tyranny = $this->isTapestryActive($player_id, TAP_TYRANNY);
         if ($tyranny) {
-            $card_id = array_get($res, 'data');
+            $card_id = array_get($res, "data");
             if ($card_id) {
                 $info = $this->cards->getCard($card_id);
-                $res['just_played'] = $info ? $info['type_arg'] : 0;
-                $res['tyranny'] = $tyranny;
+                $res["just_played"] = $info ? $info["type_arg"] : 0;
+                $res["tyranny"] = $tyranny;
             }
         }
 
-        $ben = $res['bid'];
+        $ben = $res["bid"];
         switch ($ben) {
             case BE_ADVISORS_OVERTAKE_ADVISE_SELECTED:
                 $benefit_data = $this->getCurrentBenefit();
                 $benefit_data_2 = $this->getCurrentBenefit(BE_ADVISORS_OVERTAKE_ADVISE);
-                $card1 = getReasonPart($benefit_data_2['benefit_data'], 4);
-                $card2 = getReasonPart($benefit_data['benefit_data'], 4);
-                $res['targets'] = [$card1, $card2];
+                $card1 = getReasonPart($benefit_data_2["benefit_data"], 4);
+                $card2 = getReasonPart($benefit_data["benefit_data"], 4);
+                $res["targets"] = [$card1, $card2];
                 break;
         }
         return $res;
@@ -8470,26 +9439,27 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getActivePlayerId();
         $benefit_data = $this->getCurrentBenefit();
         $res = $this->notifArgsAddBen($benefit_data);
-        $ben = $benefit_data['benefit_type'];
+        $ben = $benefit_data["benefit_type"];
         switch ($ben) {
             case 170:
                 $outposts = $this->getOutpostsInHand($player_id);
-                $res['outpost'] = $outpost_id = $this->getOutpostId(null, $player_id, false);
-                if (count($outposts) == 0 && $this->hasCiv($player_id, CIV_MILITANTS) && $this->isAdjustments4()) { // MILITANTS
-                    $res['structures'] = [$outpost_id];
+                $res["outpost"] = $outpost_id = $this->getOutpostId(null, $player_id, false);
+                if (count($outposts) == 0 && $this->hasCiv($player_id, CIV_MILITANTS) && $this->isAdjustments4()) {
+                    // MILITANTS
+                    $res["structures"] = [$outpost_id];
                 } else {
-                    $res['structures'] = array_keys($outposts);
+                    $res["structures"] = array_keys($outposts);
                 }
-                $res['targets'] = [];
+                $res["targets"] = [];
                 $opp_outposts = $this->getStructuresSearch(BUILDING_OUTPOST, 0, "land_%", $this->getOpponentsStartingFromLeft($player_id));
                 foreach ($opp_outposts as $out) {
-                    $location = $out['card_location'];
+                    $location = $out["card_location"];
                     $count = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM structure WHERE card_location='$location'");
                     if ($count == 1) {
-                        $res['targets'][] = $location;
+                        $res["targets"][] = $location;
                     }
                 }
-                $res['title'] = clienttranslate('${You} must place an outpost on the map');
+                $res["title"] = clienttranslate('${You} must place an outpost on the map');
                 break;
         }
         return $res;
@@ -8501,50 +9471,52 @@ abstract class PGameXBody extends tapcommon {
             $benefit_data = $this->getCurrentBenefit();
         }
         $args = [];
-        $ben = $benefit_data['benefit_type'];
+        $ben = $benefit_data["benefit_type"];
         if ($ben == 191 || $ben == 192 || $ben == 193 || $ben == 321 || $ben == 320) {
             $neighbours = $this->getPlayerNeighbours($player_id, false);
             $cards = [];
             foreach ($neighbours as $other) {
                 if ($ben == 191) {
-                    $cards += $this->getCardsSearch(CARD_TERRITORY, null, 'hand', $other);
-                    $cards += $this->getCardsSearch(CARD_SPACE, null, 'hand', $other);
-                } else if ($ben == 192) {
-                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, 'hand', $other, 1);
-                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, 'hand', $other, 2);
-                } else if ($ben == 320) {
-                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, 'hand', $other);
-                } else if ($ben == 193) {
-                    $cards += $this->getCardsSearch(CARD_TAPESTRY, null, 'era%', $other);
-                } else if ($ben == 321) {
-                    $cards += $this->getCardsSearch(CARD_TERRITORY, null, 'hand', $other);
+                    $cards += $this->getCardsSearch(CARD_TERRITORY, null, "hand", $other);
+                    $cards += $this->getCardsSearch(CARD_SPACE, null, "hand", $other);
+                } elseif ($ben == 192) {
+                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, "hand", $other, 1);
+                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, "hand", $other, 2);
+                } elseif ($ben == 320) {
+                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, "hand", $other);
+                } elseif ($ben == 193) {
+                    $cards += $this->getCardsSearch(CARD_TAPESTRY, null, "era%", $other);
+                } elseif ($ben == 321) {
+                    $cards += $this->getCardsSearch(CARD_TERRITORY, null, "hand", $other);
                 }
             }
-            $args['title'] = $this->getBenefitName($ben);
+            $args["title"] = $this->getBenefitName($ben);
         } else {
-            $cards = $this->getCardsSearch(null, null, 'draw', $player_id);
+            $cards = $this->getCardsSearch(null, null, "draw", $player_id);
             if ($ben == BE_GAMBLES_PICK || $ben == 319) {
-                $args['title'] = $this->getBenefitName($ben);
+                $args["title"] = $this->getBenefitName($ben);
             }
         }
         $args = $this->notifArgsAddBen($benefit_data, $args);
-        $args['cards'] = $cards;
+        $args["cards"] = $cards;
         return $args;
     }
 
-    function getRulesBenefit($ben, $field = 'flags', $def = null) {
-        if ($ben == 0)
+    function getRulesBenefit($ben, $field = "flags", $def = null) {
+        if ($ben == 0) {
             return $def;
+        }
         return array_get_def($this->benefit_types, $ben, $field, $def);
     }
 
-    function getRulesCard($card_category, $card_type, $field = 'benefit', $def = null) {
-        if ($card_type == 0)
+    function getRulesCard($card_category, $card_type, $field = "benefit", $def = null) {
+        if ($card_type == 0) {
             return $def;
-        return array_get_def($this->card_types[$card_category]['data'], $card_type, $field, $def);
+        }
+        return array_get_def($this->card_types[$card_category]["data"], $card_type, $field, $def);
     }
 
-    function getRulesCiv($card_type, $field = 'r', $def = null) {
+    function getRulesCiv($card_type, $field = "r", $def = null) {
         return $this->getRulesCard(CARD_CIVILIZATION, $card_type, $field, $def);
     }
 
@@ -8554,14 +9526,14 @@ abstract class PGameXBody extends tapcommon {
 
     function argAddTrackChoice($ben, &$res) {
         // $this->debugConsole("calling argAddTrackChoice $ben $oid");
-        $track = (int) $this->getRulesBenefit($ben, 't', 0);
+        $track = (int) $this->getRulesBenefit($ben, "t", 0);
         if ($track && $track <= 4) {
-            $change = (int) $this->getRulesBenefit($ben, 'adv', 1);
-            $res['tracks'][$ben]['cubes'] = [];
-            $res['tracks'][$ben]['spots'] = $this->getPossibleTrackChoices($track, $change, $res['tracks'][$ben]['cubes']);
-            $res['tracks'][$ben]['track'] = $track;
-            $res['tracks'][$ben]['change'] = $change;
-            $res['tracks_change'] = $change; // it should be same for all
+            $change = (int) $this->getRulesBenefit($ben, "adv", 1);
+            $res["tracks"][$ben]["cubes"] = [];
+            $res["tracks"][$ben]["spots"] = $this->getPossibleTrackChoices($track, $change, $res["tracks"][$ben]["cubes"]);
+            $res["tracks"][$ben]["track"] = $track;
+            $res["tracks"][$ben]["change"] = $change;
+            $res["tracks_change"] = $change; // it should be same for all
         }
     }
 
@@ -8570,8 +9542,8 @@ abstract class PGameXBody extends tapcommon {
         // For each: benefit_id, along with benefit_type.
         $benefit_data = $this->getCurrentBenefit();
         $comp = $this->getCompositeBenefit($benefit_data);
-        $choice_cat = $comp['op'];
-        $types = $comp['types'];
+        $choice_cat = $comp["op"];
+        $types = $comp["types"];
         $options = [];
         foreach ($types as $type) {
             $options[] = (int) $type;
@@ -8580,36 +9552,39 @@ abstract class PGameXBody extends tapcommon {
         foreach ($options as $type) {
             $this->argAddTrackChoice($type, $res);
         }
-        $res['options'] = $options;
-        $res['c'] = $choice_cat;
+        $res["options"] = $options;
+        $res["c"] = $choice_cat;
         return $res;
     }
 
     function argCivAbility() {
         $current_benefit = $this->getCurrentBenefit();
         $this->systemAssertTrue("missing benefit", $current_benefit);
-        if ($current_benefit['benefit_category'] != 'civ')
+        if ($current_benefit["benefit_category"] != "civ") {
             return [];
-        $player_id = $current_benefit['benefit_player_id'];
-        $order = $current_benefit['benefit_prerequisite'];
-        $this->systemAssertTrue("wrong benefit category for civ", $current_benefit['benefit_category'] == 'civ');
-        $all = $this->getCollectionFromDB("SELECT * FROM benefit WHERE benefit_category = 'civ' AND benefit_prerequisite = '$order' ORDER BY benefit_id");
+        }
+        $player_id = $current_benefit["benefit_player_id"];
+        $order = $current_benefit["benefit_prerequisite"];
+        $this->systemAssertTrue("wrong benefit category for civ", $current_benefit["benefit_category"] == "civ");
+        $all = $this->getCollectionFromDB(
+            "SELECT * FROM benefit WHERE benefit_category = 'civ' AND benefit_prerequisite = '$order' ORDER BY benefit_id"
+        );
         $res = [];
-        $res['benefits'] = $all;
+        $res["benefits"] = $all;
         foreach ($all as $i => $b) {
-            $cid = $b['benefit_type'];
-            $res['benefits'][$i] = $this->argCivAbilitySingle($player_id, $cid, $b);
+            $cid = $b["benefit_type"];
+            $res["benefits"][$i] = $this->argCivAbilitySingle($player_id, $cid, $b);
         }
         return $res;
     }
 
     function argCivAbilitySingle($player_id, $civ, $benefit) {
         $data = $benefit;
-        $condition = $benefit['benefit_data'];
-        $data['reason'] = $this->getReasonFullRec(reason(CARD_CIVILIZATION, $civ), false);
-        $data['slots'] = [];
-        $slots = $this->getRulesCiv($civ, 'slots');
-        $is_midgame = $condition == 'midgame';
+        $condition = $benefit["benefit_data"];
+        $data["reason"] = $this->getReasonFullRec(reason(CARD_CIVILIZATION, $civ), false);
+        $data["slots"] = [];
+        $slots = $this->getRulesCiv($civ, "slots");
+        $is_midgame = $condition == "midgame";
         $civinst = $this->getCivilizationInstance($civ);
         if ($is_midgame) {
             switch ($civ) {
@@ -8622,7 +9597,7 @@ abstract class PGameXBody extends tapcommon {
                 case CIV_ADVISORS:
                     return $civinst->argCivAbilitySingle($player_id, $benefit);
                 case CIV_ENTERTAINERS:
-                    $data['slots'] = array_keys($slots);
+                    $data["slots"] = array_keys($slots);
                     break;
                 case CIV_MERRYMAKERS:
                     $token_data = $this->getStructuresOnCiv($civ, BUILDING_CUBE);
@@ -8630,43 +9605,48 @@ abstract class PGameXBody extends tapcommon {
                     unset($slots[5]);
                     unset($slots[9]);
                     foreach ($token_data as $token) {
-                        $slot = getPart($token['card_location'], 2);
-                        if (isset($slots[$slot]))
+                        $slot = getPart($token["card_location"], 2);
+                        if (isset($slots[$slot])) {
                             unset($slots[$slot]);
+                        }
                     }
-                    $data['slots'] = array_keys($slots);
+                    $data["slots"] = array_keys($slots);
                     break;
                 case CIV_CHOSEN:
                     $token_data = $this->getStructuresOnCiv($civ, BUILDING_CUBE);
-                    $data['slots'] = $this->getLinkedSlots($civ, $token_data);
+                    $data["slots"] = $this->getLinkedSlots($civ, $token_data);
                     break;
                 case CIV_UTILITARIENS:
-                    $data['slots_choice'] = [];
+                    $data["slots_choice"] = [];
                     $own_landmarks = $this->getStructuresSearch(BUILDING_LANDMARK, null, null, $player_id);
                     $cube1 = $this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_{$civ}_9", $player_id);
                     $cube2 = $this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_{$civ}_10", $player_id);
                     foreach ($own_landmarks as $landmark_data) {
-                        $landmark_type = $landmark_data['card_location_arg2'];
+                        $landmark_type = $landmark_data["card_location_arg2"];
                         $slot = $this->getCivSlotWithValue(CIV_UTILITARIENS, "lm", $landmark_type);
                         if ($slot) {
                             $cubeon = $this->getStructureInfoSearch(BUILDING_CUBE, null, $slot, $player_id);
-                            if ($cubeon)
+                            if ($cubeon) {
                                 continue;
+                            }
                             $i = getPart($slot, 2);
-                            $toname = $this->landmark_data[$landmark_type]['name'];
-                            $data['slots_choice'][$i]['title'] = $toname;
+                            $toname = $this->landmark_data[$landmark_type]["name"];
+                            $data["slots_choice"][$i]["title"] = $toname;
                         }
                     }
-                    if (count($data['slots_choice']) == 0) {
-                        $data['title'] = clienttranslate('You have no landmarks to choose from');
-                    } else
-                        $data['title'] = clienttranslate('Pick up to ${num} slots');
-                    $data['targets'] = [];
-                    if ($cube1 != null)
-                        $data['targets'][] = $cube1['card_id'];
-                    if ($cube2 != null)
-                        $data['targets'][] = $cube2['card_id'];
-                    $data['num'] = count($data['targets']);
+                    if (count($data["slots_choice"]) == 0) {
+                        $data["title"] = clienttranslate("You have no landmarks to choose from");
+                    } else {
+                        $data["title"] = clienttranslate('Pick up to ${num} slots');
+                    }
+                    $data["targets"] = [];
+                    if ($cube1 != null) {
+                        $data["targets"][] = $cube1["card_id"];
+                    }
+                    if ($cube2 != null) {
+                        $data["targets"][] = $cube2["card_id"];
+                    }
+                    $data["num"] = count($data["targets"]);
                     break;
             }
             return $data;
@@ -8683,85 +9663,88 @@ abstract class PGameXBody extends tapcommon {
                 return $civinst->argCivAbilitySingle($player_id, $benefit);
 
             case CIV_LEADERS:
-                $data['slots'] = array_keys($slots);
+                $data["slots"] = array_keys($slots);
                 break;
             case CIV_ALIENS:
                 $space_type = CARD_SPACE;
-                $token_data = $this->getCollectionFromDB("SELECT * FROM card WHERE card_location_arg='$player_id' AND card_type='$space_type' AND card_location='civilization_$civ'");
+                $token_data = $this->getCollectionFromDB(
+                    "SELECT * FROM card WHERE card_location_arg='$player_id' AND card_type='$space_type' AND card_location='civilization_$civ'"
+                );
                 $space_tile = 0;
-                $ben = $slots[1]['benefit'];
-                if (count($token_data) >  0) {
+                $ben = $slots[1]["benefit"];
+                if (count($token_data) > 0) {
                     $space_tile = array_key_first($token_data);
                     if ($this->isAdjustments8()) {
-                        $data['slots_choice'][1]['benefit'] = [$ben];
+                        $data["slots_choice"][1]["benefit"] = [$ben];
                     } else {
                         // pay to explore
 
-                        $data['slots_choice'][1]['benefit'] = ['p' => BE_ANYRES, 'g' => $ben];
+                        $data["slots_choice"][1]["benefit"] = ["p" => BE_ANYRES, "g" => $ben];
                     }
                 }
-                $data['slots_choice'][1]['discard_id'] = $space_tile;
+                $data["slots_choice"][1]["discard_id"] = $space_tile;
                 break;
             case CIV_ARCHITECTS:
-                $data['capital'] = $this->argPlaceStructure(BUILDING_CUBE);
+                $data["capital"] = $this->argPlaceStructure(BUILDING_CUBE);
                 break;
             case CIV_MERRYMAKERS:
                 $income_turn = $this->getCurrentEra($player_id);
                 $token_data = $this->getStructuresOnCivExceptArg($civ, BUILDING_CUBE, $income_turn);
-                $data['slots'] = $this->getLinkedSlots($civ, $token_data);
+                $data["slots"] = $this->getLinkedSlots($civ, $token_data);
                 break;
             case CIV_CHOSEN:
             case CIV_ENTERTAINERS:
                 $token_data = $this->getStructuresOnCiv($civ, BUILDING_CUBE);
-                $data['slots'] = $this->getLinkedSlots($civ, $token_data);
+                $data["slots"] = $this->getLinkedSlots($civ, $token_data);
                 break;
             case CIV_SPIES:
-                $data['slots'] = array_keys($slots);
-                $data['slots_choice'] = [];
-                $data['title'] = clienttranslate('Choose the slot on the civilization mat');
+                $data["slots"] = array_keys($slots);
+                $data["slots_choice"] = [];
+                $data["title"] = clienttranslate("Choose the slot on the civilization mat");
                 break;
             case CIV_TREASURE_HUNTERS:
                 $targets = $this->getConquerTargets(false, false, $player_id, true);
-                $map = $this->getMapDataFromDb('map');
+                $map = $this->getMapDataFromDb("map");
 
                 foreach ($slots as $i => $info) {
-                    if (isset($data['slots_choice'][$i])) {
-                        $terrain = $info['ter'];
-                        $data['slots_choice'][$i]['targets'] = [];
+                    if (isset($data["slots_choice"][$i])) {
+                        $terrain = $info["ter"];
+                        $data["slots_choice"][$i]["targets"] = [];
                         foreach ($targets as $coord) {
-                            if (array_key_exists($terrain, $map[$coord]['terrain_types'])) {
-                                $data['slots_choice'][$i]['targets'][] = $coord;
+                            if (array_key_exists($terrain, $map[$coord]["terrain_types"])) {
+                                $data["slots_choice"][$i]["targets"][] = $coord;
                             }
                         }
                     }
                 }
-                $data['targets'] = $targets;
+                $data["targets"] = $targets;
                 break;
             case CIV_UTILITARIENS:
                 $condtype = getReasonPart($condition, 0);
-                if ($condtype == 'triggered') {
+                if ($condtype == "triggered") {
                     $landmark = getReasonPart($condition, 2);
                     // $this->debugConsole("$condtype $landmark");
                     $slot = $this->getCivSlotWithValue(CIV_UTILITARIENS, "lm", $landmark);
                     if ($slot) {
                         $cubes = $this->getStructuresOnCiv(CIV_UTILITARIENS, BUILDING_CUBE);
-                        $slots = $this->getRulesCiv(CIV_UTILITARIENS, 'slots');
+                        $slots = $this->getRulesCiv(CIV_UTILITARIENS, "slots");
                         foreach ($cubes as $cube) {
-                            $i = getPart($cube['card_location'], 2);
-                            $landmark_type = $slots[$i]['lm'];
-                            if ($landmark_type)
-                                $toname = $this->landmark_data[$landmark_type]['name'];
-                            else
-                                $toname = $slots[$i]['title'];
-                            $data['slots_choice'][$i]['title'] = $toname;
+                            $i = getPart($cube["card_location"], 2);
+                            $landmark_type = $slots[$i]["lm"];
+                            if ($landmark_type) {
+                                $toname = $this->landmark_data[$landmark_type]["name"];
+                            } else {
+                                $toname = $slots[$i]["title"];
+                            }
+                            $data["slots_choice"][$i]["title"] = $toname;
                         }
-                        $data['title'] = clienttranslate('Move token into ${spot_name} from');
-                        $data['spot_name'] = $this->landmark_data[$landmark]['name'];
+                        $data["title"] = clienttranslate('Move token into ${spot_name} from');
+                        $data["spot_name"] = $this->landmark_data[$landmark]["name"];
                     }
-                } else if ($this->isAdjustments8()) {
+                } elseif ($this->isAdjustments8()) {
                     //$data['title'] = clienttranslate('Place landmark');
-                    $data['slots'] = null;
-                    $data['slots_choice'][0]['title'] = clienttranslate('Place landmark');
+                    $data["slots"] = null;
+                    $data["slots_choice"][0]["title"] = clienttranslate("Place landmark");
                 }
                 break;
             default:
@@ -8772,13 +9755,14 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getLinkedSlots($civ, $token_list) {
-        $slots = $this->getRulesCiv($civ, 'slots', []);
+        $slots = $this->getRulesCiv($civ, "slots", []);
         $bslots = [];
         // add all slots connected to tokens on token_list
         foreach ($token_list as $token) {
-            if ($token == null)
+            if ($token == null) {
                 return [];
-            $slot = getPart($token['card_location'], 2);
+            }
+            $slot = getPart($token["card_location"], 2);
             $slot_info = array_get($slots, $slot, []);
             $links = array_get($slot_info, "link");
             if ($links) {
@@ -8788,7 +9772,7 @@ abstract class PGameXBody extends tapcommon {
         // remove slots blocked by current cubes
         $token_data = $this->getStructuresOnCiv($civ, BUILDING_CUBE);
         foreach ($token_data as $token) {
-            $slot = getPart($token['card_location'], 2);
+            $slot = getPart($token["card_location"], 2);
             array_remove_value($bslots, $slot);
         }
         return $bslots;
@@ -8800,18 +9784,19 @@ abstract class PGameXBody extends tapcommon {
 
     function argUpgradeTechnology() {
         $res = $this->addBenefitData();
-        $res['possible'] = $this->argUpdateCardList();
+        $res["possible"] = $this->argUpdateCardList();
         return $res;
     }
 
     function argUpdateCardList($player_id = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $techs = $this->getCardsInHand($player_id, 4);
         $techs_ok = [];
         foreach ($techs as $card) {
-            if ($this->isUpgradePrereqMet($card['card_type_arg'])) {
-                $techs_ok[] = $card['card_type_arg'];
+            if ($this->isUpgradePrereqMet($card["card_type_arg"])) {
+                $techs_ok[] = $card["card_type_arg"];
             }
         }
         return $techs_ok;
@@ -8820,32 +9805,32 @@ abstract class PGameXBody extends tapcommon {
     function getTokenTypeName($type) {
         $type = $this->getNormalizedReasonId($type);
         switch ($type) {
-            case 'other':
-                return '';
-            case 'die':
-                return '';
-            case 'tapestry':
+            case "other":
+                return "";
+            case "die":
+                return "";
+            case "tapestry":
             case CARD_TAPESTRY:
                 return clienttranslate("Tapestry card");
-            case 'be':
+            case "be":
                 return clienttranslate("Benefit");
-            case 'tech':
+            case "tech":
             case CARD_TECHNOLOGY:
                 return clienttranslate("Tech card");
-            case 'spot':
+            case "spot":
                 return clienttranslate("Track spot");
-            case 'inspot':
+            case "inspot":
                 return clienttranslate("Income track spot");
-            case 'civ':
+            case "civ":
             case CARD_CIVILIZATION:
                 return clienttranslate("Civilization");
             case CARD_TERRITORY:
-            case 'tile':
+            case "tile":
                 return clienttranslate("Territory");
             case CARD_SPACE:
-            case 'space':
+            case "space":
                 return clienttranslate("Space Tile");
-            case 'achi':
+            case "achi":
                 return clienttranslate("ACHIEVEMENT");
             default:
                 $this->warn("unsupported type $type for name getTokenTypeName");
@@ -8854,10 +9839,11 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getReasonId($reason) {
-        if (!$reason)
-            return 'other';
-        $reason_type = '';
-        $data_arr = explode(':', $reason);
+        if (!$reason) {
+            return "other";
+        }
+        $reason_type = "";
+        $data_arr = explode(":", $reason);
         if (count($data_arr) > 1) {
             $reason_type = $data_arr[1];
         }
@@ -8865,13 +9851,14 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getReasonValue($reason) {
-        if (!$reason)
-            return '';
-        $data_arr = explode(':', $reason);
+        if (!$reason) {
+            return "";
+        }
+        $data_arr = explode(":", $reason);
         if (count($data_arr) > 2) {
             return $data_arr[2];
         }
-        return '';
+        return "";
     }
 
     function getReasonArg($reason, $i) {
@@ -8879,37 +9866,38 @@ abstract class PGameXBody extends tapcommon {
     }
 
     private function getNormalizedReasonId($reason_type) {
-        if (!$reason_type)
-            $reason_type = 'other';
+        if (!$reason_type) {
+            $reason_type = "other";
+        }
         switch ($reason_type) {
-            case '':
-            case 'str':
-                return 'other';
-            case 'tapestry':
-            case 'tap':
+            case "":
+            case "str":
+                return "other";
+            case "tapestry":
+            case "tap":
             case CARD_TAPESTRY:
-                return 'tapestry';
-            case 'be':
-                return 'be';
-            case 'tech':
+                return "tapestry";
+            case "be":
+                return "be";
+            case "tech":
             case CARD_TECHNOLOGY:
-                return 'tech';
-            case 'spot':
-                return 'spot';
-            case 'civ':
+                return "tech";
+            case "spot":
+                return "spot";
+            case "civ":
             case CARD_CIVILIZATION:
-                return 'civ';
-            case 'ter':
-            case 'tile':
+                return "civ";
+            case "ter":
+            case "tile":
             case CARD_TERRITORY:
-                return 'tile';
-            case 'space':
+                return "tile";
+            case "space":
             case CARD_SPACE:
-                return 'space';
-            case 'inspot':
-            case 'die':
-            case 'other':
-            case 'achi':
+                return "space";
+            case "inspot":
+            case "die":
+            case "other":
+            case "achi":
                 return "$reason_type";
             default:
                 $this->warn("unsupported type $reason_type for name getReasonId");
@@ -8921,39 +9909,42 @@ abstract class PGameXBody extends tapcommon {
     function getTokenName($type, $value) {
         $type = $this->getNormalizedReasonId($type);
         switch ($type) {
-            case 'die':
-            case 'achi':
+            case "die":
+            case "achi":
                 return $value;
-            case 'other': // as is
+            case "other": // as is
                 return $value;
-            case 'tapestry':
-                return $this->tapestry_card_data[$value]['name'];
-            case 'be':
+            case "tapestry":
+                return $this->tapestry_card_data[$value]["name"];
+            case "be":
                 if ($value > 500 && $value < 599) {
                     return clienttranslate("VP");
                 }
-                if (!$value) return "";
-                return $this->benefit_types[$value]['name'];
-            case 'tech':
-                return $this->tech_card_data[$value]['name'];
-            case 'spot':
-                $arr = explode('_', $value);
+                if (!$value) {
+                    return "";
+                }
+                return $this->benefit_types[$value]["name"];
+            case "tech":
+                return $this->tech_card_data[$value]["name"];
+            case "spot":
+                $arr = explode("_", $value);
                 $track = $arr[0];
                 $spot = $arr[1];
-                return $this->tech_track_data[$track][$spot]['name'];
-            case 'civ':
-                return $this->civilizations[$value]['name'];
-            case 'tile':
+                return $this->tech_track_data[$track][$spot]["name"];
+            case "civ":
+                return $this->civilizations[$value]["name"];
+            case "tile":
                 return $value; //$this->territory_tiles
-            case 'space':
+            case "space":
                 return $value;
-            case 'inspot':
-                $arr = explode('_', $value);
+            case "inspot":
+                $arr = explode("_", $value);
                 $track = $arr[0];
                 $spot = $arr[1];
-                if (!$spot)
-                    return $this->income_tracks[$track]['name'];
-                return $this->income_tracks[$track][$spot]['name'];
+                if (!$spot) {
+                    return $this->income_tracks[$track]["name"];
+                }
+                return $this->income_tracks[$track][$spot]["name"];
             default:
                 $this->warn("unsupported type '$type' for name getTokenName");
                 return "$type:$value";
@@ -8961,14 +9952,15 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getReasonName($data) {
-        $data_arr = explode(':', $data);
+        $data_arr = explode(":", $data);
         if (count($data_arr) > 2) {
             $type = $data_arr[1];
             $value = $data_arr[2];
             return $this->getTokenName($type, $value);
         }
-        if (is_numeric($data))
-            return '';
+        if (is_numeric($data)) {
+            return "";
+        }
         return $data;
     }
 
@@ -8978,38 +9970,39 @@ abstract class PGameXBody extends tapcommon {
 
     /* this only can be used in notifications */
     function getReasonFullRec($data, $brackets = true) {
-        if (is_numeric($data) || !$data)
-            return '';
-        $data_arr = explode(':', $data);
+        if (is_numeric($data) || !$data) {
+            return "";
+        }
+        $data_arr = explode(":", $data);
         if (count($data_arr) > 2) {
             $type = $this->getReasonId($data);
             $value = $data_arr[2];
             $type_name = $this->getTokenTypeName($type);
             $name = $this->getTokenName($type, $value);
-            if (!$type_name)
-                $res = ['log' => '${n}', 'args' => ['n' => $name, 'i18n' => ['n']]];
-            else {
-                $res = ['log' => '${t}: ${n}', 'args' => ['t' => $type_name, 'n' => $name, 'i18n' => ['t', 'n']]];
-                if ($type == 'spot') {
-                    $arr = explode('_', $value);
+            if (!$type_name) {
+                $res = ["log" => '${n}', "args" => ["n" => $name, "i18n" => ["n"]]];
+            } else {
+                $res = ["log" => '${t}: ${n}', "args" => ["t" => $type_name, "n" => $name, "i18n" => ["t", "n"]]];
+                if ($type == "spot") {
+                    $arr = explode("_", $value);
                     $track = $arr[0];
                     $spot = $arr[1];
-                    $res['args'] = $this->notifArgsAddTrackSpot($track, $spot, $res['args']);
-                    $res['log'] = '${t}: ${spot_name}';
+                    $res["args"] = $this->notifArgsAddTrackSpot($track, $spot, $res["args"]);
+                    $res["log"] = '${t}: ${spot_name}';
                 }
             }
         } else {
-            $res = ['log' => '${n}', 'args' => ['n' => $data, 'i18n' => ['n']]];
+            $res = ["log" => '${n}', "args" => ["n" => $data, "i18n" => ["n"]]];
         }
         if ($brackets) {
-            $res['log'] = "(" . $res['log'] . ")";
+            $res["log"] = "(" . $res["log"] . ")";
         }
         return $res;
     }
 
     function parsePay($benefit_cat) {
         $items = explode(",", $benefit_cat);
-        $this->systemAssertTrue("invalid cat $benefit_cat", $items[0] == 'p');
+        $this->systemAssertTrue("invalid cat $benefit_cat", $items[0] == "p");
         $pay = null;
         $q = 0;
         $benefits = [];
@@ -9017,17 +10010,18 @@ abstract class PGameXBody extends tapcommon {
         $mode = 0;
         while ($item = array_shift($items)) {
             if ($mode == 0) {
-                if ($item == 'g') {
+                if ($item == "g") {
                     $mode = 1;
                     continue;
                 }
                 if ($pay == null) {
                     $pay = (int) $item;
                     $q++;
-                } else if ($item == $pay) {
+                } elseif ($item == $pay) {
                     $q++;
-                } else
+                } else {
                     $this->systemAssertTrue("invalid cat $benefit_cat");
+                }
             } else {
                 $benefits[] = (int) $item;
             }
@@ -9038,33 +10032,34 @@ abstract class PGameXBody extends tapcommon {
     function argBonus() {
         $benefit = $this->getCurrentBenefit();
         //$this->error(json_encode($benefit, JSON_PRETTY_PRINT));
-        $benefit_cat = $benefit['benefit_category'];
-        $benefit_data = $benefit['benefit_data'];
+        $benefit_cat = $benefit["benefit_category"];
+        $benefit_data = $benefit["benefit_data"];
         $benefits = [];
         $name = null;
-        $benefit['reason_data'] = $benefit_data;
-        if ($benefit_cat == 'civ') {
+        $benefit["reason_data"] = $benefit_data;
+        if ($benefit_cat == "civ") {
             return $benefit; // not suppose to happen in bonus state
         }
-        if ($benefit_cat == 'bonus') {
+        if ($benefit_cat == "bonus") {
             if ($benefit_data) {
                 $benefits = explode(",", $benefit_data);
             }
-            $benefit['reason_data'] = reason('str', clienttranslate('bonus'));
-            $benefit['pay_quantity'] = $benefit['benefit_quantity'];
-            $benefit['pay'] = (int) $benefit['benefit_type'];
+            $benefit["reason_data"] = reason("str", clienttranslate("bonus"));
+            $benefit["pay_quantity"] = $benefit["benefit_quantity"];
+            $benefit["pay"] = (int) $benefit["benefit_type"];
         } else {
             list($pay, $q, $benefits) = $this->parsePay($benefit_cat);
-            $benefit['pay_quantity'] = $q;
-            $benefit['pay'] = $pay;
+            $benefit["pay_quantity"] = $q;
+            $benefit["pay"] = $pay;
         }
-        $benefit['reason'] = $this->getReasonFullRec($benefit['reason_data'], true);
+        $benefit["reason"] = $this->getReasonFullRec($benefit["reason_data"], true);
         $benefit_id = $benefits[0]; // TODO
-        $benefit['benefits'] = $benefits;
+        $benefit["benefits"] = $benefits;
         $name = $this->getBenefitName($benefit_id);
-        if (!$name)
+        if (!$name) {
             $name = "unknown";
-        $benefit += ['i18n' => ['bonus_name'], 'bonus_name' => $name];
+        }
+        $benefit += ["i18n" => ["bonus_name"], "bonus_name" => $name];
         return $benefit;
     }
 
@@ -9079,13 +10074,19 @@ abstract class PGameXBody extends tapcommon {
                 $actual = $this->getResourceCountAll($player_id);
                 break;
             case BE_TERRITORY: // territory tiles.
-                $actual = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE (card_type='1')  AND (card_location='hand') AND (card_location_arg='$player_id')");
+                $actual = $this->getUniqueValueFromDB(
+                    "SELECT COUNT(*) FROM card WHERE (card_type='1')  AND (card_location='hand') AND (card_location_arg='$player_id')"
+                );
                 break;
             case BE_TAPESTRY: // tapestry cards.
-                $actual = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE (card_type='3') AND (card_location='hand') AND (card_location_arg='$player_id')");
+                $actual = $this->getUniqueValueFromDB(
+                    "SELECT COUNT(*) FROM card WHERE (card_type='3') AND (card_location='hand') AND (card_location_arg='$player_id')"
+                );
                 break;
             case BE_TECH_CARD: // tech cards.
-                $actual = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE (card_type='4') AND (card_location='hand') AND (card_location_arg='$player_id')");
+                $actual = $this->getUniqueValueFromDB(
+                    "SELECT COUNT(*) FROM card WHERE (card_type='4') AND (card_location='hand') AND (card_location_arg='$player_id')"
+                );
                 break;
             default:
                 break;
@@ -9095,79 +10096,82 @@ abstract class PGameXBody extends tapcommon {
 
     function stBonus() {
         $args = $this->argBonus();
-        $count = $args['pay_quantity'];
-        $type = (int) $args['pay'];
+        $count = $args["pay_quantity"];
+        $type = (int) $args["pay"];
         $player_id = $this->getActivePlayerId();
-        $reason = $args['reason'];
-        if (($count == 1) && ($type == BE_ANYRES) && ($this->isTapestryActive($player_id, 44))) { // WARTIME ECONOMY
+        $reason = $args["reason"];
+        if ($count == 1 && $type == BE_ANYRES && $this->isTapestryActive($player_id, 44)) {
+            // WARTIME ECONOMY
             $this->clearCurrentBenefit();
             $this->notifyWithName("message", clienttranslate('${player_name} gets a free bonus ${reason}'), [
-                'reason' => $this->getReasonFullRec(reason_tapestry(44))
+                "reason" => $this->getReasonFullRec(reason_tapestry(44)),
             ]);
-            $this->queueBenefitInterrupt($args['benefits'], $player_id, $args['reason_data']);
-            $this->gamestate->nextState('next');
+            $this->queueBenefitInterrupt($args["benefits"], $player_id, $args["reason_data"]);
+            $this->gamestate->nextState("next");
             return;
         }
         $actual = $this->getPayResourceCount($type, $player_id);
         if ($actual < $count) {
-            $this->notifyWithName('message_error', clienttranslate('${player_name} cannot pay for bonus ${reason}'), [
-                'reason' => $reason
+            $this->notifyWithName("message_error", clienttranslate('${player_name} cannot pay for bonus ${reason}'), [
+                "reason" => $reason,
             ]);
             $this->clearCurrentBenefit();
-            $this->gamestate->nextState('next');
+            $this->gamestate->nextState("next");
         }
     }
 
     function getCapitalData($player_id) {
         $grid_data = $this->getCollectionFromDB("SELECT * FROM capital WHERE player_id='$player_id'");
-        $capital = array();
+        $capital = [];
         for ($a = 0; $a < 15; $a++) {
-            $capital[$a] = array();
+            $capital[$a] = [];
         }
         foreach ($grid_data as $cell) {
-            $used = $cell['capital_occupied'];
-            $x = $cell['capital_x'];
-            $y = $cell['capital_y'];
+            $used = $cell["capital_occupied"];
+            $x = $cell["capital_x"];
+            $y = $cell["capital_y"];
             $capital[$x][$y] = $used;
         }
         return $capital;
     }
 
     function getPendingStructure() {
-        return $this->getStructureInfoSearch(null, null, 'capital_structure');
+        return $this->getStructureInfoSearch(null, null, "capital_structure");
     }
 
     function argPlaceStructure($stype = null) {
         // Need to provide details of which cells on the capital can be selected with each rotation of the structure.
-        $options = array();
+        $options = [];
         $player_id = $this->getActivePlayerId();
         $capital = $this->getCapitalData($player_id);
         // Get dimensions of the structure.  (need mask for which we need id)
         $structure = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
-        $name = '?';
-        if (!$stype)
-            $stype = $structure['card_type'];
-        if ($stype == 6) { // landmark
-            $landmark_id = $structure['card_location_arg2'];
+        $name = "?";
+        if (!$stype) {
+            $stype = $structure["card_type"];
+        }
+        if ($stype == 6) {
+            // landmark
+            $landmark_id = $structure["card_location_arg2"];
             $landmark = $this->landmark_data[$landmark_id];
-            $width = $landmark['width'];
-            $height = $landmark['height'];
-            $masks = $landmark['mask'];
-            $name = $landmark['name'];
+            $width = $landmark["width"];
+            $height = $landmark["height"];
+            $masks = $landmark["mask"];
+            $name = $landmark["name"];
         } else {
-            $masks = array();
-            $masks[0] = array(0 => array(0 => 1));
+            $masks = [];
+            $masks[0] = [0 => [0 => 1]];
             $height = 1;
             $width = 1;
-            $name = $this->structure_types[$stype]['name'];
+            $name = $this->structure_types[$stype]["name"];
         }
-        $canunpass = $this->isTapestryActive($player_id, 39) || // TERRAFORMING
-            $this->hasCiv($player_id, CIV_RIVERFOLK);
-        $unpassable = ($canunpass) ? 1 : 0;
+        $canunpass =
+            $this->isTapestryActive($player_id, 39) || $this->hasCiv($player_id, CIV_RIVERFOLK); // TERRAFORMING
+        $unpassable = $canunpass ? 1 : 0;
         // Build the options based on each rotation of the mask
         $any = false;
         foreach ($masks as $rot => $mask) {
-            $options[$rot] = array();
+            $options[$rot] = [];
             if ($rot % 2 == 1) {
                 $mask_width = $width;
                 $mask_height = $height;
@@ -9183,12 +10187,15 @@ abstract class PGameXBody extends tapcommon {
                         for ($b = 0; $b < $mask_height; $b++) {
                             $xd = $x + $a;
                             $yd = $y + $b;
-                            $this->systemAssertTrue("Landamrk data is not set for $name rot $rot $a,$b ($width,$height)", isset($mask[$a][$b]));
-                            if (($mask[$a][$b] == 1) && ($capital[$xd][$yd] > $unpassable)) {
+                            $this->systemAssertTrue(
+                                "Landamrk data is not set for $name rot $rot $a,$b ($width,$height)",
+                                isset($mask[$a][$b])
+                            );
+                            if ($mask[$a][$b] == 1 && $capital[$xd][$yd] > $unpassable) {
                                 $valid = false;
                                 break 2;
                             }
-                            if ((!$in_range) && ($mask[$a][$b] == 1) && $this->onMat($xd, $yd)) {
+                            if (!$in_range && $mask[$a][$b] == 1 && $this->onMat($xd, $yd)) {
                                 $in_range = true;
                             }
                         }
@@ -9201,61 +10208,68 @@ abstract class PGameXBody extends tapcommon {
             }
         }
         $stra = [
-            'i18n' => ['structure_name'],
-            'structure_name' => $name,
-            'structure_type' => $stype,
-            'id' => $structure ? $structure['card_id'] : 0
+            "i18n" => ["structure_name"],
+            "structure_name" => $name,
+            "structure_type" => $stype,
+            "id" => $structure ? $structure["card_id"] : 0,
         ];
         $this->addBenefitData($stra);
         /** @var Craftsmen */
         $cr = $this->getCivilizationInstance(CIV_CRAFTSMEN, true);
         $slots = $cr->getCraftsmenSlots($player_id);
-        return array(
-            'options' => $options,
-            'slots' => $slots,
-            'anyoptions' => $any ? 1 : 0,
-            'conquer_targets' => $this->getConquerTargets(true)
-        ) + $stra;
+        return [
+            "options" => $options,
+            "slots" => $slots,
+            "anyoptions" => $any ? 1 : 0,
+            "conquer_targets" => $this->getConquerTargets(true),
+        ] + $stra;
     }
 
     function onMat($x, $y) {
-        return ($x >= 3) && ($x <= 11) && ($y >= 3) && ($y <= 11);
+        return $x >= 3 && $x <= 11 && $y >= 3 && $y <= 11;
     }
 
     function getCardOnTop(int $type, string $location) {
-        return $this->getObjectFromDB("SELECT * FROM card WHERE card_location='$location' AND card_type=$type ORDER BY card_location_arg DESC LIMIT 1");
+        return $this->getObjectFromDB(
+            "SELECT * FROM card WHERE card_location='$location' AND card_type=$type ORDER BY card_location_arg DESC LIMIT 1"
+        );
     }
 
     function argInvent() {
         $res = $this->notifArgsAddBen();
-        $top = $this->getCardOnTop(CARD_TECHNOLOGY, 'discard');
-        if ($top) $res['discard'] = [$top];
+        $top = $this->getCardOnTop(CARD_TECHNOLOGY, "discard");
+        if ($top) {
+            $res["discard"] = [$top];
+        }
         return $res;
     }
 
     function argTechBenefit() {
         $benefit_type = $this->getCurrentBenefitType();
-        $slot = ($benefit_type == 32) ? 1 : 2; // 32 circle, 33 square
-        $circle = ($slot == 1);
-        $circlesquare = ($circle) ? clienttranslate('circle') : clienttranslate('square');
+        $slot = $benefit_type == 32 ? 1 : 2; // 32 circle, 33 square
+        $circle = $slot == 1;
+        $circlesquare = $circle ? clienttranslate("circle") : clienttranslate("square");
         $player_id = $this->getActivePlayerId();
-        $tech_cards = $this->getCollectionFromDB("SELECT * FROM card WHERE card_type='4' AND card_location_arg2='$slot' AND card_location='hand' AND card_location_arg='$player_id'");
+        $tech_cards = $this->getCollectionFromDB(
+            "SELECT * FROM card WHERE card_type='4' AND card_location_arg2='$slot' AND card_location='hand' AND card_location_arg='$player_id'"
+        );
         $cards = [];
         foreach ($tech_cards as $tc) {
-            $card_type = $tc['card_type_arg'];
+            $card_type = $tc["card_type_arg"];
             $card = "tech_card_$card_type";
             $current = $this->getStructureInfoSearch(BUILDING_MARKER, null, $card, $player_id, null);
-            if ($current)
+            if ($current) {
                 continue;
+            }
             $cards[] = $card_type;
         }
-        return array(
-            'circle' => $circle,
-            'circlesquare' => $circlesquare,
-            'slot' => $slot,
-            'i18n' => ['circlesquare'],
-            'cards' => $cards
-        );
+        return [
+            "circle" => $circle,
+            "circlesquare" => $circlesquare,
+            "slot" => $slot,
+            "i18n" => ["circlesquare"],
+            "cards" => $cards,
+        ];
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -9278,22 +10292,28 @@ abstract class PGameXBody extends tapcommon {
         $is_solo = $this->isSolo();
         $cap_id = 0;
         $capitals = $this->getCardsInHand($player_id, CARD_CAPITAL);
-        if (!$capitals)
+        if (!$capitals) {
             return [];
+        }
         $capital = array_shift($capitals);
-        $cap_id = $capital['card_type_arg'];
+        $cap_id = $capital["card_type_arg"];
         if ($is_solo) {
-            if ($this->isRealPlayer($player_id))
-                $cap_id = 2; // player starts at 2/4 if solo
-            else if ($player_id == PLAYER_AUTOMA)
-                $cap_id = 3; // at 3/5
-            else
+            if ($this->isRealPlayer($player_id)) {
+                $cap_id = 2;
+            }
+            // player starts at 2/4 if solo
+            elseif ($player_id == PLAYER_AUTOMA) {
+                $cap_id = 3;
+            }
+            // at 3/5
+            else {
                 $cap_id = 0;
+            }
         }
         if ($cap_id) {
-            $start = ($player_count < 4) ? $this->capitals[$cap_id]['start']['small'] : $this->capitals[$cap_id]['start']['large'];
-            $land_id = 'land_' . $start;
-            return ['location' => $land_id, 'coords' => $start, 'start_pos' => $cap_id];
+            $start = $player_count < 4 ? $this->capitals[$cap_id]["start"]["small"] : $this->capitals[$cap_id]["start"]["large"];
+            $land_id = "land_" . $start;
+            return ["location" => $land_id, "coords" => $start, "start_pos" => $cap_id];
         } else {
             return [];
         }
@@ -9304,28 +10324,32 @@ abstract class PGameXBody extends tapcommon {
         $this->importCapitalGrids();
         $this->DbQuery("UPDATE card SET card_location='discard', card_location_arg=0 WHERE card_location='choice' AND card_type='6'"); // Discard unused capitals
         $civ_data = $this->getCollectionFromDB("SELECT card_id FROM card WHERE card_location='choice'");
-        $civ_ids = array();
+        $civ_ids = [];
         foreach ($civ_data as $cid => $civ) {
             array_push($civ_ids, $cid);
         }
-        $this->cards->moveCards($civ_ids, 'deck_civ');
-        $this->cards->shuffle('deck_civ');
-        $this->notifyDeckCounters('deck_civ');
+        $this->cards->moveCards($civ_ids, "deck_civ");
+        $this->cards->shuffle("deck_civ");
+        $this->notifyDeckCounters("deck_civ");
 
-        $capital_data = $this->getCollectionFromDB("SELECT card_location_arg, card_type_arg FROM card WHERE card_type='6' AND card_location ='hand'");
+        $capital_data = $this->getCollectionFromDB(
+            "SELECT card_location_arg, card_type_arg FROM card WHERE card_type='6' AND card_location ='hand'"
+        );
 
         // Deploy starting outposts
-        $outpost_ids = array();
+        $outpost_ids = [];
         foreach (array_keys($this->loadPlayersBasicInfosWithBots()) as $player_id) {
-            if ($player_id == PLAYER_SHADOW)
+            if ($player_id == PLAYER_SHADOW) {
                 continue;
+            }
             $start_info = $this->getStartingPosition($player_id);
-            $cap_id = $start_info['start_pos'];
-            if ($player_id != PLAYER_AUTOMA)
-                $this->setStat($cap_id, 'capital', $player_id);
-            $start = $start_info['coords'];
+            $cap_id = $start_info["start_pos"];
+            if ($player_id != PLAYER_AUTOMA) {
+                $this->setStat($cap_id, "capital", $player_id);
+            }
+            $start = $start_info["coords"];
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$start'");
-            $land_id = $start_info['location'];
+            $land_id = $start_info["location"];
             array_push($outpost_ids, $this->addStructure($player_id, $land_id, BUILDING_OUTPOST));
             array_push($outpost_ids, $this->addStructure($player_id, $land_id, BUILDING_OUTPOST));
         }
@@ -9333,33 +10357,41 @@ abstract class PGameXBody extends tapcommon {
         $civ_data = $this->getCollectionFromDB("SELECT * FROM card WHERE card_type='5' AND card_location = 'hand'");
         $tokens = [];
         foreach ($civ_data as $civ) {
-            $civ_id = $civ['card_type_arg'];
-            $player_id = $civ['card_location_arg'];
-            $this->setStat($civ_id, 'civ', $player_id);
+            $civ_id = $civ["card_type_arg"];
+            $player_id = $civ["card_location_arg"];
+            $this->setStat($civ_id, "civ", $player_id);
             $additions = $this->setupCiv($civ_id, $player_id, true);
-            $tokens = array_merge($tokens, $additions['tokens']);
-            $outpost_ids = array_merge($outpost_ids, $additions['outposts']);
+            $tokens = array_merge($tokens, $additions["tokens"]);
+            $outpost_ids = array_merge($outpost_ids, $additions["outposts"]);
         }
         // Notify players
-        $this->notifyAllPlayers("setupComplete", '', array(
-            'capitals' => $capital_data,
-            'civilizations' => $civ_data,
-            'outposts' => $this->structures->getCards($outpost_ids),
-            'tokens' => $this->structures->getCards($tokens),
-        ));
+        $this->notifyAllPlayers("setupComplete", "", [
+            "capitals" => $capital_data,
+            "civilizations" => $civ_data,
+            "outposts" => $this->structures->getCards($outpost_ids),
+            "tokens" => $this->structures->getCards($tokens),
+        ]);
         $adjustmentvar = $this->getAdjustmentVariant();
         switch ($adjustmentvar) {
             case 1:
-                $this->notifyAllPlayers('message', clienttranslate('civilization adjustment will be applied after first income (game option)'), []);
+                $this->notifyAllPlayers(
+                    "message",
+                    clienttranslate("civilization adjustment will be applied after first income (game option)"),
+                    []
+                );
                 break;
             case 4:
-                $this->notifyAllPlayers('message', clienttranslate('experimental civilization adjustment rules are applied (game option)'), []);
+                $this->notifyAllPlayers(
+                    "message",
+                    clienttranslate("experimental civilization adjustment rules are applied (game option)"),
+                    []
+                );
                 break;
             case 2:
-                $this->notifyAllPlayers('message', clienttranslate('no civilization adjustment is applied (game option)'), []);
+                $this->notifyAllPlayers("message", clienttranslate("no civilization adjustment is applied (game option)"), []);
                 break;
             case 8:
-                $this->notifyAllPlayers('message', clienttranslate('civilization adjustment pack rules are applied (game option)'), []);
+                $this->notifyAllPlayers("message", clienttranslate("civilization adjustment pack rules are applied (game option)"), []);
                 break;
         }
 
@@ -9368,12 +10400,12 @@ abstract class PGameXBody extends tapcommon {
         shuffle($ids);
         $active_player = array_shift($ids);
         $this->gamestate->changeActivePlayer($active_player);
-        $this->setGameStateValue('current_player_turn', $active_player);
-        $this->setGameStateValue('starting_player', $active_player);
-        $this->notifyWithName('message', clienttranslate('${player_name} is starting player'), [], $active_player);
+        $this->setGameStateValue("current_player_turn", $active_player);
+        $this->setGameStateValue("starting_player", $active_player);
+        $this->notifyWithName("message", clienttranslate('${player_name} is starting player'), [], $active_player);
         $this->prepareUndoSavepoint();
         $this->queueBenefitNormal(BE_RESUME, $active_player);
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState("next");
     }
 
     function removeSomeComponents() {
@@ -9383,12 +10415,12 @@ abstract class PGameXBody extends tapcommon {
             if (array_key_exists($gameoption_id, $this->gamestate->table_globals)) {
                 $value = (int) $this->gamestate->table_globals[$gameoption_id];
             }
-            if ($value == 1 && isset($gameoption['tap_remove'])) {
-                foreach ($gameoption['tap_remove'] as $rem) {
+            if ($value == 1 && isset($gameoption["tap_remove"])) {
+                foreach ($gameoption["tap_remove"] as $rem) {
                     list($card_type, $card_type_arg) = $rem;
                     $this->DbQuery("UPDATE card SET card_location='limbo' WHERE card_type='$card_type' AND card_type_arg='$card_type_arg'");
-                    $this->notifyWithName('message', clienttranslate('game options: ${card_name} is removed from the game'), [
-                        'card_name' => $this->getTokenName($card_type, $card_type_arg)
+                    $this->notifyWithName("message", clienttranslate('game options: ${card_name} is removed from the game'), [
+                        "card_name" => $this->getTokenName($card_type, $card_type_arg),
                     ]);
                 }
             }
@@ -9396,12 +10428,12 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function setupCiv($civ, $player_id, $start) {
-        $tokens = array();
-        $outpost_ids = array();
+        $tokens = [];
+        $outpost_ids = [];
         $reason = reason_civ($civ);
 
         $this->interruptBenefit();
-        $start_benefit = $this->getRulesCiv($civ, 'start_benefit', []);
+        $start_benefit = $this->getRulesCiv($civ, "start_benefit", []);
         //         $this->notifyWithName('message', clienttranslate('${player_name} setup civ {$civ}'), [ 'civ'=>$civ, 'start'=>$start_benefit ],
         //                 $player_id);
         if (count($start_benefit) > 0) {
@@ -9411,9 +10443,11 @@ abstract class PGameXBody extends tapcommon {
             case CIV_MYSTICS:
                 if (!$start && $this->isAdjustments4()) {
                     $era = $this->getCurrentEra($player_id);
-                    if ($era < 5) // in era 5 - no effect
+                    if ($era < 5) {
+                        // in era 5 - no effect
                         $this->benefitCivEntry(CIV_MYSTICS, $player_id);
-                } else if ($this->isAdjustments8()) {
+                    }
+                } elseif ($this->isAdjustments8()) {
                     $civinst = $this->getCivilizationInstance($civ, true);
                     return $civinst->setupCiv($player_id, $start);
                 } else {
@@ -9430,7 +10464,7 @@ abstract class PGameXBody extends tapcommon {
                     }
                 }
                 break;
-            case CIV_HERALDS: // HERALDS 
+            case CIV_HERALDS: // HERALDS
                 // 4 tokens to slots 1-4
                 $tokens = $this->effect_setupCivTokens($civ, $player_id);
                 if ($this->isAdjustments4or8()) {
@@ -9445,7 +10479,7 @@ abstract class PGameXBody extends tapcommon {
                 array_push($tokens, $this->addCivToken($player_id, 5, $civ));
 
                 if ($this->isAdjustments4or8()) {
-                    $this->benefitCivEntry($civ, $player_id, 'midgame');
+                    $this->benefitCivEntry($civ, $player_id, "midgame");
                 } else {
                     array_push($tokens, $this->addCivToken($player_id, 9, $civ));
                 }
@@ -9454,25 +10488,27 @@ abstract class PGameXBody extends tapcommon {
                 $max = 8;
                 if (!$start) {
                     // count all remainig outpots
-                    $coll = $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location_arg='$player_id' AND card_type='5' AND card_location='hand'");
+                    $coll = $this->getCollectionFromDB(
+                        "SELECT card_id FROM structure WHERE card_location_arg='$player_id' AND card_type='5' AND card_location='hand'"
+                    );
                     $outcount = count($coll);
                     $max = ($outcount - 4) * 2;
                     if ($outcount > 0 && $outcount < 8) {
                         //  4- -> 0, 5 -> 2, 6 -> 4, 7 -> 6, 8 -> 8
-                        $this->benefitCivEntry($civ, $player_id, 'midgame');
+                        $this->benefitCivEntry($civ, $player_id, "midgame");
                     }
                 } else {
                     if ($this->isAdjustments8()) {
                         // we suppose to put player tokens on starting tile, instead add 2 more outposts
-                        array_push($outpost_ids, $this->dbAddStructure($player_id, BUILDING_OUTPOST, 0, 'hand', 0));
-                        array_push($outpost_ids, $this->dbAddStructure($player_id, BUILDING_OUTPOST, 0, 'hand', 0));
+                        array_push($outpost_ids, $this->dbAddStructure($player_id, BUILDING_OUTPOST, 0, "hand", 0));
+                        array_push($outpost_ids, $this->dbAddStructure($player_id, BUILDING_OUTPOST, 0, "hand", 0));
                     }
                 }
                 // 8 outposts to 1-8, fill 4,8,3,7,2,6,1,5
                 $fill = [4, 8, 3, 7, 2, 6, 1, 5];
                 for ($i = 0; $i < $max; $i++) {
                     $a = $fill[$i];
-                    array_push($outpost_ids, $this->addStructure($player_id, 'civ_' . $civ . '_' . $a, BUILDING_OUTPOST));
+                    array_push($outpost_ids, $this->addStructure($player_id, "civ_" . $civ . "_" . $a, BUILDING_OUTPOST));
                 }
                 break;
             case CIV_ISLANDERS:
@@ -9489,7 +10525,7 @@ abstract class PGameXBody extends tapcommon {
                 array_push($tokens, $this->addCivToken($player_id, 9, $civ));
                 array_push($tokens, $this->addCivToken($player_id, 10, $civ));
                 if (!$start) {
-                    $this->benefitCivEntry($civ, $player_id, 'midgame');
+                    $this->benefitCivEntry($civ, $player_id, "midgame");
                 } else {
                     $this->queueBenefitNormal(305, $player_id, $reason);
                 }
@@ -9498,7 +10534,7 @@ abstract class PGameXBody extends tapcommon {
                 $civinst = $this->getCivilizationInstance($civ);
                 return $civinst->setupCiv($player_id, $start);
         }
-        return array('tokens' => $tokens, 'outposts' => $outpost_ids);
+        return ["tokens" => $tokens, "outposts" => $outpost_ids];
     }
 
     function vpRiverfolkStart($player_id) {
@@ -9514,9 +10550,10 @@ abstract class PGameXBody extends tapcommon {
         for ($dx = 3; $dx < 12; $dx += 3) {
             for ($dy = 3; $dy < 12; $dy += 3) {
                 $district_info = $this->getDistrictInfo($dx, $dy, $capital, $player_id);
-                if (!$district_info)
+                if (!$district_info) {
                     continue;
-                $impasse = array_get($district_info['build_types'], BUILDING_IMPASS, 0);
+                }
+                $impasse = array_get($district_info["build_types"], BUILDING_IMPASS, 0);
                 //$this->debugConsole("district " . $district_info ['district'] . " impass $impasse");
                 if ($impasse >= 2) {
                     $vp += $num;
@@ -9538,9 +10575,10 @@ abstract class PGameXBody extends tapcommon {
         for ($dx = 3; $dx < 12; $dx += 3) {
             for ($dy = 3; $dy < 12; $dy += 3) {
                 $district_info = $this->getDistrictInfo($dx, $dy, $capital, $player_id);
-                if (!$district_info)
+                if (!$district_info) {
                     continue;
-                $impasse = array_get($district_info['build_types'], BUILDING_IMPASS, 0);
+                }
+                $impasse = array_get($district_info["build_types"], BUILDING_IMPASS, 0);
                 //$this->debugConsole("district " . $district_info ['district'] . " impass $impasse");
                 if ($impasse > 0) {
                     $vp += $impasse;
@@ -9550,12 +10588,9 @@ abstract class PGameXBody extends tapcommon {
         $this->awardVP($player_id, -$vp, reason_civ(CIV_RIVERFOLK));
     }
 
-
-
-
     function effect_setupCivTokens($civ_id, $player_id) {
         $tokens = [];
-        $tokens_count = (int) array_get_def($this->civilizations, $civ_id, 'tokens_count', 0);
+        $tokens_count = (int) array_get_def($this->civilizations, $civ_id, "tokens_count", 0);
         for ($i = 1; $i <= $tokens_count; $i++) {
             $tokens[] = $this->addCivToken($player_id, $i, $civ_id);
         }
@@ -9563,49 +10598,57 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_gainChosenMidGame($player_id = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
-        $civ = CIV_CHOSEN;
-        $achievements = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location LIKE 'achievement%' AND card_location_arg='$player_id'");
-        $achi_count = sizeOf($achievements);
-        $this->notifyAllPlayers("message", clienttranslate('${player_name} has completed ${count} public achievements'), array(
-            'player_id' => $this->getActivePlayerId(),
-            'player_name' => $this->getActivePlayerName(),
-            'count' => $achi_count,
-        ));
-        for ($a = 0; $a < $achi_count; $a++) {
-            $this->benefitCivEntry($civ, $player_id, 'midgame');
         }
-        // private achivements 
+        $civ = CIV_CHOSEN;
+        $achievements = $this->getCollectionFromDB(
+            "SELECT * FROM structure WHERE card_location LIKE 'achievement%' AND card_location_arg='$player_id'"
+        );
+        $achi_count = sizeOf($achievements);
+        $this->notifyAllPlayers("message", clienttranslate('${player_name} has completed ${count} public achievements'), [
+            "player_id" => $this->getActivePlayerId(),
+            "player_name" => $this->getActivePlayerName(),
+            "count" => $achi_count,
+        ]);
+        for ($a = 0; $a < $achi_count; $a++) {
+            $this->benefitCivEntry($civ, $player_id, "midgame");
+        }
+        // private achivements
         for ($i = 1; $i <= 6; $i++) {
-            $this->checkPrivateAchievement($i, $player_id, $civ, 'midgame');
+            $this->checkPrivateAchievement($i, $player_id, $civ, "midgame");
         }
     }
 
     function effect_drawFromBenefit($player_id, $ben, $count = 1, $reason = null) {
-        $card_type = $this->getRulesBenefit($ben, 'ct', 0);
-        $draw = $this->getRulesBenefit($ben, 'draw', 1);
+        $card_type = $this->getRulesBenefit($ben, "ct", 0);
+        $draw = $this->getRulesBenefit($ben, "draw", 1);
         $type_info = $this->card_types[$card_type];
-        $cards = $this->dbPickCardsForLocation($count * $draw, $card_type, 'draw', $player_id);
+        $cards = $this->dbPickCardsForLocation($count * $draw, $card_type, "draw", $player_id);
         if (count($cards) == 0) {
             return []; // cancel action, notif already sent
         }
-        $this->notifyWithName("moveCard", clienttranslate('${player_name} draws ${count} x ${type_name} ${reason}'), [
-            'cards' => $cards,
-            'count' => count($cards),
-            'type_name' => $type_info['name'],
-            'from' => $type_info['deck'],
-            'reason' => $this->getReasonFullRec($reason)
-        ], $player_id);
+        $this->notifyWithName(
+            "moveCard",
+            clienttranslate('${player_name} draws ${count} x ${type_name} ${reason}'),
+            [
+                "cards" => $cards,
+                "count" => count($cards),
+                "type_name" => $type_info["name"],
+                "from" => $type_info["deck"],
+                "reason" => $this->getReasonFullRec($reason),
+            ],
+            $player_id
+        );
         return $cards;
     }
 
     function isWhenPlayedTapestry($card) {
         $tapnum = $card;
         if (is_array($card)) {
-            $tapnum = $card['card_type_arg'];
+            $tapnum = $card["card_type_arg"];
         }
-        $tapvar = $this->tapestry_card_data[$tapnum]['type'];
+        $tapvar = $this->tapestry_card_data[$tapnum]["type"];
         if ($tapvar == "now" || $tapvar == "cont") {
             return true;
         }
@@ -9613,20 +10656,22 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_drawCardsUntil($player_id = null, $reason = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $card_found = false;
         while ($card_found == false) {
             $cards = $this->awardCard($player_id, 1, CARD_TAPESTRY, false, $reason);
             $card = array_shift($cards);
-            if (!$card)
+            if (!$card) {
                 break;
-            $tapvar = $this->tapestry_card_data[$card['type_arg']]['type'];
+            }
+            $tapvar = $this->tapestry_card_data[$card["type_arg"]]["type"];
             if ($tapvar == "now" || $tapvar == "cont") {
                 $card_found = true;
                 break;
             }
-            $card_id = $card['id'];
+            $card_id = $card["id"];
             $this->effect_discardCard($card_id, $player_id);
         }
         return $card_found;
@@ -9640,11 +10685,11 @@ abstract class PGameXBody extends tapcommon {
         // apply adjustments
 
         if ($adjustments1) {
-            $reason = reason('str', clienttranslate('civilization adjustment'));
-            $civ_name = $this->civilizations[$civ_id]['name'];
-            $this->notifyWithName('message', clienttranslate('${player_name} applies adjustments for ${civ_name}: ${adjustment_name}'), [
-                'civ_name' => $civ_name,
-                'adjustment_name' => $this->civilizations[$civ_id]['adjustment']
+            $reason = reason("str", clienttranslate("civilization adjustment"));
+            $civ_name = $this->civilizations[$civ_id]["name"];
+            $this->notifyWithName("message", clienttranslate('${player_name} applies adjustments for ${civ_name}: ${adjustment_name}'), [
+                "civ_name" => $civ_name,
+                "adjustment_name" => $this->civilizations[$civ_id]["adjustment"],
             ]);
             switch ($civ_id) {
                 case 1: //ALCHEMISTS
@@ -9659,7 +10704,7 @@ abstract class PGameXBody extends tapcommon {
                     break;
                 case 3: // CRAFTSMEN
                     // lose 1 resource
-                    $this->queueBenefitNormal(['p' => RES_ANY, 'g' => 142], $player_id, $reason);
+                    $this->queueBenefitNormal(["p" => RES_ANY, "g" => 142], $player_id, $reason);
                     break;
                 case 4: // ENTERTAINERS
                     $this->queueBenefitNormal(RES_ANY, $player_id, $reason);
@@ -9668,7 +10713,7 @@ abstract class PGameXBody extends tapcommon {
                     // lose 1 resource and 1 culture
                     $this->queueBenefitNormal(BE_GAIN_CULTURE, $player_id, $reason, -1);
                     // lose 1 resource
-                    $this->queueBenefitNormal(['p' => RES_ANY, 'g' => 142], $player_id, $reason);
+                    $this->queueBenefitNormal(["p" => RES_ANY, "g" => 142], $player_id, $reason);
                     break;
                 case 11: // MERRYMAKERS
                     $this->queueBenefitNormal(RES_ANY, $player_id, $reason);
@@ -9687,19 +10732,19 @@ abstract class PGameXBody extends tapcommon {
                     $this->queueBenefitNormal([RES_ANY, RES_ANY], $player_id, $reason);
                     break;
                 case 6: // HERALDS
-                    // no change
+                // no change
                 case 7: // HISTORIANS
-                    // no change
+                // no change
                 case 8: // INVENTORS
-                    // no change
+                // no change
                 case 9: // ISOLATIONISTS
-                    // no change
+                // no change
                 case 10: //LEADERS
                 case 14: //NOMADS
                 default:
-                    $this->notifyWithName('message', clienttranslate('${civ_name}: no adjustments'), [
-                        'i18n' => ['civ_name'],
-                        'civ_name' => $civ_name
+                    $this->notifyWithName("message", clienttranslate('${civ_name}: no adjustments'), [
+                        "i18n" => ["civ_name"],
+                        "civ_name" => $civ_name,
                     ]);
                     break;
             }
@@ -9708,11 +10753,15 @@ abstract class PGameXBody extends tapcommon {
 
     function stTechBenefit() {
         $args = $this->argTechBenefit();
-        $size = count($args['cards']);
+        $size = count($args["cards"]);
         if ($size == 0) {
-            $this->notifyWithName("message_error", clienttranslate('${player_name} does not have a suitable technology card for the ${circlesquare} benefit'), $args);
+            $this->notifyWithName(
+                "message_error",
+                clienttranslate('${player_name} does not have a suitable technology card for the ${circlesquare} benefit'),
+                $args
+            );
             $this->clearCurrentBenefit();
-            $this->gamestate->nextState('next');
+            $this->gamestate->nextState("next");
         }
     }
 
@@ -9720,16 +10769,17 @@ abstract class PGameXBody extends tapcommon {
         $player_data = $this->loadPlayersBasicInfos();
         $still_playing = [];
         foreach ($player_data as $player) {
-            $player_id = $player['player_id'];
-            if ($this->isPlayerAlive($player_id))
+            $player_id = $player["player_id"];
+            if ($this->isPlayerAlive($player_id)) {
                 $still_playing[$player_id] = $player;
+            }
         }
         if ($this->isSolo()) {
             $playerswithbots = $this->loadPlayersBasicInfosWithBots();
             if ($this->isPlayerAlive(PLAYER_AUTOMA)) {
                 $still_playing[PLAYER_AUTOMA] = $playerswithbots[PLAYER_AUTOMA];
             }
-        } else if ($this->isShadowEmpireOnly() && count($still_playing) > 0) {
+        } elseif ($this->isShadowEmpireOnly() && count($still_playing) > 0) {
             $playerswithbots = $this->loadPlayersBasicInfosWithBots();
             $still_playing[PLAYER_SHADOW] = $playerswithbots[PLAYER_SHADOW];
         }
@@ -9740,17 +10790,20 @@ abstract class PGameXBody extends tapcommon {
         $players = $this->loadPlayersBasicInfosWithBots();
         $value_min = 10000;
         $value_max = 0;
-        $this->notifyAllPlayers('simplePause', '', ['time' => 1000]);
+        $this->notifyAllPlayers("simplePause", "", ["time" => 1000]);
         foreach ($players as $player_id => $info) {
-            if ($player_id == PLAYER_SHADOW)
+            if ($player_id == PLAYER_SHADOW) {
                 continue;
+            }
             $score = $this->dbGetScore($player_id);
-            if ($score > $value_max)
+            if ($score > $value_max) {
                 $value_max = $score;
-            if ($score < $value_min)
+            }
+            if ($score < $value_min) {
                 $value_min = $score;
+            }
             // make sure score display is up to date
-            $this->notifyWithName('VP', '', ['increase' => 0, 'score' => $score], $player_id);
+            $this->notifyWithName("VP", "", ["increase" => 0, "score" => $score], $player_id);
         }
         if ($this->isSolo()) {
             $player_id = $this->getSoloPlayerId();
@@ -9759,26 +10812,42 @@ abstract class PGameXBody extends tapcommon {
             if ($player_score < $automa_score) {
                 $score = -1 * $player_score;
                 $this->dbSetScore($player_id, $score);
-                $this->notifyWithName('VP', clienttranslate('${player_name} loses, negating the score ${score}'), [
-                    'score' => $score,
-                    'increase' => 0
-                ], $player_id);
-                $this->notifyWithName('message_info', clienttranslate('${player_name} loses to Automa ${player_score} to ${automa_score}!'), [
-                    'player_score' => $player_score,
-                    'automa_score' => $automa_score
-                ], $player_id);
+                $this->notifyWithName(
+                    "VP",
+                    clienttranslate('${player_name} loses, negating the score ${score}'),
+                    [
+                        "score" => $score,
+                        "increase" => 0,
+                    ],
+                    $player_id
+                );
+                $this->notifyWithName(
+                    "message_info",
+                    clienttranslate('${player_name} loses to Automa ${player_score} to ${automa_score}!'),
+                    [
+                        "player_score" => $player_score,
+                        "automa_score" => $automa_score,
+                    ],
+                    $player_id
+                );
             } else {
-                $this->notifyWithName('message_info', clienttranslate('${player_name} wins over Automa ${player_score} to ${automa_score}!'), [
-                    'player_score' => $player_score,
-                    'automa_score' => $automa_score
-                ], $player_id);
+                $this->notifyWithName(
+                    "message_info",
+                    clienttranslate('${player_name} wins over Automa ${player_score} to ${automa_score}!'),
+                    [
+                        "player_score" => $player_score,
+                        "automa_score" => $automa_score,
+                    ],
+                    $player_id
+                );
             }
-            $this->setStat($automa_score, 'automa_score');
+            $this->setStat($automa_score, "automa_score");
         }
-        $this->setStat($value_max, 'game_winner_score');
-        $this->setStat($value_min, 'game_loser_score');
-        if ($tr)
-            $this->gamestate->nextState('endGame');
+        $this->setStat($value_max, "game_winner_score");
+        $this->setStat($value_min, "game_loser_score");
+        if ($tr) {
+            $this->gamestate->nextState("endGame");
+        }
     }
 
     function stTransition() {
@@ -9790,27 +10859,27 @@ abstract class PGameXBody extends tapcommon {
         }
         $next_player_table = $this->createNextPlayerTable(array_keys($this->loadPlayersBasicInfosWithBots()), true);
         // check if current player finished and elimite
-        $current_player_id = $this->getGameStateValue('current_player_turn');
+        $current_player_id = $this->getGameStateValue("current_player_turn");
         $player_id = $next_player_table[$current_player_id];
-        $this->notifyWithName('message', clienttranslate('${player_name} is current player'), [], $current_player_id);
+        $this->notifyWithName("message", clienttranslate('${player_name} is current player'), [], $current_player_id);
         // Find an active player who hasn't finished.
         $count = $this->getPlayersNumberWithBots();
         while (!array_key_exists($player_id, $still_playing) && $count > 0) {
-            $this->notifyWithName('message', clienttranslate('${player_name} is skipped'), [], $player_id);
+            $this->notifyWithName("message", clienttranslate('${player_name} is skipped'), [], $player_id);
             $player_id = $next_player_table[$player_id];
             $count--;
         }
-        $this->notifyWithName('message', clienttranslate('${player_name} is the next player'), [], $player_id);
+        $this->notifyWithName("message", clienttranslate('${player_name} is the next player'), [], $player_id);
         if (!$this->isRealPlayer($player_id)) {
             $this->effect_automaTakeTurn();
-            $this->gamestate->nextState('benefit');
+            $this->gamestate->nextState("benefit");
             return;
         } else {
             $this->gamestate->changeActivePlayer($player_id);
             $this->giveExtraTime($player_id);
             $this->prepareUndoSavepoint(true);
-            $this->notifyAllPlayers('ack', '', []);
-            $this->gamestate->nextState('next');
+            $this->notifyAllPlayers("ack", "", []);
+            $this->gamestate->nextState("next");
         }
     }
 
@@ -9818,47 +10887,51 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getActivePlayerId();
         $tokens = $this->dbGetCubesOnTrack($player_id);
         $player_data = $this->getObjectFromDB("SELECT * FROM playerextra WHERE player_id='$player_id'");
-        $advances = array();
+        $advances = [];
         foreach ($tokens as $token) {
-            $coords = explode("_", $token['card_location']);
-            if ($token['virtual'])
+            $coords = explode("_", $token["card_location"]);
+            if ($token["virtual"]) {
                 continue;
+            }
             $track = $coords[2];
             $spot = $coords[3];
             $new_spot = $spot + 1;
             if ($spot < 12) {
-                $advance_cost = $this->tech_track_data[$track][$new_spot]['cost'];
+                $advance_cost = $this->tech_track_data[$track][$new_spot]["cost"];
                 if ($this->canAffordPayment($player_data, $advance_cost)) {
                     $advances[$track . "_" . $new_spot] = 1;
                 } else {
-                    if (!$onlyValid)
+                    if (!$onlyValid) {
                         $advances[$track . "_" . $new_spot] = 0;
+                    }
                 }
             } else {
-                if (!$onlyValid)
+                if (!$onlyValid) {
                     $advances[$track . "_" . $spot] = -1;
+                }
             }
         }
         return $advances;
     }
 
     function getClosestBonus($player_id = 0, $sel_track = 0, $cube_id = 0) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         if ($cube_id) {
             $cube = $this->getStructureInfoById($cube_id);
             $tokens = [$cube_id => $cube];
         } else {
             $tokens = $this->dbGetCubesOnTrack($player_id, $sel_track, null, 0 /* no ai */);
         }
-        $advances = array();
+        $advances = [];
         foreach ($tokens as $token) {
-            $id = $token['card_id'];
-            $coords = explode("_", $token['card_location']);
+            $id = $token["card_id"];
+            $coords = explode("_", $token["card_location"]);
             $track = (int) $coords[2];
             $spot = (int) $coords[3];
             for ($i = $spot + 1; $i <= 12; $i++) {
-                if (array_key_exists('option', $this->tech_track_data[$track][$i])) {
+                if (array_key_exists("option", $this->tech_track_data[$track][$i])) {
                     $advances["cube_$id"] = "{$track}_{$i}";
                     break;
                 }
@@ -9868,23 +10941,27 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getPossibleTrackChoices($sel_track, $change = 0, &$cubes = null, $player_id = 0) {
-        if (!$cubes)
+        if (!$cubes) {
             $cubes = [];
-        if (!$player_id)
+        }
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $tokens = $this->dbGetCubesOnTrack($player_id);
-        $advances = array();
+        $advances = [];
         foreach ($tokens as $token) {
-            $coords = explode("_", $token['card_location']);
-            $arg = $token['card_type_arg'];
-            $tid = $token['card_id'];
+            $coords = explode("_", $token["card_location"]);
+            $arg = $token["card_type_arg"];
+            $tid = $token["card_id"];
             $track = (int) $coords[2];
             $spot = (int) $coords[3];
             $new_spot = $spot + $change;
-            if ($new_spot < 0)
+            if ($new_spot < 0) {
                 $new_spot = 0;
-            if ($new_spot > 13)
+            }
+            if ($new_spot > 13) {
                 $new_spot = 13;
+            }
             if ($change <= 0 && $arg == CUBE_AI) {
                 // cannot regress or repeat on virtual cube
                 continue;
@@ -9922,17 +10999,26 @@ abstract class PGameXBody extends tapcommon {
                     break;
             }
         }
-        if ($player_data['player_res_coin'] < $coins)
+        if ($player_data["player_res_coin"] < $coins) {
             return false;
-        if ($player_data['player_res_worker'] < $workers)
+        }
+        if ($player_data["player_res_worker"] < $workers) {
             return false;
-        if ($player_data['player_res_food'] < $food)
+        }
+        if ($player_data["player_res_food"] < $food) {
             return false;
-        if ($player_data['player_res_culture'] < $culture)
+        }
+        if ($player_data["player_res_culture"] < $culture) {
             return false;
-        $total = $player_data['player_res_coin'] + $player_data['player_res_worker'] + $player_data['player_res_food'] + $player_data['player_res_culture'];
-        if ($total < sizeOf($payment))
+        }
+        $total =
+            $player_data["player_res_coin"] +
+            $player_data["player_res_worker"] +
+            $player_data["player_res_food"] +
+            $player_data["player_res_culture"];
+        if ($total < sizeOf($payment)) {
             return false;
+        }
         return true;
     }
 
@@ -9941,7 +11027,7 @@ abstract class PGameXBody extends tapcommon {
         $turn = $this->effect_startOfTurn($player_id);
         // If first turn, must take income
         if ($turn == 1) {
-            $this->takeIncomeAuto(true); // Auto income for in first turn 
+            $this->takeIncomeAuto(true); // Auto income for in first turn
             return;
         }
         if ($this->ownsLighthouseAndCanPlayIt($player_id)) {
@@ -9950,14 +11036,14 @@ abstract class PGameXBody extends tapcommon {
 
         $civs = $this->getAllCivs($player_id);
         foreach ($civs as $info) {
-            $civ = $info['card_type_arg'];
+            $civ = $info["card_type_arg"];
             $civ = $this->getCivilizationInstance($civ);
             if ($civ->hasActivatedAbilities($player_id)) {
                 return;
             }
         }
 
-        if ((count($this->getPossibleAdvances()) == 0)) {
+        if (count($this->getPossibleAdvances()) == 0) {
             $this->takeIncomeAuto(true); // When cannot afford advancement.
             return;
         }
@@ -9965,15 +11051,17 @@ abstract class PGameXBody extends tapcommon {
 
     function checkDictatorship($player_id, $forceEnd = false) {
         $cleared = false;
-        $dictator_datas = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location LIKE 'tech_spot_%' AND card_location_arg='$player_id' AND card_location_arg2 LIKE 'dic_%'");
+        $dictator_datas = $this->getCollectionFromDB(
+            "SELECT * FROM structure WHERE card_location LIKE 'tech_spot_%' AND card_location_arg='$player_id' AND card_location_arg2 LIKE 'dic_%'"
+        );
         foreach ($dictator_datas as $dictator_data) {
-            $dd = explode("_", $dictator_data['card_location_arg2']);
-            $dictator = $dictator_data['card_location_arg'];
+            $dd = explode("_", $dictator_data["card_location_arg2"]);
+            $dictator = $dictator_data["card_location_arg"];
             $dictator_cur_turn = $this->getPlayerTurn($dictator);
             $dic_turn = $dd[1];
             //$this->debugConsole("dict check $dictator $dictator_cur_turn  $dic_turn");
             if ($dictator_cur_turn > $dic_turn || $forceEnd) {
-                $cube_id = $dictator_data['card_id'];
+                $cube_id = $dictator_data["card_id"];
                 $this->DbQuery("UPDATE structure SET card_location_arg2='' WHERE card_id='$cube_id'");
                 $this->notifyMoveStructure(clienttranslate('DICTATORSHIP of ${player_name} is over'), $cube_id, [], $dictator);
                 $cleared = true;
@@ -9986,16 +11074,16 @@ abstract class PGameXBody extends tapcommon {
         // can check if they want to end it automatically?
         $player_id = $this->getActivePlayerId();
         if ($this->canSkipConfirm($player_id)) {
-            $this->gamestate->nextState('next');
+            $this->gamestate->nextState("next");
         }
     }
 
     function canSkipConfirm($player_id) {
-        if ($player_id != $this->getGameStateValue('current_player_turn')) {
+        if ($player_id != $this->getGameStateValue("current_player_turn")) {
             return true;
         }
         $args = $this->argPlayerTurnEnd();
-        if ($args['move'] == $args['undo_move']) {
+        if ($args["move"] == $args["undo_move"]) {
             return true;
         }
         if ($this->isPlayerEliminated($player_id)) {
@@ -10014,43 +11102,40 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_endOfTurn(int $player_id) {
-
-
-
-
-        $this->setGameStateValue('cube_choice', -1);
-        $this->setGameStateValue('coal_baron', 0);
+        $this->setGameStateValue("cube_choice", -1);
+        $this->setGameStateValue("coal_baron", 0);
         $this->checkDictatorship($player_id);
         $marker = CUBE_MARKER;
         $turn_markers = $this->getObjectListFromDB("SELECT * FROM structure WHERE card_type='7' AND card_type_arg='$marker'");
         $turn_markers += $this->getObjectListFromDB("SELECT * FROM structure WHERE card_type='8'");
         if (count($turn_markers) > 0) {
             foreach ($turn_markers as $marker) {
-                $structure_id = $marker['card_id'];
-                $this->dbSetStructureLocation($structure_id, 'hand');
+                $structure_id = $marker["card_id"];
+                $this->dbSetStructureLocation($structure_id, "hand");
             }
         }
-        if ($this->getGameStateValue('income_turn')) {
-            $this->setGameStateValue('income_turn', 0);
+        if ($this->getGameStateValue("income_turn")) {
+            $this->setGameStateValue("income_turn", 0);
         }
     }
 
     function effect_startOfTurn($player_id) {
         $this->incPlayerTurn($player_id);
-        $this->setGameStateValue('current_player_turn', $player_id);
-        $this->setGameStateValue('cube_choice', -1);
-        $this->setGameStateValue('coal_baron', 0);
+        $this->setGameStateValue("current_player_turn", $player_id);
+        $this->setGameStateValue("cube_choice", -1);
+        $this->setGameStateValue("coal_baron", 0);
         $turns = $this->getPlayerTurn($player_id);
         return $turns;
     }
 
     function actionUndo() {
         //self::checkAction('actionUndo');
-        $undo_moves_player = self::getGameStateValue('undo_moves_player');
-        if ($undo_moves_player != self::getCurrentPlayerId())
+        $undo_moves_player = self::getGameStateValue("undo_moves_player");
+        if ($undo_moves_player != self::getCurrentPlayerId()) {
             throw new BgaUserException(self::_("The stored UNDO corresponds to another player's turn : you cannot restore it"));
+        }
         $args = $this->argUndo();
-        if ($args['move'] == $args['undo_move']) {
+        if ($args["move"] == $args["undo_move"]) {
             throw new BgaUserException(self::_("Nothing can be undone"));
         }
         $this->undoRestorePoint();
@@ -10060,8 +11145,8 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function actionConfirm() {
-        $this->checkAction('actionConfirm');
-        $this->gamestate->nextState('next');
+        $this->checkAction("actionConfirm");
+        $this->gamestate->nextState("next");
     }
 
     function queueEraCivAbilities() {
@@ -10069,21 +11154,28 @@ abstract class PGameXBody extends tapcommon {
         $era = $this->getCurrentEra($player_id);
         if ($era > 1) {
             // If first of neighbours to play, get bonus!
-            $era_string = 'era' . $era;
+            $era_string = "era" . $era;
             $neighbours = $this->getPlayerNeighbours($player_id, false);
-            $neighbours_in_era = $this->getUniqueValueFromDB("SELECT COUNT(*) c FROM card WHERE card_type='3' AND card_location='$era_string' AND card_location_arg IN (" . implode(',', $neighbours) . ")");
-            if (($neighbours_in_era == 0) && ($era > 1 && $era < 5)) { // own tapestry is not played yet
-                $this->notifyAllPlayers("message", clienttranslate('${player_name} is the first of their neighbours to enter era ${era}'), array(
-                    'i18n' => array('card_name'),
-                    'player_id' => $player_id,
-                    'player_name' => $this->getActivePlayerName(),
-                    'era' => $era,
-                ));
-                $reason = reason('str', clienttranslate('first to era'));
+            $neighbours_in_era = $this->getUniqueValueFromDB(
+                "SELECT COUNT(*) c FROM card WHERE card_type='3' AND card_location='$era_string' AND card_location_arg IN (" .
+                    implode(",", $neighbours) .
+                    ")"
+            );
+            if ($neighbours_in_era == 0 && ($era > 1 && $era < 5)) {
+                // own tapestry is not played yet
+                $this->notifyAllPlayers("message", clienttranslate('${player_name} is the first of their neighbours to enter era ${era}'), [
+                    "i18n" => ["card_name"],
+                    "player_id" => $player_id,
+                    "player_name" => $this->getActivePlayerName(),
+                    "era" => $era,
+                ]);
+                $reason = reason("str", clienttranslate("first to era"));
                 $this->queueBenefitNormal(BE_ANYRES, $player_id, $reason, $era - 1);
             }
         }
-        $civs = $this->getCollectionFromDB("SELECT card_type_arg FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='5'");
+        $civs = $this->getCollectionFromDB(
+            "SELECT card_type_arg FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='5'"
+        );
         foreach ($civs as $cid => $civ) {
             $this->queueEraCivAbility($cid, $player_id, $era);
         }
@@ -10097,14 +11189,14 @@ abstract class PGameXBody extends tapcommon {
     function militantBenefits() {
         $player_id = $this->getActivePlayerId();
         $cubes = $this->getCollectionFromDB("SELECT card_location FROM structure WHERE card_location LIKE 'civ_12_%'");
-        $covered = array();
+        $covered = [];
         foreach ($cubes as $cube) {
-            array_push($covered, explode("_", $cube['card_location'])[2]);
+            array_push($covered, explode("_", $cube["card_location"])[2]);
         }
         $vp = 0;
         for ($a = 1; $a <= 8; $a++) {
             if (!in_array($a, $covered)) {
-                $benefit = $this->civilizations[12]['slots'][$a]['benefit'];
+                $benefit = $this->civilizations[12]["slots"][$a]["benefit"];
                 foreach ($benefit as $b) {
                     if ($b == RES_VP) {
                         $vp++;
@@ -10140,21 +11232,23 @@ abstract class PGameXBody extends tapcommon {
         // PART 1: POSITION ON TRACKS
         $count = $this->furthestOnTracks($player_id);
         $vp = $this->getPlayersNumberWithBots() - 1;
-        $this->notifyAllPlayers("message", clienttranslate('${player_name} is leading on ${count} tracks'), array(
-            'player_id' => $this->getActivePlayerId(),
-            'player_name' => $this->getActivePlayerName(),
-            'count' => $count,
-        ));
+        $this->notifyAllPlayers("message", clienttranslate('${player_name} is leading on ${count} tracks'), [
+            "player_id" => $this->getActivePlayerId(),
+            "player_name" => $this->getActivePlayerName(),
+            "count" => $count,
+        ]);
         $reason = reason_civ(CIV_CHOSEN);
         $this->awardVP($player_id, $count * $vp, $reason); // 1 VP per opponent per track
         // PART 2: ACHIEVEMENTS
-        $achievements = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location LIKE 'achievement%' AND card_location_arg='$player_id'");
+        $achievements = $this->getCollectionFromDB(
+            "SELECT * FROM structure WHERE card_location LIKE 'achievement%' AND card_location_arg='$player_id'"
+        );
         $achi_count = sizeOf($achievements);
-        $this->notifyAllPlayers("message", clienttranslate('${player_name} has completed ${count} achievements'), array(
-            'player_id' => $this->getActivePlayerId(),
-            'player_name' => $this->getActivePlayerName(),
-            'count' => $achi_count,
-        ));
+        $this->notifyAllPlayers("message", clienttranslate('${player_name} has completed ${count} achievements'), [
+            "player_id" => $this->getActivePlayerId(),
+            "player_name" => $this->getActivePlayerName(),
+            "count" => $achi_count,
+        ]);
         if ($income_turn_count < 5) {
             for ($a = 0; $a < $achi_count; $a++) {
                 $this->queueBenefitNormal(BE_ANYRES, $player_id, $reason);
@@ -10168,30 +11262,36 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getActivePlayerId();
         $era = $this->getCurrentEra($player_id);
         $type = $this->getCurrentBenefitType();
-        if ($type == 64) { // tapestry overplay
-            if ($era == 1)
+        if ($type == 64) {
+            // tapestry overplay
+            if ($era == 1) {
                 return;
+            }
             if ($era >= 5) {
                 $this->clearCurrentBenefit($type);
-                $this->notifyWithName('message_error', clienttranslate('Cannot overplay tapestry in round 5 - no tapestry can be played'));
+                $this->notifyWithName("message_error", clienttranslate("Cannot overplay tapestry in round 5 - no tapestry can be played"));
                 $this->nextStateBenefitManager();
                 return;
             }
             $prev = $this->getLatestTapestry($player_id, $era);
             if (!$prev) {
                 $this->clearCurrentBenefit($type);
-                $this->notifyWithName('message_error', clienttranslate('Cannot overplay tapestry card at this moment, no tapestry is played yet'));
+                $this->notifyWithName(
+                    "message_error",
+                    clienttranslate("Cannot overplay tapestry card at this moment, no tapestry is played yet")
+                );
                 $this->nextStateBenefitManager();
                 return;
             }
             return;
         }
-        if ($type == 112) { // espionage
+        if ($type == 112) {
+            // espionage
             $all_taps = $this->getCollectionFromDB("SELECT * FROM card WHERE card_type='3' AND card_location LIKE 'era%'");
             if (count($all_taps) <= 1) {
                 // no other targets, nothing to copy
                 $this->clearCurrentBenefit($type);
-                $this->notifyWithName('message_error', clienttranslate('ESPIONAGE has not valid targets, no copy is made'));
+                $this->notifyWithName("message_error", clienttranslate("ESPIONAGE has not valid targets, no copy is made"));
                 $this->nextStateBenefitManager();
                 return;
             }
@@ -10202,26 +11302,31 @@ abstract class PGameXBody extends tapcommon {
             return;
         }
         if ($type == BE_PLAY_TAPESTY_INCOME) {
-            if ($era < 2 || $era > 4) { // Income tap in ROUNDS 2-4 ONLY
+            if ($era < 2 || $era > 4) {
+                // Income tap in ROUNDS 2-4 ONLY
                 $this->clearCurrentBenefit($type);
                 $this->nextStateBenefitManager();
                 return;
             }
         }
-        $tap_cards = $this->getCollectionFromDB("SELECT * FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='3'");
+        $tap_cards = $this->getCollectionFromDB(
+            "SELECT * FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='3'"
+        );
         $can_decline = $this->canDeclineTapestry();
         // If no tapestry cards, draw one face down
         if (count($tap_cards) == 0 && !$can_decline) {
-            $this->awardCard($player_id, 1, CARD_TAPESTRY, true, reason('str', clienttranslate('No Tapestry cards')));
-            $tap_cards = $this->getCollectionFromDB("SELECT * FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='3'");
+            $this->awardCard($player_id, 1, CARD_TAPESTRY, true, reason("str", clienttranslate("No Tapestry cards")));
+            $tap_cards = $this->getCollectionFromDB(
+                "SELECT * FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='3'"
+            );
         }
         // If only one card, play it.
-        if ((count($tap_cards) == 1) && !$can_decline) {
+        if (count($tap_cards) == 1 && !$can_decline) {
             $card = reset($tap_cards);
-            if (TAP_ESPIONAGE == $card['card_type_arg']) {
+            if (TAP_ESPIONAGE == $card["card_type_arg"]) {
                 return; // cannot auto-play
             }
-            $this->playTapestryCard($card['card_id'], $player_id);
+            $this->playTapestryCard($card["card_id"], $player_id);
             $this->nextStateBenefitManager();
             return;
         }
@@ -10234,37 +11339,47 @@ abstract class PGameXBody extends tapcommon {
     function stUpgradeTechnology() {
         $b = $this->getCurrentBenefit();
         if (!$b) {
-            $this->gamestate->nextState('benefit');
+            $this->gamestate->nextState("benefit");
             return;
         }
         $this->systemAssertTrue("upgrade ben", $b);
-        $type = $b['benefit_type'];
+        $type = $b["benefit_type"];
         $this->systemAssertTrue("upgrade type $type", $type == 14 || $type == 13);
-        $player_id = $b['benefit_player_id'];
-        $tech_cards_all = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='4'");
+        $player_id = $b["benefit_player_id"];
+        $tech_cards_all = $this->getUniqueValueFromDB(
+            "SELECT COUNT(*) FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='4'"
+        );
         if ($this->hasCiv($player_id, CIV_RECYCLERS) && $tech_cards_all > 0) {
             // don't auto-skip
             return;
         }
 
-        $tech_cards_top = $this->getUniqueValueFromDB("SELECT COUNT(*) FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='4' AND card_location_arg2 = '2'");
+        $tech_cards_top = $this->getUniqueValueFromDB(
+            "SELECT COUNT(*) FROM card WHERE card_location='hand' AND card_location_arg='$player_id' AND card_type='4' AND card_location_arg2 = '2'"
+        );
         if ($tech_cards_all == $tech_cards_top) {
             // None to upgrade, move on.
             $this->clearCurrentBenefit();
-            $this->notifyWithName('message_error', clienttranslate('${player_name} - has no tech cards levels I or II, upgrade is skipped'));
-            $this->gamestate->nextState('benefit');
+            $this->notifyWithName(
+                "message_error",
+                clienttranslate('${player_name} - has no tech cards levels I or II, upgrade is skipped')
+            );
+            $this->gamestate->nextState("benefit");
         }
     }
 
     function getResourceCountAll($player_id = 0, $specific = null) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $maxres = 0;
         for ($ben = 1; $ben <= 4; $ben++) {
-            if ($specific)
-                if ($specific != $ben)
+            if ($specific) {
+                if ($specific != $ben) {
                     continue;
-            $resname = $this->income_tracks[$ben]['resource'];
+                }
+            }
+            $resname = $this->income_tracks[$ben]["resource"];
             $res_field = "player_res_$resname";
             $base_count = $this->getUniqueValueFromDB("SELECT $res_field FROM playerextra WHERE player_id='$player_id'");
             $maxres += $base_count;
@@ -10273,57 +11388,64 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_IncomeBenefits($allowed_benefits = null, $player_id = 0) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
-        $player_income_data =  $this->getPlayerIncomeData($player_id);
+        }
+        $player_income_data = $this->getPlayerIncomeData($player_id);
         $total_benefits = [];
-        $allowed_action = 'zzz';
+        $allowed_action = "zzz";
         if (is_string($allowed_benefits)) {
             $allowed_action = $allowed_benefits;
             $allowed_benefits = [];
         }
         for ($track = 1; $track <= 4; $track++) {
-            $field = $this->income_tracks[$track]['field'];
+            $field = $this->income_tracks[$track]["field"];
             $limit = $player_income_data[$field];
             for ($slot = 1; $slot <= $limit; $slot++) {
                 $benefits = [];
-                foreach ($this->income_tracks[$track][$slot]['benefit'] as $b) {
-                    $action = $this->getRulesBenefit($b, 'r', 'x');
+                foreach ($this->income_tracks[$track][$slot]["benefit"] as $b) {
+                    $action = $this->getRulesBenefit($b, "r", "x");
                     if ($allowed_benefits === null || $action == $allowed_action || in_array($b, $allowed_benefits)) {
                         array_inc($benefits, $b, 1);
                         array_inc($total_benefits, $b, 1);
                     }
                 }
-                $reason = reason('inspot', "{$track}_{$slot}");
+                $reason = reason("inspot", "{$track}_{$slot}");
                 foreach ($benefits as $bid => $count) {
                     $this->awardBenefits($player_id, $bid, $count, $reason);
                 }
             }
         }
-        if (isset($total_benefits[RES_FOOD]) && $this->isTapestryActive($player_id, TAP_MERCANTILISM)) { // MERCANTILISM
+        if (isset($total_benefits[RES_FOOD]) && $this->isTapestryActive($player_id, TAP_MERCANTILISM)) {
+            // MERCANTILISM
             $this->queueBenefitNormal(BE_ANYRES, $player_id, reason_tapestry(TAP_MERCANTILISM), $total_benefits[RES_FOOD]);
         }
-        if (isset($total_benefits[RES_COIN]) && $this->isTapestryActive($player_id, 8)) { // CAPITALISM
+        if (isset($total_benefits[RES_COIN]) && $this->isTapestryActive($player_id, 8)) {
+            // CAPITALISM
             $this->awardVP($player_id, 2 * $total_benefits[RES_COIN], reason_tapestry(8));
         }
     }
 
     function effect_gainVPIncome($player_id = 0) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $income_turn_count = $this->getCurrentEra($player_id);
-        if ($income_turn_count > 1) { // NO VP IN FIRST ROUND
+        if ($income_turn_count > 1) {
+            // NO VP IN FIRST ROUND
             $this->setIncomeTurnPhase(INCOME_VP, clienttranslate('${player_name} receives income VP'), $player_id);
-            $this->effect_IncomeBenefits('v', $player_id);
+            $this->effect_IncomeBenefits("v", $player_id);
         }
     }
 
     function effect_gainResourcesIncome($player_id = 0) {
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
         $income_turn_count = $this->getCurrentEra($player_id);
         //RESOURCES
-        if ($income_turn_count < 5) { // NO INCOME IN LAST ROUND
+        if ($income_turn_count < 5) {
+            // NO INCOME IN LAST ROUND
             $this->setIncomeTurnPhase(40, clienttranslate('${player_name} receives resources income for turn #${turn_number}'), $player_id);
             // Give resources for each uncovered symbol on the resource tracks!
             $allowed_benefits = [RES_COIN, RES_WORKER, RES_FOOD, RES_CULTURE];
@@ -10332,39 +11454,47 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_gainCardsIncome($player_id = 0) {
-        if ($player_id == 0)
+        if ($player_id == 0) {
             $player_id = $this->getActivePlayerId();
+        }
         $income_turn_count = $this->getCurrentEra($player_id);
         //CARDS
-        if ($income_turn_count < 5) { // NO INCOME IN LAST ROUND
-            $this->setIncomeTurnPhase(40, clienttranslate('${player_name} receives cards and tiles income for turn #${turn_number}'), $player_id);
+        if ($income_turn_count < 5) {
+            // NO INCOME IN LAST ROUND
+            $this->setIncomeTurnPhase(
+                40,
+                clienttranslate('${player_name} receives cards and tiles income for turn #${turn_number}'),
+                $player_id
+            );
             $allowed_benefits = [BE_TERRITORY, BE_TAPESTRY];
             $this->effect_IncomeBenefits($allowed_benefits, $player_id);
         }
     }
 
     function effect_endOfIncome($player_id = 0) {
-        if ($player_id == 0)
+        if ($player_id == 0) {
             $player_id = $this->getActivePlayerId();
+        }
         $income_turn_count = $this->getCurrentEra($player_id);
         $this->setIncomeTurnPhase(0, clienttranslate('${player_name} ends income turn'), $player_id);
-        if ($income_turn_count == 5) { // FINAL INCOME
+        if ($income_turn_count == 5) {
+            // FINAL INCOME
             $this->finalGameScoring($player_id);
             $this->DbQuery("UPDATE playerextra SET player_income_turns=6 WHERE player_id='$player_id'");
             if ($player_id == PLAYER_AUTOMA) {
                 $this->DbQuery("UPDATE playerextra SET player_income_turns=6 WHERE player_id='2'"); // shadow is done also
             }
-            $this->setIncomeTurnPhase(0, '', $player_id); // to notify of update era to 6
+            $this->setIncomeTurnPhase(0, "", $player_id); // to notify of update era to 6
         }
     }
 
     function finalGameScoring($player_id) {
         $civs = $this->getAllCivs($player_id);
         foreach ($civs as $info) {
-            $civ = $info['card_type_arg'];
-            if ($civ == (CIV_ISLANDERS)) {
+            $civ = $info["card_type_arg"];
+            if ($civ == CIV_ISLANDERS) {
                 $this->finalIslandersScoring();
-            } else if ($civ == (CIV_RIVERFOLK)) {
+            } elseif ($civ == CIV_RIVERFOLK) {
                 $this->finalRiverfolkScoring($player_id);
             } else {
                 $civ = $this->getCivilizationInstance($civ);
@@ -10375,24 +11505,25 @@ abstract class PGameXBody extends tapcommon {
         // clear dictator data
         $this->checkDictatorship($player_id, true);
         // clear heralds data
-        if ($this->hasCiv($player_id, CIV_HERALDS))
+        if ($this->hasCiv($player_id, CIV_HERALDS)) {
             $this->removeHeraldTapestryClone($player_id);
+        }
         $this->finalStats($player_id);
         $this->dbSetAuxScore($player_id, $this->getResourceCountAll($player_id));
-        $this->notifyWithName('message_error', clienttranslate('${player_name} ends their game!'), [], $player_id);
+        $this->notifyWithName("message_error", clienttranslate('${player_name} ends their game!'), [], $player_id);
     }
 
     function getCivilizationInstance(int $civ, bool $strict = false): AbsCivilization {
         $info = array_get($this->civilizations, $civ);
         $this->systemAssertTrue("ERR:game:02:$civ", $info);
-        $derivedClass = $info['name'];
+        $derivedClass = $info["name"];
         $derivedClass = strtolower($derivedClass);
         $derivedClass = ucwords($derivedClass);
         $derivedClass = str_replace(" ", "", $derivedClass);
         $classname = array_get($info, "class", $derivedClass);
         try {
             $file = "civs/$classname.php";
-            if (@include_once($file)) {
+            if (@include_once $file) {
                 $opinst = new $classname($this);
                 return $opinst;
             }
@@ -10410,7 +11541,9 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getPlayerIncomeData($player_id) {
-        $player_income_data = $this->getObjectFromDB("SELECT player_income_armories armories, player_income_houses houses, player_income_markets markets, player_income_farms farms FROM playerextra WHERE player_id='$player_id'");
+        $player_income_data = $this->getObjectFromDB(
+            "SELECT player_income_armories armories, player_income_houses houses, player_income_markets markets, player_income_farms farms FROM playerextra WHERE player_id='$player_id'"
+        );
         return $player_income_data;
     }
 
@@ -10420,62 +11553,67 @@ abstract class PGameXBody extends tapcommon {
         }
         $score = $this->dbGetScore($player_id);
         if ($player_id == PLAYER_AUTOMA) {
-            $this->setStat($score, 'automa_score');
+            $this->setStat($score, "automa_score");
             return;
         }
         if (!$this->isRealPlayer($player_id)) {
             $this->systemAssertTrue("unathorized move");
         }
-        $this->setStat($score, 'game_points_total', $player_id);
-        $player_income_data =  $this->getPlayerIncomeData($player_id);
+        $this->setStat($score, "game_points_total", $player_id);
+        $player_income_data = $this->getPlayerIncomeData($player_id);
         $total = 0;
         for ($track = 1; $track <= 4; $track++) {
-            $field = $this->income_tracks[$track]['field'];
-            $limit = (int) ($player_income_data[$field]);
+            $field = $this->income_tracks[$track]["field"];
+            $limit = (int) $player_income_data[$field];
             $total += $limit - 1;
             $this->setStat($limit, "game_income_$track", $player_id);
         }
-        $this->setStat($total, 'game_building_income', $player_id);
+        $this->setStat($total, "game_building_income", $player_id);
         $landmarks = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_type='6' AND card_location_arg=$player_id");
-        $this->setStat(count($landmarks), 'game_building_landmark', $player_id);
-        $outposts = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_type='5' AND card_location_arg=$player_id AND card_location LIKE 'land%'");
-        $this->setStat(count($outposts), 'game_building_outpost', $player_id);
-        $civs = $this->getCollectionFromDB("SELECT card_type_arg FROM card WHERE card_type='5' AND card_location='hand' AND card_location_arg='$player_id'");
-        $this->setStat(count($civs), 'game_card_civ', $player_id);
+        $this->setStat(count($landmarks), "game_building_landmark", $player_id);
+        $outposts = $this->getCollectionFromDB(
+            "SELECT * FROM structure WHERE card_type='5' AND card_location_arg=$player_id AND card_location LIKE 'land%'"
+        );
+        $this->setStat(count($outposts), "game_building_outpost", $player_id);
+        $civs = $this->getCollectionFromDB(
+            "SELECT card_type_arg FROM card WHERE card_type='5' AND card_location='hand' AND card_location_arg='$player_id'"
+        );
+        $this->setStat(count($civs), "game_card_civ", $player_id);
     }
-
-
 
     function finalIslandersScoring($doscore = true) {
         $player_id = $this->getActivePlayerId();
-        $map = $this->getMapDataFromDb('islanders');
+        $map = $this->getMapDataFromDb("islanders");
         $highest = 0;
         foreach ($map as $info) {
-            $tile_id = $info['map_tile_id'];
-            if (!$tile_id)
+            $tile_id = $info["map_tile_id"];
+            if (!$tile_id) {
                 continue;
-            $edge = array_get($info, 'edge', -1);
-            if ($edge < 0)
+            }
+            $edge = array_get($info, "edge", -1);
+            if ($edge < 0) {
                 continue;
-            $working_data = $this->territory_tiles[$tile_id]['x'];
-            $working_rot = $info['map_tile_orient'];
+            }
+            $working_data = $this->territory_tiles[$tile_id]["x"];
+            $working_rot = $info["map_tile_orient"];
             $allsea = 0;
             for ($i = 1; $i <= 2; $i++) {
                 $working_left = (6 + $edge + $i - $working_rot) % 6;
-                if ($working_data[$working_left] == TERRAIN_SEA)
+                if ($working_data[$working_left] == TERRAIN_SEA) {
                     $allsea++;
+                }
             }
-            if ($allsea == 2)
+            if ($allsea == 2) {
                 $highest++;
+            }
         }
-        $this->notifyWithName('message', clienttranslate('${player_name} (ISLANDERS) has ${count} tiles with water on outer edges'), [
-            'count' => $highest
+        $this->notifyWithName("message", clienttranslate('${player_name} (ISLANDERS) has ${count} tiles with water on outer edges'), [
+            "count" => $highest,
         ]);
-        if ($doscore)
+        if ($doscore) {
             $this->awardVP($player_id, $highest * 4, reason_civ(CIV_ISLANDERS));
+        }
     }
-
-
 
     function dbGetBenefits() {
         $benefit_data = $this->getCollectionFromDB("SELECT * FROM benefit ORDER BY benefit_prerequisite, benefit_id");
@@ -10483,8 +11621,9 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function switchPlayer($target_player_id, $save = true) {
-        if (!$this->isRealPlayer($target_player_id))
+        if (!$this->isRealPlayer($target_player_id)) {
             return false;
+        }
         if ($this->getActivePlayerId() != $target_player_id) {
             $this->gamestate->changeActivePlayer($target_player_id);
             if ($save) {
@@ -10502,13 +11641,13 @@ abstract class PGameXBody extends tapcommon {
     function stBenefitManager() {
         // Are there any benefits to award?
         for ($b = $this->getCurrentBenefit(); $b; $b = $this->getCurrentBenefit()) {
-            $bplayer = $b['benefit_player_id'];
-            $bcat = $b['benefit_category'];
-            $ben = $b['benefit_type'];
-            $bid = $b['benefit_id'];
-            if ($bcat == 'standard' && ($ben == RES_VP || ($ben > 500 && $ben < 600))) {
+            $bplayer = $b["benefit_player_id"];
+            $bcat = $b["benefit_category"];
+            $ben = $b["benefit_type"];
+            $bid = $b["benefit_id"];
+            if ($bcat == "standard" && ($ben == RES_VP || ($ben > 500 && $ben < 600))) {
                 // do not need to switch player for these
-                $completed = $this->awardBenefits($bplayer, $ben, $b['benefit_quantity'], $b['benefit_data']);
+                $completed = $this->awardBenefits($bplayer, $ben, $b["benefit_quantity"], $b["benefit_data"]);
                 $this->systemAssertTrue("Problem with awarding VP $ben", $completed);
                 $this->benefitCashed($bid);
                 continue;
@@ -10518,37 +11657,38 @@ abstract class PGameXBody extends tapcommon {
                 continue;
             }
             $this->switchPlayer($bplayer);
-            $bcat = explode(',', $bcat)[0];
+            $bcat = explode(",", $bcat)[0];
             switch ($bcat) {
-                case 'standard':
-                    $count = $b['benefit_quantity'];
-                    $data = $b['benefit_data'];
+                case "standard":
+                    $count = $b["benefit_quantity"];
+                    $data = $b["benefit_data"];
                     $completed = $this->awardBenefits($bplayer, $ben, $count, $data);
-                    if (!$completed)
-                        return; // prev call makes state transition
+                    if (!$completed) {
+                        return;
+                    } // prev call makes state transition
                     $this->benefitCashed($bid);
                     break;
-                case 'choice':
-                case 'a':
-                    $this->gamestate->nextState('benefitChoice');
+                case "choice":
+                case "a":
+                    $this->gamestate->nextState("benefitChoice");
                     return;
-                case 'or':
-                case 'o':
-                    $this->gamestate->nextState('benefitOption');
+                case "or":
+                case "o":
+                    $this->gamestate->nextState("benefitOption");
                     return;
-                case 'civ':
-                    $this->gamestate->nextState('civReturn');
+                case "civ":
+                    $this->gamestate->nextState("civReturn");
                     return;
-                case 'bonus':
-                case 'p':
-                    $this->gamestate->nextState('bonus');
+                case "bonus":
+                case "p":
+                    $this->gamestate->nextState("bonus");
                     return;
                 default:
                     $this->systemAssertTrue("invalid type $bcat");
                     return;
             }
         }
-        $current_player = $this->getGameStateValue('current_player_turn');
+        $current_player = $this->getGameStateValue("current_player_turn");
         $this->switchPlayer($current_player, false);
         // check for end of turn trigger effects
         $player_id = $current_player;
@@ -10560,33 +11700,36 @@ abstract class PGameXBody extends tapcommon {
 
         // triggering of effect caused more stuff on stack
         if ($this->getCurrentBenefit()) {
-            $this->gamestate->nextState('loopback');
+            $this->gamestate->nextState("loopback");
             return;
         }
         $this->effect_endOfTurn($current_player);
         $player_id = $this->getActivePlayerId();
-        if ($this->canSkipConfirm($player_id))
-            $this->gamestate->nextState('nextPlayer');
-        else
-            $this->gamestate->nextState('finish');
+        if ($this->canSkipConfirm($player_id)) {
+            $this->gamestate->nextState("nextPlayer");
+        } else {
+            $this->gamestate->nextState("finish");
+        }
     }
 
     /**
      * Override
      */
     function setStat($value, $name, $player_id = null, $bDoNotLoop = false) {
-        if ($this->isRealPlayer($player_id) || $player_id == null)
+        if ($this->isRealPlayer($player_id) || $player_id == null) {
             parent::setStat($value, $name, $player_id, $bDoNotLoop);
-        else
+        } else {
             $this->warn("Calling set stat $name of $player_id");
+        }
     }
 
     /**
      * Override
      */
     function getStat($name, $player_id = null) {
-        if ($this->isRealPlayer($player_id) || $player_id == null)
+        if ($this->isRealPlayer($player_id) || $player_id == null) {
             return parent::getStat($name, $player_id);
+        }
         $this->warn("Calling get stat $name of $player_id");
         return 0;
     }
@@ -10595,33 +11738,44 @@ abstract class PGameXBody extends tapcommon {
         $owner_tiles = $this->getControlHexes($owner);
         $enemy_structures = 0;
         foreach ($owner_tiles as $coord => $hex) {
-            foreach ($hex['structures'] as $struc) {
-                if ($struc['card_location_arg'] == $owner) continue; // owned
-                if ($struc['card_type_arg'] != 1) continue; // not toppled
-                if ($struc['card_type'] != BUILDING_OUTPOST) continue; // not outpost
+            foreach ($hex["structures"] as $struc) {
+                if ($struc["card_location_arg"] == $owner) {
+                    continue;
+                } // owned
+                if ($struc["card_type_arg"] != 1) {
+                    continue;
+                } // not toppled
+                if ($struc["card_type"] != BUILDING_OUTPOST) {
+                    continue;
+                } // not outpost
                 $enemy_structures++;
                 break;
             }
         }
         // ACHIEVEMENT MET
-        if ($enemy_structures < 2)  return;
+        if ($enemy_structures < 2) {
+            return;
+        }
 
         // CHECK IF ALREADY AWARDED.
         $achievement = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location LIKE 'achievement_2_%'");
         $awarded = false;
         foreach ($achievement as $a) {
-            if ($a['card_location_arg'] == $owner)
+            if ($a["card_location_arg"] == $owner) {
                 $awarded = true;
+            }
         }
-        if ($awarded)  return;
+        if ($awarded) {
+            return;
+        }
         $pos = sizeOf($achievement) + 1;
-        $destination = 'achievement_2_' . $pos;
+        $destination = "achievement_2_" . $pos;
         $player_data = $this->loadPlayersBasicInfos();
         $player_count = sizeOf($player_data);
-        if (($player_count < 4) && ($pos < 3)) {
-            $points = (15 - ($pos * 5));
-        } else if (($player_count > 3) && ($pos < 4)) {
-            $points = (20 - ($pos * 5));
+        if ($player_count < 4 && $pos < 3) {
+            $points = 15 - $pos * 5;
+        } elseif ($player_count > 3 && $pos < 4) {
+            $points = 20 - $pos * 5;
         } else {
             $points = 0;
         }
@@ -10629,14 +11783,14 @@ abstract class PGameXBody extends tapcommon {
             $token_id = $this->addCube($owner, $destination);
             $this->notifyMoveStructure(clienttranslate('${player_name} has toppled at least 2 opponent outposts'), $token_id, [], $owner);
         }
-        $this->awardAchievementVP($owner, $points, reason('achi', clienttranslate('Topple 2')), $destination);
+        $this->awardAchievementVP($owner, $points, reason("achi", clienttranslate("Topple 2")), $destination);
     }
 
     function awardAchievementVP($player_id, $count, $reason = null, $place = null) {
         $this->awardVP($player_id, $count, $reason, $place);
         if ($this->getAdjustmentVariant() >= 4) {
             if ($this->hasCiv($player_id, CIV_CHOSEN)) {
-                $this->notifyWithName('message', clienttranslate('${player_name} - The Chosen - gains achievement benefit'));
+                $this->notifyWithName("message", clienttranslate('${player_name} - The Chosen - gains achievement benefit'));
                 $this->benefitCivEntry(CIV_CHOSEN, $player_id);
             }
         }
@@ -10651,34 +11805,35 @@ abstract class PGameXBody extends tapcommon {
         //$this->debugConsole("end of conquer for $player_id");
 
         // Let's find out who now owns it!
-        if (!$player_id)
+        if (!$player_id) {
             $player_id = $this->getActivePlayerId();
+        }
 
         $map_data = $this->getSelectedMapHex();
-        $owners = $map_data['map_owners'];
-        $this->systemAssertTrue('conquer action can result only in one owner ' . toJson($map_data), count($owners) == 1);
+        $owners = $map_data["map_owners"];
+        $this->systemAssertTrue("conquer action can result only in one owner " . toJson($map_data), count($owners) == 1);
         $owner = array_shift($owners);
         $this->checkConqueredTerritories();
         // AWARD 2: Somebody has been toppled, have they done it twice (must be shown on board, e.g. no history.)
-        $toppled = (count($map_data['map_occupants']) == 2);
+        $toppled = count($map_data["map_occupants"]) == 2;
         if ($toppled) {
             $this->checkToppleAward($owner);
         }
         // AWARD 3: Who owns the centre island?
-        if (($map_data['map_coords'] == "0_0") && ($owner == $player_id)) {
+        if ($map_data["map_coords"] == "0_0" && $owner == $player_id) {
             $achievement = $this->getObjectFromDB("SELECT card_location FROM structure WHERE card_location LIKE 'achievement_3_%' LIMIT 1"); // will be at most 1
-            $awarded = (($achievement != null) && ($achievement['card_location'] == $player_id));
+            $awarded = $achievement != null && $achievement["card_location"] == $player_id;
             if (!$awarded) {
-                $pos = ($achievement == null) ? 1 : 2;
-                $destination = 'achievement_3_' . $pos;
+                $pos = $achievement == null ? 1 : 2;
+                $destination = "achievement_3_" . $pos;
                 $token_id = $this->addCube($player_id, $destination);
                 $this->notifyMoveStructure(clienttranslate('${player_name} conquers the middle island'), $token_id, [], $player_id);
-                $points = ($pos == 1) ? 10 : 5;
-                $this->awardAchievementVP($player_id, $points, reason('achi', clienttranslate('Central island')), $destination);
+                $points = $pos == 1 ? 10 : 5;
+                $this->awardAchievementVP($player_id, $points, reason("achi", clienttranslate("Central island")), $destination);
             }
         }
         // If necessary, need to award both benefits without a choice!
-        switch ($this->getGameStateValue('conquer_bonus')) {
+        switch ($this->getGameStateValue("conquer_bonus")) {
             case 2:
                 $both = true;
                 break;
@@ -10689,91 +11844,108 @@ abstract class PGameXBody extends tapcommon {
                 $both = false;
                 break;
         }
-        if ($toppled && $owner == $player_id && $this->isTapestryActive($player_id, 30))
-            $both = true; // PILLAGE AND PLUNDER
+        if ($toppled && $owner == $player_id && $this->isTapestryActive($player_id, 30)) {
+            $both = true;
+        } // PILLAGE AND PLUNDER
         if ($both) {
-            $this->notifyWithName('message', clienttranslate('${player_name} gains benefits from both dice'));
-            $this->conquerDieBenefit('black', $player_id);
-            $this->conquerDieBenefit('red', $player_id);
-            if ($this->isTapestryActive($player_id, 31)) { // PIRATE RULE
+            $this->notifyWithName("message", clienttranslate('${player_name} gains benefits from both dice'));
+            $this->conquerDieBenefit("black", $player_id);
+            $this->conquerDieBenefit("red", $player_id);
+            if ($this->isTapestryActive($player_id, 31)) {
+                // PIRATE RULE
                 $this->queueBenefitNormal($this->getTileBenefit(), $player_id, reason_tapestry(31));
             }
-            $this->gamestate->nextState('next');
+            $this->gamestate->nextState("next");
             return;
         }
-        if ($this->isRealPlayer($player_id))
-            $this->gamestate->nextState('conquer_die');
-        else
-            $this->gamestate->nextState('next');
+        if ($this->isRealPlayer($player_id)) {
+            $this->gamestate->nextState("conquer_die");
+        } else {
+            $this->gamestate->nextState("next");
+        }
     }
 
     function rollConquerDice($player_id) {
         // Roll conquer dice
         $die_red = bga_rand(0, 5);
         $die_black = bga_rand(0, 5);
-        if ($die_black == 5)
+        if ($die_black == 5) {
             $die_black = 1;
-        if ($die_red == 5)
+        }
+        if ($die_red == 5) {
             $die_red = 2;
+        }
         $this->setGameStateValue("conquer_die_red", $die_red);
         $this->setGameStateValue("conquer_die_black", $die_black);
-        $this->notifyAllPlayers("conquer_roll", clienttranslate('${player_name} rolls the conquer dice ${black_name}/${red_name}'), array(
-            'player_id' => $player_id,
-            'player_name' => $this->getPlayerNameById($player_id),
-            'die_red' => $die_red,
-            'die_black' => $die_black,
-            'black_name' => $this->dice_names['black'][$die_black]['name'],
-            'red_name' => $this->dice_names['red'][$die_red]['name'],
-            'i18n' => ['black_name', 'red_name'],
-            'preserve' => ['die_red', 'die_black']
-        ));
+        $this->notifyAllPlayers("conquer_roll", clienttranslate('${player_name} rolls the conquer dice ${black_name}/${red_name}'), [
+            "player_id" => $player_id,
+            "player_name" => $this->getPlayerNameById($player_id),
+            "die_red" => $die_red,
+            "die_black" => $die_black,
+            "black_name" => $this->dice_names["black"][$die_black]["name"],
+            "red_name" => $this->dice_names["red"][$die_red]["name"],
+            "i18n" => ["black_name", "red_name"],
+            "preserve" => ["die_red", "die_black"],
+        ]);
         $this->prepareUndoSavepoint();
     }
 
     function rollRedConquerDie(int $player_id, bool $undosave) {
         // Roll conquer dice
         $die_red = bga_rand(0, 5);
-        if ($die_red == 5)
+        if ($die_red == 5) {
             $die_red = 2;
+        }
         $this->setGameStateValue("conquer_die_red", $die_red);
-        $this->notif('conquer_roll')->withPlayer($player_id)->withArg('red_name', $this->dice_names['red'][$die_red]['name'])->withPreserveArg('die_red', $die_red)->notifyAll(clienttranslate('${player_name} rolls red conquer dice ${red_name}'));
-        if ($undosave) $this->prepareUndoSavepoint();
+        $this->notif("conquer_roll")
+            ->withPlayer($player_id)
+            ->withArg("red_name", $this->dice_names["red"][$die_red]["name"])
+            ->withPreserveArg("die_red", $die_red)
+            ->notifyAll(clienttranslate('${player_name} rolls red conquer dice ${red_name}'));
+        if ($undosave) {
+            $this->prepareUndoSavepoint();
+        }
         return $die_red;
     }
 
     function rollBlackConquerDie($player_id, bool $undosave) {
         // Roll conquer dice
         $die_black = bga_rand(0, 5);
-        if ($die_black == 5)
+        if ($die_black == 5) {
             $die_black = 1;
+        }
         $this->setGameStateValue("conquer_die_black", $die_black);
-        $ben_name = $this->dice_names['black'][$die_black]['name'];
-        $notif =  $this->notif('conquer_roll', $player_id)->withArg('black_name', $ben_name)->withPreserveArg('die_black', $die_black);
+        $ben_name = $this->dice_names["black"][$die_black]["name"];
+        $notif = $this->notif("conquer_roll", $player_id)->withArg("black_name", $ben_name)->withPreserveArg("die_black", $die_black);
         if ($die_black == 1) {
             // territory benefit
             $tileben = $this->getTileBenefit();
 
-            if (count($tileben) == 0)
-                $tilebenname = clienttranslate('No benefits');
-            else
+            if (count($tileben) == 0) {
+                $tilebenname = clienttranslate("No benefits");
+            } else {
                 $tilebenname = $this->getBenefitName($tileben[0]);
+            }
 
-
-            $notif->withArg('tile_ben_name', $tilebenname)->notifyAll(clienttranslate('${player_name} rolls black conquer die ${black_name} (${tile_ben_name})'));
+            $notif
+                ->withArg("tile_ben_name", $tilebenname)
+                ->notifyAll(clienttranslate('${player_name} rolls black conquer die ${black_name} (${tile_ben_name})'));
         } else {
             $notif->notifyAll(clienttranslate('${player_name} rolls black conquer die ${black_name}'));
         }
 
-
-        if ($undosave) $this->prepareUndoSavepoint();
+        if ($undosave) {
+            $this->prepareUndoSavepoint();
+        }
         return $die_black;
     }
 
     function notif($type = null, $player_id = null) {
         $builder = new NotifBuilder($this);
         $builder = $builder->ofType($type);
-        if ($player_id)
+        if ($player_id) {
             $builder = $builder->withPlayer($player_id);
+        }
         return $builder;
     }
 
@@ -10794,36 +11966,39 @@ abstract class PGameXBody extends tapcommon {
      * error message.
      */
     function zombieTurn($state = null, $active_player = null) {
-        if (!$state)
+        if (!$state) {
             $state = $this->gamestate->state();
-        if (!$active_player)
+        }
+        if (!$active_player) {
             $active_player = $this->getActivePlayerId();
-        $statename = $state['name'];
+        }
+        $statename = $state["name"];
         $player_id = $active_player;
-        if ($state['type'] === "activeplayer") {
+        if ($state["type"] === "activeplayer") {
             $this->DbQuery("DELETE FROM benefit WHERE benefit_player_id='$player_id'");
-            $main_player = $this->getGameStateValue('current_player_turn');
+            $main_player = $this->getGameStateValue("current_player_turn");
             if ($this->isIncomeTurn() && $main_player == $player_id) {
-                $this->setIncomeTurnPhase(0, '', $player_id);
+                $this->setIncomeTurnPhase(0, "", $player_id);
             }
             if ($statename == "playerTurnEnd") {
-                $this->notifyWithName('message', clienttranslate('${player_name} is zombie, ends their game'), [], $player_id);
+                $this->notifyWithName("message", clienttranslate('${player_name} is zombie, ends their game'), [], $player_id);
                 $this->finalGameScoring($player_id);
-                $this->gamestate->nextState('next');
+                $this->gamestate->nextState("next");
                 return;
             }
-            $this->notifyWithName('message', clienttranslate('${player_name} is zombie, skips'), [], $player_id);
-            $trans = $state['transitions'];
-            if (isset($trans['decline']))
-                $this->gamestate->nextState('decline');
-            else if (isset($trans['next']))
-                $this->gamestate->nextState('next');
-            else
+            $this->notifyWithName("message", clienttranslate('${player_name} is zombie, skips'), [], $player_id);
+            $trans = $state["transitions"];
+            if (isset($trans["decline"])) {
+                $this->gamestate->nextState("decline");
+            } elseif (isset($trans["next"])) {
+                $this->gamestate->nextState("next");
+            } else {
                 $this->gamestate->jumpToState(18);
+            }
             return;
-        } else if ($state['type'] === "multipleactiveplayer") {
+        } elseif ($state["type"] === "multipleactiveplayer") {
             // Make sure player is in a non blocking status for role turn
-            $this->gamestate->setPlayerNonMultiactive($active_player, 'next');
+            $this->gamestate->setPlayerNonMultiactive($active_player, "next");
             return;
         }
         throw new feException("Zombie mode not supported at this game state: " . $statename);
@@ -10831,7 +12006,7 @@ abstract class PGameXBody extends tapcommon {
 }
 
 class NotifBuilder {
-    private $type = 'message';
+    private $type = "message";
     private $args = [];
     private $player_id = null;
     private $preserve = [];
@@ -10842,8 +12017,9 @@ class NotifBuilder {
     }
 
     function ofType($p) {
-        if ($p)
+        if ($p) {
             $this->type = $p;
+        }
         return $this;
     }
 
@@ -10859,12 +12035,12 @@ class NotifBuilder {
             $curr = $this->game->getStructureInfoById($id, false);
             $this->game->systemAssertTrue("cannot find structure $id", $curr);
         }
-        $location = $curr['card_location'];
-        if (startsWith($location, 'land')) {
-            $curr['coord_text'] = $this->game->coordText($location);
+        $location = $curr["card_location"];
+        if (startsWith($location, "land")) {
+            $curr["coord_text"] = $this->game->coordText($location);
         }
-        $type = $curr['card_type'];
-        $curr['structure_name'] = $this->game->structure_types[$type]["name"];
+        $type = $curr["card_type"];
+        $curr["structure_name"] = $this->game->structure_types[$type]["name"];
         $this->args = array_merge($this->args, $curr);
         return $this;
     }
@@ -10905,8 +12081,9 @@ class NotifBuilder {
      * @return NotifBuilder
      */
     function withPlayer($p) {
-        if (!$p)
+        if (!$p) {
             $p = $this->game->getActivePlayerId();
+        }
         $this->player_id = $p;
         return $this;
     }
@@ -10919,8 +12096,9 @@ class NotifBuilder {
      * @return NotifBuilder
      */
     function withPlayer2($owner) {
-        if ($owner)
-            $this->withArgs(['player_id2' => $owner, 'player_name2' => $this->game->getPlayerNameById($owner)]);
+        if ($owner) {
+            $this->withArgs(["player_id2" => $owner, "player_name2" => $this->game->getPlayerNameById($owner)]);
+        }
         return $this;
     }
 
@@ -10932,8 +12110,9 @@ class NotifBuilder {
      * @return NotifBuilder
      */
     function withReason($reason) {
-        if ($reason)
-            $this->args['reason'] = $this->game->getReasonFullRec($reason);
+        if ($reason) {
+            $this->args["reason"] = $this->game->getReasonFullRec($reason);
+        }
         return $this;
     }
 
@@ -10942,19 +12121,21 @@ class NotifBuilder {
     }
 
     function notifyPlayer($message = null) {
-        $this->withArg('_private', true);
+        $this->withArg("_private", true);
         $this->send($message);
     }
 
     function send($message = null) {
-        if (!$message)
-            $message = '';
+        if (!$message) {
+            $message = "";
+        }
         if (count($this->preserve) > 0) {
             $p = array_keys($this->preserve);
-            if (!isset($this->args['preserve']))
-                $this->args['preserve'] = $p;
-            else
-                $this->args['preserve'] = array_merge($this->args['preserve'], $p);
+            if (!isset($this->args["preserve"])) {
+                $this->args["preserve"] = $p;
+            } else {
+                $this->args["preserve"] = array_merge($this->args["preserve"], $p);
+            }
         }
         $this->game->notifyWithName($this->type, $message, $this->args, $this->player_id);
     }

@@ -1,0 +1,37 @@
+{
+  "name": "bga.tapestry",
+  "version": "1.0.0",
+  "description": "",
+  "main": "tapestry.js",
+  "scripts": {
+    "build": "npm run build:material",
+    "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap modules/_autoload.php --colors=always modules/tests",
+    "predeploy": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ php8.2  modules/_testpredeploy.php",
+    "build:material": "php8.2 ~/git/bga-sharedcode/misc/genmat.php misc/benefit_types.csv",
+    "jstest": "TS_NODE_PROJECT=tests/tsconfig.test.json mocha -r ts-node/register tests/**/*.spec.ts",
+    "end": "echo The End"
+  },
+  "author": "VictoriaLa",
+  "license": "EPL2.0",
+  "devDependencies": {
+    "@prettier/plugin-php": "^0.22",
+    "@types/chai": "^4.x.x",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^10.9.2",
+    "@types/sinon": "^10.x.x",
+    "chai": "^4.x.x",
+    "jsdom": "^20.0.0",
+    "mocha": "^10.x.x",
+    "prettier": "^3.6",
+    "sass": "^1.32.6",
+    "sinon": "^15.x.x",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.9.5"
+  },
+  "prettier": {
+    "plugins": ["@prettier/plugin-php"],
+    "braceStyle": "1tbs",
+    "printWidth": 140,
+    "trailingComma": "none"
+  }
+}

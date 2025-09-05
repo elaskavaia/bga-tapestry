@@ -23,7 +23,7 @@
         {
             "label": "update cards mat",
             "type": "shell",
-            "command": "php7.4 ${userHome}/git/bga-sharedcode/misc/genmat.php misc/benefit_types.csv",
+            "command": "php8.2 ${userHome}/git/bga-sharedcode/misc/genmat.php misc/benefit_types.csv",
             "problemMatcher": [],
             "group": {
                 "kind": "none",

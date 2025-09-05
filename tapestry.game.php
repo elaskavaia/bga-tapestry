@@ -48,7 +48,7 @@ class Tapestry extends PGameXBody {
      * _ when the game starts
      * _ when a player refreshes the game page (F5)
      */
-    protected function getAllDatas() {
+    function getAllDatas(): array {
         $result = parent::getAllDatas();
         return $result;
     }

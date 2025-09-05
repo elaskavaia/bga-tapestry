@@ -280,7 +280,8 @@ if (!defined('TAPESTRY')) { // guard since this included multiple times
 }
 if (!function_exists('str_repeat_join')) {
 
-        function str_repeat_join($str, $count, $on = ",") {
+        function str_repeat_join($str, $count, $on = ",")
+        {
                 if (!$count)
                         return '';
                 if ($count == 1)
@@ -482,125 +483,171 @@ $this->territory_tiles = array(
         6 => array('x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_WORKER],),
         7 => array('x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_COIN], 'h' => [TERRAIN_DESERT]),
         8 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_DESERT], 'benefit' => [BE_FARM],
+                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_DESERT],
+                'benefit' => [BE_FARM],
         ),
         9 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_SEA], 'benefit' => [BE_TAPESTRY],
+                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_SEA],
+                'benefit' => [BE_TAPESTRY],
         ),
         10 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_CULTURE],
+                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_CULTURE],
         ),
         11 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_WORKER],
+                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_WORKER],
         ),
         12 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_DESERT], 'benefit' => [BE_RESEARCH_NB],
+                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_DESERT, TERRAIN_DESERT],
+                'benefit' => [BE_RESEARCH_NB],
         ),
         13 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_COIN],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_COIN],
         ),
         14 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_CULTURE],
+                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_CULTURE],
         ),
         15 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_WORKER],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_WORKER],
         ),
         16 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_COIN], 'h' => [TERRAIN_FOREST]
+                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_COIN],
+                'h' => [TERRAIN_FOREST]
         ),
         17 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_FOOD], 'h' => [TERRAIN_FOREST]
+                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_FOOD],
+                'h' => [TERRAIN_FOREST]
         ),
         18 => array('x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_FOREST], 'benefit' => [BE_MARKET],),
         19 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_SEA], 'benefit' => [BE_TAPESTRY],
+                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_SEA],
+                'benefit' => [BE_TAPESTRY],
         ),
         20 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_CULTURE],
+                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_CULTURE],
         ),
         21 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_WORKER],
+                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_WORKER],
         ),
         22 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_FOREST], 'benefit' => [BE_UPGRADE_TECH],
+                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_FOREST],
+                'benefit' => [BE_UPGRADE_TECH],
         ),
         23 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_SEA], 'benefit' => [BE_INVENT],
+                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_SEA],
+                'benefit' => [BE_INVENT],
         ),
         24 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_FOOD],
+                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_FOOD],
         ),
         25 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_GRASS], 'benefit' => [BE_HOUSE],
+                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_GRASS],
+                'benefit' => [BE_HOUSE],
         ),
         26 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_FOOD], 'h' => [TERRAIN_GRASS]
+                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_FOOD],
+                'h' => [TERRAIN_GRASS]
         ),
         27 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_WORKER],
+                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_WORKER],
         ),
         28 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_COIN], 'h' => [TERRAIN_GRASS]
+                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_COIN],
+                'h' => [TERRAIN_GRASS]
         ),
         29 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_SEA], 'benefit' => [BE_TAPESTRY],
+                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_SEA],
+                'benefit' => [BE_TAPESTRY],
         ),
         30 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_CULTURE],
+                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_CULTURE],
         ),
         31 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_WORKER],
+                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_WORKER],
         ),
         32 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_GRASS], 'benefit' => [BE_INVENT],
+                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_GRASS],
+                'benefit' => [BE_INVENT],
         ),
         33 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_SEA], 'benefit' => [BE_ARMORY],
+                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_GRASS, TERRAIN_SEA],
+                'benefit' => [BE_ARMORY],
         ),
         34 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_FOOD],
+                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_FOOD],
         ),
         35 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_CULTURE],
+                'x' => [TERRAIN_SEA, TERRAIN_DESERT, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_CULTURE],
         ),
         36 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_COIN],
+                'x' => [TERRAIN_SEA, TERRAIN_GRASS, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_COIN],
         ),
         37 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_COIN],
+                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_COIN],
         ),
         38 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_CULTURE],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_CULTURE],
         ),
         39 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_WORKER],
+                'x' => [TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_WORKER],
         ),
         40 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_COIN], 'h' => [TERRAIN_MOUNTAIN]
+                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_COIN],
+                'h' => [TERRAIN_MOUNTAIN]
         ),
         41 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_FOOD], 'h' => [TERRAIN_MOUNTAIN]
+                'x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_FOOD],
+                'h' => [TERRAIN_MOUNTAIN]
         ),
         42 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN], 'benefit' => [BE_INVENT],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN],
+                'benefit' => [BE_INVENT],
         ),
         43 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_SEA], 'benefit' => [BE_TAPESTRY],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_SEA],
+                'benefit' => [BE_TAPESTRY],
         ),
         44 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_CULTURE],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_CULTURE],
         ),
         45 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_WORKER],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_WORKER],
         ),
         46 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN], 'benefit' => [BE_RESEARCH_NB],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN],
+                'benefit' => [BE_RESEARCH_NB],
         ),
         47 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_SEA], 'benefit' => [BE_TERRITORY, BE_TERRITORY],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN, TERRAIN_SEA],
+                'benefit' => [BE_TERRITORY, BE_TERRITORY],
         ),
         48 => array(
-                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA], 'benefit' => [BE_GAIN_FOOD],
+                'x' => [TERRAIN_SEA, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_MOUNTAIN, TERRAIN_SEA, TERRAIN_SEA],
+                'benefit' => [BE_GAIN_FOOD],
         ),
         // FOLLOWING ARE NOT ACTUAL TILES, BUT STARTING TERRAIN ON MAP!
         49 => array('x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA, TERRAIN_SEA], 'h' => [TERRAIN_DESERT, TERRAIN_FOREST, TERRAIN_GRASS, TERRAIN_MOUNTAIN]),
@@ -633,45 +680,71 @@ $this->territory_tiles = array(
         76 => array('x' => [TERRAIN_SEA, TERRAIN_SEA, TERRAIN_MOUNTAIN, TERRAIN_FOREST, TERRAIN_FOREST, TERRAIN_SEA],),
         77 => ["x" => [1, 1, 1, TERRAIN_GRASS, 1, 1]],
         78 => ["x" => [
-                TERRAIN_MOUNTAIN, TERRAIN_GRASS, TERRAIN_GRASS,
-                TERRAIN_GRASS, TERRAIN_FOREST, TERRAIN_FOREST,
-                TERRAIN_FOREST, TERRAIN_DESERT, TERRAIN_DESERT,
-                TERRAIN_DESERT, TERRAIN_MOUNTAIN, TERRAIN_MOUNTAIN
+                TERRAIN_MOUNTAIN,
+                TERRAIN_GRASS,
+                TERRAIN_GRASS,
+                TERRAIN_GRASS,
+                TERRAIN_FOREST,
+                TERRAIN_FOREST,
+                TERRAIN_FOREST,
+                TERRAIN_DESERT,
+                TERRAIN_DESERT,
+                TERRAIN_DESERT,
+                TERRAIN_MOUNTAIN,
+                TERRAIN_MOUNTAIN
         ]],
 );
 $this->map = array(
         "large" => array(
                 "0_0" => ['id' => 49, 'orient' => 0],
                 // TOP LEFT
-                "-1_-4" => ['id' => 50, 'orient' => 0], "0_-3" => ['id' => 51, 'orient' => 0],
-                "1_-3" => ['id' => 61, 'orient' => 0], "0_-2" => ['id' => 62, 'orient' => 0],
+                "-1_-4" => ['id' => 50, 'orient' => 0],
+                "0_-3" => ['id' => 51, 'orient' => 0],
+                "1_-3" => ['id' => 61, 'orient' => 0],
+                "0_-2" => ['id' => 62, 'orient' => 0],
                 // BOTTOM LEFT
-                "3_-1" => ['id' => 63, 'orient' => 0], "3_0" => ['id' => 55, 'orient' => 5],
-                "2_0" => ['id' => 57, 'orient' => 5], "4_1" => ['id' => 56, 'orient' => 5],
+                "3_-1" => ['id' => 63, 'orient' => 0],
+                "3_0" => ['id' => 55, 'orient' => 5],
+                "2_0" => ['id' => 57, 'orient' => 5],
+                "4_1" => ['id' => 56, 'orient' => 5],
                 // BOTTOM
-                "2_2" => ['id' => 64, 'orient' => 0], "3_3" => ['id' => 65, 'orient' => 0],
-                "4_3" => ['id' => 66, 'orient' => 0], "3_4" => ['id' => 67, 'orient' => 0],
+                "2_2" => ['id' => 64, 'orient' => 0],
+                "3_3" => ['id' => 65, 'orient' => 0],
+                "4_3" => ['id' => 66, 'orient' => 0],
+                "3_4" => ['id' => 67, 'orient' => 0],
                 // BOTTOM RIGHT
-                "0_2" => ['id' => 68, 'orient' => 0], "0_3" => ['id' => 76, 'orient' => 5],
-                "1_4" => ['id' => 69, 'orient' => 0], "-1_3" => ['id' => 70, 'orient' => 0],
+                "0_2" => ['id' => 68, 'orient' => 0],
+                "0_3" => ['id' => 76, 'orient' => 5],
+                "1_4" => ['id' => 69, 'orient' => 0],
+                "-1_3" => ['id' => 70, 'orient' => 0],
                 // TOP RIGHT
-                "-4_-1" => ['id' => 77, 'orient' => 0], "-3_0" => ['id' => 59, 'orient' => 4],
-                "-2_0" => ['id' => 58, 'orient' => 4], "-3_1" => ['id' => 71, 'orient' => 0],
+                "-4_-1" => ['id' => 77, 'orient' => 0],
+                "-3_0" => ['id' => 59, 'orient' => 4],
+                "-2_0" => ['id' => 58, 'orient' => 4],
+                "-3_1" => ['id' => 71, 'orient' => 0],
                 // TOP
-                "-2_-2" => ['id' => 72, 'orient' => 0], "-3_-3" => ['id' => 73, 'orient' => 0],
-                "-4_-3" => ['id' => 75, 'orient' => 0], "-3_-4" => ['id' => 74, 'orient' => 0],
+                "-2_-2" => ['id' => 72, 'orient' => 0],
+                "-3_-3" => ['id' => 73, 'orient' => 0],
+                "-4_-3" => ['id' => 75, 'orient' => 0],
+                "-3_-4" => ['id' => 74, 'orient' => 0],
         ),
         "small" => array(
                 "0_0" => ['id' => 49, 'orient' => 0],
                 // TOP
-                "-3_-3" => ['id' => 50, 'orient' => 0], "-2_-2" => ['id' => 51, 'orient' => 0],
-                "-1_-2" => ['id' => 52, 'orient' => 0], "-2_-1" => ['id' => 53, 'orient' => 0],
+                "-3_-3" => ['id' => 50, 'orient' => 0],
+                "-2_-2" => ['id' => 51, 'orient' => 0],
+                "-1_-2" => ['id' => 52, 'orient' => 0],
+                "-2_-1" => ['id' => 53, 'orient' => 0],
                 // BOTTOM LEFT
-                "1_-1" => ['id' => 54, 'orient' => 0], "2_0" => ['id' => 55, 'orient' => 0],
-                "3_0" => ['id' => 56, 'orient' => 0], "2_1" => ['id' => 76, 'orient' => 0],
+                "1_-1" => ['id' => 54, 'orient' => 0],
+                "2_0" => ['id' => 55, 'orient' => 0],
+                "3_0" => ['id' => 56, 'orient' => 0],
+                "2_1" => ['id' => 76, 'orient' => 0],
                 // BOTTOM RIGHT
-                "-1_1" => ['id' => 58, 'orient' => 0], "0_2" => ['id' => 59, 'orient' => 0],
-                "1_2" => ['id' => 60, 'orient' => 0], "0_3" => ['id' => 77, 'orient' => 2],
+                "-1_1" => ['id' => 58, 'orient' => 0],
+                "0_2" => ['id' => 59, 'orient' => 0],
+                "1_2" => ['id' => 60, 'orient' => 0],
+                "0_3" => ['id' => 77, 'orient' => 2],
         ),
         "islanders" => [
                 "0_0" => ['id' => 78, 'orient' => 0],
@@ -687,8 +760,10 @@ $this->map = array(
 $this->terrain_types = array(
         0 => array("name" => clienttranslate("Empty")),
         1 => array("name" => clienttranslate("Sea")),
-        2 => array("name" => clienttranslate("Desert")), 3 => array("name" => clienttranslate("Forest")),
-        4 => array("name" => clienttranslate("Grass")), 5 => array("name" => clienttranslate("Mountain"))
+        2 => array("name" => clienttranslate("Desert")),
+        3 => array("name" => clienttranslate("Forest")),
+        4 => array("name" => clienttranslate("Grass")),
+        5 => array("name" => clienttranslate("Mountain"))
 );
 $this->structure_types = // 
         array(
@@ -1833,170 +1908,225 @@ $this->dice_names = [
                 5 => $this->benefit_types[BE_VP_TERRITORY],
         ),
         'black' => array(
-                0 => $this->benefit_types[1], 2 => $this->benefit_types[2], 3 => $this->benefit_types[3],
-                4 => $this->benefit_types[4], 1 => $this->benefit_types[BE_TERRITORY_BE_BLACKDIE],
+                0 => $this->benefit_types[1],
+                2 => $this->benefit_types[2],
+                3 => $this->benefit_types[3],
+                4 => $this->benefit_types[4],
+                1 => $this->benefit_types[BE_TERRITORY_BE_BLACKDIE],
                 5 => $this->benefit_types[BE_TERRITORY_BE_BLACKDIE],
         ),
 ];
 $this->tech_track_types = array(
         1 => array(
                 "name" => "exploration", // this is used in db, has to be lower case
-                "description" => clienttranslate("Exploration"), "color" => "blue", "top" => 87.7, "left" => 16, "rot" => 0,
+                "description" => clienttranslate("Exploration"),
+                "color" => "blue",
+                "top" => 87.7,
+                "left" => 16,
+                "rot" => 0,
                 "resource" => 3,
                 "overview" => clienttranslate("Pick a territory tile from your supply and place it on the map adjacent to a territory you control. Gain 1 VP per side of the tile with at least 1 aligned terrain (max 6). Then gain the benefit on the tile."),
         ),
         2 => array(
-                "name" => "science", "description" => clienttranslate("Science"), "color" => "green", "top" => 37,
-                "left" => 53.7, "rot" => 270, "resource" => 2,
+                "name" => "science",
+                "description" => clienttranslate("Science"),
+                "color" => "green",
+                "top" => 37,
+                "left" => 53.7,
+                "rot" => 270,
+                "resource" => 2,
                 "overview" => clienttranslate("Roll the science die. You may advance on the corresponding track for free. Unless there is an X on the research icon, gain the benefit and you may pay to gain the bonus (if any)."),
         ),
         3 => array(
-                "name" => "military", "description" => clienttranslate("Military"), "color" => "red", "top" => 0.5,
-                "left" => 3.2, "rot" => 180, "resource" => 4,
+                "name" => "military",
+                "description" => clienttranslate("Military"),
+                "color" => "red",
+                "top" => 0.5,
+                "left" => 3.2,
+                "rot" => 180,
+                "resource" => 4,
                 "overview" => clienttranslate("Place an outpost token from your supply onto a territory that has no more than 1 token on it and is adjacent to a territory you control. If the territory has an opponent's outpost, topple it. Also roll the 2 conquer dice and gain the benefit of 1 of them.")
         ),
         4 => array(
-                "name" => "technology", "description" => clienttranslate("Technology"), "color" => "orange",
-                "top" => 51, "left" => -33.8, "rot" => 90, "resource" => 1,
+                "name" => "technology",
+                "description" => clienttranslate("Technology"),
+                "color" => "orange",
+                "top" => 51,
+                "left" => -33.8,
+                "rot" => 90,
+                "resource" => 1,
                 "overview" => clienttranslate("Gain a tech card (face up or from the top of the deck) and place it to the right of your capital city mat in the bottom row. Replenish each face-up tech card as you gain it.")
         ),
 );
 $this->tech_track_data = array(
         1 => array(
                 1 => array(
-                        "name" => clienttranslate("SCOUTING"), "cost" => [RES_ANY],
+                        "name" => clienttranslate("SCOUTING"),
+                        "cost" => [RES_ANY],
                         "benefit" => [BE_2_TERRITORY],
                         "description" => clienttranslate("Gain 2 territory tiles."),
                 ),
                 2 => array(
-                        "name" => clienttranslate("RAFTS"), "cost" => [RES_ANY], "benefit" => [BE_EXPLORE],
+                        "name" => clienttranslate("RAFTS"),
+                        "cost" => [RES_ANY],
+                        "benefit" => [BE_EXPLORE],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "7"],
                         "description" => clienttranslate("Explore: Place 1 territory tile from your supply on the map, gain 1 VP per aligning side, and gain the benefit on the tile."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to gain 1 tapestry card."),
                 ),
                 3 => array(
-                        "name" => clienttranslate("WAGONS"), "cost" => [RES_ANY],
+                        "name" => clienttranslate("WAGONS"),
+                        "cost" => [RES_ANY],
                         "benefit" => ["or" => [BE_EXPLORE, BE_FARM]],
                         "description" => clienttranslate("Explore OR gain 1 farm."),
                 ),
                 4 => array(
-                        "name" => clienttranslate("NAVIGATION"), "cost" => [3, 5],
+                        "name" => clienttranslate("NAVIGATION"),
+                        "cost" => [3, 5],
                         "benefit" => [BE_TERRITORY, BE_EXPLORE],
-                        "description" => clienttranslate("Gain 1 territory tile, then explore."), "landmark" => [40],
+                        "description" => clienttranslate("Gain 1 territory tile, then explore."),
+                        "landmark" => [40],
                 ),
                 5 => array(
-                        "name" => clienttranslate("SHIPS"), "cost" => [3, 5], "benefit" => [BE_VP_TERRITORY],
+                        "name" => clienttranslate("SHIPS"),
+                        "cost" => [3, 5],
+                        "benefit" => [BE_VP_TERRITORY],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "10"],
                         "description" => clienttranslate("Gain 1 VP for each territory you control."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to gain 1 farm."),
                 ),
                 6 => array(
-                        "name" => clienttranslate("TUNNELS"), "cost" => [3, 5],
+                        "name" => clienttranslate("TUNNELS"),
+                        "cost" => [3, 5],
                         "benefit" => [BE_TERRITORY, BE_FARM],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "17"],
                         "description" => clienttranslate("Gain 1 territory tile and 1 farm."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to explore."),
                 ),
                 7 => array(
-                        "name" => clienttranslate("TRAINS"), "cost" => [3, 5, 5],
+                        "name" => clienttranslate("TRAINS"),
+                        "cost" => [3, 5, 5],
                         "benefit" => [BE_2_TERRITORY, BE_EXPLORE],
-                        "description" => clienttranslate("Gain 2 territory tiles, then explore."), "landmark" => [41],
+                        "description" => clienttranslate("Gain 2 territory tiles, then explore."),
+                        "landmark" => [41],
                 ),
                 8 => array(
-                        "name" => clienttranslate("CARS"), "cost" => [3, 5, 5], "benefit" => [BE_FARM, BE_VP_FARM],
+                        "name" => clienttranslate("CARS"),
+                        "cost" => [3, 5, 5],
+                        "benefit" => [BE_FARM, BE_VP_FARM],
                         "option" => ["type" => 6, "quantity" => 2, "benefit" => "15,15,15,15,15"],
                         "description" => clienttranslate("Gain 1 farm, then gain 1 VP for each farm in your capital city."),
                         "description_bonus" => clienttranslate("You may then discard 2 territory tiles to gain 5 VP."),
                 ),
                 9 => array(
-                        "name" => clienttranslate("AIRPLANES"), "cost" => [3, 5, 5],
+                        "name" => clienttranslate("AIRPLANES"),
+                        "cost" => [3, 5, 5],
                         "benefit" => [BE_2_TERRITORY, 46],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "7"],
                         "description" => clienttranslate("Gain 2 territory tiles, then explore anywhere on the map."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to gain 1 tapestry card."),
                 ),
                 10 => array(
-                        "name" => clienttranslate("SPACE SHUTTLE"), "cost" => [3, 3], "benefit" => [50],
+                        "name" => clienttranslate("SPACE SHUTTLE"),
+                        "cost" => [3, 3],
+                        "benefit" => [50],
                         "option" => ["type" => 6, "quantity" => 3, "benefit" => "15,15,15,15,15,15,15,15,15,15"],
                         "description" => clienttranslate("Gain 1 VP per technology track space you've advanced."),
                         "description_bonus" => clienttranslate("You may then discard 3 territory tiles to gain 10 VP."),
                         "landmark" => [42],
                 ),
                 11 => array(
-                        "name" => clienttranslate("INTERSTELLAR TRAVEL"), "cost" => [3, 3],
+                        "name" => clienttranslate("INTERSTELLAR TRAVEL"),
+                        "cost" => [3, 3],
                         "benefit" => [BE_SPACE, BE_SPACE, BE_SPACE, BE_EXPLORE_SPACE],
                         "description" => clienttranslate("Gain 3 space tiles, then explore 1 of them (place explored space tiles next to your income mat)."),
                 ),
                 12 => array(
-                        "name" => clienttranslate("WARPGATES"), "cost" => [3, 3],
+                        "name" => clienttranslate("WARPGATES"),
+                        "cost" => [3, 3],
                         "benefit" => [BE_EXPLORE_SPACE],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "52"],
                         "description" => clienttranslate("Explore a space tile from your supply (place it next to your income mat)."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to explore another space tile."),
                 ),
                 0 => array(
-                        "name" => clienttranslate("Exploration"), "cost" => [], "benefit" => [],
+                        "name" => clienttranslate("Exploration"),
+                        "cost" => [],
+                        "benefit" => [],
                         "description" => clienttranslate("Starting spot"),
                 ),
         ),
         2 => array(
                 1 => array(
-                        "name" => clienttranslate("ASTRONOMY"), "cost" => [RES_ANY],
+                        "name" => clienttranslate("ASTRONOMY"),
+                        "cost" => [RES_ANY],
                         "benefit" => [BE_RESEARCH_NB],
                         "description" => clienttranslate("Research: Roll the science die to advance for free (don't gain benefit & bonus)."),
                 ),
                 2 => array(
-                        "name" => clienttranslate("MATHEMATICS"), "cost" => [RES_ANY],
-                        "benefit" => [BE_TAPESTRY], "option" => ["type" => 5, "quantity" => 1, "benefit" => "9"],
+                        "name" => clienttranslate("MATHEMATICS"),
+                        "cost" => [RES_ANY],
+                        "benefit" => [BE_TAPESTRY],
+                        "option" => ["type" => 5, "quantity" => 1, "benefit" => "9"],
                         "description" => clienttranslate("Gain 1 tapestry card."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to gain 1 house."),
                 ),
                 3 => array(
-                        "name" => clienttranslate("HERBALISM"), "cost" => [RES_ANY],
+                        "name" => clienttranslate("HERBALISM"),
+                        "cost" => [RES_ANY],
                         "benefit" => ["or" => [BE_RESEARCH_NB, BE_HOUSE]],
                         "description" => clienttranslate("Research (don't gain benefit & bonus) OR gain 1 house."),
                 ),
                 4 => array(
-                        "name" => clienttranslate("MEDICINE"), "cost" => [2, 5],
+                        "name" => clienttranslate("MEDICINE"),
+                        "cost" => [2, 5],
                         "benefit" => [BE_VP_TECH, BE_TAPESTRY],
                         "description" => clienttranslate("Gain 1 VP for each tech card in your supply; also gain 1 tapestry card."),
                         "landmark" => [43],
                 ),
                 5 => array(
-                        "name" => clienttranslate("CHEMISTRY"), "cost" => [2, 5], "benefit" => [BE_RESEARCH],
+                        "name" => clienttranslate("CHEMISTRY"),
+                        "cost" => [2, 5],
+                        "benefit" => [BE_RESEARCH],
                         "option" => ["type" => 7, "quantity" => 2, "benefit" => "15,15,15,15,15"],
                         "description" => clienttranslate("Research to gain the benefit & pay to gain the bonus (if any)."),
                         "description_bonus" => clienttranslate("You may then discard 2 tapestry cards from hand to gain 5 VP."),
                 ),
                 6 => array(
-                        "name" => clienttranslate("BIOLOGY"), "cost" => [2, 5],
+                        "name" => clienttranslate("BIOLOGY"),
+                        "cost" => [2, 5],
                         "benefit" => ["or" => [BE_RESEARCH, BE_HOUSE]],
                         "description" => clienttranslate("Research to gain the benefit & pay to gain the bonus (if any) OR gain 1 house."),
                 ),
                 7 => array(
-                        "name" => clienttranslate("ACADEMIC RESEARCH"), "cost" => [RES_WORKER, RES_ANY, RES_ANY],
+                        "name" => clienttranslate("ACADEMIC RESEARCH"),
+                        "cost" => [RES_WORKER, RES_ANY, RES_ANY],
                         "benefit" => [62],
                         "description" => clienttranslate("Gain the benefit & pay to gain the bonus (if any) of your current position on any advancement track."),
                         "landmark" => [44],
                 ),
                 8 => array(
-                        "name" => clienttranslate("NUTRITION"), "cost" => [RES_WORKER, RES_ANY, RES_ANY],
+                        "name" => clienttranslate("NUTRITION"),
+                        "cost" => [RES_WORKER, RES_ANY, RES_ANY],
                         "benefit" => [BE_HOUSE, BE_VP_HOUSE],
                         "description" => clienttranslate("Gain 1 house, then gain 1 VP for each house in your capital city."),
                 ),
                 9 => array(
-                        "name" => clienttranslate("PHYSICS"), "cost" => [RES_WORKER, RES_ANY, RES_ANY],
+                        "name" => clienttranslate("PHYSICS"),
+                        "cost" => [RES_WORKER, RES_ANY, RES_ANY],
                         "benefit" => ["or" => [BE_ADVANCE_E, BE_ADVANCE_M, BE_ADVANCE_T]],
                         "description" => clienttranslate("Advance on 1 of these tracks, then gain the benefit & pay to gain the bonus (if any)."),
                 ),
                 10 => array(
-                        "name" => clienttranslate("NEUROSCIENCE"), "cost" => [RES_WORKER, RES_WORKER],
+                        "name" => clienttranslate("NEUROSCIENCE"),
+                        "cost" => [RES_WORKER, RES_WORKER],
                         "benefit" => ["or" => [BE_REGRESS_M, BE_REGRESS_T]],
                         "description" => clienttranslate("Regress on 1 of these tracks, then gain the benefit & pay to gain the bonus (if any)."),
                         "landmark" => [45],
                 ),
                 11 => array(
-                        "name" => clienttranslate("QUANTUM PHYSICS"), "cost" => [RES_WORKER, RES_WORKER],
+                        "name" => clienttranslate("QUANTUM PHYSICS"),
+                        "cost" => [RES_WORKER, RES_WORKER],
                         "benefit" => [
                                 "or" => [BE_ADVANCE_E, BE_ADVANCE_M, BE_ADVANCE_T],
                                 'or2' => [BE_ADVANCE_E, BE_ADVANCE_M, BE_ADVANCE_T]
@@ -2004,248 +2134,335 @@ $this->tech_track_data = array(
                         "description" => clienttranslate("Advance on 1 of these tracks, then gain the benefit & pay to gain the bonus (if any). Then do it again (same or different track)."),
                 ),
                 12 => array(
-                        "name" => clienttranslate("ALIEN BIOLOGY"), "cost" => [RES_WORKER, RES_WORKER],
+                        "name" => clienttranslate("ALIEN BIOLOGY"),
+                        "cost" => [RES_WORKER, RES_WORKER],
                         "benefit" => [72, 72, 72, 72],
                         "description" => clienttranslate("Roll 4 science dice to advance (don't gain the benefits & bonuses). Gain 5 VP per die that would push you off a track."),
                 ),
                 0 => array(
-                        "name" => clienttranslate("Science"), "cost" => [], "benefit" => [],
+                        "name" => clienttranslate("Science"),
+                        "cost" => [],
+                        "benefit" => [],
                         "description" => clienttranslate("Starting spot"),
                 ),
         ),
         3 => array(
                 1 => array(
-                        "name" => clienttranslate("ARCHERY"), "cost" => [RES_ANY], "benefit" => [BE_CONQUER],
+                        "name" => clienttranslate("ARCHERY"),
+                        "cost" => [RES_ANY],
+                        "benefit" => [BE_CONQUER],
                         "description" => clienttranslate("Conquer: Place an outpost on a territory adjacent to a territory you control. Roll the 2 conquer dice and pick 1 of the benefits rolled."),
                 ),
                 2 => array(
-                        "name" => clienttranslate("BLADED WEAPONS"), "cost" => [RES_ANY],
-                        "benefit" => [BE_TAPESTRY], "option" => ["type" => 5, "quantity" => 1, "benefit" => "11"],
+                        "name" => clienttranslate("BLADED WEAPONS"),
+                        "cost" => [RES_ANY],
+                        "benefit" => [BE_TAPESTRY],
+                        "option" => ["type" => 5, "quantity" => 1, "benefit" => "11"],
                         "description" => clienttranslate("Gain 1 tapestry card."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to gain 1 armory."),
                 ),
                 3 => array(
-                        "name" => clienttranslate("WALLS"), "cost" => [RES_ANY],
+                        "name" => clienttranslate("WALLS"),
+                        "cost" => [RES_ANY],
                         "benefit" => ['or' => [BE_CONQUER, BE_ARMORY]],
                         "description" => clienttranslate("Conquer 1 territory OR gain 1 armory."),
                 ),
                 4 => array(
-                        "name" => clienttranslate("STANDING ARMY"), "cost" => [4, 5],
+                        "name" => clienttranslate("STANDING ARMY"),
+                        "cost" => [4, 5],
                         "benefit" => [BE_GAIN_WORKER, BE_VP_TILES],
                         "description" => clienttranslate("Gain 1 worker and gain 1 VP per territory tile in your supply."),
                         "landmark" => [37],
                 ),
                 5 => array(
-                        "name" => clienttranslate("CAVALRY"), "cost" => [4, 5],
+                        "name" => clienttranslate("CAVALRY"),
+                        "cost" => [4, 5],
                         "benefit" => ['choice' => [BE_CONQUER, BE_ARMORY]],
                         "description" => clienttranslate("Conquer 1 territory and gain 1 armory."),
                 ),
                 6 => array(
-                        "name" => clienttranslate("GUNPOWDER"), "cost" => [4, 5],
+                        "name" => clienttranslate("GUNPOWDER"),
+                        "cost" => [4, 5],
                         "benefit" => [BE_CONQUER, BE_TAPESTRY],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "11"],
                         "description" => clienttranslate("Conquer 1 territory and gain 1 tapestry card."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to gain 1 armory."),
                 ),
                 7 => array(
-                        "name" => clienttranslate("TANKS"), "cost" => [4, 5, 5], "benefit" => [73],
+                        "name" => clienttranslate("TANKS"),
+                        "cost" => [4, 5, 5],
+                        "benefit" => [73],
                         "description" => clienttranslate("Conquer 1 territory. If that territory was controlled by an opponent, gain the benefits of both conquer dice."),
                         "landmark" => [38],
                 ),
                 8 => array(
-                        "name" => clienttranslate("WARPLANES"), "cost" => [4, 5, 5], "benefit" => [75],
+                        "name" => clienttranslate("WARPLANES"),
+                        "cost" => [4, 5, 5],
+                        "benefit" => [75],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "7"],
                         "description" => clienttranslate("Conquer 1 territory anywhere on the map."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to gain 1 tapestry card."),
                 ),
                 9 => array(
-                        "name" => clienttranslate("ANTI-AIRCRAFT DEFENSE"), "cost" => [4, 5, 5],
+                        "name" => clienttranslate("ANTI-AIRCRAFT DEFENSE"),
+                        "cost" => [4, 5, 5],
                         "benefit" => [BE_ARMORY, BE_VP_TAPESTY],
                         "description" => clienttranslate("Gain 1 armory and gain 1 VP per tapestry card (in hand and on your income mat)."),
                 ),
                 10 => array(
-                        "name" => clienttranslate("NUCLEAR BOMB"), "cost" => [4, 4],
+                        "name" => clienttranslate("NUCLEAR BOMB"),
+                        "cost" => [4, 4],
                         "benefit" => ['choice' => [47, 64]],
                         "description" => clienttranslate("Gain 1 VP per exploration track space you've advanced. Also play a tapestry on top of your current tapestry. Only the new card is active."),
                         "landmark" => [39],
                 ),
                 11 => array(
-                        "name" => clienttranslate("DRONE ASSASSINS"), "cost" => [4, 4],
+                        "name" => clienttranslate("DRONE ASSASSINS"),
+                        "cost" => [4, 4],
                         "benefit" => [BE_VP_CAPITAL],
                         "option" => ["type" => 7, "quantity" => 3, "benefit" => "15,15,15,15,15,15,15,15,15,15"],
                         "description" => clienttranslate("Score your capital city."),
                         "description_bonus" => clienttranslate("You may then discard 3 tapestry cards from hand to gain 10 VP."),
                 ),
                 12 => array(
-                        "name" => clienttranslate("MECHS"), "cost" => [4, 4],
+                        "name" => clienttranslate("MECHS"),
+                        "cost" => [4, 4],
                         "benefit" => ['choice' => [74, 65]],
                         "description" => clienttranslate("Conquer 1 territory (gain the benefits of both conquer dice). Also gain a random additional civilization."),
                 ),
                 0 => array(
-                        "name" => clienttranslate("Military"), "cost" => [], "benefit" => [],
+                        "name" => clienttranslate("Military"),
+                        "cost" => [],
+                        "benefit" => [],
                         "description" => clienttranslate("Starting spot"),
                 ),
         ),
         4 => array(
                 1 => array(
-                        "name" => clienttranslate("POTTERY"), "cost" => [RES_ANY], "benefit" => [BE_INVENT],
+                        "name" => clienttranslate("POTTERY"),
+                        "cost" => [RES_ANY],
+                        "benefit" => [BE_INVENT],
                         "description" => clienttranslate("Invent: Gain 1 tech card and place it to the right of your capital city mat in the bottom row. If you gained a faceup card, replenish it immediately."),
                 ),
                 2 => array(
-                        "name" => clienttranslate("CARPENTRY"), "cost" => [RES_ANY], "benefit" => [BE_TAPESTRY],
+                        "name" => clienttranslate("CARPENTRY"),
+                        "cost" => [RES_ANY],
+                        "benefit" => [BE_TAPESTRY],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "8"],
                         "description" => clienttranslate("Gain 1 tapestry card."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to gain 1 market."),
                 ),
                 3 => array(
-                        "name" => clienttranslate("STONE TOOLS"), "cost" => [RES_ANY],
+                        "name" => clienttranslate("STONE TOOLS"),
+                        "cost" => [RES_ANY],
                         "benefit" => ['or' => [BE_INVENT, BE_MARKET]],
                         "description" => clienttranslate("Invent 1 tech card OR gain 1 market."),
                 ),
                 4 => array(
-                        "name" => clienttranslate("METALLURGY"), "cost" => [1, 5], "benefit" => ['choice' => [BE_REFRESH, BE_INVENT]],
+                        "name" => clienttranslate("METALLURGY"),
+                        "cost" => [1, 5],
+                        "benefit" => ['choice' => [BE_REFRESH, BE_INVENT]],
                         "description" => clienttranslate("You may discard all 3 face-up tech cards and replace them. Invent 1 tech card."),
                         "landmark" => [34],
                 ),
                 5 => array(
-                        "name" => clienttranslate("GLASS"), "cost" => [1, 5],
+                        "name" => clienttranslate("GLASS"),
+                        "cost" => [1, 5],
                         "benefit" => ['or' => [BE_HOUSE, BE_FARM, BE_ARMORY]],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "14"],
                         "description" => clienttranslate("Gain either a farm, house, or armory."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to upgrade 1 tech card."),
                 ),
                 6 => array(
-                        "name" => clienttranslate("STEEL"), "cost" => [1, 5],
+                        "name" => clienttranslate("STEEL"),
+                        "cost" => [1, 5],
                         "benefit" => [BE_MARKET, BE_VP_ARMORY],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "20"],
                         "description" => clienttranslate("Gain 1 VP for each armory in your capital city and gain 1 market."),
                         "description_bonus" => clienttranslate("You may then pay any 1 resource to invent 1 tech card."),
                 ),
                 7 => array(
-                        "name" => clienttranslate("RUBBER"), "cost" => [1, 5, 5], "benefit" => ['choice' => [BE_REFRESH, BE_2_INVENT]],
+                        "name" => clienttranslate("RUBBER"),
+                        "cost" => [1, 5, 5],
+                        "benefit" => ['choice' => [BE_REFRESH, BE_2_INVENT]],
                         "description" => clienttranslate("You may discard all 3 face-up tech cards and replace them. Invent 2 tech cards (one at a time)."),
                         "landmark" => [35],
                 ),
                 8 => array(
-                        "name" => clienttranslate("PLASTIC"), "cost" => [1, 5, 5], "benefit" => [BE_MARKET, 54],
+                        "name" => clienttranslate("PLASTIC"),
+                        "cost" => [1, 5, 5],
+                        "benefit" => [BE_MARKET, 54],
                         "option" => ["type" => 5, "quantity" => 1, "benefit" => "14"],
                         "description" => clienttranslate("Gain 1 market, then gain 1 VP for each market in your capital city."),
                         "description_bonus" => clienttranslate("You may also pay any 1 resource to upgrade 1 tech card."),
                 ),
                 9 => array(
-                        "name" => clienttranslate("ELECTRONICS"), "cost" => [1, 5, 5],
+                        "name" => clienttranslate("ELECTRONICS"),
+                        "cost" => [1, 5, 5],
                         "benefit" => ['choice' => [BE_UPGRADE_TECH, BE_TECH_CIRCLE]],
                         "description" => clienttranslate("In any order, upgrade 1 tech card and gain the circle benefit of 1 tech card in your middle row."),
                 ),
                 10 => array(
-                        "name" => clienttranslate("COMPUTERS"), "cost" => [1, 1], "benefit" => [48, 49],
+                        "name" => clienttranslate("COMPUTERS"),
+                        "cost" => [1, 1],
+                        "benefit" => [48, 49],
                         "description" => clienttranslate("Gain 1 VP per military and science track space you've advanced."),
                         "landmark" => [36],
                 ),
                 11 => array(
-                        "name" => clienttranslate("NANOTECHNOLOGY"), "cost" => [1, 1],
+                        "name" => clienttranslate("NANOTECHNOLOGY"),
+                        "cost" => [1, 1],
                         "benefit" => ['choice' => [BE_UPGRADE_TECH, BE_TECH_SQUARE]],
                         "option" => ["type" => 26, "quantity" => 3, "benefit" => "15,15,15,15,15,15,15,15,15,15"],
                         "description" => clienttranslate("In any order, upgrade 1 tech card & gain the square benefit of 1 tech card in your top row."),
                         "description_bonus" => clienttranslate("You may then discard 3 tech cards to gain 10 VP."),
                 ),
                 12 => array(
-                        "name" => clienttranslate("AI SINGULARITY"), "cost" => [1, 1],
+                        "name" => clienttranslate("AI SINGULARITY"),
+                        "cost" => [1, 1],
                         "benefit" => [BE_GAIN_COIN, BE_GAIN_WORKER, BE_GAIN_FOOD, BE_GAIN_CULTURE, 55],
                         "description" => clienttranslate("Remove your player token from the technology track and place it on the starting space of any track. Gain 1 of each resource. This track still counts as complete. <p><i>Note: if cube was removed from last space there will be a transparent cube as an indication of the max position on that track."),
                 ),
                 0 => array(
-                        "name" => clienttranslate("Technology"), "cost" => [], "benefit" => [],
+                        "name" => clienttranslate("Technology"),
+                        "cost" => [],
+                        "benefit" => [],
                         "description" => clienttranslate("Starting spot"),
                 ),
         ),
 );
 $this->landmark_data = array(
         1 => array(
-                "name" => clienttranslate("Tech Hub"), "width" => 3, "height" => 2, "benefit" => 36,
+                "name" => clienttranslate("Tech Hub"),
+                "width" => 3,
+                "height" => 2,
+                "benefit" => 36,
                 "mask" => array(
                         0 => array(0 => [1, 1, 1], 1 => [1, 1, 1],),
                         1 => array(0 => [1, 1], 1 => [1, 1], 2 => [1, 1],)
                 )
         ),
         2 => array(
-                "name" => clienttranslate("Apothecary"), "width" => 2, "height" => 2, "benefit" => 43,
+                "name" => clienttranslate("Apothecary"),
+                "width" => 2,
+                "height" => 2,
+                "benefit" => 43,
                 "mask" => array(0 => array(0 => [1, 1], 1 => [1, 1],))
         ),
         3 => array(
-                "name" => clienttranslate("Academy"), "width" => 4, "height" => 2, "benefit" => 44,
+                "name" => clienttranslate("Academy"),
+                "width" => 4,
+                "height" => 2,
+                "benefit" => 44,
                 "mask" => array(
                         1 => array(0 => [1, 1], 1 => [1, 1], 2 => [1, 1], 3 => [1, 1],),
                         0 => array(0 => [0 => 1, 1 => 1, 2 => 1, 3 => 1], 1 => [0 => 1, 1 => 1, 2 => 1, 3 => 1],)
                 )
         ),
         4 => array(
-                "name" => clienttranslate("Train Station"), "width" => 3, "height" => 3, "benefit" => 41,
+                "name" => clienttranslate("Train Station"),
+                "width" => 3,
+                "height" => 3,
+                "benefit" => 41,
                 "mask" => array(
                         0 => array(
-                                0 => [0 => 1, 1 => 1, 2 => 1], 1 => [0 => 1, 1 => 1, 2 => 1],
+                                0 => [0 => 1, 1 => 1, 2 => 1],
+                                1 => [0 => 1, 1 => 1, 2 => 1],
                                 2 => [0 => 1, 1 => 1, 2 => 1]
                         )
                 )
         ),
         5 => array(
-                "name" => clienttranslate("Tank Factory"), "width" => 3, "height" => 3, "benefit" => 38,
+                "name" => clienttranslate("Tank Factory"),
+                "width" => 3,
+                "height" => 3,
+                "benefit" => 38,
                 "mask" => array(
                         0 => array(
-                                0 => [0 => 1, 1 => 1, 2 => 1], 1 => [0 => 1, 1 => 1, 2 => 1],
+                                0 => [0 => 1, 1 => 1, 2 => 1],
+                                1 => [0 => 1, 1 => 1, 2 => 1],
                                 2 => [0 => 1, 1 => 1, 2 => 1]
                         )
                 )
         ),
         6 => array(
-                "name" => clienttranslate("Barracks"), "width" => 2, "height" => 2, "benefit" => 37,
+                "name" => clienttranslate("Barracks"),
+                "width" => 2,
+                "height" => 2,
+                "benefit" => 37,
                 "mask" => array(0 => array(0 => [1, 1], 1 => [1, 1],))
         ),
         7 => array(
-                "name" => clienttranslate("Laboratory"), "width" => 3, "height" => 2, "benefit" => 45,
+                "name" => clienttranslate("Laboratory"),
+                "width" => 3,
+                "height" => 2,
+                "benefit" => 45,
                 "mask" => array(
                         0 => array(0 => [1, 1, 1], 1 => [1, 1, 1],),
                         1 => array(0 => [1, 1], 1 => [1, 1], 2 => [1, 1])
                 )
         ),
         8 => array(
-                "name" => clienttranslate("Rubber Works"), "width" => 4, "height" => 4, "benefit" => 35,
+                "name" => clienttranslate("Rubber Works"),
+                "width" => 4,
+                "height" => 4,
+                "benefit" => 35,
                 "mask" => array(
                         0 => array(
-                                0 => [0 => 0, 1 => 0, 2 => 1, 3 => 1], 1 => [0 => 0, 1 => 0, 2 => 1, 3 => 1],
-                                2 => [0 => 1, 1 => 1, 2 => 1, 3 => 1], 3 => [0 => 1, 1 => 1, 2 => 1, 3 => 1]
+                                0 => [0 => 0, 1 => 0, 2 => 1, 3 => 1],
+                                1 => [0 => 0, 1 => 0, 2 => 1, 3 => 1],
+                                2 => [0 => 1, 1 => 1, 2 => 1, 3 => 1],
+                                3 => [0 => 1, 1 => 1, 2 => 1, 3 => 1]
                         ),
                         1 => array(
-                                0 => [0 => 1, 1 => 1, 2 => 0, 3 => 0], 1 => [0 => 1, 1 => 1, 2 => 0, 3 => 0],
-                                2 => [0 => 1, 1 => 1, 2 => 1, 3 => 1], 3 => [0 => 1, 1 => 1, 2 => 1, 3 => 1]
+                                0 => [0 => 1, 1 => 1, 2 => 0, 3 => 0],
+                                1 => [0 => 1, 1 => 1, 2 => 0, 3 => 0],
+                                2 => [0 => 1, 1 => 1, 2 => 1, 3 => 1],
+                                3 => [0 => 1, 1 => 1, 2 => 1, 3 => 1]
                         ),
                         2 => array(
-                                0 => [0 => 1, 1 => 1, 2 => 1, 3 => 1], 1 => [0 => 1, 1 => 1, 2 => 1, 3 => 1],
-                                2 => [0 => 1, 1 => 1, 2 => 0, 3 => 0], 3 => [0 => 1, 1 => 1, 2 => 0, 3 => 0]
+                                0 => [0 => 1, 1 => 1, 2 => 1, 3 => 1],
+                                1 => [0 => 1, 1 => 1, 2 => 1, 3 => 1],
+                                2 => [0 => 1, 1 => 1, 2 => 0, 3 => 0],
+                                3 => [0 => 1, 1 => 1, 2 => 0, 3 => 0]
                         ),
                         3 => array(
-                                0 => [0 => 1, 1 => 1, 2 => 1, 3 => 1], 1 => [0 => 1, 1 => 1, 2 => 1, 3 => 1],
-                                2 => [0 => 0, 1 => 0, 2 => 1, 3 => 1], 3 => [0 => 0, 1 => 0, 2 => 1, 3 => 1]
+                                0 => [0 => 1, 1 => 1, 2 => 1, 3 => 1],
+                                1 => [0 => 1, 1 => 1, 2 => 1, 3 => 1],
+                                2 => [0 => 0, 1 => 0, 2 => 1, 3 => 1],
+                                3 => [0 => 0, 1 => 0, 2 => 1, 3 => 1]
                         ),
                 )
         ),
         9 => array(
-                "name" => clienttranslate("Lighthouse"), "width" => 2, "height" => 2, "benefit" => 40,
+                "name" => clienttranslate("Lighthouse"),
+                "width" => 2,
+                "height" => 2,
+                "benefit" => 40,
                 "mask" => array(0 => array(0 => [1, 1], 1 => [1, 1]))
         ),
         10 => array(
-                "name" => clienttranslate("Forge"), "width" => 2, "height" => 2, "benefit" => 34,
+                "name" => clienttranslate("Forge"),
+                "width" => 2,
+                "height" => 2,
+                "benefit" => 34,
                 "mask" => array(0 => array(0 => [1, 1], 1 => [1, 1]))
         ),
         11 => array(
-                "name" => clienttranslate("Launch Pad"), "width" => 2, "height" => 3, "benefit" => 42,
+                "name" => clienttranslate("Launch Pad"),
+                "width" => 2,
+                "height" => 3,
+                "benefit" => 42,
                 "mask" => array(
                         0 => array(0 => [1, 1], 1 => [1, 1], 2 => [1, 1]),
                         1 => array(0 => [1, 1, 1], 1 => [1, 1, 1])
                 )
         ),
         12 => array(
-                "name" => clienttranslate("Fusion Reactor"), "width" => 3, "height" => 3, "benefit" => 39,
+                "name" => clienttranslate("Fusion Reactor"),
+                "width" => 3,
+                "height" => 3,
+                "benefit" => 39,
                 "mask" => array(
                         0 => array(0 => [0, 1, 1], 1 => [1, 1, 1], 2 => [1, 1, 1]),
                         1 => array(0 => [1, 1, 0], 1 => [1, 1, 1], 2 => [1, 1, 1]),
@@ -2254,42 +2471,64 @@ $this->landmark_data = array(
                 )
         ),
         13 => array(
-                "name" => clienttranslate("Bakery"), "width" => 2, "height" => 2, "benefit" => 56,
+                "name" => clienttranslate("Bakery"),
+                "width" => 2,
+                "height" => 2,
+                "benefit" => 56,
                 "mask" => array(0 => array(0 => [1, 1], 1 => [1, 1]))
         ),
         14 => array(
-                "name" => clienttranslate("Barn"), "width" => 3, "height" => 3, "benefit" => 57,
+                "name" => clienttranslate("Barn"),
+                "width" => 3,
+                "height" => 3,
+                "benefit" => 57,
                 "mask" => array(
                         0 => array(
-                                0 => [0 => 1, 1 => 1, 2 => 1], 1 => [0 => 1, 1 => 1, 2 => 1],
+                                0 => [0 => 1, 1 => 1, 2 => 1],
+                                1 => [0 => 1, 1 => 1, 2 => 1],
                                 2 => [0 => 1, 1 => 1, 2 => 1]
                         )
                 )
         ),
         15 => array(
-                "name" => clienttranslate("Com Tower"), "width" => 3, "height" => 2, "benefit" => 58,
+                "name" => clienttranslate("Com Tower"),
+                "width" => 3,
+                "height" => 2,
+                "benefit" => 58,
                 "mask" => array(
                         0 => array(0 => [1, 1, 1], 1 => [1, 1, 1],),
                         1 => array(0 => [1, 1], 1 => [1, 1], 2 => [1, 1],),
                 )
         ),
         16 => array(
-                "name" => clienttranslate("Library"), "width" => 2, "height" => 4, "benefit" => 59,
+                "name" => clienttranslate("Library"),
+                "width" => 2,
+                "height" => 4,
+                "benefit" => 59,
                 "mask" => array(
                         0 => array(0 => [1, 1], 1 => [1, 1], 2 => [1, 1], 3 => [1, 1],),
                         1 => array(0 => [1, 1, 1, 1], 1 => [1, 1, 1, 1],)
                 )
         ),
         17 => array(
-                "name" => clienttranslate("Stock Market"), "width" => 2, "height" => 2, "benefit" => 60,
+                "name" => clienttranslate("Stock Market"),
+                "width" => 2,
+                "height" => 2,
+                "benefit" => 60,
                 "mask" => array(0 => array(0 => [1, 1], 1 => [1, 1]))
         ),
         18 => array(
-                "name" => clienttranslate("Treasury"), "width" => 2, "height" => 2, "benefit" => 61,
+                "name" => clienttranslate("Treasury"),
+                "width" => 2,
+                "height" => 2,
+                "benefit" => 61,
                 "mask" => array(0 => array(0 => [1, 1], 1 => [1, 1]))
         ),
         19 => array(
-                "name" => clienttranslate("Urban Center"), "width" => 2, "height" => 2, "benefit" => 315,
+                "name" => clienttranslate("Urban Center"),
+                "width" => 2,
+                "height" => 2,
+                "benefit" => 315,
                 "mask" => [[[1, 1], [1, 1]]]
         ),
 );
@@ -2337,7 +2576,8 @@ $this->tech_card_data = array(
                         "benefit" => [56],
                         "description" => clienttranslate("Place the Bakery in your capital city.")
                 ),
-                "requirement" => ["track" => 7, "level" => 2], "landmark" => 13
+                "requirement" => ["track" => 7, "level" => 2],
+                "landmark" => 13
         ),
         6 => array(
                 "name" => clienttranslate("Barn"),
@@ -2346,7 +2586,8 @@ $this->tech_card_data = array(
                         "benefit" => [57],
                         "description" => clienttranslate("Place the Barn in your capital city.")
                 ),
-                "requirement" => ["track" => 7, "level" => 3], "landmark" => 14
+                "requirement" => ["track" => 7, "level" => 3],
+                "landmark" => 14
         ),
         7 => array(
                 "name" => clienttranslate("Lithium-Ion Battery"),
@@ -2403,7 +2644,8 @@ $this->tech_card_data = array(
                         "benefit" => [58],
                         "description" => clienttranslate("Place the Com Tower in your capital city.")
                 ),
-                "requirement" => ["track" => 6, "level" => 4], "landmark" => 15
+                "requirement" => ["track" => 6, "level" => 4],
+                "landmark" => 15
         ),
         13 => array(
                 "name" => clienttranslate("Concrete"),
@@ -2448,7 +2690,8 @@ $this->tech_card_data = array(
                         "benefit" => [59],
                         "description" => clienttranslate("Place the Library in your capital city.")
                 ),
-                "requirement" => ["track" => 6, "level" => 3], "landmark" => 16
+                "requirement" => ["track" => 6, "level" => 3],
+                "landmark" => 16
         ),
         18 => array(
                 "name" => clienttranslate("Light Bulb"),
@@ -2523,7 +2766,8 @@ $this->tech_card_data = array(
                         "benefit" => [60],
                         "description" => clienttranslate("Place the Stock Market in your capital city.")
                 ),
-                "requirement" => ["track" => 5, "level" => 3], "landmark" => 17
+                "requirement" => ["track" => 5, "level" => 3],
+                "landmark" => 17
         ),
         26 => array(
                 "name" => clienttranslate("Telescope"),
@@ -2574,7 +2818,8 @@ $this->tech_card_data = array(
                         "benefit" => [61],
                         "description" => clienttranslate("Place the Treasury in your capital city.")
                 ),
-                "requirement" => ["track" => 5, "level" => 2], "landmark" => 18
+                "requirement" => ["track" => 5, "level" => 2],
+                "landmark" => 18
         ),
         31 => array(
                 "name" => clienttranslate("Vaccines"),
@@ -2612,189 +2857,255 @@ $this->tech_card_data = array(
 );
 $this->tapestry_card_data = array(
         0 => array(
-                "name" => clienttranslate("FACE DOWN CARD"), "type" => "era",
+                "name" => clienttranslate("FACE DOWN CARD"),
+                "type" => "era",
                 "description" => clienttranslate("This card was played face down during an income turn when the player did not have one in their hand."),
         ),
         1 => array(
-                "name" => clienttranslate("ACADEMIA"), "type" => "era",
+                "name" => clienttranslate("ACADEMIA"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Whenever you invent Technology or gain Tapestry, gain 3 [VP]")
         ),
         2 => array(
-                "name" => clienttranslate("AGE OF DISCOVERY"), "type" => "now", "benefit" => [101],
+                "name" => clienttranslate("AGE OF DISCOVERY"),
+                "type" => "now",
+                "benefit" => [101],
                 "description" => clienttranslate("WHEN PLAYED: Roll the science die. All players must advance on the resulting track; only you gain the benefit (you may pay to gain the bonus)."),
         ),
         3 => array(
-                "name" => clienttranslate("AGE OF SAIL"), "type" => "era",
+                "name" => clienttranslate("AGE OF SAIL"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Whenever you explore, draw a total of 3 Territory tiles. Before you place a Territory tile, you may give 1 Territory tile to an opponent to gain 3 [VP].")
         ),
         4 => array(
-                "name" => clienttranslate("AGE OF WONDERS"), "type" => "now", "benefit" => [102],
+                "name" => clienttranslate("AGE OF WONDERS"),
+                "type" => "now",
+                "benefit" => [102],
                 "description" => clienttranslate("WHEN PLAYED: Gain 2 [ANY RESOURCE] if you have the fewest landmarks. If you have the most landmarks, gain 12 [VP]. Otherwise (and for ties), gain 1 [ANY RESOURCE] and 6 [VP].")
         ),
         5 => array(
-                "name" => clienttranslate("ALLIANCE"), "type" => "era", "benefit" => [122],
+                "name" => clienttranslate("ALLIANCE"),
+                "type" => "era",
+                "benefit" => [122],
                 "description" => clienttranslate("THIS ERA: Choose an opponent. You cannot conquer each other's territories. Whenever they upgrade a Technology, you gain the benefit after they do.")
         ),
         6 => array(
-                "name" => clienttranslate("BOAST OF SUPERIORITY"), "type" => "now", "benefit" => [103],
+                "name" => clienttranslate("BOAST OF SUPERIORITY"),
+                "type" => "now",
+                "benefit" => [103],
                 "description" => clienttranslate("WHEN PLAYED: For each advancement track where there are no further-advanced tokens than yours, gain 4 [VP].")
         ),
         7 => array(
-                "name" => clienttranslate("BROKER OF PEACE"), "type" => "era",
+                "name" => clienttranslate("BROKER OF PEACE"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: You cannot advance on the military track. Each time an opponent advances on the military track, you gain 3 [VP].")
         ),
         8 => array(
-                "name" => clienttranslate("CAPITALISM"), "type" => "era",
+                "name" => clienttranslate("CAPITALISM"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: When you gain income, gain 2 [VP] per [COIN] earned. Whenever you gain Market, also gain [COIN].")
         ),
         9 => array(
-                "name" => clienttranslate("COAL BARON"), "type" => "now", "benefit" => [104],
+                "name" => clienttranslate("COAL BARON"),
+                "type" => "now",
+                "benefit" => [104],
                 "description" => clienttranslate("WHEN PLAYED: Gain 1 Territory and explore with it. Your neighbours then each get 1 Territory.")
         ),
         10 => array(
-                "name" => clienttranslate("COLONIALISM"), "type" => "now", "benefit" => [105],
+                "name" => clienttranslate("COLONIALISM"),
+                "type" => "now",
+                "benefit" => [105],
                 "description" => clienttranslate("WHEN PLAYED: Choose a territory tile you control and gain each of the following resources based on its land terrain(s): mountain([WORKER]), grassland([CULTURE]), forest([FOOD]), desert([COIN])."),
                 "rulings" => clienttranslate("Printed hexes are NOT considered TILES")
         ),
         11 => array(
-                "name" => clienttranslate("DARK AGES"), "type" => "now", "benefit" => [106],
+                "name" => clienttranslate("DARK AGES"),
+                "type" => "now",
+                "benefit" => [106],
                 "description" => clienttranslate("WHEN PLAYED: Regress once on 3 difference advancement tracks if possible, then advance three times on the remaining track. Do not gain any benefits or bonuses.<br><b>Rulings: If you are on the beginning of a track, you can still use that as regressing without actually moving the token.</b"),
         ),
         12 => array(
-                "name" => clienttranslate("DEMOCRACY"), "type" => "now", "benefit" => [107],
+                "name" => clienttranslate("DEMOCRACY"),
+                "type" => "now",
+                "benefit" => [107],
                 "description" => clienttranslate("WHEN PLAYED: Draw 3 Tapestry, then discard any number of Tapestry from your hand to gain 2 [VP] each.")
         ),
         13 => array(
-                "name" => clienttranslate("DICTATORSHIP"), "type" => "now",
+                "name" => clienttranslate("DICTATORSHIP"),
+                "type" => "now",
                 "description" => clienttranslate("WHEN PLAYED: Advance on any track and gain the benefit (you may pay to gain the bonus). Opponents may not advance on that track until after your next turn."),
                 "benefit" => [108],
         ),
         14 => array(
-                "name" => clienttranslate("DIPLOMACY"), "type" => "now", "benefit" => [110, 109],
+                "name" => clienttranslate("DIPLOMACY"),
+                "type" => "now",
+                "benefit" => [110, 109],
                 "description" => clienttranslate("WHEN PLAYED: Each player gains [ANY RESOURCE]. You also gain 1 building from your income mat.")
         ),
         15 => array(
-                "name" => clienttranslate("DYSTOPIA"), "type" => "now", "benefit" => [111],
+                "name" => clienttranslate("DYSTOPIA"),
+                "type" => "now",
+                "benefit" => [111],
                 "description" => clienttranslate("WHEN PLAYED: Gain any landmark from the landmark board and place it in your capital city.")
         ),
         16 => array(
-                "name" => clienttranslate("EMPIRICISM"), "type" => "era",
+                "name" => clienttranslate("EMPIRICISM"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: If you advance on the science track, gain 2 [VP]. Whenever you roll the science die, instead roll it twice and choose 1 result.")
         ),
         17 => array(
-                "name" => clienttranslate("ESPIONAGE"), "type" => "now", "benefit" => [112],
+                "name" => clienttranslate("ESPIONAGE"),
+                "type" => "now",
+                "benefit" => [112],
                 "description" => clienttranslate("WHEN PLAYED: Copy the ability of any Tapestry on an income mat.")
         ),
         18 => array(
-                "name" => clienttranslate("EXPLOITATION"), "type" => "era",
+                "name" => clienttranslate("EXPLOITATION"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Whenever you place a territory tile on the board, you may gain double the benefit on the tile, but no [VP]")
         ),
         19 => array(
-                "name" => clienttranslate("FEUDALISM"), "type" => "now", "benefit" => ["or" => [BE_ANYRES, 113]],
+                "name" => clienttranslate("FEUDALISM"),
+                "type" => "now",
+                "benefit" => ["or" => [BE_ANYRES, 113]],
                 "description" => clienttranslate("WHEN PLAYED: Either gain [ANY RESOURCE] OR gain 3[VP] for each of your landmarks.")
         ),
         20 => array(
-                "name" => clienttranslate("GOLDEN AGE"), "type" => "era",
+                "name" => clienttranslate("GOLDEN AGE"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Ignore upgrade prerequisites on tech cards. Whenever you upgrade, gain 3 [VP].")
         ),
         21 => array(
-                "name" => clienttranslate("GUILDS"), "type" => "now", "benefit" => [114],
+                "name" => clienttranslate("GUILDS"),
+                "type" => "now",
+                "benefit" => [114],
                 "description" => clienttranslate("WHEN PLAYED: Pay 5 [VP] / 10 [VP] / 15 [VP] to gain 1 / 2 / 3 [ANY RESOURCE] or pay 1 / 2 / 3 [ANY RESOURCE] to gain 5 [VP] / 10 [VP] / 15 [VP]. You cannot spend VP you don't have.")
         ),
         22 => array(
-                "name" => clienttranslate("INDUSTRIALISM"), "type" => "era",
+                "name" => clienttranslate("INDUSTRIALISM"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Whenever you invent a Technology, gain the Circle benefit on it. The card remains in the bottom row for now.")
         ),
         23 => array(
-                "name" => clienttranslate("MARRIAGE OF STATE"), "type" => "era",
+                "name" => clienttranslate("MARRIAGE OF STATE"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Choose a track and an opponent. After they gain any benefit on that track, you gain it too (do not gain the bonus)."),
                 "benefit" => [118],
         ),
         24 => array(
-                "name" => clienttranslate("MERCANTILISM"), "type" => "era",
+                "name" => clienttranslate("MERCANTILISM"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: When you gain income, you may convert [FOOD] to any other resource. For each [FOOD] you convert, gain 2 [VP].")
         ),
         25 => array(
-                "name" => clienttranslate("MERITOCRACY"), "type" => "now",
+                "name" => clienttranslate("MERITOCRACY"),
+                "type" => "now",
                 "benefit" => [BE_INVENT, BE_VP_TECH, BE_VP_TECH],
                 "description" => clienttranslate("WHEN PLAYED: Invent Technology, then gain 2 [VP] for each of your Technology.")
         ),
         26 => array(
-                "name" => clienttranslate("MILITARISM"), "type" => "era",
+                "name" => clienttranslate("MILITARISM"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Whenever you explore a territory, you may place an outpost on the newly explored territory.")
         ),
         27 => array(
-                "name" => clienttranslate("MONARCHY"), "type" => "era",
+                "name" => clienttranslate("MONARCHY"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: whenever you place an income building in your capital city, gain 3 [VP].")
         ),
         28 => array(
-                "name" => clienttranslate("OIL MAGNATE"), "type" => "now", "benefit" => [115],
+                "name" => clienttranslate("OIL MAGNATE"),
+                "type" => "now",
+                "benefit" => [115],
                 "description" => clienttranslate("WHEN PLAYED: Choose an advancement track. Your neighbours and you may advance once on that track; only you gain the benefit & may pay to gain the bonus (if any).")
         ),
         29 => array(
-                "name" => clienttranslate("OLYMPIC HOST"), "type" => "now", "benefit" => [116],
+                "name" => clienttranslate("OLYMPIC HOST"),
+                "type" => "now",
+                "benefit" => [116],
                 "description" => clienttranslate("WHEN PLAYED: In order starting with you, each player may pay [WORKER] to gain 10 [VP]. If at least 1 opponent does this, you gain 1 building from your income mat. If no opponents do this, you gain [COIN]")
         ),
         30 => array(
-                "name" => clienttranslate("PILLAGE AND PLUNDER"), "type" => "era",
+                "name" => clienttranslate("PILLAGE AND PLUNDER"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Whenever you topple an opponent's outpost, gain the results of both conquer dice. Traps cannot be played against you.")
         ),
         31 => array(
-                "name" => clienttranslate("PIRATE RULE"), "type" => "era",
+                "name" => clienttranslate("PIRATE RULE"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Whenever you conquer a territory tile, gain the benefit on that tile (in addition to the benefit of the conquer dice)")
         ),
         32 => array(
-                "name" => clienttranslate("PLEA FOR AID"), "type" => "now", "benefit" => [117],
+                "name" => clienttranslate("PLEA FOR AID"),
+                "type" => "now",
+                "benefit" => [117],
                 "description" => clienttranslate("WHEN PLAYED: For each track where all tokens are more advanced than yours, gain 2 [VP] and [ANY RESOURCE].")
         ),
         33 => array(
-                "name" => clienttranslate("RENAISSANCE"), "type" => "now",
+                "name" => clienttranslate("RENAISSANCE"),
+                "type" => "now",
                 "benefit" => ['choice' => [92, 93, 94, 95]],
                 "description" => clienttranslate("WHEN PLAYED: Advance on each track exactly once. Do not gain the benefits. You may gain any resulting bonuses for free.")
         ),
         34 => array(
-                "name" => clienttranslate("REVISIONISM"), "type" => "era",
+                "name" => clienttranslate("REVISIONISM"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: Whenever you gain a landmark on a track, also gain [ANY RESOURCE]. If you reach an already-claimed landmark on a track, gain Armory.")
         ),
         35 => array(
-                "name" => clienttranslate("REVOLUTION"), "type" => "now",
+                "name" => clienttranslate("REVOLUTION"),
+                "type" => "now",
                 "benefit" => ["or" => [BE_ANYRES, BE_STANDUP_3_OUTPOSTS]],
                 "description" => clienttranslate("WHEN PLAYED: Gain [ANY RESOURCE] OR choose up to 3 territories containing your toppled outposts. Stand up those outposts and topple those opponent outposts.")
         ),
         36 => array(
-                "name" => clienttranslate("SOCIALISM"), "type" => "now", "benefit" => [120],
+                "name" => clienttranslate("SOCIALISM"),
+                "type" => "now",
+                "benefit" => [120],
                 "description" => clienttranslate("WHEN PLAYED: Choose an advancement track. Advance or regress (your choice) to match the closest opponent. Do not gain the benefit/bonus.")
         ),
         37 => array(
-                "name" => clienttranslate("STEAM TYCOON"), "type" => "now", "benefit" => [121],
+                "name" => clienttranslate("STEAM TYCOON"),
+                "type" => "now",
+                "benefit" => [121],
                 "description" => clienttranslate("WHEN PLAYED: Invent a face-up Technology and upgrade it. Your neighbours (right, then left) then each invent Technology from top of deck.")
         ),
         38 => array(
-                "name" => clienttranslate("TECHNOCRACY"), "type" => "now", "benefit" => [123],
+                "name" => clienttranslate("TECHNOCRACY"),
+                "type" => "now",
+                "benefit" => [123],
                 "description" => clienttranslate("WHEN PLAYED: If you are the first player to enter this era, gain Technology and upgrade it. If you are not the first player to enter this era, gain 3 [VP] per opponent in the game.")
         ),
         39 => array(
-                "name" => clienttranslate("TERRAFORMING"), "type" => "era",
+                "name" => clienttranslate("TERRAFORMING"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: You may construct buildings on impassable land in your capital city. Whenever you do, gain 5 [VP].")
         ),
         40 => array(
-                "name" => clienttranslate("THEOCRACY"), "type" => "era",
+                "name" => clienttranslate("THEOCRACY"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: You cannot advance on the science track. Whenever you enter any new advancement tier (I-IV), gain 4 [VP].")
         ),
         41 => array(
-                "name" => clienttranslate("TRADE ECONOMY"), "type" => "now", "benefit" => [124],
+                "name" => clienttranslate("TRADE ECONOMY"),
+                "type" => "now",
+                "benefit" => [124],
                 "description" => clienttranslate("WHEN PLAYED: Choose the current position of an opponent on any advancement track. You gain the corresponding benefit. If there is a bonus, that opponent gains it for free.")
         ),
         42 => array(
-                "name" => clienttranslate("TRAP"), "type" => "now", "benefit" => [510],
+                "name" => clienttranslate("TRAP"),
+                "type" => "now",
+                "benefit" => [510],
                 "description" => clienttranslate("You may discard this card from your hand when an opponent tries to conquer your territory. If you do, gain [ANY RESOURCE] and topple their outpost.<hr>WHEN PLAYED: If played as a tapestry, gain 10 [VP].")
         ),
         43 => array(
-                "name" => clienttranslate("TYRANNY"), "type" => "era",
+                "name" => clienttranslate("TYRANNY"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: If you gain a Tapestry, you may immediately play it on top of this card. The first and only time you do, gain 5 [VP].")
         ),
         44 => array(
-                "name" => clienttranslate("WARTIME ECONOMY"), "type" => "era",
+                "name" => clienttranslate("WARTIME ECONOMY"),
+                "type" => "era",
                 "description" => clienttranslate("THIS ERA: All bonuses that cost [ANY RESOURCE] are free. Example: [ANY RESOURCE]: Tapestry.")
         ),
 );
@@ -2921,71 +3232,139 @@ $this->civilizations = array(
                 "tokens_count" => 1,
                 "slots" => array(
                         1 => array(
-                                "top" => 64.25, "left" => 24, "benefit" => [], "link" => [2, 3, 4, 5], "w" => 8.5,
+                                "top" => 64.25,
+                                "left" => 24,
+                                "benefit" => [],
+                                "link" => [2, 3, 4, 5],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ),
                         2 => [
-                                "top" => 56, "left" => 34.5, "benefit" => [BE_GAIN_WORKER], "link" => [6, 7],
-                                "w" => 8.5, "h" => 5.5
+                                "top" => 56,
+                                "left" => 34.5,
+                                "benefit" => [BE_GAIN_WORKER],
+                                "link" => [6, 7],
+                                "w" => 8.5,
+                                "h" => 5.5
                         ],
                         3 => [
-                                "top" => 61.5, "left" => 34.5, "benefit" => [BE_GAIN_CULTURE], "link" => [7, 8],
-                                "w" => 8.5, "h" => 5.5
+                                "top" => 61.5,
+                                "left" => 34.5,
+                                "benefit" => [BE_GAIN_CULTURE],
+                                "link" => [7, 8],
+                                "w" => 8.5,
+                                "h" => 5.5
                         ],
                         4 => [
-                                "top" => 67, "left" => 34.5, "benefit" => [BE_GAIN_FOOD], "link" => [7, 8], "w" => 8.5,
+                                "top" => 67,
+                                "left" => 34.5,
+                                "benefit" => [BE_GAIN_FOOD],
+                                "link" => [7, 8],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                         5 => [
-                                "top" => 72.5, "left" => 34.5, "benefit" => [BE_GAIN_COIN], "link" => [8, 9],
-                                "w" => 8.5, "h" => 5.5
+                                "top" => 72.5,
+                                "left" => 34.5,
+                                "benefit" => [BE_GAIN_COIN],
+                                "link" => [8, 9],
+                                "w" => 8.5,
+                                "h" => 5.5
                         ],
                         6 => [
-                                "top" => 56, "left" => 45, "benefit" => [BE_FARM], "link" => [10, 11], "w" => 8.5,
+                                "top" => 56,
+                                "left" => 45,
+                                "benefit" => [BE_FARM],
+                                "link" => [10, 11],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                         7 => [
-                                "top" => 61.5, "left" => 45, "benefit" => [BE_MARKET], "link" => [10, 11], "w" => 8.5,
+                                "top" => 61.5,
+                                "left" => 45,
+                                "benefit" => [BE_MARKET],
+                                "link" => [10, 11],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                         8 => [
-                                "top" => 67, "left" => 45, "benefit" => [BE_HOUSE], "link" => [12, 13], "w" => 8.5,
+                                "top" => 67,
+                                "left" => 45,
+                                "benefit" => [BE_HOUSE],
+                                "link" => [12, 13],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                         9 => [
-                                "top" => 72.5, "left" => 45, "benefit" => [BE_ARMORY], "link" => [12, 13], "w" => 8.5,
+                                "top" => 72.5,
+                                "left" => 45,
+                                "benefit" => [BE_ARMORY],
+                                "link" => [12, 13],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                         10 => [
-                                "top" => 56, "left" => 55.5, "benefit" => [BE_CONQUER], "link" => [14, 15],
-                                "w" => 8.5, "h" => 5.5
+                                "top" => 56,
+                                "left" => 55.5,
+                                "benefit" => [BE_CONQUER],
+                                "link" => [14, 15],
+                                "w" => 8.5,
+                                "h" => 5.5
                         ],
                         11 => [
-                                "top" => 61.5, "left" => 55.5, "benefit" => [BE_RESEARCH_NB], "link" => [15, 16],
-                                "w" => 8.5, "h" => 5.5
+                                "top" => 61.5,
+                                "left" => 55.5,
+                                "benefit" => [BE_RESEARCH_NB],
+                                "link" => [15, 16],
+                                "w" => 8.5,
+                                "h" => 5.5
                         ],
                         12 => [
-                                "top" => 67, "left" => 55.5, "benefit" => [BE_INVENT], "link" => [15, 16], "w" => 8.5,
+                                "top" => 67,
+                                "left" => 55.5,
+                                "benefit" => [BE_INVENT],
+                                "link" => [15, 16],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                         13 => [
-                                "top" => 72.5, "left" => 55.5, "benefit" => [BE_EXPLORE], "link" => [16, 17],
-                                "w" => 8.5, "h" => 5.5
+                                "top" => 72.5,
+                                "left" => 55.5,
+                                "benefit" => [BE_EXPLORE],
+                                "link" => [16, 17],
+                                "w" => 8.5,
+                                "h" => 5.5
                         ],
                         14 => [
-                                "top" => 56, "left" => 66, "benefit" => [BE_ADVANCE_T], "link" => [], "w" => 8.5,
+                                "top" => 56,
+                                "left" => 66,
+                                "benefit" => [BE_ADVANCE_T],
+                                "link" => [],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                         15 => [
-                                "top" => 61.5, "left" => 66, "benefit" => [BE_ADVANCE_E], "link" => [], "w" => 8.5,
+                                "top" => 61.5,
+                                "left" => 66,
+                                "benefit" => [BE_ADVANCE_E],
+                                "link" => [],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                         16 => [
-                                "top" => 67, "left" => 66, "benefit" => [BE_ADVANCE_M], "link" => [], "w" => 8.5,
+                                "top" => 67,
+                                "left" => 66,
+                                "benefit" => [BE_ADVANCE_M],
+                                "link" => [],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                         17 => [
-                                "top" => 72.5, "left" => 66, "benefit" => [BE_ADVANCE_S], "link" => [], "w" => 8.5,
+                                "top" => 72.5,
+                                "left" => 66,
+                                "benefit" => [BE_ADVANCE_S],
+                                "link" => [],
+                                "w" => 8.5,
                                 "h" => 5.5
                         ],
                 ),
@@ -3177,44 +3556,84 @@ $this->civilizations = array(
                 "midgame_setup" => true,
                 "slots" => array(
                         1 => [
-                                "top" => 87, "left" => 19, "benefit" => [], "link" => [BE_GAIN_WORKER], "w" => 11,
+                                "top" => 87,
+                                "left" => 19,
+                                "benefit" => [],
+                                "link" => [BE_GAIN_WORKER],
+                                "w" => 11,
                                 "h" => 6
                         ],
                         2 => [
-                                "top" => 81.6, "left" => 19, "benefit" => [BE_GAIN_COIN], "link" => [BE_GAIN_FOOD],
-                                "w" => 11, "h" => 6
+                                "top" => 81.6,
+                                "left" => 19,
+                                "benefit" => [BE_GAIN_COIN],
+                                "link" => [BE_GAIN_FOOD],
+                                "w" => 11,
+                                "h" => 6
                         ],
                         3 => [
-                                "top" => 76.3, "left" => 19, "benefit" => [BE_GAIN_WORKER, BE_GAIN_FOOD],
-                                "link" => [BE_GAIN_CULTURE], "w" => 11, "h" => 6
+                                "top" => 76.3,
+                                "left" => 19,
+                                "benefit" => [BE_GAIN_WORKER, BE_GAIN_FOOD],
+                                "link" => [BE_GAIN_CULTURE],
+                                "w" => 11,
+                                "h" => 6
                         ],
                         4 => array(
-                                "top" => 71, "left" => 19, "benefit" => [BE_GAIN_CULTURE, BE_ARMORY], "link" => [],
-                                "w" => 11, "h" => 6
+                                "top" => 71,
+                                "left" => 19,
+                                "benefit" => [BE_GAIN_CULTURE, BE_ARMORY],
+                                "link" => [],
+                                "w" => 11,
+                                "h" => 6
                         ),
                         5 => [
-                                "top" => 87, "left" => 29, "benefit" => [], "link" => [BE_TERRITORY], "w" => 11,
+                                "top" => 87,
+                                "left" => 29,
+                                "benefit" => [],
+                                "link" => [BE_TERRITORY],
+                                "w" => 11,
                                 "h" => 6
                         ],
                         6 => [
-                                "top" => 81.6, "left" => 29, "benefit" => [BE_TERRITORY], "link" => [BE_TAPESTRY],
-                                "w" => 11, "h" => 6
+                                "top" => 81.6,
+                                "left" => 29,
+                                "benefit" => [BE_TERRITORY],
+                                "link" => [BE_TAPESTRY],
+                                "w" => 11,
+                                "h" => 6
                         ],
                         7 => [
-                                "top" => 76.3, "left" => 29, "benefit" => [BE_INVENT, BE_TAPESTRY],
-                                "link" => [BE_MARKET], "w" => 11, "h" => 6
+                                "top" => 76.3,
+                                "left" => 29,
+                                "benefit" => [BE_INVENT, BE_TAPESTRY],
+                                "link" => [BE_MARKET],
+                                "w" => 11,
+                                "h" => 6
                         ],
                         8 => array(
-                                "top" => 71, "left" => 29, "benefit" => [BE_EXPLORE, BE_RESEARCH], "link" => [],
-                                "w" => 11, "h" => 6
+                                "top" => 71,
+                                "left" => 29,
+                                "benefit" => [BE_EXPLORE, BE_RESEARCH],
+                                "link" => [],
+                                "w" => 11,
+                                "h" => 6
                         ),
                         9 => ["top" => 87, "left" => 39, "benefit" => [], "link" => [BE_FARM], "w" => 11, "h" => 6],
                         10 => [
-                                "top" => 81.6, "left" => 39, "benefit" => [505], "link" => [BE_ARMORY], "w" => 11,
+                                "top" => 81.6,
+                                "left" => 39,
+                                "benefit" => [505],
+                                "link" => [BE_ARMORY],
+                                "w" => 11,
                                 "h" => 6
                         ],
                         11 => [
-                                "top" => 76.3, "left" => 39, "benefit" => [510], "link" => [BE_INCOME_VP], "w" => 11,
+                                "top" => 76.3,
+                                "left" => 39,
+                                "benefit" => [510],
+                                "link" => [BE_INCOME_VP],
+                                "w" => 11,
                                 "h" => 6
                         ],
                         12 => array("top" => 71, "left" => 39, "benefit" => [515], "link" => [], "w" => 11, "h" => 6),
@@ -3284,7 +3703,8 @@ $this->civilizations = array(
                 //1 gold, 2 VP, 1 food, and 1 VP per territory controlled.
                 // 3 VP, 1 worker, 5 VP, and a conquer benefit*
                 "slots@a4" => array(
-                        1 => ["benefit" => [BE_GAIN_COIN]], 2 => ["benefit" => [502]],
+                        1 => ["benefit" => [BE_GAIN_COIN]],
+                        2 => ["benefit" => [502]],
                         3 => ["benefit" => [BE_GAIN_FOOD]],
                         4 => ["benefit" => [BE_VP_TERRITORY], "cl" => "paintover"], //1 VP per Terr
                         5 => ["benefit" => [503], "cl" => "paintover"],
@@ -3362,15 +3782,15 @@ $this->civilizations = array(
                 "adjustment@a4" => clienttranslate("no change"),
                 "adjustment@a8" => clienttranslate("rules change"),
                 "description@a8" => [
-clienttranslate("<i>The Mystics boast of their ability to predict the future (they're actually just good planners).</i>"),
-clienttranslate("Start with a private, randomized deck of 8 tapestry cards (draw them from the public deck; you may look through them before shuffling them) and draw 2 of those cards. Whenever you would gain a tapestry card, instead draw the top card of your private deck. Whenever you discard or pay a tapestry card, place it in a private discard pile. If your private deck is ever empty and you are gaining a card, shuffle your discard pile to form the deck."),
-clienttranslate("After playing your tapestry card on income turns (2-4), gain the top card of the public deck and discard your entire hand of tapestry cards to your private discard pile."),
-clienttranslate("Based on the quantity of cards discarded in this way, gain the following, then gain 2 cards from your private deck:"),
-clienttranslate("<li>2 cards --> choose one: | "),
-clienttranslate("<li>4 cards --> choose two different:   [CONQUER]/[ANY RESOURCE]/[INVENT]/[INCOME BUILDING] (do not place in the city)"),
-clienttranslate("<li>6 cards --> choose three different:   [CONQUER-BOTH DICE]/[ANY RESOURCE]/[INVENT]+[UPGRADE]/[INCOME BUILDING]"),
-clienttranslate("<i>If you gain this civilization in the middle of the game, proceed to create your private deck of 8 tapestry cards, draw 1 from it (adding it to your current hand), discard your entire hand to gain benefits as if it is your income turn, then draw 2 tapestry cards from your private deck.</i>"),
-                 ],
+                        clienttranslate("<i>The Mystics boast of their ability to predict the future (they're actually just good planners).</i>"),
+                        clienttranslate("Start with a private, randomized deck of 8 tapestry cards (draw them from the public deck; you may look through them before shuffling them) and draw 2 of those cards. Whenever you would gain a tapestry card, instead draw the top card of your private deck. Whenever you discard or pay a tapestry card, place it in a private discard pile. If your private deck is ever empty and you are gaining a card, shuffle your discard pile to form the deck."),
+                        clienttranslate("After playing your tapestry card on income turns (2-4), gain the top card of the public deck and discard your entire hand of tapestry cards to your private discard pile."),
+                        clienttranslate("Based on the quantity of cards discarded in this way, gain the following, then gain 2 cards from your private deck:"),
+                        clienttranslate("<li>2 cards --> choose one: | "),
+                        clienttranslate("<li>4 cards --> choose two different:   [CONQUER]/[ANY RESOURCE]/[INVENT]/[INCOME BUILDING] (do not place in the city)"),
+                        clienttranslate("<li>6 cards --> choose three different:   [CONQUER-BOTH DICE]/[ANY RESOURCE]/[INVENT]+[UPGRADE]/[INCOME BUILDING]"),
+                        clienttranslate("<i>If you gain this civilization in the middle of the game, proceed to create your private deck of 8 tapestry cards, draw 1 from it (adding it to your current hand), discard your entire hand to gain benefits as if it is your income turn, then draw 2 tapestry cards from your private deck.</i>"),
+                ],
                 "al" => 8
         ),
         14 => array(
@@ -3414,23 +3834,43 @@ clienttranslate("<i>If you gain this civilization in the middle of the game, pro
                 "income_trigger@a4a8" => ["from" => 0, "to" => 0], //
                 "achi@a4" => array(
                         1 => array(
-                                "top" => 76, "left" => 18, "w" => 8.5, "h" => 5.5, 'c' => 6,
+                                "top" => 76,
+                                "left" => 18,
+                                "w" => 8.5,
+                                "h" => 5.5,
+                                'c' => 6,
                                 'tooltip' => clienttranslate('Have 6+ of the same resource.')
                         ),
                         2 => array(
-                                "top" => 76, "left" => 32, "w" => 8.5, "h" => 5.5, 'c' => 5,
+                                "top" => 76,
+                                "left" => 32,
+                                "w" => 8.5,
+                                "h" => 5.5,
+                                'c' => 5,
                                 'tooltip' => clienttranslate('Have 5+ tapestry cards in hand at end of turn.')
                         ),
                         3 => array(
-                                "top" => 76, "left" => 47, "w" => 8.5, "h" => 5.5, 'c' => 5,
+                                "top" => 76,
+                                "left" => 47,
+                                "w" => 8.5,
+                                "h" => 5.5,
+                                'c' => 5,
                                 'tooltip' => clienttranslate('Have 5+ territory tiles.')
                         ),
                         4 => array(
-                                "top" => 76, "left" => 62, "w" => 8.5, "h" => 5.5, 'c' => 1,
+                                "top" => 76,
+                                "left" => 62,
+                                "w" => 8.5,
+                                "h" => 5.5,
+                                'c' => 1,
                                 'tooltip' => clienttranslate('Have at least 1 tech card in each row.')
                         ),
                         5 => array(
-                                "top" => 76, "left" => 77, "w" => 8.5, "h" => 5.5, 'c' => 3,
+                                "top" => 76,
+                                "left" => 77,
+                                "w" => 8.5,
+                                "h" => 5.5,
+                                'c' => 3,
                                 'tooltip' => clienttranslate('Have at least 1 complete district with 3+ house income buildings.')
                         ),
                 ),
@@ -3464,74 +3904,142 @@ clienttranslate("<i>If you gain this civilization in the middle of the game, pro
                 "slots@a4" => [ // 
                         0 => ["top" => 62, "left" => 6, "w" => 9, "h" => 5, "link" => [1], "title" => clienttranslate('Start')],
                         1 => [
-                                "benefit" => [BE_GAIN_WORKER], "top" => 62, "left" => 15, "w" => 9, "h" => 5,
+                                "benefit" => [BE_GAIN_WORKER],
+                                "top" => 62,
+                                "left" => 15,
+                                "w" => 9,
+                                "h" => 5,
                                 "link" => [2]
                         ],
                         2 => [
-                                "benefit" => [BE_GAIN_COIN], "top" => 62, "left" => 24, "w" => 9, "h" => 5,
+                                "benefit" => [BE_GAIN_COIN],
+                                "top" => 62,
+                                "left" => 24,
+                                "w" => 9,
+                                "h" => 5,
                                 "link" => [3]
                         ],
                         3 => [
-                                "benefit" => [20 /* Invent */], "top" => 62, "left" => 33, "w" => 9, "h" => 5,
+                                "benefit" => [20 /* Invent */],
+                                "top" => 62,
+                                "left" => 33,
+                                "w" => 9,
+                                "h" => 5,
                                 "link" => [4]
                         ],
                         4 => [
-                                "benefit" => [BE_GAIN_FOOD], "top" => 62, "left" => 42, "w" => 9, "h" => 5,
+                                "benefit" => [BE_GAIN_FOOD],
+                                "top" => 62,
+                                "left" => 42,
+                                "w" => 9,
+                                "h" => 5,
                                 "link" => [5]
                         ],
                         5 => [
-                                "benefit" => [110 /* any inc build */], "top" => 62, "left" => 51, "w" => 9, "h" => 5,
+                                "benefit" => [110 /* any inc build */],
+                                "top" => 62,
+                                "left" => 51,
+                                "w" => 9,
+                                "h" => 5,
                                 "link" => [6]
                         ],
                         6 => [
-                                "benefit" => [BE_GAIN_CULTURE], "top" => 62, "left" => 60, "w" => 9, "h" => 5,
+                                "benefit" => [BE_GAIN_CULTURE],
+                                "top" => 62,
+                                "left" => 60,
+                                "w" => 9,
+                                "h" => 5,
                                 "link" => [7]
                         ],
                         7 => [
-                                "benefit" => [28 /* vp city */], "top" => 62, "left" => 69, "w" => 9, "h" => 5,
+                                "benefit" => [28 /* vp city */],
+                                "top" => 62,
+                                "left" => 69,
+                                "w" => 9,
+                                "h" => 5,
                                 "link" => [8]
                         ],
                         8 => [
-                                "benefit" => [18 /* research */], "top" => 62, "left" => 78, "w" => 9, "h" => 5,
+                                "benefit" => [18 /* research */],
+                                "top" => 62,
+                                "left" => 78,
+                                "w" => 9,
+                                "h" => 5,
                                 "link" => [0]
                         ],
                 ],
                 "slots@a8" => [ // 
                         0 => ["top" => 59, "left" => 11, "w" => 6, "h" => 4, "link" => [1]],
                         1 => [
-                                "benefit" => [BE_GAIN_WORKER], "top" => 59, "left" => 18, "w" => 6, "h" => 4,
+                                "benefit" => [BE_GAIN_WORKER],
+                                "top" => 59,
+                                "left" => 18,
+                                "w" => 6,
+                                "h" => 4,
                                 "link" => [2]
                         ],
                         2 => [
-                                "benefit" => [BE_GAIN_COIN], "top" => 59, "left" => 26, "w" => 6, "h" => 4,
+                                "benefit" => [BE_GAIN_COIN],
+                                "top" => 59,
+                                "left" => 26,
+                                "w" => 6,
+                                "h" => 4,
                                 "link" => [3]
                         ],
                         3 => [
-                                "benefit" => [20 /* Invent */], "top" => 59, "left" => 34, "w" => 6, "h" => 4,
+                                "benefit" => [20 /* Invent */],
+                                "top" => 59,
+                                "left" => 34,
+                                "w" => 6,
+                                "h" => 4,
                                 "link" => [4]
                         ],
                         4 => [
-                                "benefit" => [BE_GAIN_FOOD], "top" => 59, "left" => 42, "w" => 6, "h" => 4,
+                                "benefit" => [BE_GAIN_FOOD],
+                                "top" => 59,
+                                "left" => 42,
+                                "w" => 6,
+                                "h" => 4,
                                 "link" => [5]
                         ],
                         5 => [
-                                "benefit" => [110 /* any inc build */], "top" => 59, "left" => 51, "w" => 6, "h" => 4,
+                                "benefit" => [110 /* any inc build */],
+                                "top" => 59,
+                                "left" => 51,
+                                "w" => 6,
+                                "h" => 4,
                                 "link" => [6]
                         ],
                         6 => [
-                                "benefit" => [BE_GAIN_CULTURE], "top" => 59, "left" => 58, "w" => 6, "h" => 4,
+                                "benefit" => [BE_GAIN_CULTURE],
+                                "top" => 59,
+                                "left" => 58,
+                                "w" => 6,
+                                "h" => 4,
                                 "link" => [7]
                         ],
                         7 => [
-                                "benefit" => [18 /* research */], "top" => 59, "left" => 66, "w" => 6, "h" => 4,
+                                "benefit" => [18 /* research */],
+                                "top" => 59,
+                                "left" => 66,
+                                "w" => 6,
+                                "h" => 4,
                                 "link" => [8]
                         ],
                         8 => [
-                                "benefit" => [28 /* vp city */], "top" => 59, "left" => 74, "w" => 6, "h" => 4,
+                                "benefit" => [28 /* vp city */],
+                                "top" => 59,
+                                "left" => 74,
+                                "w" => 6,
+                                "h" => 4,
                                 "link" => [9]
                         ],
                         9 => [
-                                "benefit" => [74 /* conquer both dice */], "top" => 59, "left" => 81, "w" => 6, "h" => 4,
+                                "benefit" => [74 /* conquer both dice */],
+                                "top" => 59,
+                                "left" => 81,
+                                "w" => 6,
+                                "h" => 4,
                                 "link" => [0]
                         ],
                 ],
@@ -3723,15 +4231,15 @@ clienttranslate("<i>If you gain this civilization in the middle of the game, pro
                         clienttranslate("Start with 3 tapestry cards."),
                         clienttranslate("At the beginning of your income turns (1-4), place a player token on a space on an opponent's income mat that does not already have one of your player tokens."),
                         clienttranslate("Whenever an opponent would play a tapestry card on a space containing your player token, they first return the token to you and reveal 1 card from their hand that they would like to play:"),
-                         clienttranslate("<li> If it's a WHEN PLAYED card and you agree, they play the card. Afterwards, you also gain the benefit of the card."),
-                         clienttranslate("<li> If you don't agree or if they selected a different type of card, select a WHEN PLAYED card from your hand that they may play instead. If they play it, you also gain the benefit of the card (after the opponent). If you do not have any WHEN PLAYED cards or if they disagree and proceed to play the card from their hand, you gain 1 [RESOURCE], 1 [INVENT], 1 [TAPESTRY], and 1 [TILE]."),
-                        
-                         clienttranslate("<it>If you gain this civilization in the middle of the game, you may either discard it and gain another or immediately place up to 2 player tokens on spaces that do not have your player tokens on opponents' income mats.</it>"),
+                        clienttranslate("<li> If it's a WHEN PLAYED card and you agree, they play the card. Afterwards, you also gain the benefit of the card."),
+                        clienttranslate("<li> If you don't agree or if they selected a different type of card, select a WHEN PLAYED card from your hand that they may play instead. If they play it, you also gain the benefit of the card (after the opponent). If you do not have any WHEN PLAYED cards or if they disagree and proceed to play the card from their hand, you gain 1 [RESOURCE], 1 [INVENT], 1 [TAPESTRY], and 1 [TILE]."),
+
+                        clienttranslate("<it>If you gain this civilization in the middle of the game, you may either discard it and gain another or immediately place up to 2 player tokens on spaces that do not have your player tokens on opponents' income mats.</it>"),
                 ],
 
 
 
-               "start_benefit" => ["m" => 3, "g" => BE_TAPESTRY], //
+                "start_benefit" => ["m" => 3, "g" => BE_TAPESTRY], //
                 "income_trigger" => ["from" => 2, "to" => 5, "decline" => false], //
                 "income_trigger@a8" => ["from" => 1, "to" => 4, "decline" => true], //
                 "midgame_setup" => true,
@@ -3756,7 +4264,8 @@ clienttranslate("<i>If you gain this civilization in the middle of the game, pro
                         3 =>  clienttranslate("<li>Explore 1 space tile from your supply, placing it on this civilization mat."),
 
                 ],
-                "exp" => "PP", "slots_description" => '',
+                "exp" => "PP",
+                "slots_description" => '',
                 "slots_description" => '',
                 "slot_choice" => "any",
                 "slots" => [ // 
@@ -4018,44 +4527,85 @@ clienttranslate("<i>If you gain this civilization in the middle of the game, pro
                 "tokens_count" => 2,
                 "slots" => [
                         1 => [
-                                "lm" => 10, "w" => 7, "h" => 5, "top" => 59, "left" => 8,
+                                "lm" => 10,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 59,
+                                "left" => 8,
                                 "title" => clienttranslate("Forge: Whenever upgrade a tech card to the top row, also gain [ANY RESOURCE]")
                         ],
                         2 => [
-                                "lm" => 8, "w" => 7, "h" => 5, "top" => 59, "left" => 53,
+                                "lm" => 8,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 59,
+                                "left" => 53,
                                 "title" => clienttranslate("Rubber Works: Whenever you you advance on tiers III and IV of the Technology track, gain 4 VP")
                         ],
                         3 => [
-                                "lm" => 6, "w" => 7, "h" => 5, "top" => 66, "left" => 8,
+                                "lm" => 6,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 66,
+                                "left" => 8,
                                 "title" => clienttranslate("Barracks: Whenever you conquer, gain the result of the red die (even if you also chose that die's benefit)")
                         ],
                         4 => [
-                                "lm" => 5, "w" => 7, "h" => 5, "top" => 66, "left" => 53,
+                                "lm" => 5,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 66,
+                                "left" => 53,
                                 "title" => clienttranslate("Tank Factory: Whenever you advance on tiers III and IV of the Military track, gain 4 VP")
                         ],
                         5 => [
-                                "lm" => 9, "w" => 7, "h" => 5, "top" => 74, "left" => 8, "cl" => "activatable",
+                                "lm" => 9,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 74,
+                                "left" => 8,
+                                "cl" => "activatable",
                                 "title" => clienttranslate("Lighthouse: Once on each of your advancement turns you may discard 2 [TERRITORY TILE] to gain [ANY REOURCE]")
                         ],
 
                         6 => [
-                                "lm" => 4, "w" => 7, "h" => 5, "top" => 74, "left" => 53,
+                                "lm" => 4,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 74,
+                                "left" => 53,
                                 "title" => clienttranslate("Train Station: Whenever you advance on tiers III and IV of the Exploration track, gain 4 VP")
                         ],
                         7 => [
-                                "lm" => 2, "w" => 7, "h" => 5, "top" => 82, "left" => 8,
+                                "lm" => 2,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 82,
+                                "left" => 8,
                                 "title" => clienttranslate("Apothecary: Whenever you gain another landmark, also gain [ANY RESOURCE]")
                         ],
                         8 => [
-                                "lm" => 3, "w" => 7, "h" => 5, "top" => 82, "left" => 53,
+                                "lm" => 3,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 82,
+                                "left" => 53,
                                 "title" => clienttranslate("Academy: Whenever you advance on tiers III and IV of the Science track, gain 4 VP")
                         ],
                         9 => [
-                                "lm" => 0, "w" => 7, "h" => 5, "top" => 30, "left" => 53,
+                                "lm" => 0,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 30,
+                                "left" => 53,
                                 "title" => clienttranslate("Empty slot")
                         ],
                         10 => [
-                                "lm" => 0, "w" => 7, "h" => 5, "top" => 35, "left" => 53,
+                                "lm" => 0,
+                                "w" => 7,
+                                "h" => 5,
+                                "top" => 35,
+                                "left" => 53,
                                 "title" => clienttranslate("Empty slot")
                         ],
                 ], //
@@ -4065,51 +4615,102 @@ clienttranslate("<i>If you gain this civilization in the middle of the game, pro
 );
 $this->capitals = array(
         1 => array(
-                "name" => clienttranslate("Mountain"), "start" => ["large" => "-3_-3", "small" => "-2_-2"], // 1/6
+                "name" => clienttranslate("Mountain"),
+                "start" => ["large" => "-3_-3", "small" => "-2_-2"], // 1/6
                 "grid" => [
-                        "000000000", "110001110", "000111000", "000111110", "000001100", "011100001", "001000000",
-                        "000000010", "001000000"
+                        "000000000",
+                        "110001110",
+                        "000111000",
+                        "000111110",
+                        "000001100",
+                        "011100001",
+                        "001000000",
+                        "000000010",
+                        "001000000"
                 ],
         ),
         2 => array(
-                "name" => clienttranslate("Wetland"), "start" => ["large" => "-3_0", "small" => "0_2"], // 2/4
+                "name" => clienttranslate("Wetland"),
+                "start" => ["large" => "-3_0", "small" => "0_2"], // 2/4
                 "grid" => [
-                        "000000001", "110000111", "000000000", "011100110", "001100000", "111000010", "000001100",
-                        "011000000", "000001000"
+                        "000000001",
+                        "110000111",
+                        "000000000",
+                        "011100110",
+                        "001100000",
+                        "111000010",
+                        "000001100",
+                        "011000000",
+                        "000001000"
                 ],
         ),
         3 => array(
-                "name" => clienttranslate("Tropical"), "start" => ["large" => "0_3", "small" => "2_0"], // 3/5
+                "name" => clienttranslate("Tropical"),
+                "start" => ["large" => "0_3", "small" => "2_0"], // 3/5
                 "grid" => [
-                        "000010011", "000100011", "001000001", "000000000", "010001000", "000000000", "101101010",
-                        "011110000", "001110000"
+                        "000010011",
+                        "000100011",
+                        "001000001",
+                        "000000000",
+                        "010001000",
+                        "000000000",
+                        "101101010",
+                        "011110000",
+                        "001110000"
                 ],
         ),
         4 => array(
-                "name" => clienttranslate("Desert"), "start" => ["large" => "3_3", "small" => "0_2"], // 2/4
+                "name" => clienttranslate("Desert"),
+                "start" => ["large" => "3_3", "small" => "0_2"], // 2/4
                 "grid" => [
-                        "000110000", "101000000", "100000110", "000000000", "010010011", "011000001", "011111000",
-                        "001100000", "000001000"
+                        "000110000",
+                        "101000000",
+                        "100000110",
+                        "000000000",
+                        "010010011",
+                        "011000001",
+                        "011111000",
+                        "001100000",
+                        "000001000"
                 ],
         ),
         5 => array(
-                "name" => clienttranslate("Grassland"), "start" => ["large" => "3_0", "small" => "2_0"], // 3/5
+                "name" => clienttranslate("Grassland"),
+                "start" => ["large" => "3_0", "small" => "2_0"], // 3/5
                 "grid" => [
-                        "000000000", "111000010", "111100000", "000111100", "000000111", "111000001", "001000000",
-                        "000000100", "000001000"
+                        "000000000",
+                        "111000010",
+                        "111100000",
+                        "000111100",
+                        "000000111",
+                        "111000001",
+                        "001000000",
+                        "000000100",
+                        "000001000"
                 ],
         ),
         6 => array(
-                "name" => clienttranslate("Forest"), "start" => ["large" => "0_-3", "small" => "-2_-2"], // 1/6
+                "name" => clienttranslate("Forest"),
+                "start" => ["large" => "0_-3", "small" => "-2_-2"], // 1/6
                 "grid" => [
-                        "000000000", "001100100", "000100010", "011000001", "000100000", "001111100", "010000100",
-                        "001000111", "000000011"
+                        "000000000",
+                        "001100100",
+                        "000100010",
+                        "011000001",
+                        "000100000",
+                        "001111100",
+                        "010000100",
+                        "001000111",
+                        "000000011"
                 ],
         ),
 );
 $this->income_tracks = array(
         1 => array(
-                "name" => clienttranslate("Markets"), "field" => "markets", "color" => "yellow", "resource" => "coin",
+                "name" => clienttranslate("Markets"),
+                "field" => "markets",
+                "color" => "yellow",
+                "resource" => "coin",
                 1 => array("name" => clienttranslate("Barter"), "benefit" => [BE_GAIN_COIN, BE_VP_TECH],),
                 2 => array("name" => clienttranslate("Currency"), "benefit" => [BE_GAIN_COIN]),
                 3 => array("name" => clienttranslate("Banking"), "benefit" => [BE_VP_TECH]),
@@ -4118,7 +4719,10 @@ $this->income_tracks = array(
                 6 => array("name" => clienttranslate("Biometrics"), "benefit" => [510]),
         ),
         2 => array(
-                "name" => clienttranslate("Houses"), "field" => "houses", "color" => "grey", "resource" => "worker",
+                "name" => clienttranslate("Houses"),
+                "field" => "houses",
+                "color" => "grey",
+                "resource" => "worker",
                 1 => array("name" => clienttranslate("Symbology"), "benefit" => [BE_GAIN_WORKER, BE_VP_CAPITAL]),
                 2 => array("name" => clienttranslate("Language"), "benefit" => [BE_GAIN_WORKER]),
                 3 => array("name" => clienttranslate("Writing"), "benefit" => [BE_VP_CAPITAL]),
@@ -4127,7 +4731,10 @@ $this->income_tracks = array(
                 6 => array("name" => clienttranslate("Neural Implants"), "benefit" => [510]),
         ),
         3 => array(
-                "name" => clienttranslate("Farms"), "field" => "farms", "color" => "brown", "resource" => "food",
+                "name" => clienttranslate("Farms"),
+                "field" => "farms",
+                "color" => "brown",
+                "resource" => "food",
                 1 => array("name" => clienttranslate("Hunting"), "benefit" => [BE_GAIN_FOOD, BE_TERRITORY]),
                 2 => array("name" => clienttranslate("Farming"), "benefit" => [BE_GAIN_FOOD]),
                 3 => array("name" => clienttranslate("Breeding"), "benefit" => [504]),
@@ -4136,7 +4743,9 @@ $this->income_tracks = array(
                 6 => array("name" => clienttranslate("Food Printing"), "benefit" => [510]),
         ),
         4 => array(
-                "name" => clienttranslate("Armories"), "field" => "armories", "color" => "red",
+                "name" => clienttranslate("Armories"),
+                "field" => "armories",
+                "color" => "red",
                 "resource" => "culture",
                 1 => array("name" => clienttranslate("Ceremony"), "benefit" => [BE_GAIN_CULTURE, BE_TAPESTRY]),
                 2 => array("name" => clienttranslate("Racing"), "benefit" => [BE_GAIN_CULTURE]),
