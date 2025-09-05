@@ -1638,17 +1638,19 @@ define([
           if (args.benefit_quantity == -1) {
             this.setDescriptionOnMyTurn(prefix + _("${you} may choose to pay any number of ${pay_name} for ${bonus_name} each") + pgIcon);
           } else if (args.benefit_quantity == 1) {
-            this.setDescriptionOnMyTurn(prefix + _("${you} may pay ${pay_name} to gain ${bonus_name}") + pgIcon);
+            if (cannotDecline) this.setDescriptionOnMyTurn(prefix + _("${you} must pay ${pay_name} for ${bonus_name}") + pgIcon);
+            else this.setDescriptionOnMyTurn(prefix + _("${you} may pay ${pay_name} to gain ${bonus_name}") + pgIcon);
           } else {
             this.setDescriptionOnMyTurn(prefix + _("${you} may pay ${pay_name} x ${benefit_quantity} to gain ${bonus_name}") + pgIcon);
+			if (cannotDecline)
+			  this.setDescriptionOnMyTurn(prefix + _("${you} must pay ${pay_name} x ${benefit_quantity} for ${bonus_name}") + pgIcon);
           }
 
-          if (cannotDecline)
-            this.setDescriptionOnMyTurn(prefix + _("${you} must pay ${pay_name} x ${benefit_quantity} for ${bonus_name}") + pgIcon);
 
           var bd = this.benefit_types[type];
 
           if (!bd.dest) {
+            this.addActionButton("button_confirm", _("Confirm"), "onConfirmBonus");
           } else if (bd.dest == this.CON.FLAG_NEIGHBOUR) {
             const num = this.gamedatas.playerorder_withbots.length;
             const index = this.gamedatas.playerorder_withbots.findIndex((item) => item == this.player_id);
