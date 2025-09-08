@@ -311,7 +311,7 @@ $machinestates = [
         "type" => "activeplayer",
         "args" => "argTrackSelect",
         "possibleactions" => ["selectTrackSpot", "select_cube", "formAlliance", "choose_benefit", "decline"],
-        "transitions" => ["next" => 18 /* "trackChoice"=>33 */],
+        "transitions" => ["next" => 18, "benefit" => 18 /* "trackChoice"=>33 */],
     ],
 
     34 => [

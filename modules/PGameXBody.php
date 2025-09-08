@@ -3521,7 +3521,7 @@ abstract class PGameXBody extends tapcommon {
         if ($loc) {
             foreach ($cards as $card) {
                 $this->dbSetCardLocation($card["id"], $loc, null, "", $player_id);
-            };
+            }
         }
         if ($next) {
             if ($this->getCurrentBenefit()) {
@@ -3888,7 +3888,7 @@ abstract class PGameXBody extends tapcommon {
                 } else {
                     foreach ($resources as $rtype) {
                         $this->awardBaseResource($player_id, $rtype, +1, $data);
-                    };
+                    }
                 }
                 break;
             case "114":
@@ -10165,8 +10165,7 @@ abstract class PGameXBody extends tapcommon {
             $width = 1;
             $name = $this->structure_types[$stype]["name"];
         }
-        $canunpass =
-            $this->isTapestryActive($player_id, 39) || $this->hasCiv($player_id, CIV_RIVERFOLK); // TERRAFORMING
+        $canunpass = $this->isTapestryActive($player_id, 39) || $this->hasCiv($player_id, CIV_RIVERFOLK); // TERRAFORMING
         $unpassable = $canunpass ? 1 : 0;
         // Build the options based on each rotation of the mask
         $any = false;
