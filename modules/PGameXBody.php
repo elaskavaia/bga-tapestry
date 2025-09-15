@@ -138,6 +138,10 @@ abstract class PGameXBody extends tapcommon {
         return $variant;
     }
 
+    function debug_setAdjustmentVariant(int $variant) {
+        $this->setGameStateValue("variant_adjustments", $variant);
+    }
+
     function isExpansionIncluded($exp_flag) {
         if (is_string($exp_flag)) {
             $exp = $exp_flag;
@@ -2032,6 +2036,10 @@ abstract class PGameXBody extends tapcommon {
                 $b1 = $this->getGameStateValue("science_die");
                 $this->queueBenefitNormal(21 + $b1, $player_id, $reason);
                 return true;
+            case 340: //BE_OPPONENTS_GAIN_TILE
+                // each opponent gain territory tile
+                $this->effect_allOpponentsGainTerritoryTile($player_id, $reason);
+                return true;
             case 401:
                 // decline - no op
                 return true;
@@ -2084,6 +2092,22 @@ abstract class PGameXBody extends tapcommon {
             if ($newCount >= $max) {
                 $this->effect_triggerPrivateAchievement($player_id, $category);
             }
+        }
+    }
+
+    function effect_allOpponentsGainTerritoryTile(int $player_id, $reason) {
+        $game = $this;
+
+        $players = $game->loadPlayersBasicInfosWithBots();
+        foreach ($players as $opponent_id => $player_info) {
+            if ($opponent_id == $player_id) {
+                continue;
+            }
+            if ($opponent_id == PLAYER_SHADOW) {
+                continue;
+            }
+            $game->awardCard($opponent_id, 1, CARD_TERRITORY, false, $reason);
+            //$game->effect_moveCard($card_id, $player_id, 'hand', $opponent_id, null, '*');
         }
     }
 

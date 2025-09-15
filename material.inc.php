@@ -1843,6 +1843,9 @@ $this->benefit_types = [ //
   'name' => clienttranslate("Opponent decides on Tapestry card"),
   'civ'=>CIV_ADVISORS,
 ],
+ 340 => [  // BE_OPPONENTS_GAIN_TILE
+  'name' => clienttranslate("All opponents gain hex tile"),
+],
  502 => [  //
   'name' => clienttranslate("2 VP"),
   'r' => 'v',
