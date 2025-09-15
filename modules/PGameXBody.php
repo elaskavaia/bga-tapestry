@@ -12035,9 +12035,8 @@ class NotifBuilder {
             $this->game->systemAssertTrue("cannot find structure $id", $curr);
         }
         $location = $curr["card_location"];
-        if (startsWith($location, "land")) {
-            $curr["coord_text"] = $this->game->coordText($location);
-        }
+        $curr["coord_text"] = $this->game->coordText($location);
+
         $type = $curr["card_type"];
         $curr["structure_name"] = $this->game->structure_types[$type]["name"];
         $this->args = array_merge($this->args, $curr);
