@@ -7928,11 +7928,14 @@ abstract class PGameXBody extends tapcommon {
         if (!$this->isAdjustments4or8()) {
             return;
         }
-        $achi = $this->getRulesCiv($civ, "achi", []);
         $achi_type = $category;
+        $achi = $this->getRulesCiv($civ, "achi", []);
+        if (!array_key_exists($achi_type, $achi)) {
+            return;
+        }
         $max = $achi[$achi_type]["c"];
-
         $achieved = false;
+
         switch ($category) {
             case 1:
                 // resource count

@@ -71,8 +71,8 @@ abstract class AbsCivilization {
     function debugConsole($info, $args = [], $silent = false) {
         $this->game->debugConsole($info, $args, $silent);
     }
-    function systemAssertTrue($log, $cond = false) {
-        $this->game->systemAssertTrue($log, $cond);
+    function systemAssertTrue($log, $cond = false, $logonly = "") {
+        $this->game->systemAssertTrue($log, $cond, $logonly);
     }
 
     function getSingleCube(int $player_id = 0) {
