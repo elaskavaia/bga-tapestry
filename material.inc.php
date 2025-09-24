@@ -4974,7 +4974,7 @@ $this->civilizations = [
                 "<i>The Urban Planners want a neat, orderly city. They see a place for everything and everything in its place.</i>"
             ),
             clienttranslate(
-                "When you gain this civilization, place a 2x2 landmark (formed of your cubes) in your capital city (This BGA Special Rule since we don't have landmark cards)."
+                "When you gain this civilization, place a 2x2 landmark in your capital city (This BGA Special Rule since we don't have landmark cards)."
             ),
             clienttranslate(
                 "When you gain a landmark, you may place it on this mat. If you do, you may place it in your capital city on a future turn."
