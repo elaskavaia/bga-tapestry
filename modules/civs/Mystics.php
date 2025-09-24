@@ -64,6 +64,8 @@ class Mystics extends AbsCivilization {
 
         // VALIDITY CHECKS
         $this->systemAssertTrue("user does not have mystics", $this->hasCiv($player_id, CIV_MYSTICS));
+        $this->systemAssertTrue("ERR:Mystics:100", !$game->isAdjustments8());
+        $game->userAssertTrue(totranslate("You must make some predictions"), $ids && is_array($ids));
         $era = $game->getCurrentEra($player_id);
         if ($era <= 1) {
             $game->userAssertTrue(totranslate("You must choose a value from each row"), count($ids) == 4);
