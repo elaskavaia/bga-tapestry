@@ -2689,8 +2689,11 @@ abstract class PGameXBody extends tapcommon {
         $state = getReasonPart($reason, 3);
         $this->interruptBenefit();
         //  If at least 1 opponent does this, you gain 1 building from your income mat. If no opponents do this, you gain ${coins}
-
-        if ($state == 1) {
+        $lm = $this->getUniqueValueFromDB(
+            "SELECT card_id FROM structure WHERE card_location='income' AND card_location_arg='$player_id' LIMIT 1"
+        );
+        // $lm is null - no building left
+        if ($state == 1 && $lm) {
             $this->queueBenefitNormal(110, $player_id, reason_tapestry(TAP_OLYMPIC_HOST));
         } else {
             $this->queueBenefitNormal(BE_GAIN_COIN, $player_id, reason_tapestry(TAP_OLYMPIC_HOST));
