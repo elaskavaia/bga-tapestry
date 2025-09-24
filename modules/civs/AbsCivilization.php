@@ -77,7 +77,8 @@ abstract class AbsCivilization {
 
     function getSingleCube(int $player_id = 0) {
         $cubes = $this->game->getStructuresOnCiv($this->civ, BUILDING_CUBE);
-        $cube = array_shift(array_keys($cubes));
+        $keys = array_keys($cubes);
+        $cube = array_shift($keys);
         if ($cube) {
             return $cube;
         }
