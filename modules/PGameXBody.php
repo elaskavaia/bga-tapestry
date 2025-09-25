@@ -1752,7 +1752,7 @@ abstract class PGameXBody extends tapcommon {
             case 118:
                 $this->gamestate->nextState("trackSelect");
                 return false;
-            case 119:
+            case 119: // BE_STANDUP_3_OUTPOSTS
                 $this->gamestate->nextState("conquer");
                 return false;
             case 120:
@@ -7209,7 +7209,7 @@ abstract class PGameXBody extends tapcommon {
         $this->checkAction("standup");
         $player_id = $this->getActivePlayerId();
         $this->isTapestryActive($player_id, 35, true); // revolution
-        $this->clearCurrentBenefit(119, true);
+        $this->clearCurrentBenefit(BE_STANDUP_3_OUTPOSTS, true);
         $count = count($arr);
         $this->userAssertTrue(totranslate("Select at least one outpost and at most 3 to stand up or Decline"), $count > 0 && $count <= 3);
         foreach ($arr as $card_id) {
@@ -7220,10 +7220,11 @@ abstract class PGameXBody extends tapcommon {
             $land_coords = $structure_data["card_location"];
             $this->systemAssertTrue("Outpost is not toppled", $structure_data["card_type_arg"] == 1);
             $this->systemAssertTrue("Outpost is not yours", $structure_data["card_location_arg"] == $player_id);
+            $this->systemAssertTrue("Selected structure is not an Outpost", $structure_data["card_type"] == BUILDING_OUTPOST);
             $u = getPart($land_coords, 1);
             $v = getPart($land_coords, 2);
             $coords = $u . "_" . $v;
-            $this->DbQuery("UPDATE structure SET card_type_arg = 1-card_type_arg WHERE card_location='$land_coords'"); // toggle topple flag.
+            $this->DbQuery("UPDATE structure SET card_type_arg = 0 WHERE card_location='$land_coords'"); // toggle topple flag.
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coords'");
             $affected = $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location='$land_coords'");
             $this->notifyWithName("trap", clienttranslate('${player_name} stands up an outpost'), [

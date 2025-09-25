@@ -85,7 +85,7 @@ class Traders extends AbsCivilization {
         // Check player owns TRADERS and the token is available.
         $message = clienttranslate('${player_name} places a Trader token at ${coord_text}');
         $trader = $this->getSingleCube($player_id);
-        $game->effect_placeOnMap($player_id, $trader, $land_coords, $message, true);
+        $game->effect_placeOnMap($player_id, $trader, $land_coords, $message, false);
 
         // APPLY BENEFITS
         if (count($tile_structs) == 0) {
