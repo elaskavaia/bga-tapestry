@@ -86,7 +86,7 @@ $machinestates = [
         "description" => "",
         "type" => "game",
         "action" => "stFinishSetup",
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
 
     12 => [
@@ -106,7 +106,7 @@ $machinestates = [
         "type" => "activeplayer",
         "args" => "argPlayerTurn",
         "possibleactions" => ["advance", "takeIncome"],
-        "transitions" => ["advance" => 18, "benefit" => 18, "next" => 18],
+        "transitions" => ["advance" => 18, "benefit" => 18, "next" => 18, "benefit" => 18],
     ],
 
     // INCOME SEQUENCE
@@ -118,7 +118,7 @@ $machinestates = [
         "type" => "activeplayer",
         "args" => "argCivAbility",
         "possibleactions" => ["civTokenAdvance", "civDecline", "tapestryChoice", "sendHistorian", "sendInventor"],
-        "transitions" => ["benefit" => 18, "next" => 18],
+        "transitions" => ["benefit" => 18, "next" => 18, "benefit" => 18],
     ],
 
     15 => [
@@ -187,7 +187,7 @@ $machinestates = [
         "type" => "activeplayer",
         "possibleactions" => ["choose_benefit"],
         "args" => "argBenefitOption",
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
 
     20 => [
@@ -228,7 +228,7 @@ $machinestates = [
         "descriptionmyturn" => clienttranslate('${you} may play a trap card'),
         "type" => "activeplayer",
         "possibleactions" => ["trap", "decline_trap"],
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
 
     24 => [
@@ -238,7 +238,7 @@ $machinestates = [
         "type" => "activeplayer",
         "args" => "argConquerRoll",
         "possibleactions" => ["choose_die"],
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
 
     25 => [
@@ -258,7 +258,7 @@ $machinestates = [
         "type" => "activeplayer",
         "args" => "argPlaceStructure",
         "possibleactions" => ["place_structure", "placeCraftsmen", "conquer_structure"],
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
 
     27 => [
@@ -268,7 +268,7 @@ $machinestates = [
         "type" => "activeplayer",
         "action" => "stSpaceExploration",
         "possibleactions" => ["explore_space"],
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
 
     29 => [
@@ -278,7 +278,7 @@ $machinestates = [
         "type" => "activeplayer",
         "possibleactions" => ["first_benefit"],
         "args" => "argBenefitChoice",
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
 
     30 => [
@@ -289,7 +289,7 @@ $machinestates = [
         "type" => "activeplayer",
         "possibleactions" => ["techBenefit"],
         "args" => "argTechBenefit",
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
 
     31 => [
@@ -351,7 +351,7 @@ $machinestates = [
         "type" => "activeplayer",
         "args" => "argReason",
         "possibleactions" => ["actionConfirm", "actionUndo"],
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
     38 => [
         "name" => "moveStructureOnto",
@@ -369,7 +369,7 @@ $machinestates = [
         "type" => "activeplayer",
         "args" => "arg_keepCard",
         "possibleactions" => ["keepCard"],
-        "transitions" => ["next" => 18],
+        "transitions" => ["next" => 18, "benefit" => 18],
     ],
 
     // Final state.
