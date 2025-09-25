@@ -7224,7 +7224,7 @@ abstract class PGameXBody extends tapcommon {
             $u = getPart($land_coords, 1);
             $v = getPart($land_coords, 2);
             $coords = $u . "_" . $v;
-            $this->DbQuery("UPDATE structure SET card_type_arg = 0 WHERE card_location='$land_coords'"); // toggle topple flag.
+            $this->DbQuery("UPDATE structure SET card_type_arg = 1-card_type_arg WHERE card_location='$land_coords'"); // toggle topple flag.
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coords'");
             $affected = $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location='$land_coords'");
             $this->notifyWithName("trap", clienttranslate('${player_name} stands up an outpost'), [
