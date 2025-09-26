@@ -2907,15 +2907,23 @@ abstract class PGameXBody extends tapcommon {
         $this->systemAssertTrue("non landmark benefit on stack", isset($bene["lm"]));
         $this->systemAssertTrue("inconsistnet landmark benefit", $bene["lm"] == $landmark_id);
 
-        $landmark = $this->getObjectFromDB(
-            "SELECT card_id, card_location_arg FROM structure WHERE card_location_arg2='$landmark_id' AND (card_type='6')"
-        );
+        $landmark = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location_arg2='$landmark_id' AND (card_type='6')");
         if (!$landmark) {
             $this->systemAssertTrue("Landmark $landmark_id is missing in action - skipping (send bug)"); // NOI18N
             return true;
         }
         $sid = $landmark["card_id"];
         $owner = $landmark["card_location_arg"];
+        $loc = $landmark["card_location"];
+
+        if (startsWith($loc, "capital")) {
+            // alredy placed
+            $this->notifyWithName(
+                "message",
+                clienttranslate('${player_name} attempts to place the landmark which is already placed, skipping')
+            );
+            return true;
+        }
         //$this->debugConsole("claim land $landmark_id $player_id $owner $revisionism");
         $self = $owner == $player_id;
         if ($owner == 0 || $self) {
