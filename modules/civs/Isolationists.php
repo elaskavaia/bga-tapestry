@@ -11,7 +11,7 @@ class Isolationists extends AbsCivilization {
         $civ = $this->civ;
         $reason = reason_civ($civ);
         $tokens = $this->game->effect_setupCivTokens($civ, $player_id);
-        if ($this->game->isAdjustments4()) {
+        if ($this->game->isAdjustments4or8()) {
             //"Start with 4 player tokens here (add 1 extra in 4-5 player games) and 2 territory tiles.
             if ($this->game->getPlayersNumber() >= 4) {
                 $tokens[] = $this->game->addCivToken($player_id, 5, $civ);
@@ -19,13 +19,12 @@ class Isolationists extends AbsCivilization {
             $this->game->awardCard($player_id, 2, CARD_TERRITORY, false, $reason);
         }
 
-        return array('tokens' => $tokens, 'outposts' => []);
+        return ["tokens" => $tokens, "outposts" => []];
     }
 
     function finalScoring($player_id) {
         $this->finalIsolationistScoring($player_id);
     }
-
 
     function finalIsolationistScoring($player_id, $score = true) {
         $map_control = $this->game->getControlHexes($player_id);
@@ -34,34 +33,40 @@ class Isolationists extends AbsCivilization {
         $valid_coords = [];
         $ladmass_terrain = [];
         foreach ($map_control as $tile) {
-            $coord = $tile['map_coords'];
+            $coord = $tile["map_coords"];
             $land_mass_overview[$coord] = [0, 0, 0, 0, 0, 0];
             $valid_coords[$coord] = $tile;
-            if (!$score)
-                $this->debugConsole("to check $coord", ['tile' => $tile], true);
+            if (!$score) {
+                $this->debugConsole("to check $coord", ["tile" => $tile], true);
+            }
         }
         // Go through each vertex to assign it a landmass.
         $land_mass_id = 1;
         foreach ($map_control as $tile) {
-            $coord = $tile['map_coords'];
-            $tile_id = $tile['map_tile_id'];
-            if (!$score)
+            $coord = $tile["map_coords"];
+            $tile_id = $tile["map_tile_id"];
+            if (!$score) {
                 $this->debugConsole("tile coords $coord tile $tile_id", [], true);
-            for ($side = 0; $side < 6; $side++) { // for each vertex
+            }
+            for ($side = 0; $side < 6; $side++) {
+                // for each vertex
                 $index = $land_mass_overview[$coord][$side];
                 if ($index != 0) {
-                    if (!$score)
+                    if (!$score) {
                         $this->debugConsole("tile coords $coord:$side - done mass=$index", [], true);
+                    }
                     continue;
                 }
                 $land_mass_overview[$coord][$side] = -1; // this is not connected
                 // hasn't been connected yet.
                 // Need to identify any neighbours with same terrain..
-                $terrain = $this->game->territory_tiles[$tile_id]['x'][$side];
-                $tername = $this->game->terrain_types[$terrain]['name'];
-                if ($terrain == 1) { // sea
-                    if (!$score)
+                $terrain = $this->game->territory_tiles[$tile_id]["x"][$side];
+                $tername = $this->game->terrain_types[$terrain]["name"];
+                if ($terrain == 1) {
+                    // sea
+                    if (!$score) {
                         $this->debugConsole("tile coords $coord:$side - sea", [], true);
+                    }
                     continue;
                 }
                 $ladmass_terrain[$land_mass_id] = $terrain;
@@ -73,32 +78,44 @@ class Isolationists extends AbsCivilization {
                     list($m_coord, $m_vertex) = array_shift($to_check);
                     $vn = $this->getVertexNeighbours($m_coord, $m_vertex, $valid_coords);
                     $land_mass_overview[$m_coord][$m_vertex] = $land_mass_id;
-                    $m_tile_id = $valid_coords[$m_coord]['map_tile_id'];
+                    $m_tile_id = $valid_coords[$m_coord]["map_tile_id"];
                     for ($x = 0; $x < 6; $x++) {
-                        if ($this->game->territory_tiles[$m_tile_id]['x'][$x] == $terrain) {
-                            if ($x != $m_vertex)
+                        if ($this->game->territory_tiles[$m_tile_id]["x"][$x] == $terrain) {
+                            if ($x != $m_vertex) {
                                 $vn[] = [$m_coord, $x];
+                            }
                         }
                     }
                     //if (!$score)$this->debugConsole("rec nei $m_coord:$m_vertex",$vn, true);
                     foreach ($vn as $nei) {
                         list($n_coord, $n_vertex) = $nei;
-                        $n_tile_id = $valid_coords[$n_coord]['map_tile_id'];
-                        $n_terrain = $this->game->territory_tiles[$n_tile_id]['x'][$n_vertex];
+                        $n_tile_id = $valid_coords[$n_coord]["map_tile_id"];
+                        $n_terrain = $this->game->territory_tiles[$n_tile_id]["x"][$n_vertex];
                         $n_land = $land_mass_overview[$n_coord][$n_vertex];
                         if ($n_terrain == $terrain && $n_land == 0) {
                             $land_mass_overview[$n_coord][$n_vertex] = $land_mass_id;
-                            if (!$score)
-                                $this->debugConsole("rec coords $m_coord:$m_vertex $tername pass $n_coord:$n_vertex => mass=$land_mass_id ", [], true);
+                            if (!$score) {
+                                $this->debugConsole(
+                                    "rec coords $m_coord:$m_vertex $tername pass $n_coord:$n_vertex => mass=$land_mass_id ",
+                                    [],
+                                    true
+                                );
+                            }
                             if (!in_array($nei, $to_check)) {
                                 $to_check[] = $nei;
-                                if (!$score)
+                                if (!$score) {
                                     $this->debugConsole("pushed $n_coord:$n_vertex", [], true);
+                                }
                             }
                         } else {
-                            $n_tername = $this->game->terrain_types[$n_terrain]['name'];
-                            if (!$score)
-                                $this->debugConsole("coords $m_coord:$m_vertex $tername pass $n_coord:$n_vertex $n_tername => mass=$n_land ", [], true);
+                            $n_tername = $this->game->terrain_types[$n_terrain]["name"];
+                            if (!$score) {
+                                $this->debugConsole(
+                                    "coords $m_coord:$m_vertex $tername pass $n_coord:$n_vertex $n_tername => mass=$n_land ",
+                                    [],
+                                    true
+                                );
+                            }
                         }
                     }
                 }
@@ -113,10 +130,11 @@ class Isolationists extends AbsCivilization {
             foreach ($land_mass_overview as $lmid => $lm) {
                 $found = false;
                 for ($b = 0; $b < 6; $b++) {
-                    if ($lm[$b] == $index)
+                    if ($lm[$b] == $index) {
                         $found = true;
+                    }
                 }
-                $count += ($found) ? 1 : 0;
+                $count += $found ? 1 : 0;
             }
             if ($count > $highest) {
                 $highest = $count;
@@ -145,12 +163,19 @@ class Isolationists extends AbsCivilization {
                 $points = 40;
                 break;
         }
-        $name = $this->game->terrain_types[$highest_terrain]['name'];
-        $this->game->notifyWithName('message', clienttranslate('${player_name} (ISOLATIONISTS) has ${count} connected ladnmass tiles of ${tername}'), [
-            'count' => $highest, 'tername' => $name, 'i18n' => ['tername']
-        ]);
-        if ($score)
+        $name = $this->game->terrain_types[$highest_terrain]["name"];
+        $this->game->notifyWithName(
+            "message",
+            clienttranslate('${player_name} (ISOLATIONISTS) has ${count} connected ladnmass tiles of ${tername}'),
+            [
+                "count" => $highest,
+                "tername" => $name,
+                "i18n" => ["tername"],
+            ]
+        );
+        if ($score) {
             $this->game->awardVP($player_id, $points, reason_civ(CIV_ISOLATIONISTS));
+        }
     }
 
     function debug_getVN($x, $y, $v) {
@@ -159,7 +184,6 @@ class Isolationists extends AbsCivilization {
         $res = $this->getVertexNeighbours($x . "_" . $y, $v, $map_control);
         return $res;
     }
-
 
     /**
      *
@@ -170,40 +194,40 @@ class Isolationists extends AbsCivilization {
      */
     function getVertexNeighbours($coords, $vertex, $valid_coords) {
         // need to use map_tile_orient and $vertex to know which relative position we are in.
-        $neighbours = array();
+        $neighbours = [];
         if (!array_key_exists($coords, $valid_coords)) {
             return $neighbours;
         }
         $c = explode("_", $coords);
         $x = $c[0];
         $y = $c[1];
-        $current_orient = $valid_coords[$coords]['map_tile_orient'];
+        $current_orient = $valid_coords[$coords]["map_tile_orient"];
         $relative = $this->game->getTileRotation($vertex, $current_orient, -1); // reverse rotation
-        $relatives = array();
+        $relatives = [];
         switch ($relative) {
             case 0:
-                array_push($relatives, array($x . '_' . ($y - 1), 2));
-                array_push($relatives, array(($x - 1) . '_' . ($y - 1), 4));
+                array_push($relatives, [$x . "_" . ($y - 1), 2]);
+                array_push($relatives, [$x - 1 . "_" . ($y - 1), 4]);
                 break;
             case 1:
-                array_push($relatives, array(($x - 1) . '_' . ($y), 5));
-                array_push($relatives, array(($x - 1) . '_' . ($y - 1), 3));
+                array_push($relatives, [$x - 1 . "_" . $y, 5]);
+                array_push($relatives, [$x - 1 . "_" . ($y - 1), 3]);
                 break;
             case 2:
-                array_push($relatives, array(($x - 1) . '_' . ($y), 4));
-                array_push($relatives, array(($x) . '_' . ($y + 1), 0));
+                array_push($relatives, [$x - 1 . "_" . $y, 4]);
+                array_push($relatives, [$x . "_" . ($y + 1), 0]);
                 break;
             case 3:
-                array_push($relatives, array(($x + 1) . '_' . ($y + 1), 1));
-                array_push($relatives, array(($x) . '_' . ($y + 1), 5));
+                array_push($relatives, [$x + 1 . "_" . ($y + 1), 1]);
+                array_push($relatives, [$x . "_" . ($y + 1), 5]);
                 break;
             case 4:
-                array_push($relatives, array(($x + 1) . '_' . ($y + 1), 0));
-                array_push($relatives, array(($x + 1) . '_' . ($y), 2));
+                array_push($relatives, [$x + 1 . "_" . ($y + 1), 0]);
+                array_push($relatives, [$x + 1 . "_" . $y, 2]);
                 break;
             case 5:
-                array_push($relatives, array(($x) . '_' . ($y - 1), 3));
-                array_push($relatives, array(($x + 1) . '_' . ($y), 1));
+                array_push($relatives, [$x . "_" . ($y - 1), 3]);
+                array_push($relatives, [$x + 1 . "_" . $y, 1]);
                 break;
             default:
                 $this->game->systemAssertTrue("invalid tile rotation $relative");
@@ -213,7 +237,7 @@ class Isolationists extends AbsCivilization {
             $coord = $r[0];
             $v = $r[1];
             if (array_key_exists($coord, $valid_coords)) {
-                $rel_vertex = $this->game->getTileRotation($v, $valid_coords[$coord]['map_tile_orient']);
+                $rel_vertex = $this->game->getTileRotation($v, $valid_coords[$coord]["map_tile_orient"]);
                 array_push($neighbours, [$coord, $rel_vertex]);
             }
         }
