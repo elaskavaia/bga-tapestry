@@ -47,8 +47,8 @@ abstract class PGameXBody extends tapcommon {
     public array $decision_cards;
 
     // decks
-    protected Deck $cards;
-    protected Deck $structures;
+    protected \Bga\GameFramework\Components\Deck $cards;
+    protected \Bga\GameFramework\Components\Deck $structures;
     // cache
     protected array $player_bots;
     protected bool $token_types_adjusted;
@@ -99,11 +99,17 @@ abstract class PGameXBody extends tapcommon {
             "automa_level" => 151,
             "shadow_level" => 152,
         ]);
-        $this->cards = $this->getNew("module.common.deck");
-        $this->cards->init("card");
-        $this->structures = $this->getNew("module.common.deck");
-        $this->structures->init("structure");
+
+        $this->cards = $this->getNewDeck("card");
+        $this->structures = $this->getNewDeck("structure");
         $this->token_types_adjusted = false;
+    }
+
+    /**
+     * helper method to make testing easier
+     */
+    function getNewDeck(string $name): \Bga\GameFramework\Components\Deck {
+        return $this->deckFactory->createDeck($name);
     }
 
     /**
@@ -112,7 +118,7 @@ abstract class PGameXBody extends tapcommon {
      *
      *     @Override
      */
-    protected function initTable() {
+    protected function initTable(): void {
         // this fiddles with material file depending on the extension selected
         $this->adjustMaterial();
     }
@@ -1220,6 +1226,9 @@ abstract class PGameXBody extends tapcommon {
         return $this->getObjectFromDB($sql);
     }
 
+    /**
+     * Return card info with card_ prefixes of fields
+     */
     function getCardInfo($card) {
         if (is_array($card)) {
             $info = $card;
@@ -1239,8 +1248,7 @@ abstract class PGameXBody extends tapcommon {
         }
         $sql .= " FROM structure";
         $sql .= " WHERE card_id='$structure_id' ";
-        $dbres = self::DbQuery($sql);
-        return mysql_fetch_assoc($dbres);
+        return $this->getUniqueValueFromDB($sql);
     }
 
     function getStructureInfoSearch(
@@ -3244,7 +3252,7 @@ abstract class PGameXBody extends tapcommon {
         }
 
         $prev = $this->getLatestTapestry($player_id, $era);
-        if ($prev) {
+        if ($prev && $prev["card_id"] != $card_id) {
             $prev_id = $prev["card_id"];
             $this->DbQuery("UPDATE card SET card_location='era_6' WHERE card_id='$prev_id'");
             $args = $this->notifArgsAddCardInfo($prev_id, [
@@ -3713,10 +3721,14 @@ abstract class PGameXBody extends tapcommon {
     function action_playTapestryCard($card_id) {
         $this->checkAction("playCard");
         $player_id = $this->getActivePlayerId();
-        $check_card_id = $this->getUniqueValueFromDB(
-            "SELECT card_id FROM card WHERE card_type='3' AND card_id='$card_id' AND card_location='hand' AND card_location_arg='$player_id'"
+        $card = $this->getCardInfo($card_id);
+        $this->systemAssertTrue("invalid card selected $card_id", $card);
+        $this->systemAssertTrue("invalid card selected $card_id invalid owner", $card["card_location_arg"] == $player_id);
+        $era = $this->getCurrentEra($player_id);
+        $this->systemAssertTrue(
+            "invalid card selected $card_id not in hand",
+            $card["card_location"] == "hand" || $card["card_location"] == "era$era"
         );
-        $this->systemAssertTrue("invalid card selected $card_id not in hand", $check_card_id);
         $ben = $this->getCurrentBenefitType();
         if ($ben == 181) {
             // discard
@@ -11759,7 +11771,7 @@ abstract class PGameXBody extends tapcommon {
     /**
      * Override
      */
-    function setStat($value, $name, $player_id = null, $bDoNotLoop = false) {
+    function setStat($value, $name, $player_id = null, $bDoNotLoop = false): void {
         if ($this->isRealPlayer($player_id) || $player_id == null) {
             parent::setStat($value, $name, $player_id, $bDoNotLoop);
         } else {
@@ -11770,7 +11782,7 @@ abstract class PGameXBody extends tapcommon {
     /**
      * Override
      */
-    function getStat($name, $player_id = null) {
+    function getStat($name, $player_id = null): int {
         if ($this->isRealPlayer($player_id) || $player_id == null) {
             return parent::getStat($name, $player_id);
         }

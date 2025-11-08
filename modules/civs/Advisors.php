@@ -120,8 +120,8 @@ class Advisors extends AbsCivilization {
         $civ = $this->civ;
         $game = $this->game;
         $bene = $game->getCurrentBenefit(BE_ADVISORS_OVERTAKE_ADVISE);
-        $reason = $bene["benefit_data"];
-        $original_card_id = $game->getReasonArg($reason, 4);
+        $reasonA = $bene["benefit_data"];
+        $original_card_id = $game->getReasonArg($reasonA, 4);
         $beneS = $game->getCurrentBenefit(BE_ADVISORS_OVERTAKE_ADVISE_SELECTED);
         $reason = $beneS["benefit_data"];
         $advisor_id = $game->getReasonArg($reason, 3);
@@ -132,6 +132,7 @@ class Advisors extends AbsCivilization {
         $game->clearCurrentBenefit($beneS);
         if ($advised_card_id != $card_id) {
             // declined
+            //$game->effect_moveCard($card_id, $player_id, "hand", $player_id, null, ""); // move card back  otherwise cannot play
             $game->effect_moveCard($advised_card_id, $player_id, "hand", $advisor_id); // move card back to advisor
             $this->systemAssertTrue("ERR:Advisors:15", $card_id == $original_card_id);
             $game->playTapestryCard($card_id, $player_id, false);
@@ -144,6 +145,7 @@ class Advisors extends AbsCivilization {
             $game->queueBenefitNormal(BE_ADVISORS_FALLBACK, $advisor_id, reason_civ($civ));
         } else {
             // accepted
+            $game->effect_moveCard($original_card_id, $player_id, "hand", $player_id); // move card back to opponent hand
             $game->playTapestryCard($card_id, $player_id, false);
             $card = $game->getCardInfoById($card_id);
             $tap_type = $card["card_type_arg"];
@@ -284,21 +286,13 @@ class Advisors extends AbsCivilization {
         }
         $game->interruptBenefit();
         if ($game->isRealPlayer($opponent_id)) {
-            $args = $game->notifArgsAddCardInfo($card_id);
-            $game->notifyWithName("message_info", clienttranslate('${player_name} attempts to play ${card_name}'), $args, $player_id);
-            $card = $game->getCardInfo($card_id);
-            $card["card_location"] = "draw";
-            $card["card_location_arg"] = $player_id;
-            $game->notifyWithName(
-                "moveCard",
-                "",
-                [
-                    "cards" => [$card],
-                    "count" => 1,
-                    "_private" => true,
-                ],
-                $player_id
-            );
+            $this->game->getCurrentEra($opponent_id);
+            $this->game->DbQuery("UPDATE card SET card_location='era$era',card_location_arg='$opponent_id' WHERE card_id='$card_id'");
+
+            $this->game
+                ->notif("moveCard", $opponent_id)
+                ->withCard($card_id)
+                ->notifyAll(clienttranslate('${player_name} attempts to play ${card_name}'));
             $game->queueBenefitNormal(BE_ADVISORS_OVERTAKE, $player_id, reason_civ($civ, "$opponent_id:$card_id"));
             return true;
         } else {
