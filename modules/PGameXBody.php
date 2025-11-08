@@ -7216,7 +7216,7 @@ abstract class PGameXBody extends tapcommon {
     function action_standup($arr) {
         $this->checkAction("standup");
         $player_id = $this->getActivePlayerId();
-        $this->isTapestryActive($player_id, 35, true); // revolution
+        //$this->isTapestryActive($player_id, 35, true); // revolution DO NOT NEED this check
         $this->clearCurrentBenefit(BE_STANDUP_3_OUTPOSTS, true);
         $count = count($arr);
         $this->userAssertTrue(totranslate("Select at least one outpost and at most 3 to stand up or Decline"), $count > 0 && $count <= 3);
@@ -11120,10 +11120,11 @@ abstract class PGameXBody extends tapcommon {
         if ($player_id != $this->getGameStateValue("current_player_turn")) {
             return true;
         }
-        $args = $this->argPlayerTurnEnd();
-        if ($args["move"] == $args["undo_move"]) {
-            return true;
-        }
+        // $args = $this->argPlayerTurnEnd();
+        // if ($args["move"] == $args["undo_move"]) {
+        //     return true;
+        // }
+
         if ($this->isPlayerEliminated($player_id)) {
             return true;
         }
@@ -11134,6 +11135,9 @@ abstract class PGameXBody extends tapcommon {
             return true;
         }
         if (!$this->isRealPlayer($player_id)) {
+            return true;
+        }
+        if ($this->getGameUserPreference($player_id, PREF_AUTO_CONFIRM) == PREFVALUE_AUTO_CONFIRM_ON) {
             return true;
         }
         return false;
