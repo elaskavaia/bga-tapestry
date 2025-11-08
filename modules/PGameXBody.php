@@ -3497,31 +3497,32 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function debug_award(string $card_name) {
+        $player_id = $this->getCurrentPlayerId();
         $cid = $this->searchForCard($this->tapestry_card_data, $card_name);
         if ($cid) {
             $deck = $this->card_types[CARD_TAPESTRY]["deck"];
             $discard = "discard";
-            $this->debug_awardCard(CARD_TAPESTRY, $cid, null, false, null, $deck, $discard);
+            $this->debug_awardCard(CARD_TAPESTRY, $cid, null, false, $player_id, $deck, $discard);
             return;
         }
         $cid = $this->searchForCard($this->tech_card_data, $card_name);
         if ($cid) {
-            $this->debug_awardCard(4, $cid);
+            $this->debug_awardCard(CARD_TECHNOLOGY, $cid, null, false, $player_id);
             return;
         }
         $cid = $this->searchForCard($this->civilizations, $card_name);
         if ($cid) {
-            $this->debug_awardCard(5, $cid);
+            $this->debug_awardCard(CARD_CIVILIZATION, $cid, null, false, $player_id);
             return;
         }
         if (startsWith($card_name, "tile") || startswith($card_name, "territory")) {
             $cid = getPart($card_name, 1);
-            $this->debug_awardCard(1, $cid);
+            $this->debug_awardCard(CARD_TERRITORY, $cid, null, false, $player_id);
             return;
         }
         if (startsWith($card_name, "space")) {
             $cid = getPart($card_name, 1);
-            $this->debug_awardCard(CARD_SPACE, $cid);
+            $this->debug_awardCard(CARD_SPACE, $cid, null, false, $player_id);
             return;
         }
         $this->userAssertTrue("Card $card_name is not found");
@@ -8258,6 +8259,7 @@ abstract class PGameXBody extends tapcommon {
         $ben = $current_benefit["benefit_type"];
         switch ($ben) {
             case 111:
+                $this->interruptBenefit();
                 $this->queueBenefitNormal($this->landmark_data[$type]["benefit"], $player_id, reason_tapestry(15)); // DYSTOPIA
                 break;
             case 305:
