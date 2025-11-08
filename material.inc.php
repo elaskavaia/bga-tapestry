@@ -278,6 +278,15 @@ if (!defined("TAPESTRY")) {
     define("EXP_PP_FLAG", 0b010);
     define("EXP_BA_FLAG", 0b001);
 }
+
+if (!defined("PREF_AUTO_CONFIRM")) {
+    // guard since this included multiple times
+    define("PREF_AUTO_CONFIRM", 150);
+    define("PREFVALUE_AUTO_CONFIRM_OFF", 0);
+    define("PREFVALUE_AUTO_CONFIRM_ON", 1);
+    define("PREFVALUE_AUTO_CONFIRM_TIMER", 2);
+    define("PREF_SHOW_STACK", 151);
+}
 if (!function_exists("str_repeat_join")) {
     function str_repeat_join($str, $count, $on = ",") {
         if (!$count) {
