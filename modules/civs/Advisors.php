@@ -25,6 +25,31 @@ class Advisors extends AbsCivilization {
         return ["tokens" => $tokens, "outposts" => []];
     }
 
+    function interceptTapestryGain($ben, $player_id = null, $reason = "", $count = 1) {
+        $civ_owner = $this->game->getCivOwner(CIV_ADVISORS);
+        $game = $this->game;
+        if ($civ_owner && $civ_owner != $player_id && !$game->isIncomeTurn() && $game->getAdjustmentVariant() < 8) {
+            $nei = $game->getPlayerNeighbours($civ_owner, false);
+            if (!in_array($player_id, $nei)) {
+                return true;
+            }
+            if ($game->getCardCountInHand($civ_owner, CARD_TAPESTRY) == 0) {
+                return true;
+            }
+
+            for ($i = 0; $i < $count; $i++) {
+                $game->queueBenefitNormal(
+                    ["p" => 138, "g" => [BE_TAPESTRY, "h" => 603]],
+                    $civ_owner,
+                    reason(CARD_CIVILIZATION, CIV_ADVISORS, $player_id)
+                );
+                $game->benefitSingleEntry("standard", $ben, $player_id, 1, $reason);
+            }
+            return false;
+        }
+        return true;
+    }
+
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = "") {
         $civ = $this->civ;
         $game = $this->game;

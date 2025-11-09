@@ -5030,24 +5030,10 @@ abstract class PGameXBody extends tapcommon {
         switch ($ben) {
             case BE_TAPESTRY:
                 $civ_owner = $this->getCivOwner(CIV_ADVISORS);
-                if ($civ_owner && $civ_owner != $player_id && !$this->isIncomeTurn() && $this->getAdjustmentVariant() < 8) {
-                    $nei = $this->getPlayerNeighbours($civ_owner, false);
-                    if (!in_array($player_id, $nei)) {
-                        return true;
-                    }
-                    if ($this->getCardCountInHand($civ_owner, CARD_TAPESTRY) == 0) {
-                        return true;
-                    }
-
-                    for ($i = 0; $i < $count; $i++) {
-                        $this->queueBenefitNormal(
-                            ["p" => 138, "g" => [BE_TAPESTRY, "h" => 603]],
-                            $civ_owner,
-                            reason(CARD_CIVILIZATION, CIV_ADVISORS, $player_id)
-                        );
-                        $this->benefitSingleEntry("standard", $ben, $player_id, 1, $reason);
-                    }
-                    return false;
+                if ($civ_owner && $civ_owner != $player_id) {
+                    /** @var Advisors */
+                    $inst = $this->getCivilizationInstance(CIV_ADVISORS, true);
+                    return $inst->interceptTapestryGain($ben, $player_id, $reason, $count);
                 }
                 return true;
             case BE_HOUSE:
@@ -9036,6 +9022,7 @@ abstract class PGameXBody extends tapcommon {
         $this->userAssertTrue(totranslate("Cannot accept bonus without payment, use Decline"), count($params) > 0);
         $is_bonus = $args["benefit_category"] == "bonus";
         $reason = $args["reason_data"];
+        $this->interruptBenefit();
         // Check the quantity and that player owns the ids..
         switch ($type) {
             case BE_GAIN_WORKER: // OLYMPIC HOST (1 worker for 10 VP) process as resources (e.g. fall through) although need to add tag to olympic host card.
@@ -9071,6 +9058,10 @@ abstract class PGameXBody extends tapcommon {
                     $this->systemAssertTrue("cannot pass card to yourself", $dest != $player_id);
                     // XXX validate desttype vs $dest
                     $this->effect_moveCard($items, $player_id, "hand", $dest);
+
+                    foreach ($items as $card) {
+                        $this->effect_cardComesInPlay($card["card_id"], $dest, reason("be", $type));
+                    }
                 } else {
                     $this->effect_discardCard($items, $player_id, "discard", true);
                 }
@@ -9089,7 +9080,7 @@ abstract class PGameXBody extends tapcommon {
             $this->incStat(1, "bonuses", $player_id);
         }
         $benefit = $args["benefits"];
-        $this->interruptBenefit();
+
         if ($count > 0) {
             $this->queueBenefitNormal($benefit, $player_id, $reason);
         } else {
