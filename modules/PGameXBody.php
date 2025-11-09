@@ -474,7 +474,8 @@ abstract class PGameXBody extends tapcommon {
             if (array_get($c, "exclude", false) === true) {
                 continue;
             }
-            if ($automa && !$this->isTestEnv() && array_get($c, "automa", true) === false) {
+            if ($automa && array_get($c, "automa", true) === false) {
+                //$this->debugConsole("Civilization excluded: " + $c["name"]);
                 continue;
             }
             $exp = array_get($c, "exp", "BA");
@@ -1248,7 +1249,7 @@ abstract class PGameXBody extends tapcommon {
         }
         $sql .= " FROM structure";
         $sql .= " WHERE card_id='$structure_id' ";
-        return $this->getUniqueValueFromDB($sql);
+        return $this->getObjectFromDB($sql);
     }
 
     function getStructureInfoSearch(

@@ -35,10 +35,7 @@ abstract class tapcommon extends Table {
         //getGameStateValue does not work when dealing with undo, have to read directly from db
         $next_move_index = 3;
         $subsql = "SELECT global_value FROM global WHERE global_id='$next_move_index' ";
-        $dbres = $this->DbQuery($subsql);
-        $row = mysql_fetch_assoc($dbres);
-        $move_id = (int) $row["global_value"];
-        return $move_id;
+        return (int) $this->getUniqueValueFromDB($subsql);
     }
 
     /*
@@ -306,12 +303,7 @@ abstract class tapcommon extends Table {
 
     function getLastId($table) {
         $sql = "SELECT LAST_INSERT_ID() as res FROM $table";
-        $dbres = self::DbQuery($sql);
-        if ($row = mysql_fetch_assoc($dbres)) {
-            return $row["res"];
-        } else {
-            return 0;
-        }
+        return (int) $this->getUniqueValueFromDB($sql);
     }
 
     function extractStateOperator(&$state) {
