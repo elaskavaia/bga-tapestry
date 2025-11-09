@@ -71,21 +71,13 @@ class Advisors extends AbsCivilization {
                 return false;
             case BE_ADVISORS_OVERTAKE_ADVISE:
                 $card_id = $game->getReasonArg($reason, 4);
-                $card = $game->getCardInfo($card_id);
-                $game->notifyWithName(
-                    "moveCard",
-                    "",
-                    [
-                        "cards" => [$card],
-                        "count" => 1,
-                        "_private" => true,
-                    ],
-                    $player_id
-                );
+                $opponent_id = $game->getReasonArg($reason, 3);
 
                 $res = $this->getWhenPlayedInHand($player_id);
                 if (count($res) == 0) {
                     $game->clearCurrentBenefit();
+
+                    $game->playTapestryCard($card_id, $opponent_id, false);
                     $game->notifyWithName("message", clienttranslate('${player_name} ADVISORS get decline bonus'), [], $player_id);
                     $game->queueBenefitNormal(BE_ADVISORS_FALLBACK, $player_id, reason_civ($civ));
                     $game->nextStateBenefitManager();
@@ -295,9 +287,8 @@ class Advisors extends AbsCivilization {
                 ->notifyAll(clienttranslate('${player_name} attempts to play ${card_name}'));
             $game->queueBenefitNormal(BE_ADVISORS_OVERTAKE, $player_id, reason_civ($civ, "$opponent_id:$card_id"));
             return true;
-        } else {
-            $game->queueBenefitNormal(BE_ADVISORS_FALLBACK, $player_id, reason_civ($civ));
-            return false;
         }
+        $game->queueBenefitNormal(BE_ADVISORS_FALLBACK, $player_id, reason_civ($civ));
+        return false;
     }
 }

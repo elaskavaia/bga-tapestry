@@ -3537,7 +3537,7 @@ abstract class PGameXBody extends tapcommon {
         $this->userAssertTrue("Card $card_name is not found");
     }
 
-    function debug_discardHand($type, $player_id = null) {
+    function debug_discardHand(int $type = CARD_TAPESTRY, int $player_id = 0) {
         if (!$player_id) {
             $player_id = $this->getActivePlayerId();
         }
