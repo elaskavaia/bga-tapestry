@@ -302,7 +302,7 @@ abstract class tapcommon extends Table {
     }
 
     function getLastId($table) {
-        $sql = "SELECT LAST_INSERT_ID() as res FROM $table";
+        $sql = "SELECT LAST_INSERT_ID() as res FROM $table LIMIT 1";
         return (int) $this->getUniqueValueFromDB($sql);
     }
 
