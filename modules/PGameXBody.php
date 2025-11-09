@@ -2614,6 +2614,7 @@ abstract class PGameXBody extends tapcommon {
 
     function coalBaron() {
         // Draw territory and explore with it. Then give neighbours each 1 territory.
+        $this->interruptBenefit();
         $player_id = $this->getActivePlayerId();
         $reason = reason_tapestry(TAP_COAL_BARON);
         $cards = $this->awardCard($player_id, 1, CARD_TERRITORY, false, $reason);
