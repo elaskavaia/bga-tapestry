@@ -276,6 +276,7 @@ class Advisors extends AbsCivilization {
         if ($cube == null) {
             return false;
         }
+        $this->game->dbSetStructureLocation($cube["card_id"], "hand", 0, "", $player_id);
         $game->interruptBenefit();
         if ($game->isRealPlayer($opponent_id)) {
             $this->game->getCurrentEra($opponent_id);
