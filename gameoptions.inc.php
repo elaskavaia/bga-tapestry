@@ -46,6 +46,17 @@ $game_options = [
         //                     2 => [ [ 'type' => 'minplayers', 'value' => 32, 'message' => totranslate('Maintenance in progress.  Table creation for Tapestry is disabled.') ] ],
         //                     4 => [ [ 'type' => 'minplayers', 'value' => 32, 'message' => totranslate('Maintenance in progress.  Table creation for Tapestry is disabled.') ] ],
         //             ],
+        // "startcondition" => [
+        //     4 => [
+        //         [
+        //             "type" => "minplayers",
+        //             "value" => 32,
+        //             "message" => totranslate(
+        //                 "This option can no longer be used (remains for backward compatibiolity), use Adjustment Civilization Pack"
+        //             ),
+        //         ],
+        //     ],
+        // ],
         "default" => 1,
     ],
     101 => [
@@ -83,16 +94,16 @@ $game_options = [
             0b001 => ["name" => totranslate("Original Only")],
             0b011 => ["name" => totranslate("Original + Plans & Ploys"), "tmdisplay" => totranslate("Plans & Ploys"), "beta" => true],
             // 0b101 => ['name' => totranslate('Original + Arts & Architecture'), ],
-            0b010 => [
-                "name" => totranslate("Plans & Ploys Only - Do not use"),
-                "tmdisplay" => totranslate("Plans & Ploys"),
-                "beta" => true,
-            ],
-            0b110 => [
-                "name" => totranslate("Only Expansions (PP + AA) - For Testing"),
-                "tmdisplay" => totranslate("Civilation Set: Only Expansions"),
-                "beta" => true,
-            ],
+            // 0b010 => [
+            //     "name" => totranslate("Plans & Ploys Only - Do not use"),
+            //     "tmdisplay" => totranslate("Plans & Ploys"),
+            //     "beta" => true,
+            // ],
+            // 0b110 => [
+            //     "name" => totranslate("Only Expansions (PP + AA) - For Testing"),
+            //     "tmdisplay" => totranslate("Civilation Set: Only Expansions"),
+            //     "beta" => true,
+            // ],
         ],
         "default" => 0b001,
         "displaycondition" => [
@@ -100,15 +111,6 @@ $game_options = [
                 "type" => "otheroptionisnot",
                 "id" => 100, // adjustment is not set to 4
                 "value" => 4,
-            ],
-        ],
-        "startcondition" => [
-            0b010 => [
-                [
-                    "type" => "minplayers",
-                    "value" => 32,
-                    "message" => totranslate("This option can no longer be used (remains for backward compatibiolity), use All"),
-                ],
             ],
         ],
         "notdisplayedmessage" => totranslate("Original Only - Civilization Set selection is not available with Experimental Adjustments"),

@@ -279,7 +279,7 @@ abstract class tapcommon extends Table {
         }
         $args["player_id"] = $player_id;
         if ($message) {
-            $player_name = $this->getPlayerNameById($player_id);
+            $player_name = $this->getPlayerNameById((int)$player_id);
             $args["player_name"] = $player_name;
         }
         if (array_key_exists("noa", $args) || array_key_exists("nop", $args) || array_key_exists("nod", $args)) {

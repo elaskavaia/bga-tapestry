@@ -1651,7 +1651,7 @@ define([
           } else if (bd.dest == this.CON.FLAG_NEIGHBOUR) {
             const num = this.gamedatas.playerorder_withbots.length;
             const index = this.gamedatas.playerorder_withbots.findIndex((item) => item == this.player_id);
-            const left = (index - 1) % num;
+            const left = (index - 1 + num) % num;
             const right = (index + 1) % num;
             this.addPlayerActionButton(this.gamedatas.playerorder_withbots[left], "onConfirmBonus");
             if (left != right) this.addPlayerActionButton(this.gamedatas.playerorder_withbots[right], "onConfirmBonus");
