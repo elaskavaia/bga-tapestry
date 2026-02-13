@@ -60,9 +60,6 @@ $gameinfos = [
     // The game end result will display "Winner" for the 1st player and "Loser" for all other players
     "losers_not_ranked" => false,
 
-    // Game is "beta". A game MUST set is_beta=1 when published on BGA for the first time, and must remains like this until all bugs are fixed.
-    "is_beta" => 1,
-
     // Is this game cooperative (all players wins together or loose together)
     "is_coop" => 0,
 
@@ -84,12 +81,6 @@ $gameinfos = [
         //  maximum possible value: 740 (ie: your game interface should fit with a 740px width (correspond to a 1024px screen)
         //  minimum possible value: 320 (the lowest value you specify, the better the display is on mobile)
         "min" => 1000,
-
-        // Maximum width
-        //  default: null (ie: no limit, the game interface is as big as the player's screen allows it).
-        //  maximum possible value: unlimited
-        //  minimum possible value: 740
-        "max" => null,
     ],
     "db_undo_support" => true,
 ];

@@ -51,15 +51,6 @@
 //    !! It is not a good idea to modify this file when a game is running !!
 
 $machinestates = [
-    // The initial state. Please do not modify.
-    1 => [
-        "name" => "gameSetup",
-        "description" => "",
-        "type" => "manager",
-        "action" => "stGameSetup",
-        "transitions" => ["" => 2], // 2, 92 for debug
-    ],
-
     92 => [
         // debug state
         "name" => "startGameDebug",
@@ -70,7 +61,6 @@ $machinestates = [
         "transitions" => ["next" => 2],
     ],
 
-    // Note: ID=2 => your first state
     2 => [
         "name" => "setupChoice",
         "description" => clienttranslate("Everyone must choose a civilization"),
@@ -370,15 +360,5 @@ $machinestates = [
         "args" => "arg_keepCard",
         "possibleactions" => ["keepCard"],
         "transitions" => ["next" => 18, "benefit" => 18],
-    ],
-
-    // Final state.
-    // Please do not modify (and do not overload action/args methods).
-    99 => [
-        "name" => "gameEnd",
-        "description" => clienttranslate("End of game"),
-        "type" => "manager",
-        "action" => "stGameEnd",
-        "args" => "argGameEnd",
     ],
 ];

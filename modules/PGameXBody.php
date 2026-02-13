@@ -310,7 +310,7 @@ abstract class PGameXBody extends tapcommon {
         shuffle($default_colors);
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
+        $sql = "INSERT INTO player (player_id, player_color, player_name) VALUES ";
         $values = [];
         foreach ($players as $player_id => $player) {
             $color = array_shift($default_colors);
@@ -318,11 +318,7 @@ abstract class PGameXBody extends tapcommon {
                 "('" .
                 $player_id .
                 "','$color','" .
-                $player["player_canal"] .
-                "','" .
                 addslashes($player["player_name"]) .
-                "','" .
-                addslashes($player["player_avatar"]) .
                 "')";
         }
         $sql .= implode(",", $values);
@@ -370,9 +366,9 @@ abstract class PGameXBody extends tapcommon {
                 "','" .
                 $player["player_color"] .
                 "','" .
-                addslashes($player["player_name"]) .
+                addslashes($player["player_name"] ?? '') .
                 "','" .
-                addslashes($player["player_avatar"]) .
+                addslashes($player["player_avatar"] ?? '') .
                 "')";
         }
         $sql .= implode(",", $values);
@@ -674,7 +670,6 @@ abstract class PGameXBody extends tapcommon {
                 "player_id" => PLAYER_AUTOMA,
                 "player_color" => 0,
                 "player_name" => clienttranslate("Automa"),
-                "player_avatar" => "",
                 "player_no" => $numPlayers,
                 "player_ai" => 1,
                 "player_color" => "69c9c9",
@@ -684,7 +679,6 @@ abstract class PGameXBody extends tapcommon {
             "player_id" => PLAYER_SHADOW,
             "player_color" => 0,
             "player_name" => clienttranslate("Shadow Empire"),
-            "player_avatar" => "",
             "player_no" => $numPlayers + 1,
             "player_ai" => 1,
             "player_color" => "777777",
@@ -1004,18 +998,15 @@ abstract class PGameXBody extends tapcommon {
         return $arr;
     }
 
-    public function getPlayerNameById($player_id): ?string {
+    public function customGetPlayerNameById($player_id): ?string {
         if ($player_id == PLAYER_AUTOMA) {
             return clienttranslate("Automa");
         }
         if ($player_id == PLAYER_SHADOW) {
             return clienttranslate("Shadow Empire");
         }
-        $players = self::loadPlayersBasicInfos();
-        if (!isset($players[$player_id])) {
-            return null;
-        }
-        return $players[$player_id]["player_name"];
+
+        return $this->getPlayerNameById($player_id);
     }
 
     function notifyWithTokenName($type, $message, $id, $player_id = -1) {
@@ -1047,7 +1038,7 @@ abstract class PGameXBody extends tapcommon {
         $args["card_name"] = $this->getTokenName($info["card_type"], $info["card_type_arg"]);
         $args["card_type_name"] = $this->card_types[$info["card_type"]]["name"];
         $card_location_arg = $info["card_location_arg"];
-        $name = $this->getPlayerNameById($card_location_arg);
+        $name = $this->customGetPlayerNameById($card_location_arg);
         if ($name) {
             $args["player_name2"] = $name;
             $args["player_id2"] = $card_location_arg;
@@ -4112,7 +4103,7 @@ abstract class PGameXBody extends tapcommon {
                 $args = $this->notifArgsAddTrackSpot($track, null, $args);
                 $era = $this->getCurrentEra($player_id);
                 $args += [
-                    "opp_name" => $this->getPlayerNameById($owner),
+                    "opp_name" => $this->customGetPlayerNameById($owner),
                     "destination" => "tapestry_slot_{$player_id}_$era",
                 ];
                 $this->notifyWithName(
@@ -6295,7 +6286,7 @@ abstract class PGameXBody extends tapcommon {
         } else {
             if ($type > 0) {
                 $this->notifyAllPlayers("message", clienttranslate('${player_name} is finished, cannot get the bonus'), [
-                    "player_name" => $this->getPlayerNameById($player_id),
+                    "player_name" => $this->customGetPlayerNameById($player_id),
                 ]);
             }
         }
@@ -6331,7 +6322,7 @@ abstract class PGameXBody extends tapcommon {
             $this->notifyAllPlayers("message", clienttranslate('${player_name} is finished, cannot get ${bename}'), [
                 "i18n" => ["bename"],
                 "bename" => $bename,
-                "player_name" => $this->getPlayerNameById($player_id),
+                "player_name" => $this->customGetPlayerNameById($player_id),
             ]);
         }
         return false;
@@ -6574,7 +6565,7 @@ abstract class PGameXBody extends tapcommon {
                 : clienttranslate('${player_name} upgrades ${card_name} for ${player_name2}');
         $args = $this->notifArgsAddCardInfo($card_id, [
             "player_id2" => $player_id,
-            "player_name2" => $this->getPlayerNameById($player_id),
+            "player_name2" => $this->customGetPlayerNameById($player_id),
         ]);
         $this->notifyWithName("moveCard", $message, $args, $active_player);
         $benefit =
@@ -6647,7 +6638,7 @@ abstract class PGameXBody extends tapcommon {
                         "card_name" => $this->tech_card_data[$card_type]["name"],
                         "i18n" => ["card_name"],
                         "player_id2" => $owner,
-                        "player_name2" => $this->getPlayerNameById($owner),
+                        "player_name2" => $this->customGetPlayerNameById($owner),
                         "slot" => 0,
                     ]);
                     $found = true;
@@ -7684,7 +7675,7 @@ abstract class PGameXBody extends tapcommon {
                     "track" => $track,
                     "adv" => $change,
                     "player_id" => $player_id,
-                    "player_name" => $this->getPlayerNameById($player_id),
+                    "player_name" => $this->customGetPlayerNameById($player_id),
                 ];
                 if ($mandatory && $advance) {
                     $args = $this->notifArgsAddTrackSpot(null, null, $args);
@@ -7862,7 +7853,7 @@ abstract class PGameXBody extends tapcommon {
             $dictator = $dictator_data["card_location_arg"];
             $turn = $this->getPlayerTurn($dictator);
             if ($turn == $dd[1] && $dictator && $player_id != $dictator) {
-                $dictName = $this->getPlayerNameById($dictator);
+                $dictName = $this->customGetPlayerNameById($dictator);
                 if ($check) {
                     throw new BgaUserException($this->_("Cannot advance on this track this turn due to DICTATORSHIP") . " " . $dictName);
                 }
@@ -11144,7 +11135,7 @@ abstract class PGameXBody extends tapcommon {
         if (!$this->isRealPlayer($player_id)) {
             return true;
         }
-        if ($this->getGameUserPreference($player_id, PREF_AUTO_CONFIRM) == PREFVALUE_AUTO_CONFIRM_ON) {
+        if ($this->bga->userPreferences->get($player_id, PREF_AUTO_CONFIRM) == PREFVALUE_AUTO_CONFIRM_ON) {
             return true;
         }
         return false;
@@ -11928,7 +11919,7 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("conquer_die_black", $die_black);
         $this->notifyAllPlayers("conquer_roll", clienttranslate('${player_name} rolls the conquer dice ${black_name}/${red_name}'), [
             "player_id" => $player_id,
-            "player_name" => $this->getPlayerNameById($player_id),
+            "player_name" => $this->customGetPlayerNameById($player_id),
             "die_red" => $die_red,
             "die_black" => $die_black,
             "black_name" => $this->dice_names["black"][$die_black]["name"],
@@ -12145,7 +12136,7 @@ class NotifBuilder {
      */
     function withPlayer2($owner) {
         if ($owner) {
-            $this->withArgs(["player_id2" => $owner, "player_name2" => $this->game->getPlayerNameById($owner)]);
+            $this->withArgs(["player_id2" => $owner, "player_name2" => $this->game->customGetPlayerNameById($owner)]);
         }
         return $this;
     }

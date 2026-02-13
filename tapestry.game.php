@@ -23,11 +23,6 @@ class Tapestry extends PGameXBody {
         parent::__construct();
     }
 
-    protected function getGameName() {
-        // Used for translations and stuff. Please do not modify.
-        return "tapestry";
-    }
-
     /*
      * setupNewGame:
      *
@@ -37,6 +32,7 @@ class Tapestry extends PGameXBody {
      */
     protected function setupNewGame($players, $options = []) {
         parent::setupNewGame($players, $options);
+        return 2; // 2, 92 for debug
     }
 
     /*

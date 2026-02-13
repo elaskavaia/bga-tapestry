@@ -76,7 +76,7 @@ class Infiltrators extends AbsCivilization {
             $data['slots_choice'][$no]['benefit'] = [171];
             $data['slots_choice'][$no]['player_id'] = $opponent_id;
             $data['slots_choice'][$no]['count'] = $o_count;
-            $data['slots_choice'][$no]['player_name'] = $game->getPlayerNameById($opponent_id);
+            $data['slots_choice'][$no]['player_name'] = $game->customGetPlayerNameById($opponent_id);
             if ($is_midgame) {
                 $data['slots_choice'][$no]['title'] = clienttranslate('Give token to ${player_name}');
             } else {

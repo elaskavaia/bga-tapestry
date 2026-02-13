@@ -1,5 +1,7 @@
 <?php
-require_once APP_GAMEMODULE_PATH . "module/table/table.game.php";
+
+use Bga\GameFramework\Table;
+
 require_once "taputils.php";
 
 abstract class tapcommon extends Table {
@@ -279,7 +281,7 @@ abstract class tapcommon extends Table {
         }
         $args["player_id"] = $player_id;
         if ($message) {
-            $player_name = $this->getPlayerNameById((int)$player_id);
+            $player_name = $this->customGetPlayerNameById((int)$player_id);
             $args["player_name"] = $player_name;
         }
         if (array_key_exists("noa", $args) || array_key_exists("nop", $args) || array_key_exists("nod", $args)) {
@@ -524,12 +526,5 @@ abstract class tapcommon extends Table {
             $this->notifyAllPlayers("log", $info, $args);
         }
         $this->warn($info);
-    }
-
-    /**
-     * This to make it public
-     */
-    public function _($text) {
-        return parent::_($text);
     }
 }
