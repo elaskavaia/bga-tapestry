@@ -314,12 +314,7 @@ abstract class PGameXBody extends tapcommon {
         $values = [];
         foreach ($players as $player_id => $player) {
             $color = array_shift($default_colors);
-            $values[] =
-                "('" .
-                $player_id .
-                "','$color','" .
-                addslashes($player["player_name"]) .
-                "')";
+            $values[] = "('" . $player_id . "','$color','" . addslashes($player["player_name"]) . "')";
         }
         $sql .= implode(",", $values);
         $this->DbQuery($sql);
@@ -366,9 +361,9 @@ abstract class PGameXBody extends tapcommon {
                 "','" .
                 $player["player_color"] .
                 "','" .
-                addslashes($player["player_name"] ?? '') .
+                addslashes($player["player_name"] ?? "") .
                 "','" .
-                addslashes($player["player_avatar"] ?? '') .
+                addslashes($player["player_avatar"] ?? "") .
                 "')";
         }
         $sql .= implode(",", $values);
@@ -996,17 +991,6 @@ abstract class PGameXBody extends tapcommon {
     function addBenefitData(&$arr = null, $benefit_data = null) {
         $arr = $this->notifArgsAddBen($benefit_data, $arr);
         return $arr;
-    }
-
-    public function customGetPlayerNameById($player_id): ?string {
-        if ($player_id == PLAYER_AUTOMA) {
-            return clienttranslate("Automa");
-        }
-        if ($player_id == PLAYER_SHADOW) {
-            return clienttranslate("Shadow Empire");
-        }
-
-        return $this->getPlayerNameById($player_id);
     }
 
     function notifyWithTokenName($type, $message, $id, $player_id = -1) {
@@ -11135,7 +11119,7 @@ abstract class PGameXBody extends tapcommon {
         if (!$this->isRealPlayer($player_id)) {
             return true;
         }
-        if ($this->bga->userPreferences->get($player_id, PREF_AUTO_CONFIRM) == PREFVALUE_AUTO_CONFIRM_ON) {
+        if ($this->userPreferences->get($player_id, PREF_AUTO_CONFIRM) == PREFVALUE_AUTO_CONFIRM_ON) {
             return true;
         }
         return false;

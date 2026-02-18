@@ -281,7 +281,7 @@ abstract class tapcommon extends Table {
         }
         $args["player_id"] = $player_id;
         if ($message) {
-            $player_name = $this->customGetPlayerNameById((int)$player_id);
+            $player_name = $this->customGetPlayerNameById((int) $player_id);
             $args["player_name"] = $player_name;
         }
         if (array_key_exists("noa", $args) || array_key_exists("nop", $args) || array_key_exists("nod", $args)) {
@@ -301,6 +301,21 @@ abstract class tapcommon extends Table {
         } else {
             $this->notifyAllPlayers($type, $message, $args);
         }
+    }
+
+    public function customGetPlayerNameById($player_id): ?string {
+        if ($player_id == PLAYER_AUTOMA) {
+            return clienttranslate("Automa");
+        }
+        if ($player_id == PLAYER_SHADOW) {
+            return clienttranslate("Shadow Empire");
+        }
+
+        if (!$this->isRealPlayer($player_id)) {
+            return null;
+        }
+
+        return $this->getPlayerNameById($player_id);
     }
 
     function getLastId($table) {

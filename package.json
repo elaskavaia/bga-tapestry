@@ -4,10 +4,10 @@
   "description": "",
   "main": "tapestry.js",
   "scripts": {
-    "build": "npm run build:material",
-    "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap modules/_autoload.php --colors=always modules/tests",
+    "build": "npm run genmat",
+    "tests": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap modules/_autoload.php --colors=always modules/tests",
     "predeploy": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ php8.2  modules/_testpredeploy.php",
-    "build:material": "php8.2 ~/git/bga-sharedcode/misc/genmat.php misc/benefit_types.csv",
+    "genmat": "php8.2 ~/git/bga-sharedcode/misc/genmat.php misc/benefit_types.csv",
     "jstest": "TS_NODE_PROJECT=tests/tsconfig.test.json mocha -r ts-node/register tests/**/*.spec.ts",
     "end": "echo The End"
   },
@@ -29,7 +29,9 @@
     "typescript": "^4.9.5"
   },
   "prettier": {
-    "plugins": ["@prettier/plugin-php"],
+    "plugins": [
+      "@prettier/plugin-php"
+    ],
     "braceStyle": "1tbs",
     "printWidth": 140,
     "trailingComma": "none"
