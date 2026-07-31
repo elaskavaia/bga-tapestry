@@ -303,7 +303,7 @@ abstract class tapcommon extends Table {
         }
     }
 
-    public function customGetPlayerNameById($player_id): ?string {
+    public function customGetPlayerNameById($player_id): string {
         if ($player_id == PLAYER_AUTOMA) {
             return clienttranslate("Automa");
         }
@@ -312,10 +312,10 @@ abstract class tapcommon extends Table {
         }
 
         if (!$this->isRealPlayer($player_id)) {
-            return null;
+            return clienttranslate("Unknown"); // should not happen
         }
 
-        return $this->getPlayerNameById($player_id);
+        return $this->getPlayerNameById((int) $player_id);
     }
 
     function getLastId($table) {

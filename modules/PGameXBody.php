@@ -2441,12 +2441,14 @@ abstract class PGameXBody extends tapcommon {
                     $this->DbQuery("UPDATE card SET card_type_arg=0 WHERE card_id='$cid'");
                 }
             }
-            $this->notifyPlayer($player_id, "newCardsMine", "", [
-                "player_id" => $player_id,
-                "count" => $count,
-                "card_type" => $card_type,
-                "cards" => $cards,
-            ]);
+            if ($player_id > PLAYER_SHADOW) {
+                $this->notifyPlayer($player_id, "newCardsMine", "", [
+                    "player_id" => $player_id,
+                    "count" => $count,
+                    "card_type" => $card_type,
+                    "cards" => $cards,
+                ]);
+            }
             $send_cards = null; // suppress sending public notif
         }
         $this->notifyWithName(
