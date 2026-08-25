@@ -23,9 +23,10 @@ class GameUT extends Tapestry {
         parent::__construct();
         include "./material.inc.php";
         include "./states.inc.php";
-        $this->gamestate = new GameState($machinestates);
+        $this->gamestate->_setStates($machinestates);
         $this->xtable = [];
         $this->curid = 1;
+        $this->_setCurrentPlayerId($this->curid);
     }
 
     function init() {
@@ -34,11 +35,7 @@ class GameUT extends Tapestry {
         $this->gamestate->jumpToState(2);
     }
 
-    public function getCurrentPlayerId($bReturnNullIfNotLogged = false) {
-        return $this->curid;
-    }
-
-    protected function getCurrentPlayerColor() {
+    public function getCurrentPlayerColor(): string {
         return $this->getPlayerColorById($this->curid);
     }
 

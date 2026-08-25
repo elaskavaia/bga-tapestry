@@ -44,7 +44,7 @@ abstract class tapcommon extends Table {
      * @Override
      * - have to override to track second copy of var flag as original one is private
      */
-    function undoSavepoint() {
+    function undoSavepoint(): void {
         parent::undoSavepoint();
         $this->undoSaveOnMoveEndDup = true;
     }

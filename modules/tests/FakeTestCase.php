@@ -7,12 +7,20 @@ namespace PHPUnit\Framework;
 use feException;
 
 class TestCase {
+    function runTestMethod(string $method) {
+        $this->setUp();
+        $this->$method();
+    }
+
     function fail($string = null) {
         if ($string) throw new feException($string);
         else throw new feException("assertion failed");
     }
     function assertNotNull($exp, $string = null) {
         if ($exp === null) $this->fail($string);
+    }
+    function assertNull($exp, $string = null) {
+        if ($exp !== null) $this->fail($string);
     }
     function assertTrue($exp, $string = null) {
         if (!$exp) $this->fail($string);

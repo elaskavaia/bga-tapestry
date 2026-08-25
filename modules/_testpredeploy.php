@@ -16,7 +16,7 @@ $methods = get_class_methods($x);
 foreach ($methods as $method) {
     if (startsWith($method,"test")) {
         echo("calling $method\n");
-        call_user_func_array([$x, $method], []);
+        $x->runTestMethod($method);
     }
 }
 
