@@ -9,10 +9,10 @@ RES_DIR=${2:-$CUR_PROJ/../$PROJECT_NAME}
 rm -rf ${TEMP_PROJ}
 
 if [ "$PROJECT_NAME" = "taptest" ]; then
-    php7.4 ~/git/bga-sharedcode/misc/bgaprojectrename.php ${CUR_PROJ} ${TEMP_PROJ} --old-name Tapestry --new-name taptest
+    php8.4 ~/git/bga-sharedcode/misc/bgaprojectrename.php ${CUR_PROJ} ${TEMP_PROJ} --old-name Tapestry --new-name taptest
 	sed -i ${TEMP_PROJ}/gameinfos.inc.php -e "s/'game_name' => .*/'game_name' => 'Tapestry Test',/"
 elif [ "$PROJECT_NAME" = "tapestry" ]; then
-    php7.4 ~/git/bga-sharedcode/misc/bgaprojectrename.php ${CUR_PROJ} ${TEMP_PROJ} --old-name taptest --new-name Tapestry
+    php8.4 ~/git/bga-sharedcode/misc/bgaprojectrename.php ${CUR_PROJ} ${TEMP_PROJ} --old-name taptest --new-name Tapestry
 	sed -i ${TEMP_PROJ}/gameinfos.inc.php -e "s/'game_name' => .*/'game_name' => 'Tapestry',/"
 fi
 grep game_name ${TEMP_PROJ}/gameinfos.inc.php 
