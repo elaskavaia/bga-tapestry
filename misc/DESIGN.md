@@ -6,6 +6,11 @@ Developed by: started apollo1001, cont Victoria_La
 If you see this file you probably are unlike person who want to fix this game. I have to warn you - its a mess.
 Here is my design notes (I am Victoria_La):
 
+Raw assets:
+
+The source graphics (PSD, PDF, full size scans) are NOT in this repo, they live in
+~/Develop/bga/bga-assets/Tapestry/. Only the exported sprites end up in img/.
+
 Db tables:
 
 card and structure - are standard "deck" type table with extra data field card_location_arg2
