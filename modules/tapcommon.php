@@ -234,8 +234,7 @@ abstract class tapcommon extends Table {
     }
 
     function getMostlyActivePlayerId() {
-        $state = $this->gamestate->state();
-        if ($state["type"] === "multipleactiveplayer") {
+        if ($this->gamestate->isMultiactiveState()) {
             return $this->getCurrentPlayerId();
         } else {
             return $this->getActivePlayerId();
