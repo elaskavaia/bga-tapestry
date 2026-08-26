@@ -313,6 +313,7 @@ namespace Bga\GameFramework {
         public TableStats $tableStats;
         public PlayerStats $playerStats;
         public Components\DeckFactory $deckFactory;
+        public Components\ItemManagerFactory $itemManagerFactory;
         public Components\Counters\CounterFactory $counterFactory;
         public Debug $debug;
         
@@ -1602,6 +1603,7 @@ namespace Bga\GameFramework {
          *     disable_player_order_swap_on_rematch: bool,
          *     game_interface_width: array{
          *         min: int,
+         *         autoscale?: bool|'viewport',
          *     }
          * }
          * @see gameinfos.inc.php
@@ -2662,6 +2664,228 @@ namespace Bga\GameFramework\Components {
         function countCardsByLocationArgs(string $location): array
         {
             return [];
+        }
+    }
+
+}
+
+namespace Bga\GameFramework\Components\ItemManager {
+
+    /**
+     * Metadata attribute marking a class as an item managed by ItemManager.
+     */
+    #[\Attribute(\Attribute::TARGET_CLASS)]
+    class Item {
+        /** The name of DB table. */
+        public function __construct(public ?string $tableName = null) {}
+    }
+
+    enum ItemFieldKind: string {
+        case ID = 'id';
+        case LOCATION = 'location';
+        case ORDER = 'order';
+    }
+
+    /**
+     * Metadata attribute describing an item field persisted by ItemManager.
+     */
+    #[\Attribute(\Attribute::TARGET_PROPERTY)]
+    class ItemField {
+        /** The name of the field. */
+        public string $name;
+        /** The type of the data stored in that field. */
+        public string $type;
+        /** The name of the DB column. */
+        public string $dbField;
+        /** The class of the object for typed JSON fields. */
+        public ?string $class = null;
+
+        /**
+         * @param ?ItemFieldKind $kind Mandatory field kind, if applicable.
+         * @param ?string $type The type of the data stored in that field.
+         * @param ?string $dbField The name of the DB column, if different from the field name.
+         * @param bool $serialize Whether objects are stored as PHP serialized objects.
+         * @param int $locationIndex The location field index used for ordering.
+         */
+        public function __construct(
+            public ?ItemFieldKind $kind = null,
+            ?string $type = null,
+            ?string $dbField = null,
+            public bool $serialize = false,
+            public int $locationIndex = 0,
+        ) {
+        }
+    }
+
+    class ItemLocation {
+        public string|int|null $autoReshuffleFrom;
+        public ?\Closure $autoReshuffleCallback;
+
+        /**
+         * @param string|int $name The name of the location. String names can end with * or % as a wildcard.
+         * @param bool $randomPick Indicates if the location should be reshuffled when picking.
+         * @param string|int|ItemLocation|null $autoReshuffleFrom Location to rebuild from when needed.
+         * @param callable|null $autoReshuffleCallback Callback called after an automatic reshuffle.
+         */
+        public function __construct(
+            public string|int $name,
+            public bool $randomPick = false,
+            string|int|ItemLocation|null $autoReshuffleFrom = null,
+            ?callable $autoReshuffleCallback = null,
+        ) {
+        }
+
+        /**
+         * Create the 4 usual locations: deck, discard, table and hand.
+         * @param bool $reshuffleDiscardToDeck if deck is automatically rebuilt from discard when needed.
+         * @return ItemLocation[] default locations
+         */
+        public static function getDefaults(bool $reshuffleDiscardToDeck = true): array { return []; }
+    }
+
+    class Location {
+        /** @var array<int, mixed> */
+        public array $locations;
+        public bool $filter;
+
+        /** Create a concrete location from one or more location parts. */
+        public static function from(array|string|int|Location $location, string|int|null ...$locations): self { return new self(); }
+        /** Create a read-only location filter. */
+        public static function filter(array|string|int|Location $location, string|int|array|null ...$locations): self { return new self(); }
+    }
+
+    /**
+     * Manager for database-backed game items.
+     *
+     * @template T of object
+     */
+    class ItemManager {
+        /** @param class-string<T> $className The Item object class. */
+        public function __construct(
+            private string $className,
+            ?callable $classNameResolver = null,
+            ?callable $dbUpdateCallback = null,
+            ?callable $countChangeCallback = null,
+        ) {}
+
+        /** Create the DB table; call this at the beginning of Game::setupNewGame. */
+        public function initDb(): void {}
+        /** Register a location available for managed items. */
+        public function addLocation(ItemLocation $location): void {}
+        /** @param array<int, mixed> $locations */
+        public function addLocations(array $locations): void {}
+        /** Return a registered location by name, including wildcard matches. */
+        public function getLocationByName(string|int $locationName): ?ItemLocation { return null; }
+        /** Create new items in the DB. @param array[] $itemsTypes */
+        public function createItems(array $itemsTypes): void {}
+        /** Move all items from one location to another. */
+        public function moveAllItemsInLocation(Location|array|string|int|null $from, Location|array|string|int $to): void {}
+        /**
+         * Pick an item from a location into another location.
+         * @return T|null An object of the managed class, or null if no item is picked.
+         */
+        public function pickItem(Location|array|string|int $from, Location|array|string|int $to): ?object { return null; }
+        /**
+         * Pick items from a location into another location.
+         * @param int $number The number of items to pick.
+         * @return \Bga\GameFramework\Helpers\Collection<T>
+         */
+        public function pickItems(int $number, Location|array|string|int $from, Location|array|string|int $to): \Bga\GameFramework\Helpers\Collection { return new \Bga\GameFramework\Helpers\Collection(); }
+        /** Set the order of a managed item within its location. @param int|T $itemOrItemId */
+        public function setItemOrder(object|int $itemOrItemId, int $order): void {}
+        /** Move one managed item to a location. @param int|T $itemOrItemId */
+        public function moveItem(object|int $itemOrItemId, Location|array|string|int $to, ?int $order = null): void {}
+        /** Move managed items to a location. @param array<int|T>|Collection<int|T> $itemsOrItemIds */
+        public function moveItems(array|\Bga\GameFramework\Helpers\Collection $itemsOrItemIds, Location|array|string|int $to, bool $prepend = false): void {}
+        /**
+         * Get a list of items matching values for a field name.
+         * @param mixed $values A single value or an array of values.
+         * @return \Bga\GameFramework\Helpers\Collection<T>
+         */
+        public function getItemsByFieldName(string $fieldName, mixed $values, ?int $limit = null, ?string $sortByField = null, bool $reversed = false): \Bga\GameFramework\Helpers\Collection { return new \Bga\GameFramework\Helpers\Collection(); }
+        /**
+         * Get a list of items matching multiple queries with AND.
+         * @param array<string, mixed>|array<array{0: string, 1: mixed}> $filters
+         * @return \Bga\GameFramework\Helpers\Collection<T>
+         */
+        public function getItemsByFieldNames(array $filters, ?int $limit = null, ?string $sortByField = null, bool $reversed = false): \Bga\GameFramework\Helpers\Collection { return new \Bga\GameFramework\Helpers\Collection(); }
+        /** See getItemsByFieldName. @param mixed $values A single value or an array of values. @return \Bga\GameFramework\Helpers\Collection<T> */
+        public function getItemsByField(ItemField $field, mixed $values, ?int $limit = null, ?string $sortByField = null, bool $reversed = false): \Bga\GameFramework\Helpers\Collection { return new \Bga\GameFramework\Helpers\Collection(); }
+        /** See getItemsByFieldNames. @param array<array{0: ItemField, 1: mixed}> $filters @return \Bga\GameFramework\Helpers\Collection<T> */
+        public function getItemsByFields(array $filters, ?int $limit = null, ?string $sortByField = null, bool $reversed = false): \Bga\GameFramework\Helpers\Collection { return new \Bga\GameFramework\Helpers\Collection(); }
+        /** @return T|null An object of the managed class, or null if it does not exist. */
+        public function getItemById(int $id): ?object { return null; }
+        /** @param int[] $ids @return \Bga\GameFramework\Helpers\Collection<T> */
+        public function getItemsByIds(array $ids, ?string $sortByField = null, bool $reversed = false): \Bga\GameFramework\Helpers\Collection { return new \Bga\GameFramework\Helpers\Collection(); }
+        /** Count the items in a location. Use null for a non-trailing location part as a wildcard filter. */
+        public function countItemsInLocation(Location|array|string|int $location): int { return 0; }
+        /** Get the highest order value currently used in a location. */
+        public function getMaxOrderInLocation(Location|array|string|int $location): int { return 0; }
+        /** @return \Bga\GameFramework\Helpers\Collection<T> Use null for a non-trailing location part as a wildcard filter. */
+        public function getItemsInLocation(Location|array|string|int $location, bool $reversed = false, ?int $limit = null, ?string $sortByField = null): \Bga\GameFramework\Helpers\Collection { return new \Bga\GameFramework\Helpers\Collection(); }
+        /** @return \Bga\GameFramework\Helpers\Collection<T> A collection of managed items keyed by item id. */
+        public function getAllItems(?int $limit = null): \Bga\GameFramework\Helpers\Collection { return new \Bga\GameFramework\Helpers\Collection(); }
+        /** @return T|null An object on top of the location, or null if no item is present. */
+        public function getItemOnTop(Location|array|string|int $location): ?object { return null; }
+        /** @return \Bga\GameFramework\Helpers\Collection<T> Items on top of the location. */
+        public function getItemsOnTop(int $number, Location|array|string|int $location): \Bga\GameFramework\Helpers\Collection { return new \Bga\GameFramework\Helpers\Collection(); }
+        /** Update the DB value based on the Item fields; all fields are updated if null. */
+        public function updateItem(object $item, array|string|null $fields = null): void {}
+        /** @param T[]|\Bga\GameFramework\Helpers\Collection<T> $items Update DB values based on the Item fields. */
+        public function updateItems(array|\Bga\GameFramework\Helpers\Collection $items, array|string|null $fields = null): void {}
+        /** Update the named field on all items. */
+        public function updateAllItems(string $fieldName, mixed $value): void {}
+        /** @return T|null An object of the managed class, or null if no item is provided. */
+        public function getItemFromDb(?array $dbItem): ?object { return null; }
+        /** Shuffle the order of the items in a location. */
+        public function shuffle(Location|array|string|int $location): void {}
+        /**
+         * Change the ids of some items, usually when items become hidden again.
+         * @param array<int|T>|\Bga\GameFramework\Helpers\Collection<int|T> $itemsOrItemIds
+         * @return array<int, int> old id => new id
+         */
+        public function changeIds(array|\Bga\GameFramework\Helpers\Collection $itemsOrItemIds): array { return []; }
+        /** Change the ids of all items in a location. */
+        public function changeIdsForLocation(Location|array|string|int $location): void {}
+        /**
+         * Update the table with columns added to the item class after its creation.
+         * @param string[] $fieldNames The names of the newly added fields.
+         */
+        public function upgradeTableDbAddColumns(array $fieldNames) {}
+    }
+
+}
+
+namespace Bga\GameFramework\Components {
+
+    /** Factory for creating ItemManager components. */
+    final class ItemManagerFactory {
+        /**
+         * Creates an ItemManager for the given item class.
+         *
+         * The item class must declare an #[Item] attribute, and its managed fields
+         * must be declared with #[ItemField] attributes.
+         *
+         * @template T of object
+         * @param class-string<T> $className Item base class managed by this manager.
+         * @param (callable(array<string, mixed>|null): class-string<T>|null)|null $classNameResolver Optional resolver used to instantiate a subclass from a DB row.
+         * @param \Bga\GameFramework\Components\ItemManager\ItemLocation[] $locations Locations accepted by this manager.
+         * @param (callable(string, array<int|string, array<string, mixed>>, string): void)|null $dbUpdateCallback Optional callback receiving table name, updated DB lines keyed by item id, and operation ('INSERT' or 'UPDATE').
+         * @param (callable(string, array<string, array{location: array<int, string|int|null>, count: int}>): void)|null $countChangeCallback Optional callback receiving table name and changed item counts keyed by encoded location.
+         * @return \Bga\GameFramework\Components\ItemManager\ItemManager<T>
+         */
+        public function createItemManager(
+            string $className,
+            ?callable $classNameResolver = null,
+            array $locations = [],
+            ?callable $dbUpdateCallback = null,
+            ?callable $countChangeCallback = null,
+        ): \Bga\GameFramework\Components\ItemManager\ItemManager {
+            $itemManager = new \Bga\GameFramework\Components\ItemManager\ItemManager($className, $classNameResolver, $dbUpdateCallback, $countChangeCallback);
+            if ($locations !== []) {
+                $itemManager->addLocations($locations);
+            }
+            return $itemManager;
         }
     }
 
