@@ -8137,7 +8137,7 @@ abstract class PGameXBody extends tapcommon {
         $op = array_shift($options);
         if ($op == "o") {
             $op = "or";
-        } elseif ($op = "a") {
+        } elseif ($op == "a") {
             $op = "choice";
         }
         return ["op" => $op, "types" => $options];
