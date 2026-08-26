@@ -93,9 +93,33 @@ face value, then choose science or black die).
     science vs black choice, territory-control benefit).
 11. `npm run predeploy` gate.
 
+## Implemented, with two deviations from the plan above
+
+1. The plan missed the `al` gate, which would have broken level 9 on its own. The civ deck
+   builder skipped every civ whose `"al"` was below the adjustment level, and all 31 civs carry
+   `"al" => 8`, so level 9 would have started with an empty civ deck. All 31 being 8 also makes
+   the check dead for levels 1-8, so the condition was deleted outright rather than clamped.
+   The `"al"` keys in material were left in place.
+2. Change 6 needed no extra click for the science/black choice. `queueBenefitNormal` refuses a
+   nested choice ("Cannot queue recursive choice benefit"), so every `or` branch has to be one
+   benefit id, and the black die pays a pair. New benefit `341 BE_ALCHEMISTS_DIE` carries
+   `'civ'=>CIV_ALCHEMISTS`, so picking it dispatches to `Alchemists::awardBenefits`, which reads
+   the mat pair for the current black die roll and queues it. Same trick as benefits 301-304.
+   The red die benefit is queued first and always, then `['or' => [21+science, 341]]`.
+   `'r'=>'die','die'=>'black'` on the row makes the choice UI show the actual rolled die face.
+
+Level 9 turn is: Roll, keep a die, keep a die (the third is rolled and placed automatically),
+then the standard benefit choice UI for science vs black. No client change beyond item 7.
+
+Tests live in `modules/tests/GameTest.php`. `AlchemistsUT` fakes the cube table and the dice
+rolls, since the framework stubs persist neither, which is enough to drive the whole elixir
+flow. `FakeTestCase` gained `assertStringContainsString` / `assertStringNotContainsString`.
+
 ## Time Spent
 
-- 2026-08-25: analysis and plan writing, 20:12 to 20:56 EDT, about 45 min (in progress)
+- 2026-08-25: analysis and plan writing, 20:12 to 20:56 EDT, about 45 min
+- 2026-08-25: implementation and tests, 20:56 to 21:25 EDT, about 30 min
+- 2026-08-25: human review, 21:45 to 22:14 EDT, about 30 min
 
 ## Notes
 
