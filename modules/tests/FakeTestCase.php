@@ -32,4 +32,10 @@ class TestCase {
     function assertFalse($exp, $string = null) {
         if ($exp) $this->fail($string);
     }
+    function assertStringContainsString($needle, $haystack, string $message = ''): void {
+        if (strpos($haystack, $needle) === false) $this->fail($message);
+    }
+    function assertStringNotContainsString($needle, $haystack, string $message = ''): void {
+        if (strpos($haystack, $needle) !== false) $this->fail($message);
+    }
 }

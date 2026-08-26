@@ -129,11 +129,15 @@ abstract class PGameXBody extends tapcommon {
     }
     function isAdjustments4or8() {
         $variant = $this->getAdjustmentVariant();
-        return $variant == 4 || $variant == 8;
+        return $variant == 4 || $variant >= 8;
     }
     function isAdjustments8() {
         $variant = $this->getAdjustmentVariant();
-        return $variant == 8;
+        return $variant >= 8;
+    }
+    function isAdjustments9() {
+        $variant = $this->getAdjustmentVariant();
+        return $variant >= 9;
     }
 
     function getAdjustmentVariant() {
@@ -181,29 +185,62 @@ abstract class PGameXBody extends tapcommon {
         return $this->doAdjustMaterial($num, $adj);
     }
 
+    private function stripPlayerCountVariant(string $variant, int $num) {
+        $stripped = preg_replace("/p{$num}/", "", $variant, 1);
+        if ($stripped == $variant) {
+            return $variant;
+        }
+        return preg_replace("/p[0-9]/", "", $stripped);
+    }
+
+    /**
+     * Primaries that have a twin resolving at the current adjustment level, snapshotted before the
+     * merge loop starts unsetting keys - the guard must not depend on declaration order.
+     */
+    private function collectAdjustmentOverrides(array $table, int $num, int $adj) {
+        $overridden = [];
+        foreach ($table as $key => $value) {
+            $vars = explode("@", $key, 2);
+            if (count($vars) <= 1) {
+                continue;
+            }
+            $variant = $this->stripPlayerCountVariant($vars[1], $num);
+            $stripped = preg_replace("/a{$adj}/", "", $variant, 1);
+            if ($stripped == $variant || preg_replace("/a[0-9]/", "", $stripped) !== "") {
+                continue;
+            }
+            $overridden[$vars[0]] = true;
+        }
+        return $overridden;
+    }
+
     function doAdjustMaterial(int $num, int $variant) {
         $all_tables = [&$this->civilizations];
         $adj = $variant;
+        // level 9 is level 8 plus a few reworked civs, so it reads a8 fields it does not override
+        $adj_levels = $adj >= 9 ? [$adj, 8] : [$adj];
         foreach ($all_tables as &$token_types) {
             foreach ($token_types as $index => &$table) {
+                $overridden = $this->collectAdjustmentOverrides($table, $num, $adj);
                 foreach ($table as $key => $civ_info) {
                     $vars = explode("@", $key, 2);
                     if (count($vars) <= 1) {
                         continue;
                     }
                     $primary = $vars[0];
-                    $variant = $vars[1];
-                    // if variant matches
-                    $orig = $variant;
-                    $variant = preg_replace("/p{$num}/", "", $variant, 1);
-                    if ($orig != $variant) {
-                        $variant = preg_replace("/p[0-9]/", "", $variant);
-                    }
+                    $variant = $this->stripPlayerCountVariant($vars[1], $num);
 
                     $orig = $variant;
-                    $variant = preg_replace("/a{$adj}/", "", $variant, 1);
-                    if ($orig != $variant) {
-                        $variant = preg_replace("/a[0-9]/", "", $variant);
+                    foreach ($adj_levels as $level) {
+                        $stripped = preg_replace("/a{$level}/", "", $orig, 1);
+                        if ($stripped == $orig) {
+                            continue;
+                        }
+                        if ($level != $adj && array_key_exists($primary, $overridden)) {
+                            break; // twin for the current level wins, older level is not merged under it
+                        }
+                        $variant = preg_replace("/a[0-9]/", "", $stripped);
+                        break;
                     }
 
                     if ($variant !== "") {
@@ -459,7 +496,6 @@ abstract class PGameXBody extends tapcommon {
         //
         // CIVILIZATIONS
         //
-        $adj = $this->getAdjustmentVariant();
         $cards = [];
         foreach ($this->civilizations as $cid => $c) {
             if (array_get($c, "exclude", false) === true) {
@@ -474,10 +510,6 @@ abstract class PGameXBody extends tapcommon {
                 continue;
             }
 
-            $max_adjustement_level = (int) array_get($c, "al", 4);
-            if ($adj > $max_adjustement_level) {
-                continue;
-            }
             $cards[] = ["type" => CARD_CIVILIZATION, "type_arg" => $cid, "nbr" => 1];
         }
         $this->cards->createCards($cards, "deck_civ");
@@ -10414,6 +10446,13 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case 8:
                 $this->notifyAllPlayers("message", clienttranslate("civilization adjustment pack rules are applied (game option)"), []);
+                break;
+            case 9:
+                $this->notifyAllPlayers(
+                    "message",
+                    clienttranslate("civilization adjustment pack rules with the new Alchemists are applied (game option)"),
+                    []
+                );
                 break;
         }
 

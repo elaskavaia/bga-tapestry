@@ -46,6 +46,11 @@ $game_options = [
                 "beta" => true,
                 "description" => totranslate("official expansion"),
             ],
+            9 => [
+                "name" => totranslate("Adjustment Civilization Pack + new Alchemists (Testing)"),
+                "beta" => true,
+                "description" => totranslate("official expansion, with the reworked Alchemists (testing, rules may change)"),
+            ],
         ],
         //             'startcondition' => [
         //                     1 => [ [ 'type' => 'minplayers', 'value' => 32, 'message' => totranslate('Maintenance in progress.  Table creation for Tapestry is disabled.') ] ],

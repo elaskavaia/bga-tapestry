@@ -549,15 +549,18 @@ div[data-income="0"] #subtitle_bar {
   vertical-align: top;
 }
 
-.variant_adjustments_8 .civilization.exp_BA {
+.variant_adjustments_8 .civilization.exp_BA,
+.variant_adjustments_9 .civilization.exp_BA {
   background-size: 800% auto;
   background-image: url("img/adj8/civsB.jpg");
 }
-.variant_adjustments_8 .civilization.exp_PP {
+.variant_adjustments_8 .civilization.exp_PP,
+.variant_adjustments_9 .civilization.exp_PP {
   background-size: 500% auto;
   background-image: url("img/adj8/civsP.jpg");
 }
-.variant_adjustments_8 .civilization.exp_AA {
+.variant_adjustments_8 .civilization.exp_AA,
+.variant_adjustments_9 .civilization.exp_AA {
   background-size: 500% auto;
   background-image: url("img/adj8/civsA.jpg");
 }

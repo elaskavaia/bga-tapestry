@@ -160,6 +160,7 @@ if (!defined("TAPESTRY")) {
     define("BE_ADVISORS_OVERTAKE_APPROVE", 337);
     define("BE_ADVISORS_OVERTAKE_ADVISE", 338);
     define("BE_ADVISORS_OVERTAKE_ADVISE_SELECTED", 339);
+    define("BE_ALCHEMISTS_DIE", 341);
     define("BE_OP_UNIQUE", 600);
 
     // TERRAIN
@@ -2289,6 +2290,13 @@ $this->benefit_types = [
         // BE_OPPONENTS_GAIN_TILE
         "name" => clienttranslate("All opponents gain hex tile"),
     ],
+    341 => [
+        // BE_ALCHEMISTS_DIE
+        "name" => clienttranslate("ALCHEMISTS gain the black conquer die benefits"),
+        "civ" => CIV_ALCHEMISTS,
+        "die" => "black",
+        "r" => "die",
+    ],
     502 => [
         //
         "name" => clienttranslate("2 VP"),
@@ -3714,8 +3722,23 @@ $this->civilizations = [
 
             #clienttranslate("[FOOD]+[EXPLORE]     [CULTURE]+[CONQUER]     [COIN]+[INVENT]     [WORKER]+[RESEARCH X]     [TERRITORY]+[ANY RESOURCE]"),
         ],
+
+        "description@a9" => [
+            clienttranslate("<i>The Alchemists, perhaps foolishly, attempt to make unstable-but-potent elixirs.</i>"),
+            clienttranslate("<b>At the beginning of your income turns (2-5)</b>, research elixirs:"),
+            clienttranslate("<br>1. Roll all three dice; select one die to place on this mat."),
+            clienttranslate("<br>2. Roll the remaining two dice; select one die to place on this mat."),
+            clienttranslate("<br>3. Roll the final remaining die and place it on this mat."),
+            clienttranslate("<br>4. Gain the benefit of the red conquer die and either the:"),
+            clienttranslate(
+                "<li> Science die: Advance on the track and gain the resulting benefit (you may pay to gain the bonus, if any)."
+            ),
+            clienttranslate("<li> or Black conquer die: Gain the benefits as indicated below."),
+            clienttranslate("The [TERRITORY FACE] is a benefit on a territory you control"),
+        ],
         "adjustment" => clienttranslate("When starting the game with the Alchemists, gain [ANY RESOURCE] [ANY RESOURCE] and 10 VP"),
         "adjustment@a4a8" => clienttranslate("rules change"), //
+        "adjustment@a9" => clienttranslate("rules change: unofficial variant https://boardgamegeek.com/image/9005335/nexus87"), //
         "income_trigger" => ["from" => 2, "to" => 5], //
         "slots_description" => clienttranslate("counter clockwise"),
         "slots" => [

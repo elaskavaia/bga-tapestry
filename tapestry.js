@@ -963,7 +963,7 @@ define([
           case this.CON.CIV_TRADERS:
             if (this.getAdjustmentLevel() == 4) {
               this.setDescriptionOnMyTurn(_("TRADERS: You may place trader token or income building on half-occupied territory."));
-            } else if (this.getAdjustmentLevel() == 8) {
+            } else if (this.getAdjustmentLevel() >= 8) {
               this.setDescriptionOnMyTurn(
                 _(
                   "TRADERS: You may place trader token or income building on half-occupied territory. If opponent controls it you also need a select a Territory Tile to give them"

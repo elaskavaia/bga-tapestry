@@ -227,6 +227,7 @@ id|-con|name|r|t|php
 338|BE_ADVISORS_OVERTAKE_ADVISE|Advise on new Tapestry card (WHEN PLAYED)|||'civ'=>CIV_ADVISORS
 339|BE_ADVISORS_OVERTAKE_ADVISE_SELECTED|Opponent decides on Tapestry card|||'civ'=>CIV_ADVISORS
 340|BE_OPPONENTS_GAIN_TILE|All opponents gain hex tile
+341|BE_ALCHEMISTS_DIE|ALCHEMISTS gain the black conquer die benefits|||'civ'=>CIV_ALCHEMISTS,'die'=>'black','r'=>'die'
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||
