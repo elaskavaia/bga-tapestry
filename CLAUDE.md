@@ -140,6 +140,8 @@ the server engine described above maintains.
   token/card/track names so the log stays translatable.
 - Wrap player-visible strings in `clienttranslate()` (states/notifications) or `totranslate()`
   (gameinfos/gameoptions).
+- Name tests in `modules/tests/` after the feature under test (e.g. `UtilitariansTest.php`), never
+  after a bug report number - bug numbers belong in the test docblocks.
 - `_ide_helper.php` and `bga-framework.d.ts` exist only for IDE autocomplete; do not edit them.
 - `misc/` is not deployed to BGA - it holds docs, CSV sources and tools only.
 - `misc/rename.sh` produces the renamed `taptest` copy of the project used for studio testing.
