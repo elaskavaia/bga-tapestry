@@ -78,9 +78,8 @@ face value, then choose science or black die).
 7. tapestry.js 966: the only `== 8` (Traders prompt); make it `>= 8`.
    Every other check is already `>= 8`, `< 8` or `>= 4`.
 8. tapestry.css 552-562: comma-join `.variant_adjustments_9` onto the three
-   `variant_adjustments_8` art selectors so level 9 reuses the a8 card graphics.
-   No proper new card art yet; when the asset arrives, add a single
-   `.variant_adjustments_9 .civilization_1` override with the new Alchemists image.
+   `variant_adjustments_8` art selectors so level 9 reuses the a8 card graphics,
+   then override the Alchemists mat with its own image.
 
 ### Tests
 
@@ -93,7 +92,7 @@ face value, then choose science or black die).
     science vs black choice, territory-control benefit).
 11. `npm run predeploy` gate.
 
-## Implemented, with two deviations from the plan above
+## Implemented, with three deviations from the plan above
 
 1. The plan missed the `al` gate, which would have broken level 9 on its own. The civ deck
    builder skipped every civ whose `"al"` was below the adjustment level, and all 31 civs carry
@@ -107,19 +106,34 @@ face value, then choose science or black die).
    the mat pair for the current black die roll and queues it. Same trick as benefits 301-304.
    The red die benefit is queued first and always, then `['or' => [21+science, 341]]`.
    `'r'=>'die','die'=>'black'` on the row makes the choice UI show the actual rolled die face.
+3. Reading `@a8` where `@a9` is absent was not enough on its own. The merge loop unsets each
+   key as it merges it, so a live `array_key_exists("$primary@a9")` guard made the winner
+   depend on declaration order in material: with `description@a9` above `description@a8`, a8
+   silently overwrote the rework. `collectAdjustmentOverrides` now snapshots the primaries
+   overridden at the current level before the loop runs, after player-count stripping, so a
+   twin like `@a9p2` suppresses `@a8` only at the counts where it applies.
 
 Level 9 turn is: Roll, keep a die, keep a die (the third is rolled and placed automatically),
-then the standard benefit choice UI for science vs black. No client change beyond item 7.
+then the standard benefit choice UI for science vs black. No client change beyond items 7 and 8.
 
 Tests live in `modules/tests/GameTest.php`. `AlchemistsUT` fakes the cube table and the dice
 rolls, since the framework stubs persist neither, which is enough to drive the whole elixir
 flow. `FakeTestCase` gained `assertStringContainsString` / `assertStringNotContainsString`.
+Deviation 3 is pinned by three synthetic-civ tests plus a characterization test asserting that
+variant 9 material differs from variant 8 only on the Alchemists, at 2 to 5 players.
+
+The mat art arrived as `img/adj9/civAlchemists_r9.webp`, a single 502x764 image rather than a
+tile of the a8 sprite. Its selector has to keep `.civilization` to outrank
+`.variant_adjustments_9 .civilization.exp_BA`, and has to reset `background-position`, which
+`.civilization_1` sets for the 8-column sheet. `background-size: 100% auto` renders it at the
+same height as an a8 sprite tile, so the mat sits where the old one did.
 
 ## Time Spent
 
 - 2026-08-25: analysis and plan writing, 20:12 to 20:56 EDT, about 45 min
 - 2026-08-25: implementation and tests, 20:56 to 21:25 EDT, about 30 min
 - 2026-08-25: human review, 21:45 to 22:14 EDT, about 30 min
+- 2026-08-26: merge guard fix and mat art, started 17:40 EDT
 
 ## Notes
 
