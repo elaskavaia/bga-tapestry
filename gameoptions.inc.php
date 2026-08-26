@@ -29,11 +29,11 @@ $game_options = [
         "name" => totranslate("Civilization Adjustments"),
         "values" => [
             2 => [
-                "name" => totranslate("no Adjustments (Deprected)"),
+                "name" => totranslate("no Adjustments (Deprecated)"),
                 "description" => totranslate("original rules (Deprecated EOL 2027)"),
             ],
             1 => [
-                "name" => totranslate("with Adjustments (Deprected)"),
+                "name" => totranslate("with Adjustments (Deprecated)"),
                 "description" => totranslate("latest official adjustments (Deprecated EOL 2027)"),
             ],
             4 => [
