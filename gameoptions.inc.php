@@ -28,15 +28,21 @@ $game_options = [
     100 => [
         "name" => totranslate("Civilization Adjustments"),
         "values" => [
-            2 => ["name" => totranslate("no Adjustments"), "description" => totranslate("original rules")],
-            1 => ["name" => totranslate("with Adjustments"), "description" => totranslate("latest official adjustments")],
+            2 => [
+                "name" => totranslate("no Adjustments (Deprected)"),
+                "description" => totranslate("original rules (Deprecated EOL 2027)"),
+            ],
+            1 => [
+                "name" => totranslate("with Adjustments (Deprected)"),
+                "description" => totranslate("latest official adjustments (Deprecated EOL 2027)"),
+            ],
             4 => [
-                "name" => totranslate("with Experimental Adjustments Nov 2022 (Deprecated)"),
+                "name" => totranslate("with Experimental Adjustments Nov 2022 (Removed)"),
                 "beta" => true,
-                "description" => totranslate("experimental rules"),
+                "description" => totranslate("experimental rules (Removed, left only for existing games)"),
             ],
             8 => [
-                "name" => totranslate("Adjustment Civilization Pack"),
+                "name" => totranslate("Adjustment Civilization Pack (Default)"),
                 "beta" => true,
                 "description" => totranslate("official expansion"),
             ],
@@ -46,18 +52,18 @@ $game_options = [
         //                     2 => [ [ 'type' => 'minplayers', 'value' => 32, 'message' => totranslate('Maintenance in progress.  Table creation for Tapestry is disabled.') ] ],
         //                     4 => [ [ 'type' => 'minplayers', 'value' => 32, 'message' => totranslate('Maintenance in progress.  Table creation for Tapestry is disabled.') ] ],
         //             ],
-        // "startcondition" => [
-        //     4 => [
-        //         [
-        //             "type" => "minplayers",
-        //             "value" => 32,
-        //             "message" => totranslate(
-        //                 "This option can no longer be used (remains for backward compatibiolity), use Adjustment Civilization Pack"
-        //             ),
-        //         ],
-        //     ],
-        // ],
-        "default" => 1,
+        "startcondition" => [
+            4 => [
+                [
+                    "type" => "minplayers",
+                    "value" => 32,
+                    "message" => totranslate(
+                        "This option can no longer be used (remains for backward compatibility), use Adjustment Civilization Pack"
+                    ),
+                ],
+            ],
+        ],
+        "default" => 8,
     ],
     101 => [
         "name" => totranslate("Tapestry: Marriage of State"),
