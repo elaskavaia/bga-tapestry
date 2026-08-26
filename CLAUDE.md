@@ -42,6 +42,16 @@ framework signature or `final` conflict breaks the build. The stubs expose test-
 
 PHP is invoked as `php8.4` everywhere. Prettier (with the PHP plugin, width 140, 1tbs) formats on save.
 
+## Time tracking
+
+Work sessions are logged in [misc/time.timeclock](misc/time.timeclock), hledger timeclock format
+(`i` clock in with an account like `alchemists:impl`, `o` clock out). Shell helpers `ti` / `to` /
+`tb` live in `~/.bashrc` and resolve the file from the git root, so they work from anywhere in the
+repo. Report with `hledger -f misc/time.timeclock balance --tree` (add `--daily` for per-day).
+
+Entries must stay in chronological order and every `i` needs its `o` before the next `i`; a
+dangling `i` is read as "still running until now".
+
 ## Architecture
 
 ### Server class chain
