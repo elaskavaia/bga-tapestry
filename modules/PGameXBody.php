@@ -514,6 +514,13 @@ abstract class PGameXBody extends tapcommon {
         }
         $this->cards->createCards($cards, "deck_civ");
         $this->cards->shuffle("deck_civ");
+        if ($this->isAdjustments9()) {
+            // testing option is pointless unless somebody is actually offered the reworked Alchemists
+            $alchemists = $this->cards->getCardsOfTypeInLocation(CARD_CIVILIZATION, CIV_ALCHEMISTS, "deck_civ");
+            if ($alchemists) {
+                $this->cards->insertCardOnExtremePosition(reset($alchemists)["id"], "deck_civ", true);
+            }
+        }
 
         // Capitals
         $cards = [];
