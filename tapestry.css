@@ -569,6 +569,13 @@ div[data-income="0"] #subtitle_bar {
   background-image: url("img/adj8/civsA.jpg");
 }
 
+/* reworked Alchemists mat, a single image rather than a tile of the a8 sprite */
+.variant_adjustments_9 .civilization.civilization_1 {
+  background-size: 100% auto;
+  background-position: 0 0;
+  background-image: url("img/adj9/civAlchemists_r9.webp");
+}
+
 .civilization.exp_PP,
 .civilization_30,
 .civilization_31,
