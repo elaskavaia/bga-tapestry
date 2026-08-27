@@ -31,9 +31,11 @@ class HistoriansUT extends GameUT {
         $this->queued[] = $benefit;
     }
 
+    public int $adjustment_variant = 8;
+
     // the stubs do not persist globals or playerextra, pin the reported table's setup
     function getAdjustmentVariant() {
-        return 8;
+        return $this->adjustment_variant;
     }
 
     function getCurrentEra($player_id) {
@@ -47,7 +49,7 @@ class HistoriansUT extends GameUT {
                 "card_id" => $type,
                 "card_type" => BUILDING_LANDMARK,
                 "card_location" => "landmark_mat_slot$type",
-                "card_location_arg2" => $type,
+                "card_location_arg2" => "$type",
             ];
         }
     }
@@ -79,20 +81,38 @@ final class HistoriansTest extends TestCase {
 
     function testEmptyLandmarkMatIsDetected() {
         $this->game->setLandmarkSupply([]);
-        $this->assertTrue($this->historians()->noLandmarksLeft());
+        $this->assertTrue($this->historians()->noTrackLandmarksLeft());
 
         $this->historians()->sendHistorianTokensMidGame();
         $this->assertEquals(4, count($this->game->queued));
     }
 
     /**
-     * Documents the buggy behavior of BGA #203108: landmarks 13-19 never sit on an advancement
-     * track, yet they keep noLandmarksLeft() false, so the midgame "no landmarks remaining on
-     * advancement tracks" clause never fires. Flip both assertions when the fix lands.
+     * BGA #203108: landmarks 13-19 are the extra pool and never sit on an advancement track, so an
+     * exhausted track must still fire the midgame "no landmarks remaining" clause.
      */
     function testTrackLandmarksExhaustedButMatStillHoldsExtras() {
         $this->game->setLandmarkSupply([13, 14, 15, 16, 17, 18, 19]);
-        $this->assertFalse($this->historians()->noLandmarksLeft());
+        $this->assertTrue($this->historians()->noTrackLandmarksLeft());
+
+        $this->historians()->sendHistorianTokensMidGame();
+        $this->assertEquals(4, count($this->game->queued));
+    }
+
+    function testTrackLandmarkRemainingBlocksTheClause() {
+        $this->game->setLandmarkSupply([12, 13, 14]);
+        $this->assertFalse($this->historians()->noTrackLandmarksLeft());
+
+        $this->historians()->sendHistorianTokensMidGame();
+        $this->assertEquals(0, count($this->game->queued));
+    }
+
+    /**
+     * The clause is printed only on the a4/a8 card, the original mat must never award it.
+     */
+    function testEmptyMatAwardsNothingWithoutTheAdjustmentPack() {
+        $this->game->adjustment_variant = 2;
+        $this->game->setLandmarkSupply([]);
 
         $this->historians()->sendHistorianTokensMidGame();
         $this->assertEquals(0, count($this->game->queued));

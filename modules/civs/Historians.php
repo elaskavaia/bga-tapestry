@@ -76,7 +76,8 @@ class Historians extends AbsCivilization {
             }
         }
 
-        if ($this->noLandmarksLeft()) {
+        // the "no landmarks remaining on advancement tracks" clause is only on the a4/a8 card
+        if ($this->game->isAdjustments4or8() && $this->noTrackLandmarksLeft()) {
             $this->activateBenefits($player_id);
         }
     }
@@ -102,9 +103,15 @@ class Historians extends AbsCivilization {
         $this->activateBenefits($historian);
     }
 
-    function noLandmarksLeft() {
+    function noTrackLandmarksLeft() {
         $lms = $this->game->getStructuresSearch(null, null, 'landmark_mat_slot%');
-        return count($lms) == 0; 
+        foreach ($lms as $lm) {
+            // landmarks 13-19 are the extra pool, they never sit on an advancement track
+            if ($lm['card_location_arg2'] <= 12) {
+                return false;
+            }
+        }
+        return true;
     }
 
     function activateBenefits($player_id) {
