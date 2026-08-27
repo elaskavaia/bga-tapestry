@@ -313,16 +313,16 @@ confirmed two are still OPEN on the tracker.
       **NOTE (not studio-verified)** - the stubs run no SQL, so the tests model the structure table
       rather than executing it. The filter itself is now plain PHP and is exercised, but a live
       table 795801647 check would be the real confirmation.
-      **NOTE (wontfix for now, Victoria's call 2026-08-26)** - benefit 111's guard at
-      [PGameXBody.php:1745](../modules/PGameXBody.php#L1745) accepts any `landmark_mat_slot%` row
-      while its arg builder at [:9431](../modules/PGameXBody.php#L9431) and
-      [selectLandmark:8268](../modules/PGameXBody.php#L8268) both cut at 12. Setup seeds all 19
-      landmarks at `landmark_mat_slot1..19` ([:610](../modules/PGameXBody.php#L610)) even though the
-      client draws 13-19 in a separate `landmark_extra` container, so the prefix does match the
-      extras. With only extras left the guard passes, state 34 opens with empty `choices` and has no
-      decline action - the active player soft-locks rather than getting the "No more landmarks left"
-      skip. Needs all 12 track landmarks claimed and Dystopia firing afterwards, so it is rare;
-      `AND card_location_arg2 <= 12` on that guard is the fix if it ever shows up in a report.
+      **Also fixed (same family, no separate report).** Benefit 111's guard accepted any
+      `landmark_mat_slot%` row while its arg builder and
+      [selectLandmark](../modules/PGameXBody.php#L8280) both cut at 12. Setup seeds all 19 landmarks
+      at `landmark_mat_slot1..19` ([:610](../modules/PGameXBody.php#L610)) even though the client
+      draws 13-19 in a separate `landmark_extra` container, so the prefix does match the extras.
+      With only extras left the guard passed, state 34 opened with empty `choices` and has no
+      decline action - the active player soft-locked instead of getting the "No more landmarks left"
+      skip. Deferred once as rare (needs all 12 track landmarks claimed and Dystopia firing
+      afterwards), then taken once `getUnclaimedTrackLandmarks()` made it a one-liner. Test
+      `tests/LandmarksTest.php::testDystopiaSkipsWhenOnlyTheExtraPoolIsLeft`.
       **NOTE (unverified, pre-existing)** - `activateBenefits`
       ([Historians.php:116](../modules/civs/Historians.php#L116)) queries `civ_7_%` with no owner
       filter; harmless with one owner, latent if the a4/a8 "discard and draw another in era 1-2"
