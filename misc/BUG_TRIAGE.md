@@ -293,49 +293,47 @@ confirmed two are still OPEN on the tracker.
       is only queued for income turns 2-4 ([:3895](../modules/PGameXBody.php#L3895)) - so the dump
       was taken after the incident. The reporter's own pointer is "before move #10".
       No fix commit.
-- [ ] **BGA #203108** - "Gaining Historian Midgame." OPEN on BGA, 10 votes, `rules`. Table
-      795801647, 2 players, dump state 99 move 472, created 2026-01-25. Options: adj=8 (Pack), set=7
-      (All: Original + PP + AA), Marriage of State removed, Renaissance removed, Shadow Empire off.
-      Reporter gained Historians midgame in Era 4 when no landmarks remained and got none of the
-      benefits of the exposed spaces (expected science die roll with no benefit, food, a tapestry
-      card for a technology card, and VP for conquered spaces).
-      **CONFIRMED 2026-08-26.** Test `tests/HistoriansTest.php`, method
-      `testTrackLandmarksExhaustedButMatStillHoldsExtras` - green, pinning the buggy behaviour, with
-      the assertions to flip marked in the file. Verified here: 3 tests, 9 assertions, OK.
-      Root cause: `Historians::noLandmarksLeft()`
-      ([Historians.php:105](../modules/civs/Historians.php#L105)) counts _every_ row matching
-      `landmark_mat_slot%`. `$this->landmark_data` holds **19** landmarks and
-      [PGameXBody.php:610](../modules/PGameXBody.php#L610) inserts all 19 at setup, but only **1-12**
-      are the advancement-track landmarks; 13-19 are the extra pool (Bakery, Barn, Com Tower,
-      Library, Stock Market, Treasury, Urban Center), which almost nothing claims. So the count is
-      effectively never zero, the clause never fires, and the player gets nothing for the rest of the
-      game. The rest of the file already applies the cut correctly -
-      [Historians.php:92](../modules/civs/Historians.php#L92) skips `$landmark_id > 12` under a4/a8,
-      and [PGameXBody.php:9431](../modules/PGameXBody.php#L9431) filters `card_location_arg2 <= 12`.
-      `noLandmarksLeft()` is the one place that forgot.
-      Rules: unusually for a Pack civ this one is citable. `material.inc.php` CIV*HISTORIANS
-      `description@a4a8` (card transcription inside implementation data, not a converted rules doc)
-      reads "<i>Then, if there are no landmarks remaining <b>on advancement tracks</b>, gain the
-      exposed benefits.</i>" - "on advancement tracks" is explicit. And `slots@a4a8` is
-      `BE_RESEARCH_NB`, `{p: BE_TAPESTRY, g: BE_INVENT}`, `RES_FOOD`, `BE_VP_TERRITORY`, a one-to-one
-      match with what the reporter expected. The reporter is right and the mat data is right; only
-      the gate is wrong. Nothing in FORMAL_RULES.txt, TODO.md or DESIGN.md contradicts this.
-      Fix: filter `noLandmarksLeft()` to advancement-track landmarks (`card_location_arg2 <= 12`),
-      reusing the same predicate as PGameXBody:9431 rather than a fresh magic number.
-      Two secondary observations from the investigation, maintainer's call, both unproven:
-      `sendHistorianTokensMidGame` calls `noLandmarksLeft()` ungated, but the "no landmarks
-      remaining" clause only exists on the a4/a8 card - under adjustment 2 an empty mat would award
-      benefits the printed card never promises, so it probably wants the same `isAdjustments4or8()`
-      gate as the era check above it. And `activateBenefits`
-      ([Historians.php:110](../modules/civs/Historians.php#L110)) queries `civ_7*%`with no owner
- filter - harmless with one owner, latent otherwise.
- Related but a separate ticket: the`Invalid historian token`auto-error below is thrown at
- [Historians.php:41](../modules/civs/Historians.php#L41) when the chosen token is not at
-`civ*7*$token_id`; after a midgame acquisition all 4 tokens have moved to `pb_X`, so if the
- income-turn "send a historian" action is still offered the server throws. Same civ, same
- midgame state, but a different code path and the table ids were not cross-checked - a guess.
- Note it is a bare `feException`, not `userAssertTrue`, so it surfaces as a crash rather than a
-      friendly message. No fix commit.
+- [x] **BGA #203108** - "Gaining Historian Midgame." **FIXED 2026-08-26.** Reporter gained
+      HISTORIANS midgame in era 4 with no advancement-track landmarks left and got none of the
+      exposed benefits. `Historians::noLandmarksLeft()` counted every `landmark_mat_slot%` row, but
+      landmarks 13-19 are the extra pool (Bakery, Barn, Com Tower, Library, Stock Market, Treasury,
+      Urban Center) and never sit on a track, so the count was never zero and the clause never
+      fired. Renamed to `noTrackLandmarksLeft()` and filtered to `card_location_arg2 <= 12`, the
+      same cut already used at [PGameXBody.php:9431](../modules/PGameXBody.php#L9431) and
+      [Historians.php:93](../modules/civs/Historians.php#L93). Tests: `tests/HistoriansTest.php`,
+      `testTrackLandmarksExhaustedButMatStillHoldsExtras`,
+      `testTrackLandmarkRemainingBlocksTheClause`,
+      `testEmptyMatAwardsNothingWithoutTheAdjustmentPack`.
+      Also gated the clause on `isAdjustments4or8()`: it is printed only on `description@a4a8`
+      ("<i>Then, if there are no landmarks remaining on advancement tracks, gain the exposed
+      benefits.</i>"), the base card stops at "leaving the squares exposed on this mat". Without the
+      gate the filter fix would have started awarding variants 1/2 four benefits the printed card
+      never promises - the clause was previously dead code there, so this was latent, not a
+      regression.
+      **NOTE (not studio-verified)** - the stubs run no SQL, so the tests model the structure table
+      rather than executing it. The filter itself is now plain PHP and is exercised, but a live
+      table 795801647 check would be the real confirmation.
+      **NOTE (separate ticket, pre-existing, not fixed here)** - benefit 111's guard at
+      [PGameXBody.php:1745](../modules/PGameXBody.php#L1745) accepts any `landmark_mat_slot%` row
+      while its arg builder at [:9431](../modules/PGameXBody.php#L9431) and
+      [selectLandmark:8268](../modules/PGameXBody.php#L8268) both cut at 12. With only extras on the
+      mat the guard passes, state 34 opens with empty `choices`, and state 34 has no decline action
+      - the active player soft-locks. All 19 landmarks are seeded at setup, so "extras only" is the
+      normal late-game state. Adding `AND card_location_arg2 <= 12` to that guard is the fix.
+      **NOTE (unverified, pre-existing)** - `activateBenefits`
+      ([Historians.php:116](../modules/civs/Historians.php#L116)) queries `civ_7_%` with no owner
+      filter; harmless with one owner, latent if the a4/a8 "discard and draw another in era 1-2"
+      path can leave a prior holder's cubes behind. Not traced.
+      **NOTE (cosmetic)** - the literal 12 now appears in five places (Historians.php 93 and 109,
+      PGameXBody.php 3009, 8268, 9431). A `LANDMARK_TRACK_MAX` constant would be the tidy-up; not
+      done, to keep the fix diff small.
+      Related but a separate ticket: the `Invalid historian token` auto-error is thrown at
+      [Historians.php:41](../modules/civs/Historians.php#L41) when the chosen token is not at
+      `civ_7_$token_id`; after a midgame acquisition all 4 tokens have moved to `pb_X`, so if the
+      income-turn "send a historian" action is still offered the server throws. Same civ, same
+      midgame state, but a different code path and the table ids were not cross-checked - a guess.
+      Note it is a bare `feException`, not `userAssertTrue`, so it surfaces as a crash rather than a
+      friendly message.
 
 ### Lower priority (deprecated adjustment options)
 
