@@ -26,6 +26,12 @@ class LandmarksUT extends GameUT {
         return [];
     }
 
+    public array $messages = [];
+
+    function notifyWithName($type, $message = "", $args = null, $player_id = null) {
+        $this->messages[] = $message;
+    }
+
     function setMat(array $types) {
         $this->mat = [];
         foreach ($types as $type) {
@@ -73,5 +79,16 @@ final class LandmarksTest extends TestCase {
         $left = $this->game->getUnclaimedTrackLandmarks();
 
         $this->assertEquals([101], array_keys($left));
+    }
+
+    /**
+     * Benefit 111 used to accept any row on the mat while argBuildingSelect offered only 1-12, so
+     * an extras-only mat opened a selection state with nothing to click.
+     */
+    function testDystopiaSkipsWhenOnlyTheExtraPoolIsLeft() {
+        $this->game->setMat([13, 14, 15, 16, 17, 18, 19]);
+
+        $this->assertTrue($this->game->awardBenefits(1, 111));
+        $this->assertEquals(["No more landmarks left"], $this->game->messages);
     }
 }

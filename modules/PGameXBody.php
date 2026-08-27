@@ -1742,8 +1742,7 @@ abstract class PGameXBody extends tapcommon {
                 $this->gamestate->nextState("buildingChoice");
                 return false;
             case 111:
-                $lm = $this->getObjectFromDB("SELECT card_id FROM structure WHERE card_location LIKE 'landmark_mat_slot%' LIMIT 1");
-                if (!$lm) {
+                if (!$this->getUnclaimedTrackLandmarks()) {
                     $this->notifyWithName("message_error", clienttranslate("No more landmarks left"));
                     return true;
                 }
