@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once "modules/tests/GameTest.php";
+require_once __DIR__ . "/Stubs/GameUT.php";
 
 /**
  * Regression tests for BGA bug #202072.

@@ -8,61 +8,8 @@ use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertNotNull;
 use function PHPUnit\Framework\assertTrue;
 
-require_once "tapestry.game.php";
-//require_once "TokensInMem.php";
+require_once __DIR__ . "/Stubs/GameUT.php";
 
-define("PCOLOR", "ff0000");
-define("BCOLOR", "0000ff");
-
-class GameUT extends Tapestry {
-    protected $timachine;
-    protected $xtable;
-    public $curid;
-
-    function __construct() {
-        parent::__construct();
-        include "./material.inc.php";
-        include "./states.inc.php";
-        $this->gamestate->_setStates($machinestates);
-        $this->xtable = [];
-        $this->curid = 1;
-        $this->_setCurrentPlayerId($this->curid);
-    }
-
-    function init() {
-        //$this->createTokens();
-        $this->gamestate->changeActivePlayer(1);
-        $this->gamestate->jumpToState(2);
-    }
-
-    public function getCurrentPlayerColor(): string {
-        return $this->getPlayerColorById($this->curid);
-    }
-
-    function loadPlayersBasicInfos() {
-        $default_colors = [PCOLOR, BCOLOR];
-        $values = [];
-        $id = 1;
-        foreach ($default_colors as $color) {
-            $values[$id] = [
-                "player_id" => $id,
-                "player_color" => $color,
-                "player_name" => "player$id",
-                "player_zombie" => 0,
-                "player_no" => $id,
-                "player_eliminated" => 0,
-            ];
-            $id++;
-        }
-        return $values;
-    }
-
-    function getNewDeck(string $tableName): \Bga\GameFramework\Components\Deck {
-        $res = new \Bga\GameFramework\Components\Deck();
-        $res->init($tableName);
-        return $res;
-    }
-}
 /**
  * Alchemists drive the whole elixir flow through cubes on the mat and dice globals, neither of
  * which the framework stubs persist, so the test keeps them in memory here.

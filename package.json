@@ -5,10 +5,12 @@
   "main": "tapestry.js",
   "scripts": {
     "build": "npm run genmat",
-    "tests": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap modules/_autoload.php --colors=always modules/tests",
-    "predeploy": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ php8.4  modules/_testpredeploy.php",
+    "tests": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --display-deprecations --display-warnings --colors=always",
+    "tests:cov": "XDEBUG_MODE=coverage APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --coverage-text",
+    "lint:php": "find modules/ tests/ -name '*.php' -exec php8.4 -l {} + && echo 'All PHP files OK'",
+    "lint:phpstan": "phpstan analyse -c misc/phpstan.neon",
+    "predeploy": "npm run lint:php && npm run tests",
     "genmat": "php8.4 ~/git/bga-sharedcode/misc/genmat.php misc/benefit_types.csv && prettier --write material.inc.php",
-    "jstest": "TS_NODE_PROJECT=tests/tsconfig.test.json mocha -r ts-node/register tests/**/*.spec.ts",
     "end": "echo The End"
   },
   "author": "VictoriaLa",

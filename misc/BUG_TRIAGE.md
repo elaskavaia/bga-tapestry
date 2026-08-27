@@ -115,9 +115,9 @@ Ignore it.
 
 ## Investigation and tests
 
-- Tests live under `modules/tests/`, PHPUnit, bootstrapped by `modules/_autoload.php`.
+- Tests live under `tests/`, PHPUnit, configured by `phpunit.xml` (bootstrap `tests/_autoload.php`).
 - Single method:
-  `APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap modules/_autoload.php --filter <method> modules/tests/<File>.php`
+  `APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --filter <method> tests/<File>.php`
 - The investigation agent runs **only its own test**, never `npm run tests` or `npm run predeploy`.
 - A reproducing test must be **green**, asserting the current buggy behavior, with a comment pinning
   it for `Bug #<id>` (flip the assertion when the fix lands) - see the skill's CONFIRMED note.
@@ -158,7 +158,7 @@ confirmed two are still OPEN on the tracker.
       Utilitarians as a _third_ civ midgame instead of at setup.
       **CONFIRMED 2026-08-26**, twice over. Victoria reproduced it live in the studio (studio log
       27/08 00:59 UTC, table T950560, move 11) - that production stack trace is the real proof. Test
-      `modules/tests/UtilitariansBenefitTest.php`, methods
+      `tests/UtilitariansTest.php`, methods
       `testUtilitariansTriggeredCrashesOnStateArgsReload`,
       `testUtilitariansMidgameCrashesOnStateArgsReload`,
       `testUtilitariansLandmarkSlotsAreAdjustmentIndependent` - green, pinning the buggy behaviour.
@@ -214,7 +214,7 @@ confirmed two are still OPEN on the tracker.
       ([tapcommon.php:236](../modules/tapcommon.php#L236)) now calls
       `gamestate->isMultiactiveState()` instead of the deprecated `state()` - the predicate reads
       the state row without the arg reload. Victoria chose it over the `state(true)` variant
-      proposed above. Tests: `modules/tests/UtilitariansTest.php` (renamed from
+      proposed above. Tests: `tests/UtilitariansTest.php` (renamed from
       `UtilitariansBenefitTest.php`, tests are now named by feature), 5 tests / 14 assertions,
       driving the real crash path end to end - the stubs now model `loadStateArgs()` (opt-in via
       `gamestate->game`), and reverting the fix reproduces the production error. Blind-reviewed;
@@ -229,7 +229,8 @@ confirmed two are still OPEN on the tracker.
       paths), :12042 (zombieTurn) and tapcommon:62 (doUndoSavePoint) - `state(true)` them in a
       follow-up. The explicit `$player_id` at :4911/:4923 remains a good second commit. The
       predeploy FakeTestCase gate only runs `GameTest`, so the new tests run under real phpunit
-      only - Victoria declined extending the legacy shim.
+      only - Victoria declined extending the legacy shim (since resolved: the shim is gone and
+      predeploy runs all of `tests/`).
 - [ ] **BGA #183142** - "Islanders gained exploration tiles after the opportunity to use civ
       ability". OPEN on BGA, 11 votes, `rules`. Table 726016713, 5 players, dump state 15 move 9,
       created 2025-09-06. Options: adj=8 (Pack), set=7 (All: Original + PP + AA), Marriage of State
@@ -237,7 +238,7 @@ confirmed two are still OPEN on the tracker.
       Reporter: prompted to explore on the Islanders mat at the start of income turn 1 _before_ being
       given the 4 starting territory tiles; expects the 4 tiles first.
       **CONFIRMED 2026-08-26 (code ordering only - see the caveat).** Test
-      `modules/tests/Bug183142Test.php`, method
+      `tests/IslandersTest.php`, method
       `testIslandersIncomeTurn1TriggerJumpsAheadOfStartTiles` - green, pinning the buggy behaviour.
       Verified here: 2 tests, 7 assertions, OK.
       Root cause, and it is **not Islanders-specific** - Islanders just exposes it. `setupCiv` calls
@@ -298,7 +299,7 @@ confirmed two are still OPEN on the tracker.
       Reporter gained Historians midgame in Era 4 when no landmarks remained and got none of the
       benefits of the exposed spaces (expected science die roll with no benefit, food, a tapestry
       card for a technology card, and VP for conquered spaces).
-      **CONFIRMED 2026-08-26.** Test `modules/tests/Bug203108Test.php`, method
+      **CONFIRMED 2026-08-26.** Test `tests/HistoriansTest.php`, method
       `testTrackLandmarksExhaustedButMatStillHoldsExtras` - green, pinning the buggy behaviour, with
       the assertions to flip marked in the file. Verified here: 3 tests, 9 assertions, OK.
       Root cause: `Historians::noLandmarksLeft()`
@@ -404,9 +405,8 @@ that window.
 
 Not yet checked this run: the `projects=frontend` (browser/JS) half of the log.
 
-**Housekeeping:** `modules/_testpredeploy.php` only runs `GameTest.php`, so new test files land in
-`npm run tests` but **not** in `npm run predeploy`. Any bug test written by an investigation agent
-needs adding there if it is meant to gate commits.
+**Housekeeping:** resolved - `npm run predeploy` now runs the whole `tests/` directory through real
+PHPUnit, so every new test file gates commits with no extra wiring.
 
 ## Triage run log
 
@@ -435,9 +435,9 @@ Short log of each run: date, reports touched, outcome.
 - **2026-08-26 (later, same session)** - Victoria reproduced **#202072** live in the studio and
   supplied the full stack trace, then had three investigation agents launched. Two came back
   **CONFIRMED** with green tests that pin the current buggy behaviour: #202072
-  (`modules/tests/UtilitariansBenefitTest.php`, 3 tests / 11 assertions) and #203108
-  (`modules/tests/Bug203108Test.php`, 3 tests / 9 assertions). Both re-run and verified here. The
-  #183142 Islanders agent then also returned **CONFIRMED** (`modules/tests/Bug183142Test.php`,
+  (`tests/UtilitariansTest.php`, 3 tests / 11 assertions) and #203108
+  (`tests/HistoriansTest.php`, 3 tests / 9 assertions). Both re-run and verified here. The
+  #183142 Islanders agent then also returned **CONFIRMED** (`tests/IslandersTest.php`,
   2 tests / 7 assertions, re-run and verified here), but on weaker evidence - the stubs run no SQL,
   so its test models the benefit table rather than executing it; the mechanism was re-read and
   confirmed by hand instead.

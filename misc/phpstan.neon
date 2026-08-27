@@ -1,0 +1,16 @@
+# PHPStan config. Run via: npm run lint:phpstan
+# PHPStan itself lives in ~/php-composer (cannot be installed inside this BGA repo).
+# Level 1 is a starting point for this pre-namespace codebase - raise it as findings get fixed.
+parameters:
+    level: 1
+    phpVersion: 80400 # pin analysis to PHP 8.4
+    tmpDir: /tmp/phpstan-tapestry
+    paths:
+        - ../modules
+        - ../tapestry.game.php
+    # Symbols for resolution only - not analysed (framework stubs + generated material constants).
+    scanFiles:
+        - ../_ide_helper.php
+        - ../material.inc.php # generated blocks, see CLAUDE.md
+    excludePaths:
+        - ../modules/tapantistock.js

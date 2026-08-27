@@ -33,12 +33,15 @@ framework signature or `final` conflict breaks the build. The stubs expose test-
 
 - `npm run build` / `npm run genmat` - regenerate the generated blocks in `material.inc.php` from
   `misc/benefit_types.csv`. VS Code also runs this on save for any `misc/*.csv`.
-- `npm run tests` - PHPUnit over `modules/tests/`.
-- `npm run predeploy` - runs the same tests through the `FakeTestCase` shim (no PHPUnit needed).
-  This is the pre-commit gate.
-- Single test method: `APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap modules/_autoload.php --filter testCollectors modules/tests/GameTest.php`
+- `npm run tests` - PHPUnit over [tests/](tests/). Config is [phpunit.xml](phpunit.xml), bootstrap is
+  [tests/_autoload.php](tests/_autoload.php), so a bare `phpunit` works too.
+- `npm run lint:php` - `php -l` sweep over `modules/` and `tests/`.
+- `npm run predeploy` - `lint:php` then `tests`. This is the pre-commit gate.
+- `npm run lint:phpstan` - PHPStan level 1 ([misc/phpstan.neon](misc/phpstan.neon)). Not part of the
+  gate: it still reports findings on the pre-namespace code.
+- Single test method: `APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --filter testCollectors`
 
-`npm run jstest` points at a `tests/` directory that does not exist - there are no JS tests.
+There are no JS tests.
 
 PHP is invoked as `php8.4` everywhere. Prettier (with the PHP plugin, width 140, 1tbs) formats on save.
 
@@ -101,8 +104,8 @@ client decodes to show what caused an effect.
 Each civ with non-trivial behaviour is its own class in [modules/civs/](modules/civs/) extending
 `AbsCivilization`; everything else falls back to `BasicCivilization`. `getCivilizationInstance()`
 resolves the class name from the civ's `name` in material (title-cased, spaces stripped) or an
-explicit `class` key, and instantiates via the `spl_autoload_register` in
-[modules/_autoload.php](modules/_autoload.php). Override points: `awardBenefits`, `moveCivCube`,
+explicit `class` key, then `include`s `civs/$classname.php` relative to
+[modules/PGameXBody.php](modules/PGameXBody.php). Override points: `awardBenefits`, `moveCivCube`,
 `argCivAbilitySingle`, `setupCiv`, `finalScoring`, `hasActivatedAbilities`,
 `triggerPreGainBenefit`, `queueEraCivAbility`.
 
@@ -140,8 +143,9 @@ the server engine described above maintains.
   token/card/track names so the log stays translatable.
 - Wrap player-visible strings in `clienttranslate()` (states/notifications) or `totranslate()`
   (gameinfos/gameoptions).
-- Name tests in `modules/tests/` after the feature under test (e.g. `UtilitariansTest.php`), never
-  after a bug report number - bug numbers belong in the test docblocks.
+- Name tests in [tests/](tests/) after the feature under test (e.g. `UtilitariansTest.php`), never
+  after a bug report number - bug numbers belong in the test docblocks. Shared test harness classes
+  live in [tests/Stubs/](tests/Stubs/) (`GameUT`); a test file never requires another test file.
 - `_ide_helper.php` and `bga-framework.d.ts` exist only for IDE autocomplete; do not edit them.
-- `misc/` is not deployed to BGA - it holds docs, CSV sources and tools only.
+- `misc/` and `tests/` are not deployed to BGA - `misc/` holds docs, CSV sources and tools only.
 - `misc/rename.sh` produces the renamed `taptest` copy of the project used for studio testing.

@@ -26,28 +26,17 @@
         },
       },
       {
-        "name": "PHP: predeploy debug",
+        "name": "PHP: debug phpunit",
         "type": "php",
         "request": "launch",
-        "program": "${workspaceFolder}/modules/_testpredeploy.php",
+        "program": "${userHome}/php-composer/vendor/bin/phpunit",
+        "args": ["--colors=never", "tests"],
         "cwd": "${workspaceFolder}",
         "port": 0,
         "runtimeArgs": ["-dxdebug.start_with_request=yes"],
         "env": {
           "XDEBUG_MODE": "debug,develop",
           "XDEBUG_CONFIG": "client_port=${port} idekey=VSCODE",
-  
-          "APP_GAMEMODULE_PATH": "${userHome}/git/bga-sharedcode/misc/"
-        },
-      },
-      {
-        "name": "PHP: predeploy",
-        "type": "php",
-        "request": "launch",
-        "program": "${workspaceFolder}/modules/_testpredeploy.php",
-        "cwd": "${workspaceFolder}",
-        "port": 0,
-        "env": {
   
           "APP_GAMEMODULE_PATH": "${userHome}/git/bga-sharedcode/misc/"
         },
