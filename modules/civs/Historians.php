@@ -104,14 +104,7 @@ class Historians extends AbsCivilization {
     }
 
     function noTrackLandmarksLeft() {
-        $lms = $this->game->getStructuresSearch(null, null, 'landmark_mat_slot%');
-        foreach ($lms as $lm) {
-            // landmarks 13-19 are the extra pool, they never sit on an advancement track
-            if ($lm['card_location_arg2'] <= 12) {
-                return false;
-            }
-        }
-        return true;
+        return count($this->game->getUnclaimedTrackLandmarks()) == 0;
     }
 
     function activateBenefits($player_id) {

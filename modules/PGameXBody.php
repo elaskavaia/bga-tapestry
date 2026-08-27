@@ -2888,6 +2888,18 @@ abstract class PGameXBody extends tapcommon {
         return false;
     }
 
+    /**
+     * Landmarks still on the mat and available to claim. 13-19 are the extra pool: they share the
+     * location prefix but never sit on an advancement track, so they are never a valid choice.
+     */
+    function getUnclaimedTrackLandmarks(?array $types = null) {
+        $landmarks = $this->getStructuresSearch(BUILDING_LANDMARK, null, "landmark_mat_slot%");
+        return array_filter($landmarks, function ($landmark) use ($types) {
+            $type = (int) $landmark["card_location_arg2"];
+            return $types === null ? $type <= 12 : in_array($type, $types);
+        });
+    }
+
     function getLandmarkFromSlot($track, $spot) {
         $data = $this->tech_track_data[$track][$spot];
         $landmark_arr = array_get($data, "landmark", null);
@@ -9427,17 +9439,11 @@ abstract class PGameXBody extends tapcommon {
                 }
                 break;
             case 111: // select landmark
-                $lm = $this->getCollectionFromDB(
-                    "SELECT * FROM structure WHERE card_location_arg2 <= 12 AND card_location LIKE 'landmark_mat_slot%'"
-                );
-                $arr["choices"] = $lm;
+                $arr["choices"] = $this->getUnclaimedTrackLandmarks();
                 $arr["title"] = clienttranslate('${You} may choose any remaining landmark from the landmark\'s mat');
                 break;
             case 305: // select landmark tier 2
-                $lm = $this->getCollectionFromDB(
-                    "SELECT * FROM structure WHERE card_location_arg2 in (2,6,9,10) AND card_location LIKE 'landmark_mat_slot%'"
-                );
-                $arr["choices"] = $lm;
+                $arr["choices"] = $this->getUnclaimedTrackLandmarks([2, 6, 9, 10]);
                 $arr["title"] = clienttranslate('${You} may choose tier II landmark from the landmark\'s mat');
                 break;
             default:
