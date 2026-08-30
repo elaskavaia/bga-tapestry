@@ -161,6 +161,8 @@ if (!defined("TAPESTRY")) {
     define("BE_ADVISORS_OVERTAKE_ADVISE", 338);
     define("BE_ADVISORS_OVERTAKE_ADVISE_SELECTED", 339);
     define("BE_ALCHEMISTS_DIE", 341);
+    define("BE_VP_ANY_BUILDING", 342);
+    define("BE_FAEFOLK_FLICKER", 343);
     define("BE_OP_UNIQUE", 600);
 
     // TERRAIN
@@ -204,6 +206,17 @@ if (!defined("TAPESTRY")) {
     define("CIV_TINKERERS", 37);
     define("CIV_TREASURE_HUNTERS", 38);
     define("CIV_UTILITARIENS", 39);
+    // FF - alphabetical, the constant minus 40 is the index in the civ_ff sprite
+    define("CIV_ARTIFICERS", 40);
+    define("CIV_CELESTIALS", 41);
+    define("CIV_ELDER_ONES", 42);
+    define("CIV_FAEFOLK", 43);
+    define("CIV_GENIES", 44);
+    define("CIV_ILLUMINATI", 45);
+    define("CIV_MERFOLK", 46);
+    define("CIV_PSIONICS", 47);
+    define("CIV_WEEFOLK", 48);
+    define("CIV_WEREFOLK", 49);
     // income phases
     define("INCOME_FIRSTBONUS", 1);
     define("INCOME_CIV", 10);
@@ -275,6 +288,7 @@ if (!defined("TAPESTRY")) {
     define("MARKER_ONCE", 3); // mark spot that can only be used once per turn
     define("MARKER_SELECT", 4); // mark currently selected spot/tile/etc
     //define("MARKER_ESPIONAGE", 200 + TAP_ESPIONAGE); // mark tapestry which was originally espionage
+    define("EXP_FF_FLAG", 0b1000);
     define("EXP_AA_FLAG", 0b100);
     define("EXP_PP_FLAG", 0b010);
     define("EXP_BA_FLAG", 0b001);
@@ -2296,6 +2310,16 @@ $this->benefit_types = [
         "civ" => CIV_ALCHEMISTS,
         "die" => "black",
         "r" => "die",
+    ],
+    342 => [
+        // BE_VP_ANY_BUILDING
+        "name" => clienttranslate("Score any income building"),
+        "alias" => ["or" => [BE_VP_FARM, BE_VP_ARMORY, BE_VP_HOUSE, 54]],
+    ],
+    343 => [
+        // BE_FAEFOLK_FLICKER
+        "name" => clienttranslate("FAEFOLK move around the ellipse and gain the new spot"),
+        "civ" => CIV_FAEFOLK,
     ],
     502 => [
         //
@@ -5510,6 +5534,40 @@ $this->civilizations = [
         ], //
         "exp" => "PP",
         "al" => 8,
+    ],
+    // FF
+    CIV_FAEFOLK => [
+        "name" => clienttranslate("FAEFOLK"),
+        "description" => [
+            clienttranslate("<i>The Faefolk cyclically flicker among adjacent realities.</i>"),
+            clienttranslate(
+                "When you start the game (or gain Faefolk mid-game), place a player token on the [SCORE TAPESTRY] at the top of the ellipse shown here."
+            ),
+            clienttranslate(
+                "At the beginning of your income turns (2-5), you may gain 1 [TAPESTRY]. Next, count your visible [TAPESTRY] (including those on your income mat) and move your token clockwise that number of spots around the ellipse. Finally, gain the benefit shown on your token's new spot."
+            ),
+            clienttranslate("On income turn 5, gain the indicated benefit twice instead of just once."),
+        ],
+        "exp" => "FF",
+        "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
+        "tokens_count" => 1,
+        "slots_description" => clienttranslate("clockwise"),
+        "slots" => [
+            //
+            1 => ["top" => 62.6, "left" => 69.6, "w" => 8.8, "h" => 5.7, "benefit" => [BE_VP_TAPESTY]],
+            2 => [
+                "top" => 68.2,
+                "left" => 78.4,
+                "w" => 11.6,
+                "h" => 7.5,
+                "benefit" => [BE_TAPESTRY, BE_TERRITORY, BE_TECH_CARD, BE_VP_ANY_BUILDING],
+            ],
+            3 => ["top" => 76.7, "left" => 78.4, "w" => 11.6, "h" => 7.5, "benefit" => [BE_GAIN_FOOD, BE_VP_TILES]],
+            4 => ["top" => 85, "left" => 74.6, "w" => 11.4, "h" => 7.6, "benefit" => [BE_GAIN_COIN, BE_VP_TECH]],
+            5 => ["top" => 85.2, "left" => 61.9, "w" => 11.6, "h" => 7.4, "benefit" => [BE_GAIN_CULTURE, BE_VP_TERRITORY]],
+            6 => ["top" => 76.7, "left" => 57.5, "w" => 11.6, "h" => 7.5, "benefit" => [BE_GAIN_WORKER, BE_VP_CAPITAL]],
+            7 => ["top" => 68.2, "left" => 57.5, "w" => 11.6, "h" => 7.5, "benefit" => [BE_SPACE, BE_EXPLORE_SPACE]], //
+        ],
     ],
 ];
 $this->capitals = [

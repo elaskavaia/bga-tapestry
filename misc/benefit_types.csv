@@ -228,6 +228,8 @@ id|-con|name|r|t|php
 339|BE_ADVISORS_OVERTAKE_ADVISE_SELECTED|Opponent decides on Tapestry card|||'civ'=>CIV_ADVISORS
 340|BE_OPPONENTS_GAIN_TILE|All opponents gain hex tile
 341|BE_ALCHEMISTS_DIE|ALCHEMISTS gain the black conquer die benefits|||'civ'=>CIV_ALCHEMISTS,'die'=>'black','r'=>'die'
+342|BE_VP_ANY_BUILDING|Score any income building|||'alias'=>['or'=>[BE_VP_FARM,BE_VP_ARMORY,BE_VP_HOUSE,54]]
+343|BE_FAEFOLK_FLICKER|FAEFOLK move around the ellipse and gain the new spot|||'civ'=>CIV_FAEFOLK
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

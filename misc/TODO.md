@@ -2,6 +2,18 @@
 
 NEW CIVILIZATIONS
 
+Faefolk: verify the 7 ring slot positions in the studio (measured off civ_ff.webp, not yet seen
+rendered on a real mat).
+
+Faefolk: no test goes through the game object, so the two case CIV_FAEFOLK lines in
+saction_civTokenAdvance and argCivAbilitySingle are unverified - delete them and the suite still
+passes, while a real game falls through to the generic path and places a second cube.
+
+Faefolk: FaefolkUT::resolveFlicker scans the row list instead of popping the head of the stack, so
+testCardPlayedWhileGainingIsCounted passes whether the flicker is queued before or after the
+tapestry gain. It is the regression guard for the gain-then-count ordering and currently guards
+nothing.
+
 Coal baron reset when spies was using it
 Utilitarients - no city when they place landmark
 

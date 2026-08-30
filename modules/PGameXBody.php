@@ -166,6 +166,9 @@ abstract class PGameXBody extends tapcommon {
                 case "BA":
                     $exp_flag = EXP_BA_FLAG;
                     break;
+                case "FF":
+                    $exp_flag = EXP_FF_FLAG;
+                    break;
                 default:
                     $this->systemAssertTrue("Unknown expantion $exp");
                     break;
@@ -4727,6 +4730,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_ALCHEMISTS:
             case CIV_MYSTICS:
             case CIV_ADVISORS:
+            case CIV_FAEFOLK:
                 $inst = $this->getCivilizationInstance($cid, true);
                 $inst->moveCivCube($player_id, $spot, $extra, $civ_args);
                 return;
@@ -9727,6 +9731,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_TRADERS:
             case CIV_ALCHEMISTS:
             case CIV_ADVISORS:
+            case CIV_FAEFOLK:
                 return $civinst->argCivAbilitySingle($player_id, $benefit);
 
             case CIV_LEADERS:

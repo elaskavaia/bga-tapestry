@@ -65,3 +65,6 @@ This is my interpretation not actuall formal rules
 4.6 If Benefit contains multiple effects (i.e. A B)  player can select order, unless stated otherwise by rule or irrelevant
 4.7 Upgrade benefit is mandatory if possible (except during income where it is optional). If upgrade resolved in moving card up player is considered gained the benefit even if benefit is void.
 
+5. Civilization specific
+5.1 Faefolk "score any building" - player picks one building type and scores it (choose one of
+    farms, armories, houses, markets), not the sum of all building types.

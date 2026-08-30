@@ -599,6 +599,20 @@ div[data-income="0"] #subtitle_bar {
   background-size: 500% auto;
   background-image: url("img/exp_pp/civs_aa.jpg");
 }
+.civilization.exp_FF,
+.civilization_40,
+.civilization_41,
+.civilization_42,
+.civilization_43,
+.civilization_44,
+.civilization_45,
+.civilization_46,
+.civilization_47,
+.civilization_48,
+.civilization_49 {
+  background-size: 500% auto;
+  background-image: url("img/exp_ff/civ_ff.webp");
+}
 .tooltipimage .civilization {
   width: calc(216px * 2);
   height: calc(330px * 2);
@@ -697,6 +711,38 @@ div[data-income="0"] #subtitle_bar {
 }
 .civilization_23 {
   background-position: calc(100% / 4 * 4) calc(100% / 1 * 0);
+}
+
+/* Fantasies & Futures, 5x2 sprite in alphabetical order */
+.civilization_40 {
+  background-position: calc(100% / 4 * 0) calc(100% / 1 * 0);
+}
+.civilization_41 {
+  background-position: calc(100% / 4 * 1) calc(100% / 1 * 0);
+}
+.civilization_42 {
+  background-position: calc(100% / 4 * 2) calc(100% / 1 * 0);
+}
+.civilization_43 {
+  background-position: calc(100% / 4 * 3) calc(100% / 1 * 0);
+}
+.civilization_44 {
+  background-position: calc(100% / 4 * 4) calc(100% / 1 * 0);
+}
+.civilization_45 {
+  background-position: calc(100% / 4 * 0) calc(100% / 1 * 1);
+}
+.civilization_46 {
+  background-position: calc(100% / 4 * 1) calc(100% / 1 * 1);
+}
+.civilization_47 {
+  background-position: calc(100% / 4 * 2) calc(100% / 1 * 1);
+}
+.civilization_48 {
+  background-position: calc(100% / 4 * 3) calc(100% / 1 * 1);
+}
+.civilization_49 {
+  background-position: calc(100% / 4 * 4) calc(100% / 1 * 1);
 }
 
 .variant_adjustments_4 .civilization_15 {
