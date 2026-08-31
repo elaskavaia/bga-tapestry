@@ -233,6 +233,13 @@ abstract class tapcommon extends Table {
         throw new BgaUserException("Internal Error. That should not have happened. Please raise a bug.[$log]"); // NOI18N
     }
 
+    /**
+     * Wrapper for bga_rand, tests override it to make randomness deterministic.
+     */
+    function bgaRand(int $min, int $max): int {
+        return bga_rand($min, $max);
+    }
+
     function getMostlyActivePlayerId() {
         if ($this->gamestate->isMultiactiveState()) {
             return $this->getCurrentPlayerId();

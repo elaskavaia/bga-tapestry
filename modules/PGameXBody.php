@@ -540,7 +540,7 @@ abstract class PGameXBody extends tapcommon {
         // randomize player_no for automa games XXX TODO
         $this->setGameStateValue("automa_no", 3);
         if ($automa) {
-            $order = bga_rand(0, 2);
+            $order = $this->bgaRand(0, 2);
             $no = $order + 1;
             $this->setGameStateValue("automa_no", $no);
             $keys = array_keys($players);
@@ -637,15 +637,15 @@ abstract class PGameXBody extends tapcommon {
             $this->cards->createCards($cards, "deck_decision");
             $this->cards->shuffle("deck_decision");
             // pick civ automa
-            $automa_civ = bga_rand(1, 4);
+            $automa_civ = $this->bgaRand(1, 4);
             $this->effect_automaChangeFavoriteTrack(PLAYER_AUTOMA, $automa_civ);
             $this->setGameStateValue("automa_civ", $automa_civ);
             $this->setStat($automa_civ, "automa_civ");
             $this->setStat(0, "automa_score");
             // pick fav shadow
-            $shadow_fav_track = bga_rand(1, 4);
+            $shadow_fav_track = $this->bgaRand(1, 4);
             while ($shadow_fav_track == $automa_civ) {
-                $shadow_fav_track = bga_rand(1, 4);
+                $shadow_fav_track = $this->bgaRand(1, 4);
             }
             $this->effect_automaChangeFavoriteTrack(PLAYER_SHADOW, $shadow_fav_track);
         }
@@ -657,7 +657,7 @@ abstract class PGameXBody extends tapcommon {
             $this->cards->createCards($cards, "deck_decision");
             $this->cards->shuffle("deck_decision");
             // pick fav
-            $shadow_fav_track = bga_rand(1, 4);
+            $shadow_fav_track = $this->bgaRand(1, 4);
             $this->effect_automaChangeFavoriteTrack(PLAYER_SHADOW, $shadow_fav_track);
         }
     }
@@ -3335,7 +3335,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function rollScienceDie($data, $dievar = "science_die", $player_id = -1, $undosave = true) {
-        $die_roll = bga_rand(1, 4);
+        $die_roll = $this->bgaRand(1, 4);
         $this->setGameStateValue($dievar, $die_roll);
         $this->notifyWithTrack(
             "science_roll",
@@ -5481,7 +5481,7 @@ abstract class PGameXBody extends tapcommon {
                     // take first
                     $this->queueBenefitAutoma($ben[0], $player_id, $reason, $count);
                 } else {
-                    $pick = bga_rand(0, count($ben) - 1);
+                    $pick = $this->bgaRand(0, count($ben) - 1);
                     $selben = $ben[$pick];
                     $this->queueBenefitAutoma($selben, $player_id, $reason, $count);
                 }
@@ -5690,7 +5690,7 @@ abstract class PGameXBody extends tapcommon {
     function automa_getHexTiebreaker($valid_targets, $player_id = PLAYER_AUTOMA) {
         $this->systemAssertTrue("no valid targets", count($valid_targets) > 0);
         //$this->debugConsole('hex tb', [$valid_targets], true);
-        $loc = bga_rand(0, count($valid_targets) - 1); // random valid target for now XXX automa
+        $loc = $this->bgaRand(0, count($valid_targets) - 1); // random valid target for now XXX automa
         $coord = $valid_targets[$loc];
         return $coord;
     }
@@ -5880,7 +5880,7 @@ abstract class PGameXBody extends tapcommon {
             $tiebreaker_card = array_shift($cards);
             return [$track_card["type_arg"], $tiebreaker_card["type_arg"]];
         } else {
-            $random_card = bga_rand(1, 22);
+            $random_card = $this->bgaRand(1, 22);
             return [$random_card, $random_card];
         }
     }
@@ -6030,7 +6030,7 @@ abstract class PGameXBody extends tapcommon {
                 $tiebreaker_card = array_shift($cards);
                 $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $tiebreaker_card["type_arg"], "tt");
             } else {
-                $track_tiebreaker = $this->getRulesCard(CARD_DECISION, bga_rand(1, 22), "tt");
+                $track_tiebreaker = $this->getRulesCard(CARD_DECISION, $this->bgaRand(1, 22), "tt");
             }
             $track = $this->getValidTracksAutoma($player_id, "l", $track_tiebreaker);
         }
@@ -6202,7 +6202,7 @@ abstract class PGameXBody extends tapcommon {
             );
             return;
         }
-        $loc = bga_rand(0, count($targets) - 1); // random valid target for now XXX automa
+        $loc = $this->bgaRand(0, count($targets) - 1); // random valid target for now XXX automa
         $coord = $targets[$loc];
         $cards = $this->awardCard($player_id, 1, CARD_TERRITORY, false, $be_reason);
         $tile_data = array_shift($cards);
@@ -6214,7 +6214,7 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_exploreWithCard($player_id, $tile_id, $location, $rot = -1, $reason = null) {
         if ($rot == -1) {
-            $rot = bga_rand(0, 5);
+            $rot = $this->bgaRand(0, 5);
         }
         $tile_data = $this->getCardInfoById($tile_id);
         $this->systemAssertTrue("invalid id $tile_id", $tile_data);
@@ -11949,8 +11949,8 @@ abstract class PGameXBody extends tapcommon {
 
     function rollConquerDice($player_id) {
         // Roll conquer dice
-        $die_red = bga_rand(0, 5);
-        $die_black = bga_rand(0, 5);
+        $die_red = $this->bgaRand(0, 5);
+        $die_black = $this->bgaRand(0, 5);
         if ($die_black == 5) {
             $die_black = 1;
         }
@@ -11974,7 +11974,7 @@ abstract class PGameXBody extends tapcommon {
 
     function rollRedConquerDie(int $player_id, bool $undosave) {
         // Roll conquer dice
-        $die_red = bga_rand(0, 5);
+        $die_red = $this->bgaRand(0, 5);
         if ($die_red == 5) {
             $die_red = 2;
         }
@@ -11992,7 +11992,7 @@ abstract class PGameXBody extends tapcommon {
 
     function rollBlackConquerDie($player_id, bool $undosave) {
         // Roll conquer dice
-        $die_black = bga_rand(0, 5);
+        $die_black = $this->bgaRand(0, 5);
         if ($die_black == 5) {
             $die_black = 1;
         }

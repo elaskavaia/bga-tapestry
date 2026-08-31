@@ -46,6 +46,24 @@ class GameUT extends Tapestry {
         return $deck;
     }
 
+    /** @var int[] Predetermined bgaRand() results, consumed in order; falls back to $min when empty. */
+    public array $randQueue = [];
+
+    function bgaRand(int $min, int $max): int {
+        if (!$this->randQueue) {
+            fwrite(
+                STDERR,
+                "\nWARNING: bgaRand($min, $max) with an empty randQueue, returning $min. Use seedRand() to make this test deterministic.\n"
+            );
+            return $min;
+        }
+        return (int) array_shift($this->randQueue);
+    }
+
+    function seedRand(int ...$values): void {
+        $this->randQueue = array_merge($this->randQueue, $values);
+    }
+
     function prepareUndoSavepoint($first = false) {}
 
     /** Everything sent so far, as the framework stub collected it: type, log, args. */
