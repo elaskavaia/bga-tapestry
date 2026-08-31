@@ -68,3 +68,8 @@ This is my interpretation not actuall formal rules
 5. Civilization specific
 5.1 Faefolk "score any building" - player picks one building type and scores it (choose one of
     farms, armories, houses, markets), not the sum of all building types.
+5.2 Faefolk "visible tapestry" - cards in your hand count as well as the ones played on your
+    income mat (BGA forum ruling). A tapestry covered by one played over it does not count. So the
+    optional card gained at the start of the ability is always counted and always moves the token
+    one extra spot, and a card that leaves your hand onto the mat during the same resolution is
+    still counted exactly once.

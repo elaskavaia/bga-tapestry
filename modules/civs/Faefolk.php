@@ -30,9 +30,9 @@ class Faefolk extends AbsCivilization {
     }
 
     /**
-     * The flicker is queued behind the tapestry card rather than resolved here: gaining a card can
-     * itself put one on the income mat (TYRANNY via the HERALDS clone), and the printed order is
-     * gain first, count second.
+     * The flicker is queued behind the tapestry card rather than resolved here. Hand cards count,
+     * so a gained card always adds a spot: the printed "gain first, count second" order decides
+     * the result on every use of the ability, not just in corner cases.
      */
     function moveCivCube(int $player_id, int $spot, $extra, array $civ_args) {
         $civ = $this->civ;
@@ -65,13 +65,15 @@ class Faefolk extends AbsCivilization {
     }
 
     /**
-     * Visible tapestry cards are the ones played on the income mat. Cards in hand are hidden and
-     * cards moved to era_6 are covered by the card played over them.
+     * Visible tapestry cards are the ones in hand plus the ones played on the income mat
+     * (FORMAL_RULES 5.2). A card on era_6 is covered by the one played over it. The HERALDS clone
+     * on civilization_6 and the ESPIONAGE clones on tapestry_NN are copies whose originals are
+     * already counted in era%, and neither location is searched here.
      */
     function countVisibleTapestry(int $player_id): int {
-        $cards = $this->game->getCardsSearch(CARD_TAPESTRY, null, "era%", $player_id);
-        $count = 0;
-        foreach ($cards as $card) {
+        $game = $this->game;
+        $count = count($game->getCardsSearch(CARD_TAPESTRY, null, "hand", $player_id));
+        foreach ($game->getCardsSearch(CARD_TAPESTRY, null, "era%", $player_id) as $card) {
             if ($card["card_location"] !== "era_6") {
                 $count++;
             }

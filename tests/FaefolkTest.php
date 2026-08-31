@@ -41,6 +41,28 @@ class FaefolkUT extends GameUT {
         }
     }
 
+    function seedTapestryDeck(int $count = 1): void {
+        for ($i = 1; $i <= $count; $i++) {
+            $this->addCard(CARD_TAPESTRY, "deck_tapestry");
+        }
+    }
+
+    /** The card move part of playTapestryCard, without the rest of that method. */
+    function playCardOntoMat(int $card_id, string $era): void {
+        $this->cards->setLocation($card_id, $era);
+    }
+
+    /** What stBenefitManager does with the pending tapestry gain: resolve it, then cash it. */
+    function resolveTapestryGain(int $player_id = 1): void {
+        $row = $this->benefits->first(["benefit_category" => "standard", "benefit_type" => BE_TAPESTRY]);
+        if (!$row) {
+            throw new BgaSystemException("no pending tapestry row");
+        }
+        if ($this->awardBenefits($player_id, BE_TAPESTRY)) {
+            $this->benefitCashed($row["benefit_id"]);
+        }
+    }
+
     /** What stBenefitManager does with the pending flicker row: resolve it, then cash it on true. */
     function resolveFlicker(int $player_id = 1): void {
         $row = $this->benefits->first(["benefit_category" => "standard", "benefit_type" => BE_FAEFOLK_FLICKER]);
@@ -103,7 +125,7 @@ final class FaefolkTest extends TestCase {
     function testEachSpotQueuesItsPrintedBenefits() {
         $expected = [
             1 => [(string) BE_VP_TAPESTY],
-            2 => [(string) BE_TAPESTRY, (string) BE_TERRITORY, (string) BE_TECH_CARD, (string) BE_VP_ANY_BUILDING],
+            2 => [(string) BE_TAPESTRY, (string) BE_TERRITORY, (string) BE_INVENT, (string) BE_VP_ANY_BUILDING],
             3 => [(string) BE_GAIN_FOOD, (string) BE_VP_TILES],
             4 => [(string) BE_GAIN_COIN, (string) BE_VP_TECH],
             5 => [(string) BE_GAIN_CULTURE, (string) BE_VP_TERRITORY],
@@ -175,38 +197,91 @@ final class FaefolkTest extends TestCase {
     }
 
     /**
-     * Gaining a tapestry card can put one on the income mat before the count happens: with HERALDS,
-     * isTapestryActive() reads the clone on civilization_6, so a TYRANNY there makes
-     * effect_cardComesInPlayTriggerResolve queue benefit 64 and the card lands in era{N}. The
-     * flicker must see that card. Resolving the two queued rows in stack order is what makes this
-     * work, so the test resolves them in order with the mat changing in between.
+     * With HERALDS, isTapestryActive() reads the clone on civilization_6, so a TYRANNY there makes
+     * effect_cardComesInPlayTriggerResolve queue benefit 64 and the just gained card is played into
+     * era{N} before the count. Hand and mat both count, so the card moves between two counted
+     * zones and is counted exactly once - the same result as leaving it in hand.
      */
-    function testCardPlayedWhileGainingIsCounted() {
-        $this->game->setTapestryOnMat(1);
-        $this->faefolk()->moveCivCube(1, Faefolk::CHOICE_GAIN_TAPESTRY, "", []);
+    function testCardPlayedOntoTheMatWhileGainingIsCountedOnce() {
+        $game = $this->newGame();
+        $game->setToken("civ_43_1");
+        $game->setTapestryOnMat(1);
+        $game->seedTapestryDeck();
+        $game->getCivilizationInstance(CIV_FAEFOLK, true)->moveCivCube(1, Faefolk::CHOICE_GAIN_TAPESTRY, "", []);
+        $game->resolveTapestryGain();
 
-        // BE_TAPESTRY resolves first; TYRANNY plays the drawn card onto the mat
-        $this->game->addCard(CARD_TAPESTRY, "era2");
-        $this->game->resolveFlicker();
+        // benefit 64 interrupts before the flicker and plays the drawn card into the current era
+        $drawn = array_key_first($game->getCardsSearch(CARD_TAPESTRY, null, "hand", 1));
+        $game->playCardOntoMat($drawn, "era2");
+        $game->resolveFlicker();
 
-        // 2 visible now, not 1: spot 1 + 2 = spot 3, and the spot 2 benefits are never queued
-        $this->assertEquals("civ_43_3", $this->game->tokenLocation());
-        $this->assertContains((string) BE_VP_TILES, $this->game->benefitLabels());
+        // 1 on the mat + the gained card = 2 spots, exactly what leaving it in hand would give
+        $this->assertEquals("civ_43_3", $game->tokenLocation());
+        $this->assertContains((string) BE_VP_TILES, $game->benefitLabels());
     }
 
     /**
-     * Visible means played on the income mat. Cards in hand are hidden, and a card in era_6 has
-     * been covered by the one played over it, so neither is counted.
+     * FORMAL_RULES 5.2: your hand counts as well as your income mat, a covered card does not, and
+     * nothing that belongs to anyone else or to the deck does.
      */
-    function testHandAndCoveredCardsAreNotVisible() {
+    function testHandCardsCountAndCoveredOnesDoNot() {
         $this->game->setTapestryOnMat(2);
         $this->game->addCard(CARD_TAPESTRY, "hand");
         $this->game->addCard(CARD_TAPESTRY, "hand");
-        $this->game->addCard(CARD_TAPESTRY, "era_6");
-        $this->game->addCard(CARD_TAPESTRY, "era1", 2); // an opponent's card
+        $this->game->addCard(CARD_TAPESTRY, "era_6"); // covered by the card played over it
+        $this->game->addCard(CARD_TAPESTRY, "era1", 2); // an opponent's mat
+        $this->game->addCard(CARD_TAPESTRY, "hand", 2); // an opponent's hand
         $this->game->addCard(CARD_TAPESTRY, "deck_tapestry");
+        $this->game->addCard(CARD_TAPESTRY, "discard");
+
+        $this->assertEquals(4, $this->faefolk()->countVisibleTapestry(1)); // 2 on the mat, 2 in hand
+    }
+
+    /**
+     * The HERALDS clone on civilization_6 and the ESPIONAGE clones on tapestry_NN are copies of
+     * cards that are still sitting in era%, so counting them would count those cards twice.
+     */
+    function testCloneCopiesAreNotCounted() {
+        $this->game->setTapestryOnMat(2);
+        $this->game->addCard(CARD_TAPESTRY, "civilization_6");
+        $this->game->addCard(CARD_TAPESTRY, "tapestry_1");
 
         $this->assertEquals(2, $this->faefolk()->countVisibleTapestry(1));
+    }
+
+    /** The gained card lands in hand, which counts, so taking it is always worth exactly one spot. */
+    function testGainingTheCardMovesOneSpotFurtherThanDeclining() {
+        $declined = $this->newGame();
+        $declined->setToken("civ_43_1");
+        $declined->setTapestryOnMat(2);
+        $declined->getCivilizationInstance(CIV_FAEFOLK, true)->moveCivCube(1, Faefolk::CHOICE_FLICKER_ONLY, "", []);
+        $declined->resolveFlicker();
+        $this->assertEquals("civ_43_3", $declined->tokenLocation());
+
+        $gained = $this->newGame();
+        $gained->setToken("civ_43_1");
+        $gained->setTapestryOnMat(2);
+        $gained->seedTapestryDeck();
+        $gained->getCivilizationInstance(CIV_FAEFOLK, true)->moveCivCube(1, Faefolk::CHOICE_GAIN_TAPESTRY, "", []);
+        $gained->resolveTapestryGain();
+        $gained->resolveFlicker();
+        $this->assertEquals(1, $gained->getCardCountInHand(1, CARD_TAPESTRY), "the gain really drew a card");
+        $this->assertEquals("civ_43_4", $gained->tokenLocation());
+    }
+
+    /**
+     * The count runs strictly after the gain, so anything the gain interrupts with (benefit 64
+     * under TYRANNY) is resolved before the token moves.
+     */
+    function testTheFlickerStaysBehindWhateverTheGainInterruptsWith() {
+        $this->game->seedTapestryDeck();
+        $this->faefolk()->moveCivCube(1, Faefolk::CHOICE_GAIN_TAPESTRY, "", []);
+        $this->game->resolveTapestryGain();
+        $this->game->queueBenefitInterrupt(64, 1, "");
+
+        $interrupt = $this->game->benefitPosition("standard", 64, 1);
+        $flicker = $this->game->benefitPosition("standard", BE_FAEFOLK_FLICKER, 1);
+        $this->assertTrue($interrupt >= 0 && $flicker > $interrupt, "the flicker pops last");
     }
 
     function testClockwiseMoveWrapsPastSpotSeven() {
