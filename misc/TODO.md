@@ -14,6 +14,11 @@ testCardPlayedWhileGainingIsCounted passes whether the flicker is queued before 
 tapestry gain. It is the regression guard for the gain-then-count ordering and currently guards
 nothing.
 
+BE_TECH_CARD (26) is broken as a queued benefit: awardBenefits case 26 sends it to the invent
+state, but stInvent asserts the benefit's r rule is "i" and row 26 has "g". Nothing used it until
+Faefolk did, which is how it surfaced. Faefolk now uses BE_INVENT instead; row 26 is still a trap
+for the next caller.
+
 Coal baron reset when spies was using it
 Utilitarients - no city when they place landmark
 

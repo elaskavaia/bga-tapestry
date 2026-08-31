@@ -5560,7 +5560,7 @@ $this->civilizations = [
                 "left" => 78.4,
                 "w" => 11.6,
                 "h" => 7.5,
-                "benefit" => [BE_TAPESTRY, BE_TERRITORY, BE_TECH_CARD, BE_VP_ANY_BUILDING],
+                "benefit" => [BE_TAPESTRY, BE_TERRITORY, BE_INVENT, BE_VP_ANY_BUILDING],
             ],
             3 => ["top" => 76.7, "left" => 78.4, "w" => 11.6, "h" => 7.5, "benefit" => [BE_GAIN_FOOD, BE_VP_TILES]],
             4 => ["top" => 85, "left" => 74.6, "w" => 11.4, "h" => 7.6, "benefit" => [BE_GAIN_COIN, BE_VP_TECH]],
