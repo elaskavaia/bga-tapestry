@@ -9,8 +9,7 @@ require_once __DIR__ . "/Stubs/GameUT.php";
 /**
  * Regression tests for BGA bug #202072.
  *
- * The framework stubs return empty rows for every DB accessor, so the benefit stack and the
- * civilization cube are kept in memory here.
+ * The benefit stack and the civilization cube live in the GameUT in memory tables.
  *
  * The stub gamestate is wired with ->game, so gamestate->state() models what the production
  * framework does: the studio stack trace for table T950560 move 11 shows state() going through
@@ -19,8 +18,6 @@ require_once __DIR__ . "/Stubs/GameUT.php";
  * getMostlyActivePlayerId() asks isMultiactiveState(), which does not reload args.
  */
 class UtilitariansUT extends GameUT {
-    public $benefit_rows = [];
-    public $cube = null;
     public $active_player_lookups = 0;
     public $benefit_at_lookup = "not-called";
     public $civ_arg_reloads = 0;
@@ -28,42 +25,6 @@ class UtilitariansUT extends GameUT {
     function __construct() {
         parent::__construct();
         $this->gamestate->game = $this;
-    }
-
-    function getCurrentBenefit($ben = null, $cat = "standard") {
-        if ($ben === null) {
-            return $this->benefit_rows ? reset($this->benefit_rows) : null;
-        }
-        if (is_array($ben)) {
-            return array_get($this->benefit_rows, $ben["benefit_id"], null);
-        }
-        foreach ($this->benefit_rows as $row) {
-            if ($row["benefit_type"] == $ben && $row["benefit_category"] == $cat) {
-                return $row;
-            }
-        }
-        return null;
-    }
-
-    function benefitCashed($benefit_table_id) {
-        $id = is_array($benefit_table_id) ? $benefit_table_id["benefit_id"] : $benefit_table_id;
-        unset($this->benefit_rows[$id]);
-    }
-
-    function interruptBenefit() {}
-
-    function getStructureInfoSearch(
-        $card_type,
-        $card_type_arg = null,
-        $card_location = null,
-        $card_location_arg = null,
-        $card_location_arg2 = null
-    ) {
-        return $this->cube;
-    }
-
-    function getStructureInfoById($id, $assert = true) {
-        return $this->cube;
     }
 
     function getMostlyActivePlayerId() {
@@ -84,29 +45,11 @@ final class UtilitariansTest extends TestCase {
         $game->init();
         $game->doAdjustMaterial(2, $variant);
         $game->gamestate->jumpToState(14); // civAbility, args = argCivAbility
-        $game->cube = [
-            "card_id" => 77,
-            "card_type" => BUILDING_CUBE,
-            "card_type_arg" => 0,
-            "card_location" => "civ_39_7",
-            "card_location_arg" => 1,
-            "card_location_arg2" => 0,
-        ];
         return $game;
     }
 
-    private function civBenefit($data) {
-        return [
-            5 => [
-                "benefit_id" => 5,
-                "benefit_type" => CIV_UTILITARIENS,
-                "benefit_category" => "civ",
-                "benefit_player_id" => 1,
-                "benefit_prerequisite" => 1,
-                "benefit_count" => 1,
-                "benefit_data" => $data,
-            ],
-        ];
+    private function queueCivBenefit(GameUT $game, string $data): void {
+        $game->benefits->insert("civ", CIV_UTILITARIENS, 1, 1, $data, 1);
     }
 
     /**
@@ -118,7 +61,8 @@ final class UtilitariansTest extends TestCase {
      */
     function testUtilitariansTriggeredNotificationDoesNotReloadStateArgs() {
         $game = $this->game();
-        $game->benefit_rows = $this->civBenefit("triggered::10");
+        $this->queueCivBenefit($game, "triggered::10");
+        $game->addCubeAt(1, "civ_39_1"); // the cube the landmark trigger advances
 
         $game->action_civTokenAdvance(CIV_UTILITARIENS, 1, "");
 
@@ -135,7 +79,8 @@ final class UtilitariansTest extends TestCase {
      */
     function testUtilitariansMidgameNotificationDoesNotReloadStateArgs() {
         $game = $this->game();
-        $game->benefit_rows = $this->civBenefit("midgame");
+        $this->queueCivBenefit($game, "midgame");
+        $game->addCubeAt(1, "civ_39_9"); // the midgame branch moves a cube off slot 9 or 10
 
         $game->action_civTokenAdvance(CIV_UTILITARIENS, 1, "");
 
@@ -151,7 +96,7 @@ final class UtilitariansTest extends TestCase {
      */
     function testStateReloadsArgsUnlessSkipped() {
         $game = $this->game();
-        $game->benefit_rows = $this->civBenefit("triggered::10");
+        $this->queueCivBenefit($game, "triggered::10");
 
         $game->gamestate->state(true);
         $game->gamestate->isMultiactiveState();
@@ -168,7 +113,6 @@ final class UtilitariansTest extends TestCase {
      */
     function testStateReloadOnDrainedStackAsserts() {
         $game = $this->game();
-        $game->benefit_rows = [];
 
         ob_start(); // systemAssertTrue echoes the server log through the final error()
         try {

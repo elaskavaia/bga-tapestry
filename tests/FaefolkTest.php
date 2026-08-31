@@ -9,145 +9,47 @@ require_once __DIR__ . "/Stubs/GameUT.php";
 /**
  * Faefolk, the first Fantasies and Futures civilization.
  *
- * The stubs run no SQL, so the card table, the single mat token and the benefit stack are modelled
- * in memory. queueBenefitNormal is deliberately NOT stubbed: the tests drive the real engine so
- * that array expansion, the benefit 342 alias and the income turn 5 doubling are all exercised.
- * The stack model is the IslandersUT one - interruptBenefit() bumps the prerequisite of every
- * pending row, benefitSingleEntry() inserts at prerequisite 0, and rows pop by (prerequisite, id).
+ * The card table, the single mat token and the benefit stack all live in the GameUT in memory
+ * models, so the tests drive the real engine: array expansion, the benefit 342 alias and the
+ * income turn 5 doubling are all exercised rather than stubbed.
  */
 class FaefolkUT extends GameUT {
-    public array $rows = [];
-    public array $card_rows = [];
-    public array $messages = [];
-    public array $added_cubes = [];
-    public string $token_location = "civ_43_1";
-    public int $token_id = 77;
-    public int $era = 2;
-    private int $next_id = 1;
-
-    function getCurrentEra($player_id) {
-        return $this->era;
+    function __construct() {
+        parent::__construct();
+        $this->era = 2;
+        $this->giveCiv(1, CIV_FAEFOLK);
     }
 
-    function hasCiv($player_id, $civ_id) {
-        return $civ_id == CIV_FAEFOLK;
-    }
-
-    /** Honours card_type, card_location (with SQL LIKE wildcards) and card_location_arg. */
-    function getCardsSearch(
-        $card_type,
-        $card_type_arg = null,
-        $card_location = null,
-        $card_location_arg = null,
-        $card_location_arg2 = null
-    ) {
-        $found = [];
-        foreach ($this->card_rows as $card) {
-            if ($card_type !== null && $card["card_type"] != $card_type) {
-                continue;
-            }
-            if ($card_location_arg !== null && $card["card_location_arg"] != $card_location_arg) {
-                continue;
-            }
-            if ($card_location !== null) {
-                $pattern = "/^" . str_replace(["%", "_"], [".*", "."], preg_quote($card_location, "/")) . "$/";
-                if (!preg_match($pattern, $card["card_location"])) {
-                    continue;
-                }
-            }
-            $found[$card["card_id"]] = $card;
+    /** Replaces whatever sits on the ellipse, no argument leaves the player without a token. */
+    function setToken(string ...$locations): void {
+        foreach (array_keys($this->getStructuresOnCiv(CIV_FAEFOLK)) as $id) {
+            $this->structures->setLocation($id, "hand");
         }
-        return $found;
+        foreach ($locations as $location) {
+            $this->addCubeAt(1, $location, CUBE_CIV);
+        }
     }
 
-    function addCard(string $location, int $player_id = 1, int $type = CARD_TAPESTRY) {
-        $id = 100 + count($this->card_rows);
-        $this->card_rows[] = [
-            "card_id" => $id,
-            "card_type" => $type,
-            "card_type_arg" => 1,
-            "card_location" => $location,
-            "card_location_arg" => $player_id,
-        ];
+    function tokenLocation(): string {
+        $tokens = $this->getStructuresOnCiv(CIV_FAEFOLK);
+        return $tokens ? reset($tokens)["card_location"] : "";
     }
 
     function setTapestryOnMat(int $count) {
         for ($i = 1; $i <= $count; $i++) {
-            $this->addCard("era$i");
+            $this->addCard(CARD_TAPESTRY, "era$i");
         }
-    }
-
-    function getStructuresOnCiv($cid, $type = BUILDING_CUBE, $arg2 = null) {
-        if ($this->token_location === "") {
-            return [];
-        }
-        $tokens = [];
-        foreach (explode(",", $this->token_location) as $i => $location) {
-            $tokens[$this->token_id + $i] = [
-                "card_id" => $this->token_id + $i,
-                "card_type" => BUILDING_CUBE,
-                "card_type_arg" => CUBE_CIV,
-                "card_location" => $location,
-                "card_location_arg" => 1,
-                "card_location_arg2" => 0,
-            ];
-        }
-        return $tokens;
-    }
-
-    function dbSetStructureLocation($structure_id, $location, $state = null, $message = "", $player_id = null) {
-        $this->token_location = $location;
-    }
-
-    function addCube($player_id, $destination, $type_arg = 0, $arg2 = 0) {
-        $this->added_cubes[] = $destination;
-        return $this->token_id;
-    }
-
-    function notifyWithName($type, $message = "", $args = null, $player_id = null) {
-        $this->messages[] = ["type" => $type, "message" => $message, "args" => $args];
-    }
-
-    function interruptBenefit() {
-        foreach ($this->rows as &$row) {
-            $row["prereq"]++;
-        }
-    }
-
-    function benefitSingleEntry($cat, $type, $player_id, $quantity = 1, $data = "") {
-        $this->rows[] = [
-            "id" => $this->next_id++,
-            "prereq" => 0,
-            "cat" => $cat,
-            "type" => (int) $type,
-            "player" => (int) $player_id,
-            "count" => $quantity,
-        ];
-    }
-
-    /** The order stBenefitManager pops rows in. */
-    function drainOrder(): array {
-        $rows = $this->rows;
-        usort($rows, fn($a, $b) => [$a["prereq"], $a["id"]] <=> [$b["prereq"], $b["id"]]);
-        return $rows;
     }
 
     /** What stBenefitManager does with the pending flicker row: resolve it, then cash it on true. */
     function resolveFlicker(int $player_id = 1): void {
-        foreach ($this->rows as $i => $row) {
-            if ($row["cat"] == "standard" && $row["type"] == BE_FAEFOLK_FLICKER) {
-                if ($this->awardBenefits($player_id, BE_FAEFOLK_FLICKER)) {
-                    unset($this->rows[$i]);
-                }
-                return;
-            }
+        $row = $this->benefits->first(["benefit_category" => "standard", "benefit_type" => BE_FAEFOLK_FLICKER]);
+        if (!$row) {
+            throw new BgaSystemException("no pending flicker row");
         }
-        throw new BgaSystemException("no pending flicker row");
-    }
-
-    /** Pending rows as "cat:type" in pop order, standard rows shown as just the type. */
-    function drainLabels(): array {
-        return array_map(fn($r) => $r["cat"] == "standard" ? (string) $r["type"] : $r["cat"], $this->drainOrder());
+        if ($this->awardBenefits($player_id, BE_FAEFOLK_FLICKER)) {
+            $this->benefitCashed($row["benefit_id"]);
+        }
     }
 }
 
@@ -155,9 +57,16 @@ final class FaefolkTest extends TestCase {
     private FaefolkUT $game;
 
     protected function setUp(): void {
-        $this->game = new FaefolkUT();
-        $this->game->init();
-        $this->game->doAdjustMaterial(2, 8);
+        $this->game = $this->newGame();
+        $this->game->setToken("civ_43_1");
+    }
+
+    /** A table with the civ in hand and nothing on the ellipse yet. */
+    private function newGame(): FaefolkUT {
+        $game = new FaefolkUT();
+        $game->init();
+        $game->doAdjustMaterial(2, 8);
+        return $game;
     }
 
     private function faefolk(): Faefolk {
@@ -202,47 +111,45 @@ final class FaefolkTest extends TestCase {
             7 => [(string) BE_SPACE, (string) BE_EXPLORE_SPACE],
         ];
         foreach ($expected as $spot => $rows) {
-            $game = new FaefolkUT();
-            $game->init();
-            $game->doAdjustMaterial(2, 8);
-            $game->token_location = "civ_43_$spot";
+            $game = $this->newGame();
+            $game->setToken("civ_43_$spot");
             $game->getCivilizationInstance(CIV_FAEFOLK, true)->moveCivCube(1, Faefolk::CHOICE_FLICKER_ONLY, "", []);
             $game->resolveFlicker();
 
-            $this->assertEquals("civ_43_$spot", $game->token_location, "spot $spot, 0 visible tapestry, token stays");
-            $this->assertEquals($rows, $game->drainLabels(), "spot $spot");
+            $this->assertEquals("civ_43_$spot", $game->tokenLocation(), "spot $spot, 0 visible tapestry, token stays");
+            $this->assertEquals($rows, $game->benefitLabels(), "spot $spot");
         }
     }
 
     /** SCORE ANY BUILDING resolves into a single four way choice, it is not four separate scores. */
     function testScoreAnyBuildingResolvesToAChooseOne() {
         $this->game->awardBenefits(1, BE_VP_ANY_BUILDING);
-        $this->assertEquals(["o," . BE_VP_FARM . "," . BE_VP_ARMORY . "," . BE_VP_HOUSE . ",54"], $this->game->drainLabels());
+        $this->assertEquals(["o," . BE_VP_FARM . "," . BE_VP_ARMORY . "," . BE_VP_HOUSE . ",54"], $this->game->benefitLabels());
     }
 
     function testSetupPlacesTokenOnSpotOne() {
-        $this->game->setupCiv(CIV_FAEFOLK, 1, "1");
-        $this->assertEquals(["civ_43_1"], $this->game->added_cubes);
+        $game = $this->newGame();
+        $game->setupCiv(CIV_FAEFOLK, 1, "1");
+        $this->assertEquals("civ_43_1", $game->tokenLocation());
     }
 
     function testMidgameSetupAlsoPlacesTheToken() {
-        $this->game->setupCiv(CIV_FAEFOLK, 1, "");
-        $this->assertEquals(["civ_43_1"], $this->game->added_cubes);
+        $game = $this->newGame();
+        $game->setupCiv(CIV_FAEFOLK, 1, "");
+        $this->assertEquals("civ_43_1", $game->tokenLocation());
     }
 
     function testAbilityFiresOnIncomeTurns2To5() {
         foreach ([2, 3, 4, 5] as $turn) {
-            $game = new FaefolkUT();
-            $game->init();
-            $game->doAdjustMaterial(2, 8);
+            $game = $this->newGame();
             $game->queueEraCivAbility(CIV_FAEFOLK, 1, $turn);
-            $this->assertEquals(["civ"], $game->drainLabels(), "income turn $turn");
+            $this->assertEquals(["civ"], $game->benefitLabels(), "income turn $turn");
         }
     }
 
     function testAbilityDoesNotFireOnIncomeTurn1() {
         $this->game->queueEraCivAbility(CIV_FAEFOLK, 1, 1);
-        $this->assertEquals([], $this->game->drainLabels());
+        $this->assertEquals([], $this->game->benefitLabels());
     }
 
     /** The whole ability is mandatory, only the tapestry card is a choice, so no Decline button. */
@@ -259,12 +166,12 @@ final class FaefolkTest extends TestCase {
      */
     function testTapestryCardIsQueuedAheadOfTheFlicker() {
         $this->faefolk()->moveCivCube(1, Faefolk::CHOICE_GAIN_TAPESTRY, "", []);
-        $this->assertEquals([(string) BE_TAPESTRY, (string) BE_FAEFOLK_FLICKER], $this->game->drainLabels());
+        $this->assertEquals([(string) BE_TAPESTRY, (string) BE_FAEFOLK_FLICKER], $this->game->benefitLabels());
     }
 
     function testFlickerOnlyQueuesNoTapestryCard() {
         $this->faefolk()->moveCivCube(1, Faefolk::CHOICE_FLICKER_ONLY, "", []);
-        $this->assertEquals([(string) BE_FAEFOLK_FLICKER], $this->game->drainLabels());
+        $this->assertEquals([(string) BE_FAEFOLK_FLICKER], $this->game->benefitLabels());
     }
 
     /**
@@ -279,12 +186,12 @@ final class FaefolkTest extends TestCase {
         $this->faefolk()->moveCivCube(1, Faefolk::CHOICE_GAIN_TAPESTRY, "", []);
 
         // BE_TAPESTRY resolves first; TYRANNY plays the drawn card onto the mat
-        $this->game->addCard("era2");
+        $this->game->addCard(CARD_TAPESTRY, "era2");
         $this->game->resolveFlicker();
 
         // 2 visible now, not 1: spot 1 + 2 = spot 3, and the spot 2 benefits are never queued
-        $this->assertEquals("civ_43_3", $this->game->token_location);
-        $this->assertContains((string) BE_VP_TILES, $this->game->drainLabels());
+        $this->assertEquals("civ_43_3", $this->game->tokenLocation());
+        $this->assertContains((string) BE_VP_TILES, $this->game->benefitLabels());
     }
 
     /**
@@ -293,30 +200,30 @@ final class FaefolkTest extends TestCase {
      */
     function testHandAndCoveredCardsAreNotVisible() {
         $this->game->setTapestryOnMat(2);
-        $this->game->addCard("hand");
-        $this->game->addCard("hand");
-        $this->game->addCard("era_6");
-        $this->game->addCard("era1", 2); // an opponent's card
-        $this->game->addCard("deck_tapestry");
+        $this->game->addCard(CARD_TAPESTRY, "hand");
+        $this->game->addCard(CARD_TAPESTRY, "hand");
+        $this->game->addCard(CARD_TAPESTRY, "era_6");
+        $this->game->addCard(CARD_TAPESTRY, "era1", 2); // an opponent's card
+        $this->game->addCard(CARD_TAPESTRY, "deck_tapestry");
 
         $this->assertEquals(2, $this->faefolk()->countVisibleTapestry(1));
     }
 
     function testClockwiseMoveWrapsPastSpotSeven() {
-        $this->game->token_location = "civ_43_5";
+        $this->game->setToken("civ_43_5");
         $this->game->setTapestryOnMat(3);
         $this->useAbility(Faefolk::CHOICE_FLICKER_ONLY);
 
-        $this->assertEquals("civ_43_1", $this->game->token_location);
-        $this->assertEquals([(string) BE_VP_TAPESTY], $this->game->drainLabels());
+        $this->assertEquals("civ_43_1", $this->game->tokenLocation());
+        $this->assertEquals([(string) BE_VP_TAPESTY], $this->game->benefitLabels());
     }
 
     function testFullLapLandsOnTheSameSpot() {
-        $this->game->token_location = "civ_43_3";
+        $this->game->setToken("civ_43_3");
         $this->game->setTapestryOnMat(7);
         $this->useAbility(Faefolk::CHOICE_FLICKER_ONLY);
 
-        $this->assertEquals("civ_43_3", $this->game->token_location);
+        $this->assertEquals("civ_43_3", $this->game->tokenLocation());
     }
 
     /**
@@ -324,11 +231,11 @@ final class FaefolkTest extends TestCase {
      * moves 0 spots and the benefit of the spot it is already on is gained again.
      */
     function testZeroVisibleTapestryStaysOnTheCurrentSpot() {
-        $this->game->token_location = "civ_43_6";
+        $this->game->setToken("civ_43_6");
         $this->useAbility(Faefolk::CHOICE_FLICKER_ONLY);
 
-        $this->assertEquals("civ_43_6", $this->game->token_location);
-        $this->assertEquals([(string) BE_GAIN_WORKER, (string) BE_VP_CAPITAL], $this->game->drainLabels());
+        $this->assertEquals("civ_43_6", $this->game->tokenLocation());
+        $this->assertEquals([(string) BE_GAIN_WORKER, (string) BE_VP_CAPITAL], $this->game->benefitLabels());
     }
 
     function testIncomeTurn4DoesNotDoubleTheBenefit() {
@@ -336,8 +243,8 @@ final class FaefolkTest extends TestCase {
         $this->game->setTapestryOnMat(2);
         $this->useAbility(Faefolk::CHOICE_FLICKER_ONLY);
 
-        $this->assertEquals("civ_43_3", $this->game->token_location);
-        $this->assertEquals([(string) BE_GAIN_FOOD, (string) BE_VP_TILES], $this->game->drainLabels());
+        $this->assertEquals("civ_43_3", $this->game->tokenLocation());
+        $this->assertEquals([(string) BE_GAIN_FOOD, (string) BE_VP_TILES], $this->game->benefitLabels());
     }
 
     /** Income turn 5 doubles the benefit, not the move: one flicker, two resolutions of one spot. */
@@ -346,10 +253,10 @@ final class FaefolkTest extends TestCase {
         $this->game->setTapestryOnMat(2);
         $this->useAbility(Faefolk::CHOICE_FLICKER_ONLY);
 
-        $this->assertEquals("civ_43_3", $this->game->token_location);
+        $this->assertEquals("civ_43_3", $this->game->tokenLocation());
         $this->assertEquals(
             [(string) BE_GAIN_FOOD, (string) BE_VP_TILES, (string) BE_GAIN_FOOD, (string) BE_VP_TILES],
-            $this->game->drainLabels()
+            $this->game->benefitLabels()
         );
     }
 
@@ -359,21 +266,21 @@ final class FaefolkTest extends TestCase {
         $this->game->setTapestryOnMat(1);
         $this->useAbility(Faefolk::CHOICE_FLICKER_ONLY);
 
-        $this->assertEquals("civ_43_2", $this->game->token_location);
-        $labels = $this->game->drainLabels();
+        $this->assertEquals("civ_43_2", $this->game->tokenLocation());
+        $labels = $this->game->benefitLabels();
         $this->assertEquals(8, count($labels));
         $this->assertEquals(2, count(array_keys($labels, (string) BE_VP_ANY_BUILDING)));
     }
 
     function testFlickerNotificationReportsTheCountAndTheNewSpot() {
-        $this->game->token_location = "civ_43_7";
+        $this->game->setToken("civ_43_7");
         $this->game->setTapestryOnMat(3);
         $this->useAbility(Faefolk::CHOICE_FLICKER_ONLY);
 
-        $notif = $this->game->messages[0];
+        $notif = $this->game->notificationsOfType("message")[0];
         $this->assertEquals("message", $notif["type"]);
-        $this->assertStringContainsString('${count}', $notif["message"]);
-        $this->assertStringContainsString('${spot}', $notif["message"]);
+        $this->assertStringContainsString('${count}', $notif["log"]);
+        $this->assertStringContainsString('${spot}', $notif["log"]);
         $this->assertEquals(3, $notif["args"]["count"]);
         $this->assertEquals(3, $notif["args"]["spot"]);
     }
@@ -383,17 +290,17 @@ final class FaefolkTest extends TestCase {
     }
 
     function testMissingTokenIsRejected() {
-        $this->game->token_location = "";
+        $this->game->setToken();
         $this->assertAsserts("ERR:Faefolk:20", fn() => $this->faefolk()->flicker(1, 1));
     }
 
     function testDuplicateTokensAreRejected() {
-        $this->game->token_location = "civ_43_1,civ_43_4";
+        $this->game->setToken("civ_43_1", "civ_43_4");
         $this->assertAsserts("ERR:Faefolk:20", fn() => $this->faefolk()->flicker(1, 1));
     }
 
     function testTokenOutsideTheEllipseIsRejected() {
-        $this->game->token_location = "civ_43_9";
+        $this->game->setToken("civ_43_9");
         $this->assertAsserts("ERR:Faefolk:21", fn() => $this->faefolk()->flicker(1, 1));
     }
 

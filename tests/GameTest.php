@@ -11,51 +11,14 @@ use function PHPUnit\Framework\assertTrue;
 require_once __DIR__ . "/Stubs/GameUT.php";
 
 /**
- * Alchemists drive the whole elixir flow through cubes on the mat and dice globals, neither of
- * which the framework stubs persist, so the test keeps them in memory here.
+ * Alchemists drive the whole elixir flow through cubes on the mat and dice globals. The cubes live
+ * in the GameUT structure table, the dice rolls and the benefit queue are stubbed here so the test
+ * can pin what the ability asks for.
  */
 class AlchemistsUT extends GameUT {
-    public $cubes = [];
     public $queued = [];
     public $reentry = 0;
     public $rolls = ["black" => 0, "red" => 0, "science" => 1];
-    private $next_cube_id = 100;
-
-    function getStructuresOnCiv($cid, $type = BUILDING_CUBE, $arg2 = null) {
-        $res = [];
-        foreach ($this->cubes as $id => $cube) {
-            if (strpos($cube["card_location"], "civ_{$cid}_") !== 0) {
-                continue;
-            }
-            if ($arg2 !== null && (int) $cube["card_location_arg2"] != $arg2) {
-                continue;
-            }
-            $res[$id] = $cube;
-        }
-        return $res;
-    }
-
-    function getStructureOnCivSlot($cid, $slot) {
-        foreach ($this->cubes as $cube) {
-            if ($cube["card_location"] == "civ_{$cid}_$slot") {
-                return $cube;
-            }
-        }
-        return null;
-    }
-
-    function addCube($player_id, $destination, $type_arg = 0, $arg2 = 0) {
-        $id = $this->next_cube_id++;
-        $this->cubes[$id] = ["card_id" => $id, "card_location" => $destination, "card_location_arg2" => $arg2];
-        return $id;
-    }
-
-    function dbSetStructureLocation($structure_id, $location, $state = null, $message = "", $player_id = null) {
-        $this->cubes[$structure_id]["card_location"] = $location;
-        if ($state !== null) {
-            $this->cubes[$structure_id]["card_location_arg2"] = $state;
-        }
-    }
 
     function rollBlackConquerDie($player_id, bool $undosave) {
         $this->setGameStateValue("conquer_die_black", $this->rolls["black"]);
@@ -72,8 +35,6 @@ class AlchemistsUT extends GameUT {
         return $this->rolls["science"];
     }
 
-    function prepareUndoSavepoint($first = false) {}
-
     function queueBenefitNormal($benefit, $player_id = null, $reason = "", $count = 1) {
         $this->queued[] = $benefit;
     }
@@ -84,10 +45,6 @@ class AlchemistsUT extends GameUT {
 
     function benefitCivEntry($cid, $player_id, $data = "") {
         $this->reentry++;
-    }
-
-    function hasCiv($player_id, $civ_id) {
-        return $civ_id == CIV_ALCHEMISTS;
     }
 }
 
@@ -352,6 +309,7 @@ final class GameTest extends TestCase {
     private function alchemistsGame(int $variant) {
         $game = new AlchemistsUT();
         $game->init();
+        $game->giveCiv(1, CIV_ALCHEMISTS);
         $game->setGameStateValue("variant_adjustments", $variant);
         $game->doAdjustMaterial(2, $variant);
         return $game;

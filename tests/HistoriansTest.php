@@ -11,47 +11,10 @@ require_once __DIR__ . "/Stubs/GameUT.php";
  * awarded none of the exposed benefits.
  */
 class HistoriansUT extends GameUT {
-    public array $landmark_supply = [];
     public array $queued = [];
-
-    function getStructuresSearch(
-        $card_type,
-        $card_type_arg = null,
-        $card_location = null,
-        $card_location_arg = null,
-        $card_location_arg2 = null
-    ) {
-        if ($card_location === "landmark_mat_slot%") {
-            return $this->landmark_supply;
-        }
-        return [];
-    }
 
     function queueBenefitNormal($benefit, $player_id = null, $reason = "", $count = 1) {
         $this->queued[] = $benefit;
-    }
-
-    public int $adjustment_variant = 8;
-
-    // the stubs do not persist globals or playerextra, pin the reported table's setup
-    function getAdjustmentVariant() {
-        return $this->adjustment_variant;
-    }
-
-    function getCurrentEra($player_id) {
-        return 4;
-    }
-
-    function setLandmarkSupply(array $types) {
-        $this->landmark_supply = [];
-        foreach ($types as $type) {
-            $this->landmark_supply[$type] = [
-                "card_id" => $type,
-                "card_type" => BUILDING_LANDMARK,
-                "card_location" => "landmark_mat_slot$type",
-                "card_location_arg2" => "$type",
-            ];
-        }
     }
 }
 
@@ -62,6 +25,8 @@ final class HistoriansTest extends TestCase {
         $this->game = new HistoriansUT();
         $this->game->init();
         $this->game->doAdjustMaterial(2, 8);
+        $this->game->setGameStateValue("variant_adjustments", 8);
+        $this->game->era = 4;
     }
 
     private function historians(): Historians {
@@ -80,7 +45,7 @@ final class HistoriansTest extends TestCase {
     }
 
     function testEmptyLandmarkMatIsDetected() {
-        $this->game->setLandmarkSupply([]);
+        $this->game->setLandmarkMat([]);
         $this->assertTrue($this->historians()->noTrackLandmarksLeft());
 
         $this->historians()->sendHistorianTokensMidGame();
@@ -92,7 +57,7 @@ final class HistoriansTest extends TestCase {
      * exhausted track must still fire the midgame "no landmarks remaining" clause.
      */
     function testTrackLandmarksExhaustedButMatStillHoldsExtras() {
-        $this->game->setLandmarkSupply([13, 14, 15, 16, 17, 18, 19]);
+        $this->game->setLandmarkMat([13, 14, 15, 16, 17, 18, 19]);
         $this->assertTrue($this->historians()->noTrackLandmarksLeft());
 
         $this->historians()->sendHistorianTokensMidGame();
@@ -100,7 +65,7 @@ final class HistoriansTest extends TestCase {
     }
 
     function testTrackLandmarkRemainingBlocksTheClause() {
-        $this->game->setLandmarkSupply([12, 13, 14]);
+        $this->game->setLandmarkMat([12, 13, 14]);
         $this->assertFalse($this->historians()->noTrackLandmarksLeft());
 
         $this->historians()->sendHistorianTokensMidGame();
@@ -111,8 +76,8 @@ final class HistoriansTest extends TestCase {
      * The clause is printed only on the a4/a8 card, the original mat must never award it.
      */
     function testEmptyMatAwardsNothingWithoutTheAdjustmentPack() {
-        $this->game->adjustment_variant = 2;
-        $this->game->setLandmarkSupply([]);
+        $this->game->setGameStateValue("variant_adjustments", 2);
+        $this->game->setLandmarkMat([]);
 
         $this->historians()->sendHistorianTokensMidGame();
         $this->assertEquals(0, count($this->game->queued));
