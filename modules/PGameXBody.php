@@ -1150,7 +1150,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function getStructuresOnCivExceptArg($cid, $type, $income_turn) {
-        $location_like = "civ_$cid\\_%";
+        $location_like = "civ\\_$cid\\_%";
         $sql = "SELECT * FROM structure WHERE card_type='$type' AND card_location LIKE '$location_like'";
         if ($income_turn !== null) {
             $sql .= " AND card_location_arg2 != $income_turn";
@@ -6289,7 +6289,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function dbGetBenefitQueue() {
-        $benefits = $this->getCollectionFromDB("SELECT * FROM benefit ORDER BY benefit_prerequisite, benefit_id");
+        $benefits = $this->dbGetBenefits();
         $order = 0;
         $inorder = [];
         foreach ($benefits as $bid => &$bene) {
