@@ -914,6 +914,7 @@ div[data-income="0"] #subtitle_bar {
 
 .building1,
 .icon_market,
+.icon_ben_54,
 .icon_ben_8 {
   background-image: url("img/icons.png");
   background-size: 1200% 100%;
@@ -921,7 +922,9 @@ div[data-income="0"] #subtitle_bar {
 }
 
 .building2,
-.icon_ben_9 {
+.icon_ben_9,
+.icon_ben_63 {
+  /* house */
   background-image: url("img/icons.png");
   background-size: 1200% 100%;
   background-position-x: 9.09090909%;
