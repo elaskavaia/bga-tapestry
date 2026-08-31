@@ -191,15 +191,30 @@ Run once the pack is assembled, not per civ.
 
 ## Sequencing
 
-1. One time infrastructure plus Faefolk end to end. Cheapest civ, fully specified, and it exercises
-   every step of the per-civ pipeline at once. What it costs is the measured unit for everything
-   else in this document.
-2. Werefolk. Confirms the unit and finishes the cheap band.
-3. Post income 5 turn loop as a standalone engine change, verified against existing civilizations.
-   Then Elder Ones, then Merfolk.
-4. Psionics and Illuminati together, since both are hooks into random generation.
-5. Genies and Weefolk.
-6. Celestials and Artificers last, as they touch the map and the income mat respectively.
+Simplest first, so each civ pays for the next one's plumbing. Two deliberate deviations from strict
+complexity order are called out below.
+
+1. Faefolk. Done. Cheapest civ, fully specified, and it exercised every step of the per-civ pipeline
+   at once, along with the one time pack infrastructure. What it cost is the measured unit for
+   everything after it.
+2. Werefolk. Confirms the unit and finishes the cheap band. Its coin flip needs seeded or injectable
+   randomness in the test harness, which is also the first piece of what Psionics and Illuminati
+   will need later.
+3. Genies. First of the cross-player states, and the smaller of the two: a random opponent picks,
+   you mirror. Advisors and Historians are the precedent.
+4. Weefolk. Same cross-player machinery as Genies plus a token living in an opponent's capital grid
+   and row and column scoring at income 5.
+5. Elder Ones. Build the post income 5 alternate turn loop first, as a standalone engine change
+   verified against existing civilizations, then the civ itself, which adds nothing else new.
+6. Merfolk. The loop again, plus the hidden submerged card zone.
+7. Illuminati. Global die roll provenance, and an opponent's roll leaving the die off the mat.
+8. Psionics. Draw two keep one on every random source in the game, composing additively with
+   Empiricism. Out of complexity order deliberately: it is the harder of the two random hooks, but
+   doing it straight after Illuminati means one seam gets designed once instead of twice.
+9. Celestials. A player token on the map that blocks conquest without granting control, plus
+   landmark scoring off the side of the capital.
+10. Artificers. Last despite not being the most complex civ logic, because it mutates the income
+    mat, which is shared UI that every other civilization renders.
 
 ## Risks
 
