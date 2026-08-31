@@ -17,6 +17,11 @@ nothing.
 Coal baron reset when spies was using it
 Utilitarients - no city when they place landmark
 
+Several civ mat queries build their LIKE pattern as "civ_$cid\_%" (PGameXBody.php 4849, 4951, 4955,
+4996) or "civ_6_%" / "civ_9_%" / "civ_12_%" (3849, 7468, 11273) instead of escaping the underscore
+the way getStructuresOnCiv does ("civ\_$cid\_%"). An unescaped underscore is a single character
+wildcard, so those helpers do not search quite the same thing. Harmless with today's location names.
+
 RULES
 
 VISUAL EFFECTS
