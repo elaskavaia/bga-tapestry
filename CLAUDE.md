@@ -34,12 +34,12 @@ framework signature or `final` conflict breaks the build. The stubs expose test-
 - `npm run build` / `npm run genmat` - regenerate the generated blocks in `material.inc.php` from
   `misc/benefit_types.csv`. VS Code also runs this on save for any `misc/*.csv`.
 - `npm run tests` - PHPUnit over [tests/](tests/). Config is [phpunit.xml](phpunit.xml), bootstrap is
-  [tests/_autoload.php](tests/_autoload.php), so a bare `phpunit` works too.
+  [tests/\_autoload.php](tests/_autoload.php), so a bare `phpunit` works too.
 - `npm run lint:php` - `php -l` sweep over `modules/` and `tests/`.
 - `npm run predeploy` - `lint:php` then `tests`. This is the pre-commit gate.
 - `npm run lint:phpstan` - PHPStan level 1 ([misc/phpstan.neon](misc/phpstan.neon)). Not part of the
   gate: it still reports findings on the pre-namespace code.
-- Single test method: `APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --filter testCollectors`
+- Single test method: `npm run tests -- --filter testCollectors`
 
 There are no JS tests.
 
@@ -62,7 +62,7 @@ dangling `i` is read as "still running until now".
 `Tapestry` ([tapestry.game.php](tapestry.game.php), a thin BGA entry point)
 -> `PGameXBody` ([modules/PGameXBody.php](modules/PGameXBody.php), ~12k lines, all the game logic)
 -> `tapcommon` ([modules/tapcommon.php](modules/tapcommon.php), framework overrides: undo savepoints,
-   notification batching, zombie/eliminated helpers, argument validation, studio chat debug)
+notification batching, zombie/eliminated helpers, argument validation, studio chat debug)
 -> `Table` (BGA framework).
 
 `PGameXBody` is sectioned by banner comments: utilities, debug methods, player actions, state
@@ -78,9 +78,9 @@ defines all the `BE_*`, `CIV_*`, `CARD_*`, `BUILDING_*`, `FLAG_*`, `TRACK_*` con
 Two regions are generated and must not be hand-edited:
 `/* --- gen php begin benefit_types --- */` (from `misc/benefit_types.csv`) and
 `/* --- gen php begin decision_deck --- */` (from `misc/decision_deck.csv`). Edit the pipe-delimited
-CSV and re-run `npm run genmat`, then `npx prettier --write material.inc.php` - the generator emits
-unformatted PHP and the committed file is prettier-formatted, so skipping that step produces a huge
-spurious diff. `awk` is safer than manual editing for those columns.
+CSV and re-run `npm run genmat` - the script ends with a prettier pass over `material.inc.php`,
+which is required because the raw generator emits unformatted PHP and the committed file is
+prettier-formatted. `awk` is safer than manual editing for those columns.
 
 `doAdjustMaterial($players, $variant)` rewrites material in place for the player count and the
 "Civilization Adjustments" option (2 = original, 1 = official, 4 = deprecated experimental,
