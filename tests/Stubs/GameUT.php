@@ -64,6 +64,13 @@ class GameUT extends Tapestry {
         $this->randQueue = array_merge($this->randQueue, $values);
     }
 
+    /** The real one moves the row with raw SQL, which the in memory card model never sees. */
+    function effect_discardCard($card_id, $player_id = null, $location = null, $private = false) {
+        foreach (is_array($card_id) ? $card_id : [$card_id] as $id) {
+            $this->cards->setLocation((int) $id, $location ?? "discard");
+        }
+    }
+
     function prepareUndoSavepoint($first = false) {}
 
     /** Everything sent so far, as the framework stub collected it: type, log, args. */
@@ -237,6 +244,17 @@ class GameUT extends Tapestry {
         }
         $this->benefits->delete($benefit_table_id);
         $this->notifyBenefitQueue();
+    }
+
+    /** What stBenefitManager does with a pending standard row: resolve it, then cash it on true. */
+    function resolveBenefit(int $ben, int $player_id = 1): void {
+        $row = $this->benefits->first(["benefit_category" => "standard", "benefit_type" => $ben]);
+        if (!$row) {
+            throw new BgaSystemException("no pending row for benefit $ben");
+        }
+        if ($this->awardBenefits($player_id, $ben, 1, $row["benefit_data"])) {
+            $this->benefitCashed($row["benefit_id"]);
+        }
     }
 
     function getCurrentBenefit($ben = null, $cat = "standard") {

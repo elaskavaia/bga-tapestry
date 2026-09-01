@@ -51,28 +51,6 @@ class FaefolkUT extends GameUT {
     function playCardOntoMat(int $card_id, string $era): void {
         $this->cards->setLocation($card_id, $era);
     }
-
-    /** What stBenefitManager does with the pending tapestry gain: resolve it, then cash it. */
-    function resolveTapestryGain(int $player_id = 1): void {
-        $row = $this->benefits->first(["benefit_category" => "standard", "benefit_type" => BE_TAPESTRY]);
-        if (!$row) {
-            throw new BgaSystemException("no pending tapestry row");
-        }
-        if ($this->awardBenefits($player_id, BE_TAPESTRY)) {
-            $this->benefitCashed($row["benefit_id"]);
-        }
-    }
-
-    /** What stBenefitManager does with the pending flicker row: resolve it, then cash it on true. */
-    function resolveFlicker(int $player_id = 1): void {
-        $row = $this->benefits->first(["benefit_category" => "standard", "benefit_type" => BE_FAEFOLK_FLICKER]);
-        if (!$row) {
-            throw new BgaSystemException("no pending flicker row");
-        }
-        if ($this->awardBenefits($player_id, BE_FAEFOLK_FLICKER)) {
-            $this->benefitCashed($row["benefit_id"]);
-        }
-    }
 }
 
 final class FaefolkTest extends TestCase {
@@ -98,7 +76,7 @@ final class FaefolkTest extends TestCase {
     /** Resolve the whole ability the way stBenefitManager would, stopping at non-Faefolk rows. */
     private function useAbility(int $choice): void {
         $this->faefolk()->moveCivCube(1, $choice, "", []);
-        $this->game->resolveFlicker();
+        $this->game->resolveBenefit(BE_FAEFOLK_FLICKER);
     }
 
     function testConstantsAreTheOnesTheSpriteExpects() {
@@ -136,7 +114,7 @@ final class FaefolkTest extends TestCase {
             $game = $this->newGame();
             $game->setToken("civ_43_$spot");
             $game->getCivilizationInstance(CIV_FAEFOLK, true)->moveCivCube(1, Faefolk::CHOICE_FLICKER_ONLY, "", []);
-            $game->resolveFlicker();
+            $game->resolveBenefit(BE_FAEFOLK_FLICKER);
 
             $this->assertEquals("civ_43_$spot", $game->tokenLocation(), "spot $spot, 0 visible tapestry, token stays");
             $this->assertEquals($rows, $game->benefitLabels(), "spot $spot");
@@ -208,12 +186,12 @@ final class FaefolkTest extends TestCase {
         $game->setTapestryOnMat(1);
         $game->seedTapestryDeck();
         $game->getCivilizationInstance(CIV_FAEFOLK, true)->moveCivCube(1, Faefolk::CHOICE_GAIN_TAPESTRY, "", []);
-        $game->resolveTapestryGain();
+        $game->resolveBenefit(BE_TAPESTRY);
 
         // benefit 64 interrupts before the flicker and plays the drawn card into the current era
         $drawn = array_key_first($game->getCardsSearch(CARD_TAPESTRY, null, "hand", 1));
         $game->playCardOntoMat($drawn, "era2");
-        $game->resolveFlicker();
+        $game->resolveBenefit(BE_FAEFOLK_FLICKER);
 
         // 1 on the mat + the gained card = 2 spots, exactly what leaving it in hand would give
         $this->assertEquals("civ_43_3", $game->tokenLocation());
@@ -255,7 +233,7 @@ final class FaefolkTest extends TestCase {
         $declined->setToken("civ_43_1");
         $declined->setTapestryOnMat(2);
         $declined->getCivilizationInstance(CIV_FAEFOLK, true)->moveCivCube(1, Faefolk::CHOICE_FLICKER_ONLY, "", []);
-        $declined->resolveFlicker();
+        $declined->resolveBenefit(BE_FAEFOLK_FLICKER);
         $this->assertEquals("civ_43_3", $declined->tokenLocation());
 
         $gained = $this->newGame();
@@ -263,8 +241,8 @@ final class FaefolkTest extends TestCase {
         $gained->setTapestryOnMat(2);
         $gained->seedTapestryDeck();
         $gained->getCivilizationInstance(CIV_FAEFOLK, true)->moveCivCube(1, Faefolk::CHOICE_GAIN_TAPESTRY, "", []);
-        $gained->resolveTapestryGain();
-        $gained->resolveFlicker();
+        $gained->resolveBenefit(BE_TAPESTRY);
+        $gained->resolveBenefit(BE_FAEFOLK_FLICKER);
         $this->assertEquals(1, $gained->getCardCountInHand(1, CARD_TAPESTRY), "the gain really drew a card");
         $this->assertEquals("civ_43_4", $gained->tokenLocation());
     }
@@ -276,7 +254,7 @@ final class FaefolkTest extends TestCase {
     function testTheFlickerStaysBehindWhateverTheGainInterruptsWith() {
         $this->game->seedTapestryDeck();
         $this->faefolk()->moveCivCube(1, Faefolk::CHOICE_GAIN_TAPESTRY, "", []);
-        $this->game->resolveTapestryGain();
+        $this->game->resolveBenefit(BE_TAPESTRY);
         $this->game->queueBenefitInterrupt(64, 1, "");
 
         $interrupt = $this->game->benefitPosition("standard", 64, 1);
