@@ -117,6 +117,14 @@ if (!defined("TAPESTRY")) {
     define("BE_ADVANCE_SCIENCE_BENEFIT_OPT", 89);
     define("BE_ADVANCE_MILITARY_BENEFIT_OPT", 90);
     define("BE_ADVANCE_TECHNOLOGY_BENEFIT_OPT", 91);
+    define("BE_ADVANCE_EXPLORATION_BENEFIT_FREEBONUS", 182);
+    define("BE_ADVANCE_SCIENCE_BENEFIT_FREEBONUS", 183);
+    define("BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS", 184);
+    define("BE_ADVANCE_TECHNOLOGY_BENEFIT_FREEBONUS", 185);
+    define("BE_REGRESS_EXPLORATION_NOBENEFIT", 131);
+    define("BE_REGRESS_SCIENCE_NOBENEFIT", 132);
+    define("BE_REGRESS_MILITARY_NOBENEFIT", 133);
+    define("BE_REGRESS_TECHNOLOGY_NOBENEFIT", 134);
     define("BE_GAIN_ANY_INCOME_BUILDING", 110);
     define("BE_STANDUP_3_OUTPOSTS", 119);
     define("BE_PLAY_TAPESTY_INCOME", 128);
@@ -163,6 +171,9 @@ if (!defined("TAPESTRY")) {
     define("BE_ALCHEMISTS_DIE", 341);
     define("BE_VP_ANY_BUILDING", 342);
     define("BE_FAEFOLK_FLICKER", 343);
+    define("BE_WEREFOLK_FLIP", 344);
+    define("BE_WEREFOLK_REGRESS", 345);
+    define("BE_WEREFOLK_EXPLORE", 346);
     define("BE_OP_UNIQUE", 600);
 
     // TERRAIN
@@ -1700,7 +1711,7 @@ $this->benefit_types = [
         "name" => clienttranslate("Transfer tech card"),
     ],
     131 => [
-        //
+        // BE_REGRESS_EXPLORATION_NOBENEFIT
         "name" => clienttranslate("Regress (no benefits) - Exploration"),
         "r" => "t",
         "t" => 1,
@@ -1708,7 +1719,7 @@ $this->benefit_types = [
         "flags" => 0,
     ],
     132 => [
-        //
+        // BE_REGRESS_SCIENCE_NOBENEFIT
         "name" => clienttranslate("Regress (no benefits) - Science"),
         "r" => "t",
         "t" => 2,
@@ -1716,7 +1727,7 @@ $this->benefit_types = [
         "flags" => 0,
     ],
     133 => [
-        //
+        // BE_REGRESS_MILITARY_NOBENEFIT
         "name" => clienttranslate("Regress (no benefits) - Military"),
         "r" => "t",
         "t" => 3,
@@ -1724,7 +1735,7 @@ $this->benefit_types = [
         "flags" => 0,
     ],
     134 => [
-        //
+        // BE_REGRESS_TECHNOLOGY_NOBENEFIT
         "name" => clienttranslate("Regress (no benefits) - Technology"),
         "r" => "t",
         "t" => 4,
@@ -1736,6 +1747,7 @@ $this->benefit_types = [
         "name" => clienttranslate("Explore space"),
         "r" => "s",
         "state" => "explore_space",
+        "civ" => CIV_ALIENS,
     ],
     136 => [
         //
@@ -1972,6 +1984,34 @@ $this->benefit_types = [
         "tt" => "card",
         "ct" => CARD_TAPESTRY,
         "state" => "playTapestryCard",
+    ],
+    182 => [
+        // BE_ADVANCE_EXPLORATION_BENEFIT_FREEBONUS
+        "name" => clienttranslate("Advance (benefit, free bonus) - Exploration"),
+        "r" => "t",
+        "t" => 1,
+        "flags" => FLAG_GAIN_BENFIT | FLAG_FREE_BONUS,
+    ],
+    183 => [
+        // BE_ADVANCE_SCIENCE_BENEFIT_FREEBONUS
+        "name" => clienttranslate("Advance (benefit, free bonus) - Science"),
+        "r" => "t",
+        "t" => 2,
+        "flags" => FLAG_GAIN_BENFIT | FLAG_FREE_BONUS,
+    ],
+    184 => [
+        // BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS
+        "name" => clienttranslate("Advance (benefit, free bonus) - Military"),
+        "r" => "t",
+        "t" => 3,
+        "flags" => FLAG_GAIN_BENFIT | FLAG_FREE_BONUS,
+    ],
+    185 => [
+        // BE_ADVANCE_TECHNOLOGY_BENEFIT_FREEBONUS
+        "name" => clienttranslate("Advance (benefit, free bonus) - Technology"),
+        "r" => "t",
+        "t" => 4,
+        "flags" => FLAG_GAIN_BENFIT | FLAG_FREE_BONUS,
     ],
     190 => [
         //
@@ -2320,6 +2360,23 @@ $this->benefit_types = [
         // BE_FAEFOLK_FLICKER
         "name" => clienttranslate("FAEFOLK move around the ellipse and gain the new spot"),
         "civ" => CIV_FAEFOLK,
+    ],
+    344 => [
+        // BE_WEREFOLK_FLIP
+        "name" => clienttranslate("WEREFOLK discard the mat tile, draw a space tile and flip it"),
+        "civ" => CIV_WEREFOLK,
+    ],
+    345 => [
+        // BE_WEREFOLK_REGRESS
+        "name" => clienttranslate("WEREFOLK regress on 1 track, then explore with the space tile"),
+        "civ" => CIV_WEREFOLK,
+    ],
+    346 => [
+        // BE_WEREFOLK_EXPLORE
+        "name" => clienttranslate("Explore space"),
+        "r" => "s",
+        "state" => "explore_space",
+        "civ" => CIV_WEREFOLK,
     ],
     502 => [
         //
@@ -5568,6 +5625,28 @@ $this->civilizations = [
             6 => ["top" => 76.7, "left" => 57.5, "w" => 11.6, "h" => 7.5, "benefit" => [BE_GAIN_WORKER, BE_VP_CAPITAL]],
             7 => ["top" => 68.2, "left" => 57.5, "w" => 11.6, "h" => 7.5, "benefit" => [BE_SPACE, BE_EXPLORE_SPACE]], //
         ],
+    ],
+    CIV_WEREFOLK => [
+        "name" => clienttranslate("WEREFOLK"),
+        "description" => [
+            clienttranslate(
+                "<i>Inspired by the stars (not by the moon as rumored), the Werefolk occasionally regress in a feral pursuit of their goals.</i>"
+            ),
+            clienttranslate(
+                "At the start of your income turns (2-5), if there is a space tile on this civilization mat, discard it. Then gain a random space tile, and flip it (like a coin)."
+            ),
+            clienttranslate("If the tile lands face-up, you may regress on 1 track; do not gain the benefit or the bonus."),
+            clienttranslate("<li>If you regressed, explore with the space tile by placing it onto this civilization mat.</li>"),
+            clienttranslate("<li>If you did not regress, gain 4 [VP].</li>"),
+            clienttranslate(
+                "If the tile lands face-down, your civilized nature dominates. Advance on 1 track; gain the benefit and bonus for free."
+            ),
+            clienttranslate(
+                "Regardless, if you do not explore with the space tile, keep it in your supply for possible use in future exploration (like any other space tile)."
+            ),
+        ],
+        "exp" => "FF",
+        "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
     ],
 ];
 $this->capitals = [

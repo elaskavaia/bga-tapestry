@@ -2,45 +2,74 @@
 
 NEW CIVILIZATIONS
 
-Faefolk: verify the 7 ring slot positions in the studio (measured off civ_ff.webp, not yet seen
-rendered on a real mat).
+- [ ] Faefolk: verify the 7 ring slot positions in the studio (measured off civ_ff.webp, not yet seen
+      rendered on a real mat).
 
-Faefolk: no test goes through the game object, so the two case CIV_FAEFOLK lines in
-saction_civTokenAdvance and argCivAbilitySingle are unverified - delete them and the suite still
-passes, while a real game falls through to the generic path and places a second cube.
+- [ ] Faefolk: no test goes through the game object, so the two case CIV_FAEFOLK lines in
+      saction_civTokenAdvance and argCivAbilitySingle are unverified - delete them and the suite still
+      passes, while a real game falls through to the generic path and places a second cube.
 
-Faefolk: FaefolkUT::resolveFlicker scans the row list instead of popping the head of the stack, so
-testCardPlayedWhileGainingIsCounted passes whether the flicker is queued before or after the
-tapestry gain. It is the regression guard for the gain-then-count ordering and currently guards
-nothing.
+- [ ] Faefolk: FaefolkUT::resolveFlicker scans the row list instead of popping the head of the stack, so
+      testCardPlayedWhileGainingIsCounted passes whether the flicker is queued before or after the
+      tapestry gain. It is the regression guard for the gain-then-count ordering and currently guards
+      nothing.
 
-BE_TECH_CARD (26) is broken as a queued benefit: awardBenefits case 26 sends it to the invent
-state, but stInvent asserts the benefit's r rule is "i" and row 26 has "g". Nothing used it until
-Faefolk did, which is how it surfaced. Faefolk now uses BE_INVENT instead; row 26 is still a trap
-for the next caller.
+- [ ] BE_TECH_CARD (26) is broken as a queued benefit: awardBenefits case 26 sends it to the invent
+      state, but stInvent asserts the benefit's r rule is "i" and row 26 has "g". Nothing used it until
+      Faefolk did, which is how it surfaced. Faefolk now uses BE_INVENT instead; row 26 is still a trap
+      for the next caller.
 
-Coal baron reset when spies was using it
-Utilitarients - no city when they place landmark
+- [ ] Werefolk: verify in the studio that the space tile explored onto the mat renders where the art
+      expects it. The generic ".civilization .space_tile" rule positions it, and no Werefolk specific
+      CSS was added.
 
-Several civ mat queries build their LIKE pattern as "civ_$cid\_%" (PGameXBody.php 4849, 4951, 4955,
-4996) or "civ_6_%" / "civ_9_%" / "civ_12_%" (3849, 7468, 11273) instead of escaping the underscore
-the way getStructuresOnCiv does ("civ\_$cid\_%"). An unescaped underscore is a single character
-wildcard, so those helpers do not search quite the same thing. Harmless with today's location names.
+- [ ] Werefolk: the ability is queued straight from queueEraCivAbility instead of going through
+      benefitCivEntry, because the mat has no cube and the flip has nothing to click. That means the civ
+      never reaches the civ ability state, so it is also the first income civ whose ability shows no
+      "Decline" affordance at all. Confirm that reads correctly in a real game.
+
+- [ ] Werefolk: onSpaceTileClick has no checkActiveSlot guard, unlike onTerritoryTileClick and the track
+      handlers, so a space tile the new spaceExploration filter dimmed is still clickable and fires
+      explore_space just to earn a server rejection toast. Add "if (!this.checkActiveSlot(id)) return;"
+      to the default branch.
+
+- [x] Werefolk, ANSWERED: if no space tile can be gained (deck and discard both empty) there is nothing
+      to flip, so the whole ability is skipped - ruled by Victoria, recorded in FORMAL_RULES 5.3. flip()
+      now early-outs with a "cannot gain a space tile" message when drawTile gains nothing. Test:
+      testEmptyDeckAndDiscardSkipsTheFlip.
+
+- [ ] Werefolk cleanup: queueEraCivAbility reads income_trigger, computes from/to and calls in_range, then
+      on a miss hands off to the parent which re-reads the same income_trigger and re-runs the same check
+      just to reach its else branch and post the "not applicable in era" chat line. Extract the range test
+      into an AbsCivilization helper both can call, instead of nine duplicated lines per civ.
+
+- [ ] Coal baron reset when spies was using it
+- [ ] Utilitarients - no city when they place landmark
+
+- [ ] Several civ mat queries build their LIKE pattern as `civ_$cid\_%` (PGameXBody.php 4849, 4951, 4955,
+      4996) or `civ_6_%` / `civ_9_%` / `civ_12_%` (3849, 7468, 11273) instead of escaping the underscore
+      the way getStructuresOnCiv does (`civ\_$cid\_%`). An unescaped underscore is a single character
+      wildcard, so those helpers do not search quite the same thing. Harmless with today's location names.
+
+- [ ] soft_block is registered as game state label id 99 (PGameXBody.php initGameStateLabels), but the
+      BGA docs only allow ids 10-89 for globals (1-9 framework, 100-199 gameoptions; 90-99 undocumented).
+      It works today and is debug-only, but it relies on unspecified framework behavior. Consider moving
+      it to a free id under 90; do not add more ids in 90-99.
 
 RULES
 
 VISUAL EFFECTS
 
-- Show color of player who owns Nomads buildings?s TODO
+- [ ] Show color of player who owns Nomads buildings?s TODO
 
 TOOLTIPS
 
-- No tooltips on on-board achievement
-- Tooltips on slots of Civ cards especiall mystic
+- [ ] No tooltips on on-board achievement
+- [ ] Tooltips on slots of Civ cards especiall mystic
 
 LOGS
 
-- Nice to show building icons
+- [ ] Nice to show building icons
 
 TRANSLATION
 

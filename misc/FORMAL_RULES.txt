@@ -73,3 +73,13 @@ This is my interpretation not actuall formal rules
     optional card gained at the start of the ability is always counted and always moves the token
     one extra spot, and a card that leaves your hand onto the mat during the same resolution is
     still counted exactly once.
+5.3 Werefolk coin flip - the tile is gained before it is flipped, and it is gained on every income
+    turn 2-5 whether or not it ends up explored. The tile drawn this turn is the one that must be
+    explored with, not any tile in the supply, the same reading COAL BARON uses for its territory.
+    An unexplored tile stays in the supply as an ordinary space tile. If no tile can be gained
+    (space deck and discard both empty), there is nothing to flip and the whole ability is skipped.
+5.4 Werefolk "you may regress" - a player with no track that can move back did not regress, so
+    they gain the 4 VP. The regress and the 4 VP are therefore one choice, and the tracks that
+    cannot regress are not offered.
+5.5 Werefolk face-down advance is mandatory and grants the spot benefit plus the bonus for free,
+    which is a flag combination (benefit + free bonus) no printed effect used before.

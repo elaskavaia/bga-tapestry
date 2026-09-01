@@ -197,9 +197,9 @@ complexity order are called out below.
 1. Faefolk. Done. Cheapest civ, fully specified, and it exercised every step of the per-civ pipeline
    at once, along with the one time pack infrastructure. What it cost is the measured unit for
    everything after it.
-2. Werefolk. Confirms the unit and finishes the cheap band. Its coin flip needs seeded or injectable
-   randomness in the test harness, which is also the first piece of what Psionics and Illuminati
-   will need later.
+2. Werefolk. Done. Confirmed the unit and finished the cheap band. Its coin flip needed seeded
+   randomness in the test harness, which landed first as an overridable bgaRand and is also the
+   first piece of what Psionics and Illuminati will need later.
 3. Genies. First of the cross-player states, and the smaller of the two: a random opponent picks,
    you mirror. Advisors and Historians are the precedent.
 4. Weefolk. Same cross-player machinery as Genies plus a token living in an opponent's capital grid

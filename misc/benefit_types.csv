@@ -130,11 +130,11 @@ id|-con|name|r|t|php
 128|BE_PLAY_TAPESTY_INCOME|Play tapestry card (Income)|||
 129||Gain cards and tiles (Income)|||
 130||Transfer tech card|||
-131||Regress (no benefits) - Exploration|t|1|'adv'=>-1,'flags'=>0
-132||Regress (no benefits) - Science|t|2|'adv'=>-1,'flags'=>0
-133||Regress (no benefits) - Military|t|3|'adv'=>-1,'flags'=>0
-134||Regress (no benefits) - Technology|t|4|'adv'=>-1,'flags'=>0
-135|BE_EXPLORE_SPACE_ALIEN|Explore space|s||'state'=>'explore_space'
+131|BE_REGRESS_EXPLORATION_NOBENEFIT|Regress (no benefits) - Exploration|t|1|'adv'=>-1,'flags'=>0
+132|BE_REGRESS_SCIENCE_NOBENEFIT|Regress (no benefits) - Science|t|2|'adv'=>-1,'flags'=>0
+133|BE_REGRESS_MILITARY_NOBENEFIT|Regress (no benefits) - Military|t|3|'adv'=>-1,'flags'=>0
+134|BE_REGRESS_TECHNOLOGY_NOBENEFIT|Regress (no benefits) - Technology|t|4|'adv'=>-1,'flags'=>0
+135|BE_EXPLORE_SPACE_ALIEN|Explore space|s||'state'=>'explore_space','civ'=>CIV_ALIENS
 136||VP - Tapestry cards (hand)|v||'icon' => 'no'
 #tt - type of table, ct - type of card (card_type), dest - where to pay it
 137||Tapestry card to a neighbour|p||'tt'=>'card','ct'=>CARD_TAPESTRY,'dest'=>FLAG_NEIGHBOUR
@@ -173,6 +173,10 @@ id|-con|name|r|t|php
 179||Islanders's Explore (with Benefits)|e||'icon' => 'no', 'state' => 'explore'
 180|BE_MIDGAME_SETUP|Midgame setup for Civilization|||'icon' => 'no'
 181||Discard Tapestry card|||'icon' => 'icon_ben_7','tt'=>'card','ct'=>CARD_TAPESTRY, 'state'=>'playTapestryCard'
+182|BE_ADVANCE_EXPLORATION_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT|FLAG_FREE_BONUS)
+183|BE_ADVANCE_SCIENCE_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT|FLAG_FREE_BONUS)
+184|BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT|FLAG_FREE_BONUS)
+185|BE_ADVANCE_TECHNOLOGY_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT|FLAG_FREE_BONUS)
 190||Gain the benefit of a neighbor’s current position on any advancement track (no bonus)|||'s'=>'c','sflags'=>(FLAG_NEIGHBOUR),'adv'=>0,'state'=>'trackSelect'
 191||Gain the benefit of a territory or space tile in a neighbor’s supply|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
 192||Gain the benefit of a neighbor’s tech card, matching its current row|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
@@ -230,6 +234,9 @@ id|-con|name|r|t|php
 341|BE_ALCHEMISTS_DIE|ALCHEMISTS gain the black conquer die benefits|||'civ'=>CIV_ALCHEMISTS,'die'=>'black','r'=>'die'
 342|BE_VP_ANY_BUILDING|Score any income building|||'alias'=>['or'=>[BE_VP_FARM,BE_VP_ARMORY,BE_VP_HOUSE,54]]
 343|BE_FAEFOLK_FLICKER|FAEFOLK move around the ellipse and gain the new spot|||'civ'=>CIV_FAEFOLK
+344|BE_WEREFOLK_FLIP|WEREFOLK discard the mat tile, draw a space tile and flip it|||'civ'=>CIV_WEREFOLK
+345|BE_WEREFOLK_REGRESS|WEREFOLK regress on 1 track, then explore with the space tile|||'civ'=>CIV_WEREFOLK
+346|BE_WEREFOLK_EXPLORE|Explore space|s||'state'=>'explore_space','civ'=>CIV_WEREFOLK
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

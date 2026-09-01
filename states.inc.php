@@ -256,6 +256,7 @@ $machinestates = [
         "description" => clienttranslate('${actplayer} must explore a space tile'),
         "descriptionmyturn" => clienttranslate('${you} must explore a space tile'),
         "type" => "activeplayer",
+        "args" => "argSpaceExploration",
         "action" => "stSpaceExploration",
         "possibleactions" => ["explore_space"],
         "transitions" => ["next" => 18, "benefit" => 18],

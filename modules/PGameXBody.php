@@ -90,6 +90,7 @@ abstract class PGameXBody extends tapcommon {
             "target_player" => 35, // target player for actions that target a player
             "map_coords_selected" => 36, //
             "starting_player" => 37,
+            "selected_space_tile" => 38, // card_id an effect drew that must be the one explored with
             // debug
             "soft_block" => 99,
             // variants
@@ -1687,6 +1688,10 @@ abstract class PGameXBody extends tapcommon {
             case 157:
             case 158:
             case 159:
+            case 182:
+            case 183:
+            case 184:
+            case 185:
                 $track = (int) $this->getRulesBenefit($ben, "t", 0);
                 $flags = (int) $this->getRulesBenefit($ben, "flags", 0);
                 $adv = (int) $this->getRulesBenefit($ben, "adv", +1);
@@ -7117,6 +7122,12 @@ abstract class PGameXBody extends tapcommon {
         $this->gamestate->nextState("next");
     }
 
+    function argSpaceExploration() {
+        // the marker binds only the werefolk explore (FORMAL_RULES 5.3); any other explore treats hand tiles as ordinary
+        $selected = $this->getCurrentBenefitType() == BE_WEREFOLK_EXPLORE ? $this->getGameStateValue("selected_space_tile") : 0;
+        return ["selected_space_tile" => $selected ? $this->getCardInfoById($selected) : null];
+    }
+
     function stSpaceExploration() {
         $player_id = $this->getActivePlayerId();
         $space_tiles = $this->getCardsInHand($player_id, CARD_SPACE);
@@ -7132,12 +7143,15 @@ abstract class PGameXBody extends tapcommon {
         $this->checkAction("explore_space");
         $player_id = $this->getActivePlayerId();
         $ben = $this->getCurrentBenefitType();
+        $selected = $this->argSpaceExploration()["selected_space_tile"];
+        $this->userAssertTrue(
+            totranslate("You must explore with the space tile you just drew"),
+            !$selected || $selected["card_type_arg"] == $sid
+        );
         $this->clearCurrentBenefit();
-        if ($ben == BE_EXPLORE_SPACE_ALIEN) {
-            $this->saction_exploreSpace($sid, "civilization_31", $player_id);
-        } else {
-            $this->saction_exploreSpace($sid, "hand_space", $player_id);
-        }
+        $this->setGameStateValue("selected_space_tile", 0);
+        $civ = $this->getRulesBenefit($ben, "civ", null);
+        $this->saction_exploreSpace($sid, $civ === null ? "hand_space" : "civilization_$civ", $player_id);
         $this->gamestate->nextState("next");
     }
 
@@ -11186,6 +11200,7 @@ abstract class PGameXBody extends tapcommon {
     function effect_endOfTurn(int $player_id) {
         $this->setGameStateValue("cube_choice", -1);
         $this->setGameStateValue("coal_baron", 0);
+        $this->setGameStateValue("selected_space_tile", 0);
         $this->checkDictatorship($player_id);
         $marker = CUBE_MARKER;
         $turn_markers = $this->getObjectListFromDB("SELECT * FROM structure WHERE card_type='7' AND card_type_arg='$marker'");
@@ -11206,6 +11221,7 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("current_player_turn", $player_id);
         $this->setGameStateValue("cube_choice", -1);
         $this->setGameStateValue("coal_baron", 0);
+        $this->setGameStateValue("selected_space_tile", 0);
         $turns = $this->getPlayerTurn($player_id);
         return $turns;
     }

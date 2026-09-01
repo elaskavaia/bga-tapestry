@@ -1283,7 +1283,12 @@ define([
 
           break;
         case "spaceExploration":
-          dojo.query("#space_tiles_" + this.player_id + " .space_tile").addClass("active_slot");
+          dojo.query("#space_tiles_" + this.player_id + " .space_tile").forEach((tile) => {
+            const selected = args.selected_space_tile;
+            if (!selected || dojo.getAttr(tile, "data-type-arg") == selected.card_type_arg) {
+              dojo.addClass(tile, "active_slot");
+            }
+          });
           break;
         case "client_trader":
           const land = $(this.clientStateArgs.land_id);
