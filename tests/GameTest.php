@@ -380,4 +380,29 @@ final class GameTest extends TestCase {
         // only the two kept dice pay out, and the red one pays twice
         $this->assertEquals([["choice" => [505, 505, 24]]], $game->queued);
     }
+
+    /** LIKE escapes are legal in a search value, a backslash anywhere else is not. */
+    function testCheckValueAcceptsLikeEscapes() {
+        $game = new GameUT();
+        foreach (["tech\\_spot\\_%", "civ\\_49\\_%", "tech_spot_%", "hand"] as $value) {
+            $game->checkValue($value, true);
+        }
+        $this->assertTrue(true);
+
+        foreach (["foo\\'bar", "foo\\bar", "foo\\\\%"] as $value) {
+            try {
+                $game->checkValue($value, true);
+                $this->fail("should reject '$value'");
+            } catch (feException $e) {
+                $this->assertStringContainsString("alphanum", $e->getMessage());
+            }
+        }
+    }
+
+    /** Outside LIKE an escape has no meaning, so it stays rejected. */
+    function testCheckValueRejectsEscapesWithoutLike() {
+        $game = new GameUT();
+        $this->expectException(feException::class);
+        $game->checkValue("tech\\_spot\\_1", false);
+    }
 }

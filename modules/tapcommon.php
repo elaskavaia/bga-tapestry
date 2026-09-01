@@ -416,10 +416,13 @@ abstract class tapcommon extends Table {
             throw new feException("value is not a string");
         }
         $extra = "";
+        $check = $key;
         if ($like) {
             $extra = "%";
+            // \_ and \% are LIKE escapes, a backslash anywhere else stays illegal
+            $check = preg_replace("/\\\\[_%]/", "", $key);
         }
-        if (preg_match("/^[-A-Za-z_0-9 :,(){$extra}]+$/", $key) == 0) {
+        if (preg_match("/^[-A-Za-z_0-9 :,(){$extra}]+$/", $check) == 0) {
             throw new feException("value must be alphanum and underscore non empty string '$key'");
         }
     }
