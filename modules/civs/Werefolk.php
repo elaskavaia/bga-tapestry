@@ -6,28 +6,39 @@ class Werefolk extends AbsCivilization {
     const FACE_DOWN = 0;
     const FACE_UP = 1;
     const VP_NO_REGRESS = 504;
+    const CHOICE_FLIP = 1;
 
     public function __construct(object $game) {
         parent::__construct(CIV_WEREFOLK, $game);
     }
 
     /**
-     * The mat holds no cube and the ability starts with no decision, so it is queued as a plain
-     * benefit instead of going through benefitCivEntry, which would stop on the civ ability state
-     * and ask for a click that has nothing to choose between.
+     * The mat holds no cube and the flip has nothing to choose between, but the ability still goes
+     * through the civ ability state: that is what puts it in the pool a player picks the order from
+     * when another income civ is pending. A single button stands in for the missing slots.
      */
-    function queueEraCivAbility($player_id, $incomeTurn = 0) {
-        if (!$incomeTurn) {
-            $incomeTurn = $this->game->getCurrentEra($player_id);
-        }
-        $income_trigger = $this->getRules("income_trigger", []);
-        $from = array_get($income_trigger, "from", 0);
-        $to = array_get($income_trigger, "to", 0);
-        if (!in_range($incomeTurn, $from, $to)) {
-            parent::queueEraCivAbility($player_id, $incomeTurn);
-            return;
-        }
-        $this->game->queueBenefitNormal(BE_WEREFOLK_FLIP, $player_id, reason_civ($this->civ));
+    function argCivAbilitySingle($player_id, $benefit) {
+        $data = $benefit;
+        $data["reason"] = $this->game->getReasonFullRec(reason(CARD_CIVILIZATION, $this->civ), false);
+        $data["slots"] = [];
+        $this->populateSlotChoiceForArgs($data);
+        $data["title"] = clienttranslate("You must draw a space tile and flip it");
+        $data["slots_choice"] = [
+            self::CHOICE_FLIP => [
+                "title" => clienttranslate("Flip the space tile"),
+                "tooltip" => clienttranslate("Discard the tile on the mat, gain a random space tile and flip it like a coin"),
+            ],
+        ];
+        return $data;
+    }
+
+    function moveCivCube(int $player_id, int $spot, $extra, array $civ_args) {
+        $game = $this->game;
+        $this->systemAssertTrue("ERR:Werefolk:14", $game->isRealPlayer($player_id));
+        $this->systemAssertTrue("ERR:Werefolk:15", $game->hasCiv($player_id, $this->civ));
+        $this->systemAssertTrue("ERR:Werefolk:16", $spot == self::CHOICE_FLIP);
+
+        $game->queueBenefitNormal(BE_WEREFOLK_FLIP, $player_id, reason_civ($this->civ));
     }
 
     function awardBenefits(int $player_id, int $ben, int $count = 1, string $reason = "") {
@@ -73,7 +84,12 @@ class Werefolk extends AbsCivilization {
         $this->discardTileOnMat($player_id);
         if (!$this->drawTile($player_id, $reason)) {
             // no tile gained means nothing to flip, the whole ability is skipped (FORMAL_RULES 5.3)
-            $game->notifyWithName("message", clienttranslate('${player_name} cannot gain a space tile, the ability is skipped'), [], $player_id);
+            $game->notifyWithName(
+                "message",
+                clienttranslate('${player_name} cannot gain a space tile, the ability is skipped'),
+                [],
+                $player_id
+            );
             return true;
         }
         $face_up = $game->bgaRand(self::FACE_DOWN, self::FACE_UP) == self::FACE_UP;

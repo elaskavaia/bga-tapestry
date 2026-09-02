@@ -23,11 +23,6 @@ NEW CIVILIZATIONS
       expects it. The generic ".civilization .space_tile" rule positions it, and no Werefolk specific
       CSS was added.
 
-- [ ] Werefolk: the ability is queued straight from queueEraCivAbility instead of going through
-      benefitCivEntry, because the mat has no cube and the flip has nothing to click. That means the civ
-      never reaches the civ ability state, so it is also the first income civ whose ability shows no
-      "Decline" affordance at all. Confirm that reads correctly in a real game.
-
 - [ ] Werefolk: onSpaceTileClick has no checkActiveSlot guard, unlike onTerritoryTileClick and the track
       handlers, so a space tile the new spaceExploration filter dimmed is still clickable and fires
       explore_space just to earn a server rejection toast. Add "if (!this.checkActiveSlot(id)) return;"

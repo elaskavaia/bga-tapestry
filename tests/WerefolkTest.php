@@ -27,6 +27,13 @@ class WerefolkUT extends GameUT {
         return $this->addCard(CARD_SPACE, "civilization_" . CIV_WEREFOLK);
     }
 
+    /** What action_civTokenAdvance does: cash the civ row, then let the civ queue its work. */
+    function useCivAbility(int $spot, int $player_id = 1): void {
+        $this->benefitCashed($this->getCurrentBenefit(CIV_WEREFOLK, "civ"));
+        $this->interruptBenefit();
+        $this->getCivilizationInstance(CIV_WEREFOLK, true)->moveCivCube($player_id, $spot, "", []);
+    }
+
     /** What action_choose_benefit does: cash the choice row, then resolve the option taken. */
     function chooseOption(int $ben, int $player_id = 1): void {
         foreach ($this->benefitQueue() as $row) {
@@ -67,6 +74,7 @@ final class WerefolkTest extends TestCase {
         $game->addCard(CARD_SPACE, "deck_space");
         $game->seedRand($face);
         $game->queueEraCivAbility(CIV_WEREFOLK, 1, $turn);
+        $game->useCivAbility(Werefolk::CHOICE_FLIP);
         $game->resolveBenefit(BE_WEREFOLK_FLIP);
     }
 
@@ -103,8 +111,40 @@ final class WerefolkTest extends TestCase {
         foreach ([2, 3, 4, 5] as $turn) {
             $game = $this->newGame();
             $game->queueEraCivAbility(CIV_WEREFOLK, 1, $turn);
-            $this->assertEquals([(string) BE_WEREFOLK_FLIP], $game->benefitLabels(), "income turn $turn");
+            $this->assertEquals(["civ"], $game->benefitLabels(), "income turn $turn");
         }
+    }
+
+    /**
+     * The flip has nothing to pick, but it still queues as a civ row: that is the only thing the
+     * civ ability state offers a player the order of when a second income civ is pending.
+     */
+    function testAbilityOffersOneButtonAndNoDecline() {
+        $args = $this->werefolk()->argCivAbilitySingle(1, ["benefit_data" => ""]);
+        $this->assertFalse($args["decline"]);
+        $this->assertEquals([Werefolk::CHOICE_FLIP], array_keys($args["slots_choice"]));
+    }
+
+    function testUsingTheAbilityQueuesTheFlip() {
+        $this->game->queueEraCivAbility(CIV_WEREFOLK, 1, 2);
+        $this->game->useCivAbility(Werefolk::CHOICE_FLIP);
+        $this->assertEquals([(string) BE_WEREFOLK_FLIP], $this->game->benefitLabels());
+    }
+
+    /**
+     * argCivAbility groups every pending civ row sharing a prerequisite, and the client turns the
+     * ones the player is not on into "switch civilization" buttons. Queueing the flip outside that
+     * pool silently took the ordering choice away from a player holding two income civs.
+     */
+    function testSecondIncomeCivSharesTheSameChoicePool() {
+        $this->game->giveCiv(1, CIV_FAEFOLK);
+        $this->game->queueEraCivAbility(CIV_FAEFOLK, 1, 2);
+        $this->game->queueEraCivAbility(CIV_WEREFOLK, 1, 2);
+
+        $rows = $this->game->benefitQueue();
+        $this->assertEquals(["civ", "civ"], $this->game->benefitLabels());
+        $this->assertEquals([CIV_FAEFOLK, CIV_WEREFOLK], [(int) $rows[0]["benefit_type"], (int) $rows[1]["benefit_type"]]);
+        $this->assertEquals($rows[0]["benefit_prerequisite"], $rows[1]["benefit_prerequisite"]);
     }
 
     function testAbilityDoesNotFireOnIncomeTurn1() {
@@ -162,6 +202,7 @@ final class WerefolkTest extends TestCase {
     function testEmptyDeckAndDiscardSkipsTheFlip() {
         $this->game->seedRand(Werefolk::FACE_DOWN);
         $this->game->queueEraCivAbility(CIV_WEREFOLK, 1, 2);
+        $this->game->useCivAbility(Werefolk::CHOICE_FLIP);
         $this->game->resolveBenefit(BE_WEREFOLK_FLIP);
         $this->assertEquals([], $this->game->benefitLabels(), "no advance or regress choice from a ghost flip");
     }
@@ -271,6 +312,10 @@ final class WerefolkTest extends TestCase {
 
     function testAssertsForAPlayerWithoutTheCiv() {
         $this->assertAsserts("ERR:Werefolk:12", fn() => $this->werefolk()->awardBenefits(2, BE_WEREFOLK_FLIP));
+    }
+
+    function testAssertsOnASpotItDoesNotHave() {
+        $this->assertAsserts("ERR:Werefolk:16", fn() => $this->werefolk()->moveCivCube(1, 2, "", []));
     }
 
     /** systemAssertTrue echoes the diagnostic before throwing, so swallow the output. */
