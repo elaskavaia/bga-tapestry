@@ -109,15 +109,14 @@ $game_options = [
             0b111 => [
                 "name" => totranslate("Original + PP + AA"),
                 "tmdisplay" => totranslate("Civilation Set: Basic, Plans & Ploys, Arts & Architecture"),
-                "beta" => true,
             ],
             0b001 => ["name" => totranslate("Original Only")],
-            0b011 => ["name" => totranslate("Original + Plans & Ploys"), "tmdisplay" => totranslate("Plans & Ploys"), "beta" => true],
-            0b1001 => [
-                "name" => totranslate("Original + Fantasies & Futures"),
-                "tmdisplay" => totranslate("Fantasies & Futures"),
-                "beta" => true,
-            ],
+            0b011 => ["name" => totranslate("Original + Plans & Ploys"), "tmdisplay" => totranslate("Plans & Ploys")],
+            // 0b1001 => [
+            //     "name" => totranslate("Original + Fantasies & Futures"),
+            //     "tmdisplay" => totranslate("Fantasies & Futures"),
+            //     "beta" => true,
+            // ],
             0b1000 => [
                 "name" => totranslate("Fantasies & Futures Only - For Testing"),
                 "tmdisplay" => totranslate("Civilation Set: Fantasies & Futures Only"),
