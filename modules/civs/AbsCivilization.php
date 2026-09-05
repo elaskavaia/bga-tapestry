@@ -69,6 +69,9 @@ abstract class AbsCivilization {
     /** A player who does not own this civ quit while holding one of its benefits */
     function zombieBenefit(array $benefit): void {}
 
+    /** BE_CIV_END queued with this civ's reason has been reached: everything the ability queued before it is resolved. */
+    function endCivAbility(int $player_id): void {}
+
     /**
      * Copy of translation function for conviniene, this can only be user for error message in exceptions
      */

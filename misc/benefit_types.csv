@@ -253,4 +253,5 @@ id|-con|name|r|t|php
 602||End of income|||'auto'=>1
 #Adjust benefit - no name
 603||-|||'auto'=>1
+604|BE_CIV_END|End of civilization ability|||'auto'=>1
 #of of benefits

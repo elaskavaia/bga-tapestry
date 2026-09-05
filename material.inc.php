@@ -176,6 +176,7 @@ if (!defined("TAPESTRY")) {
     define("BE_WEREFOLK_EXPLORE", 346);
     define("BE_GENIES_WISH", 347);
     define("BE_GENIES_SQUARE", 348);
+    define("BE_CIV_END", 604);
     define("BE_OP_UNIQUE", 600);
 
     // TERRAIN
@@ -2454,6 +2455,11 @@ $this->benefit_types = [
     603 => [
         //
         "name" => clienttranslate("-"),
+        "auto" => 1,
+    ],
+    604 => [
+        // BE_CIV_END
+        "name" => clienttranslate("End of civilization ability"),
         "auto" => 1,
     ],
     /* --- gen php end benefit_types --- */

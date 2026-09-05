@@ -1483,6 +1483,9 @@ abstract class PGameXBody extends tapcommon {
             case 602:
                 $this->effect_endOfIncome($player_id);
                 return true;
+            case BE_CIV_END:
+                $this->getCivilizationInstance((int) $this->getReasonArg($reason, 2), true)->endCivAbility($player_id);
+                return true;
             case 17: // EXPLORE
                 $this->ageOfSailCheck($player_id);
                 $this->gamestate->nextState("explore");
