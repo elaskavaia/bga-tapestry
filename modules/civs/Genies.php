@@ -86,8 +86,8 @@ class Genies extends AbsCivilization {
     }
 
     /**
-     * The draw is with replacement: every token goes back in the pile first, which also clears the
-     * one left on the ring by the previous wish. An opponent past income turn 5 cannot answer, so
+     * The draw is with replacement: every token goes back in the pile first, which also clears a
+     * token left on the ring by a wish that was undone. An opponent past income turn 5 cannot answer, so
      * their token is skipped; a zombie answers with a random circle (FORMAL_RULES 5.6).
      */
     function drawOpponent(int $player_id): bool {
@@ -170,6 +170,12 @@ class Genies extends AbsCivilization {
             $game->queueBenefitNormal($circle, $opponent_id, reason_civ($this->civ));
         }
         $game->queueBenefitNormal(["choice" => [$circle, BE_GENIES_SQUARE]], $owner, reason_civ($this->civ));
+        $game->queueBenefitNormal(BE_CIV_END, $owner, reason_civ($this->civ));
+    }
+
+    /** The wish is fully paid out, the drawn token goes back in the pile. */
+    function endCivAbility(int $player_id): void {
+        $this->returnTokensToPile();
     }
 
     function gainAdjacentSquare(int $player_id, string $reason): bool {

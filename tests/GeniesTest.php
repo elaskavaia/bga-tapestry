@@ -223,7 +223,11 @@ final class GeniesTest extends TestCase {
 
         $this->assertEquals($this->slot(4), $this->game->tokenLocation(GeniesUT::OPPONENT));
         $rows = $this->game->benefitQueue();
-        $this->assertEquals(["a," . BE_VP_TILES . "," . BE_GENIES_SQUARE], $this->game->benefitLabels(), "only the owner scores");
+        $this->assertEquals(
+            ["a," . BE_VP_TILES . "," . BE_GENIES_SQUARE, (string) BE_CIV_END],
+            $this->game->benefitLabels(),
+            "only the owner scores"
+        );
         $this->assertEquals(GeniesUT::OWNER, (int) $rows[0]["benefit_player_id"]);
         $this->assertContains('${player_name} is zombie, a random circled benefit is chosen for them', $this->game->notificationTexts());
     }
@@ -253,10 +257,27 @@ final class GeniesTest extends TestCase {
         $this->assertEquals($this->slot(4), $this->game->tokenLocation(GeniesUT::OPPONENT));
         $this->assertContains('${player_name} places their player token on the chosen circled benefit', $this->game->notificationTexts());
         $rows = $this->game->benefitQueue();
-        $this->assertCount(1, $rows, "the opponent's own score is already resolved");
-        $this->assertEquals("a," . BE_VP_TILES . "," . BE_GENIES_SQUARE, $rows[0]["benefit_category"]);
+        $this->assertEquals(
+            ["a," . BE_VP_TILES . "," . BE_GENIES_SQUARE, (string) BE_CIV_END],
+            $this->game->benefitLabels(),
+            "the opponent's own score is already resolved"
+        );
         $this->assertEquals(GeniesUT::OWNER, (int) $rows[0]["benefit_player_id"]);
         $this->assertEquals(reason_civ(CIV_GENIES), $rows[0]["benefit_data"], "the wish tag does not leak into the mirror");
+    }
+
+    /** The token stays on the circle while the owner is still choosing and returns to the pile after. */
+    function testTokenReturnsToThePileOnceTheOwnerIsPaid() {
+        $this->summon();
+        $this->game->chooseOption(BE_VP_TILES, GeniesUT::OPPONENT);
+        $this->game->chooseOption(BE_VP_TILES, GeniesUT::OWNER);
+        $this->game->resolveBenefit(BE_GENIES_SQUARE, GeniesUT::OWNER);
+        $this->game->chooseOption(BE_GAIN_CULTURE, GeniesUT::OWNER);
+        $this->assertEquals($this->slot(4), $this->game->tokenLocation(GeniesUT::OPPONENT));
+
+        $this->game->resolveBenefit(BE_CIV_END, GeniesUT::OWNER);
+        $this->assertEquals($this->slot(Genies::PILE), $this->game->tokenLocation(GeniesUT::OPPONENT));
+        $this->assertEquals([], $this->game->benefitLabels());
     }
 
     /** The mirror is one "either order" row, so the square can come before the score. */
@@ -265,7 +286,10 @@ final class GeniesTest extends TestCase {
         $this->game->chooseOption(BE_VP_TILES, GeniesUT::OPPONENT);
 
         $this->game->chooseOption(BE_GENIES_SQUARE, GeniesUT::OWNER);
-        $this->assertEquals(["o," . BE_INVENT . "," . BE_GAIN_CULTURE, (string) BE_VP_TILES], $this->game->benefitLabels());
+        $this->assertEquals(
+            ["o," . BE_INVENT . "," . BE_GAIN_CULTURE, (string) BE_VP_TILES, (string) BE_CIV_END],
+            $this->game->benefitLabels()
+        );
     }
 
     /** The owner's own circle row carries the civ reason too and must not be mistaken for a wish. */
@@ -274,10 +298,10 @@ final class GeniesTest extends TestCase {
         $this->game->chooseOption(BE_VP_TILES, GeniesUT::OPPONENT);
 
         $this->game->chooseOption(BE_VP_TILES, GeniesUT::OWNER);
-        $this->assertEquals([(string) BE_GENIES_SQUARE], $this->game->benefitLabels());
+        $this->assertEquals([(string) BE_GENIES_SQUARE, (string) BE_CIV_END], $this->game->benefitLabels());
 
         $this->game->resolveBenefit(BE_GENIES_SQUARE, GeniesUT::OWNER);
-        $this->assertEquals(["o," . BE_INVENT . "," . BE_GAIN_CULTURE], $this->game->benefitLabels());
+        $this->assertEquals(["o," . BE_INVENT . "," . BE_GAIN_CULTURE, (string) BE_CIV_END], $this->game->benefitLabels());
     }
 
     /** The square is read off the token's spot on the ring, not carried in a reason. */
@@ -326,7 +350,7 @@ final class GeniesTest extends TestCase {
         $this->assertEquals($this->slot(6), $this->game->tokenLocation(GeniesUT::OPPONENT));
         $rows = $this->game->benefitQueue();
         $this->assertEquals(
-            ["a," . BE_VP_TERRITORY . "," . BE_GENIES_SQUARE],
+            ["a," . BE_VP_TERRITORY . "," . BE_GENIES_SQUARE, (string) BE_CIV_END],
             $this->game->benefitLabels(),
             "only the owner's row survives"
         );
