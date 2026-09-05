@@ -4736,6 +4736,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_MYSTICS:
             case CIV_ADVISORS:
             case CIV_FAEFOLK:
+            case CIV_GENIES:
             case CIV_WEREFOLK:
                 $inst = $this->getCivilizationInstance($cid, true);
                 $inst->moveCivCube($player_id, $spot, $extra, $civ_args);
@@ -5063,6 +5064,13 @@ abstract class PGameXBody extends tapcommon {
     function effect_onQueueBenefit($ben, $player_id = null, $reason = "", $count = 1) {
         if (!$this->isRealPlayer($player_id)) {
             return true;
+        }
+        $civ = getReasonCiv($reason);
+        if ($civ && $this->getCivOwner($civ) != $player_id) {
+            $inst = $this->getCivilizationInstance($civ);
+            if (!$inst->interceptOpponentBenefit((int) $ben, (int) $player_id, (string) $reason, (int) $count)) {
+                return false;
+            }
         }
         switch ($ben) {
             case BE_TAPESTRY:
@@ -9747,6 +9755,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_ALCHEMISTS:
             case CIV_ADVISORS:
             case CIV_FAEFOLK:
+            case CIV_GENIES:
             case CIV_WEREFOLK:
                 return $civinst->argCivAbilitySingle($player_id, $benefit);
 
@@ -12052,6 +12061,25 @@ abstract class PGameXBody extends tapcommon {
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie
     ////////////
+    /**
+     * A row the quitter holds on behalf of another player's civ is that player's ability, so the
+     * civ gets to answer for the zombie before the quitter's rows are dropped.
+     */
+    function effect_zombieBenefits($player_id) {
+        foreach ($this->dbGetBenefits() as $benefit) {
+            $civ = getReasonCiv($benefit["benefit_data"]);
+            if ($benefit["benefit_player_id"] != $player_id || !$civ || $this->getCivOwner($civ) == $player_id) {
+                continue;
+            }
+            $this->getCivilizationInstance($civ)->zombieBenefit($benefit);
+        }
+        $this->dbDeleteBenefitsOfPlayer($player_id);
+    }
+
+    function dbDeleteBenefitsOfPlayer($player_id) {
+        $this->DbQuery("DELETE FROM benefit WHERE benefit_player_id='$player_id'");
+    }
+
     /*
      * zombieTurn:
      *
@@ -12075,7 +12103,7 @@ abstract class PGameXBody extends tapcommon {
         $statename = $state["name"];
         $player_id = $active_player;
         if ($state["type"] === "activeplayer") {
-            $this->DbQuery("DELETE FROM benefit WHERE benefit_player_id='$player_id'");
+            $this->effect_zombieBenefits($player_id);
             $main_player = $this->getGameStateValue("current_player_turn");
             if ($this->isIncomeTurn() && $main_player == $player_id) {
                 $this->setIncomeTurnPhase(0, "", $player_id);

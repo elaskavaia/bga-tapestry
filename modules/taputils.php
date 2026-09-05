@@ -35,6 +35,15 @@ function getReasonPart($haystack, $i){
     return getPart($haystack, $i, true, ':');
 }
 
+/** The civilization a reason names, 0 when the reason is not a civilization one */
+function getReasonCiv($reason) {
+    $kind = getReasonPart($reason, 1);
+    if ($kind === 'civ' || $kind == CARD_CIVILIZATION) {
+        return (int) getReasonPart($reason, 2);
+    }
+    return 0;
+}
+
 function varsub($line, $keymap) {
     if (strpos($line, "{") !== false) {
         foreach ( $keymap as $key => $value ) {

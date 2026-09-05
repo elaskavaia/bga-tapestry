@@ -61,6 +61,14 @@ abstract class AbsCivilization {
         return true;
     }
 
+    /** A benefit this civ hands to a player who does not own it is about to be queued; false drops it. */
+    function interceptOpponentBenefit(int $ben, int $player_id, string $reason, int $count): bool {
+        return true;
+    }
+
+    /** A player who does not own this civ quit while holding one of its benefits */
+    function zombieBenefit(array $benefit): void {}
+
     /**
      * Copy of translation function for conviniene, this can only be user for error message in exceptions
      */

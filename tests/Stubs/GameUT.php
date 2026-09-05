@@ -133,6 +133,12 @@ class GameUT extends Tapestry {
         return count($this->getCardsSearch(CARD_CIVILIZATION, $civ_id, "hand", $player_id)) > 0;
     }
 
+    /** The real one reads the card table with raw SQL, which the in memory card model never sees. */
+    function getCivOwner($civ_id) {
+        $card = $this->getCardInfoSearch(CARD_CIVILIZATION, $civ_id, "hand");
+        return $card ? $card["card_location_arg"] : null;
+    }
+
     /** Give a player a civilization the way the setup deal does, as a card in their hand. */
     function giveCiv($player_id, $civ_id): int {
         return $this->cards->addRow(CARD_CIVILIZATION, $civ_id, "hand", $player_id);
@@ -246,6 +252,10 @@ class GameUT extends Tapestry {
         $this->notifyBenefitQueue();
     }
 
+    function dbDeleteBenefitsOfPlayer($player_id) {
+        $this->benefits->deleteOfPlayer($player_id);
+    }
+
     /** What stBenefitManager does with a pending standard row: resolve it, then cash it on true. */
     function resolveBenefit(int $ben, int $player_id = 1): void {
         $row = $this->benefits->first(["benefit_category" => "standard", "benefit_type" => $ben]);
@@ -255,6 +265,26 @@ class GameUT extends Tapestry {
         if ($this->awardBenefits($player_id, $ben, 1, $row["benefit_data"])) {
             $this->benefitCashed($row["benefit_id"]);
         }
+    }
+
+    /**
+     * What action_choose_benefit and action_first_benefit do: take one option out of a composite
+     * "o," or "a," row, put back what is left, then resolve the option taken.
+     */
+    function chooseOption(int $ben, int $player_id = 1): void {
+        foreach ($this->benefitQueue() as $row) {
+            $options = explode(",", $row["benefit_category"]);
+            $op = array_shift($options);
+            if (($op != "o" && $op != "a") || !in_array((string) $ben, $options)) {
+                continue;
+            }
+            $left = $op == "o" ? (int) $row["benefit_quantity"] - 1 : 1;
+            $this->reinjectCompositeBenefitWithChoiceRemoved($ben, $row, $left);
+            $this->queueBenefitInterrupt($ben, $player_id, $row["benefit_data"]);
+            $this->resolveBenefit($ben, $player_id);
+            return;
+        }
+        throw new BgaSystemException("no pending choice offering benefit $ben");
     }
 
     function getCurrentBenefit($ben = null, $cat = "standard") {

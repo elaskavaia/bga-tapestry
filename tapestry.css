@@ -4010,3 +4010,16 @@ div[data-income="0"] #subtitle_bar {
 #page-title.fixed-page-title {
   width: calc(100% - 10px) !important;
 }
+
+/* genies: the opponents' player tokens wait in the middle of the ring */
+.civilization_44 .civ_44_0 {
+  text-align: center;
+  white-space: nowrap;
+  cursor: default;
+}
+.civilization_44 .civ_44_0 .cube {
+  display: inline-block;
+  position: relative;
+  bottom: auto;
+  margin: 0 -3px;
+}

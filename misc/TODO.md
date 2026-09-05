@@ -33,6 +33,29 @@ NEW CIVILIZATIONS
       now early-outs with a "cannot gain a space tile" message when drawTile gains nothing. Test:
       testEmptyDeckAndDiscardSkipsTheFlip.
 
+- [ ] Genies: verify the 8 ring slot positions and the token pile (slot 0, 4 cubes wide) in the studio
+      (measured off civ_ff.webp, not yet seen rendered on a real mat).
+
+- [ ] Genies and Faefolk: clicking any holder on the mat during civAbility sends civTokenAdvance with
+      that spot (the checkActiveSlot guard in onCubeHolderClick, tapestry.js around 4842, is commented
+      out), so a legal-looking click on the ring or the token pile earns an ERR:Genies:13 (ERR:Faefolk:13)
+      system error toast; clicking spot 1 silently fires the ability like the button. Fix: either
+      "case this.CON.CIV_GENIES: return;" beside "case 15: return;" in that handler, or restore the
+      guard for every civ.
+
+- [x] Genies, RESOLVED by the redesign: the drawn opponent now answers a plain choose-one row in the
+      benefitOption state, so no civAbility description names them as the ability's owner.
+
+- [ ] Genies: same gap as the Faefolk item above - the two case CIV_GENIES lines in
+      saction_civTokenAdvance and argCivAbilitySingle are only exercised by calling the civ class
+      directly, so deleting them leaves the suite green while a real game falls through to the generic
+      cube-placing path.
+
+- [x] Genies, DONE: a drawn opponent who quits at the wish prompt no longer swallows the ability.
+      zombieTurn now goes through effect_zombieBenefits, which hands every row the quitter holds for
+      another player's civ to that civ (AbsCivilization::zombieBenefit) before the delete; Genies
+      answers with a random circle (FORMAL_RULES 5.6). Test: testOpponentQuittingAtThePromptGetsARandomCircle.
+
 - [ ] Werefolk cleanup: queueEraCivAbility reads income_trigger, computes from/to and calls in_range, then
       on a miss hands off to the parent which re-reads the same income_trigger and re-runs the same check
       just to reach its else branch and post the "not applicable in era" chat line. Extract the range test

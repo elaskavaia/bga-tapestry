@@ -33,20 +33,6 @@ class WerefolkUT extends GameUT {
         $this->interruptBenefit();
         $this->getCivilizationInstance(CIV_WEREFOLK, true)->moveCivCube($player_id, $spot, "", []);
     }
-
-    /** What action_choose_benefit does: cash the choice row, then resolve the option taken. */
-    function chooseOption(int $ben, int $player_id = 1): void {
-        foreach ($this->benefitQueue() as $row) {
-            $options = explode(",", $row["benefit_category"]);
-            if (array_shift($options) == "o" && in_array((string) $ben, $options)) {
-                $this->benefitCashed($row["benefit_id"]);
-                $this->queueBenefitInterrupt($ben, $player_id, $row["benefit_data"]);
-                $this->resolveBenefit($ben, $player_id);
-                return;
-            }
-        }
-        throw new BgaSystemException("no pending choice offering benefit $ben");
-    }
 }
 
 final class WerefolkTest extends TestCase {

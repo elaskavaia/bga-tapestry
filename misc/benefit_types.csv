@@ -237,6 +237,8 @@ id|-con|name|r|t|php
 344|BE_WEREFOLK_FLIP|WEREFOLK discard the mat tile, draw a space tile and flip it|||'civ'=>CIV_WEREFOLK
 345|BE_WEREFOLK_REGRESS|WEREFOLK regress on 1 track, then explore with the space tile|||'civ'=>CIV_WEREFOLK
 346|BE_WEREFOLK_EXPLORE|Explore space|s||'state'=>'explore_space','civ'=>CIV_WEREFOLK
+347|BE_GENIES_WISH|GENIES a random opponent picks a circled benefit|||'civ'=>CIV_GENIES
+348|BE_GENIES_SQUARE|GENIES gain a squared benefit adjacent to the picked circled one|||'civ'=>CIV_GENIES
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

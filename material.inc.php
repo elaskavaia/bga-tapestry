@@ -174,6 +174,8 @@ if (!defined("TAPESTRY")) {
     define("BE_WEREFOLK_FLIP", 344);
     define("BE_WEREFOLK_REGRESS", 345);
     define("BE_WEREFOLK_EXPLORE", 346);
+    define("BE_GENIES_WISH", 347);
+    define("BE_GENIES_SQUARE", 348);
     define("BE_OP_UNIQUE", 600);
 
     // TERRAIN
@@ -2377,6 +2379,16 @@ $this->benefit_types = [
         "r" => "s",
         "state" => "explore_space",
         "civ" => CIV_WEREFOLK,
+    ],
+    347 => [
+        // BE_GENIES_WISH
+        "name" => clienttranslate("GENIES a random opponent picks a circled benefit"),
+        "civ" => CIV_GENIES,
+    ],
+    348 => [
+        // BE_GENIES_SQUARE
+        "name" => clienttranslate("GENIES gain a squared benefit adjacent to the picked circled one"),
+        "civ" => CIV_GENIES,
     ],
     502 => [
         //
@@ -5624,6 +5636,42 @@ $this->civilizations = [
             5 => ["top" => 85.2, "left" => 61.9, "w" => 11.6, "h" => 7.4, "benefit" => [BE_GAIN_CULTURE, BE_VP_TERRITORY]],
             6 => ["top" => 76.7, "left" => 57.5, "w" => 11.6, "h" => 7.5, "benefit" => [BE_GAIN_WORKER, BE_VP_CAPITAL]],
             7 => ["top" => 68.2, "left" => 57.5, "w" => 11.6, "h" => 7.5, "benefit" => [BE_SPACE, BE_EXPLORE_SPACE]], //
+        ],
+    ],
+    CIV_GENIES => [
+        "name" => clienttranslate("GENIES"),
+        "description" => [
+            clienttranslate("<i>Genies grant wishes, though not altruistically.</i>"),
+            clienttranslate(
+                "At the start of your income turns (2-4), a randomly drawn opponent chooses and scores 1 circled benefit on the ring shown here."
+            ),
+            clienttranslate(
+                "You score that same circled benefit and gain a squared benefit adjacent to the chosen circled benefit. You may use your 2 benefits in either order."
+            ),
+            clienttranslate("At the start of your income turn 5, gain 2 different circled benefits of your choice."),
+        ],
+        "exp" => "FF",
+        "automa" => false,
+        "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
+        "slots_description" => clienttranslate("clockwise"),
+        "slots" => [
+            // the pile of the opponents' player tokens, in the middle of the ring
+            0 => [
+                "top" => 77.2,
+                "left" => 61.5,
+                "w" => 22,
+                "h" => 4.9,
+                "title" => clienttranslate("Player tokens of the opponents"),
+                "tooltip" => clienttranslate("Player tokens of the opponents, one is drawn at random on income turns 2-4"),
+            ],
+            1 => ["top" => 67.6, "left" => 68.9, "w" => 7.6, "h" => 4.9, "benefit" => [BE_RESEARCH_NB]],
+            2 => ["top" => 70.5, "left" => 79.3, "w" => 7.6, "h" => 4.9, "benefit" => [BE_VP_CAPITAL]],
+            3 => ["top" => 77.2, "left" => 83.7, "w" => 7.6, "h" => 4.9, "benefit" => [BE_INVENT]],
+            4 => ["top" => 84.0, "left" => 79.3, "w" => 7.6, "h" => 4.9, "benefit" => [BE_VP_TILES]],
+            5 => ["top" => 87.1, "left" => 68.9, "w" => 7.6, "h" => 4.9, "benefit" => [BE_GAIN_CULTURE]],
+            6 => ["top" => 84.0, "left" => 58.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_VP_TERRITORY]],
+            7 => ["top" => 77.3, "left" => 53.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_EXPLORE]],
+            8 => ["top" => 70.5, "left" => 58.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_VP_TECH]], //
         ],
     ],
     CIV_WEREFOLK => [

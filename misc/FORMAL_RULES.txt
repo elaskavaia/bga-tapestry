@@ -83,3 +83,9 @@ This is my interpretation not actuall formal rules
     cannot regress are not offered.
 5.5 Werefolk face-down advance is mandatory and grants the spot benefit plus the bonus for free,
     which is a flag combination (benefit + free bonus) no printed effect used before.
+5.6 Genies token bag - an opponent who has finished (past income turn 5) cannot answer the prompt,
+    so their token is treated as out of the bag for that draw rather than the wish being swallowed.
+    A zombie opponent stays in the bag and picks a random circled benefit when drawn, so the GENIES
+    player is never blocked by a quitter; the zombie's own score is skipped, only the GENIES player
+    scores. If no opponent can answer at all, the whole ability is skipped and the GENIES player
+    scores nothing, not even the circled benefit. Ruled by Victoria.

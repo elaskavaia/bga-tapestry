@@ -21,6 +21,10 @@ Needs new cross-player interactive states, precedent in Advisors and Historians:
 - Weefolk - your token occupies a plot in an opponent's capital and counts as filled, then row and
   column scoring at income 5.
 
+Genies, Illuminati and Weefolk all need a live opponent to point at, so all three are kept out of
+solo games with `"automa" => false` in material - the civ pool in `setupNewGameTables` already drops
+any civ carrying that flag. Ruled by Victoria.
+
 Needs engine changes beyond the civ hooks:
 
 - Elder Ones and Merfolk - both keep taking turns after income turn 5 while everyone else is
@@ -200,8 +204,12 @@ complexity order are called out below.
 2. Werefolk. Done. Confirmed the unit and finished the cheap band. Its coin flip needed seeded
    randomness in the test harness, which landed first as an overridable bgaRand and is also the
    first piece of what Psionics and Illuminati will need later.
-3. Genies. First of the cross-player states, and the smaller of the two: a random opponent picks,
-   you mirror. Advisors and Historians are the precedent.
+3. Genies. Done. First cross-player ability and cheaper than expected: a benefit row owned by
+   another player already makes that player active, so the drawn opponent answers a plain
+   choose-one row and no new state was needed. What it did need was two engine hooks, an
+   opponent-benefit intercept in effect_onQueueBenefit and a zombie hook so a quitter cannot
+   swallow someone else's ability. Two benefit rows, one civ class, the opponents' tokens as cubes
+   on the mat, one CSS rule.
 4. Weefolk. Same cross-player machinery as Genies plus a token living in an opponent's capital grid
    and row and column scoring at income 5.
 5. Elder Ones. Build the post income 5 alternate turn loop first, as a standalone engine change
