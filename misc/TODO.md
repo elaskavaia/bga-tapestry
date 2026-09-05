@@ -61,6 +61,12 @@ NEW CIVILIZATIONS
       just to reach its else branch and post the "not applicable in era" chat line. Extract the range test
       into an AbsCivilization helper both can call, instead of nine duplicated lines per civ.
 
+- [ ] Alchemists cleanup: removeCubes() is called at the four exits of the roll sequence, right after
+      the final benefits are queued, so the kept-die cubes vanish from the mat before the player resolves
+      them. Queue BE_CIV_END once instead and clear the cubes in endCivAbility, the way Genies and
+      Werefolk do. Check first whether BE_ALCHEMISTS_DIE in the level 9 branch relies on
+      getRemainingDice() seeing an empty mat.
+
 - [ ] Coal baron reset when spies was using it
 - [ ] Utilitarients - no city when they place landmark
 
