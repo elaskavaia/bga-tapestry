@@ -109,9 +109,11 @@ Each bullet is a **preferred pattern or a check to run** - flag any changed code
 - Prettier (PHP plugin, width 140, 1tbs) formats on save; `npx prettier --check` must be clean.
 - Never edit `_ide_helper.php` or `bga-framework.d.ts`.
 - `misc/` and `tests/` are not deployed - nothing runtime may depend on them.
-- Getters start with `get`; the only other sanctioned getter prefixes are `is` (boolean
-  predicates) and `count` (methods doubling as expression-engine barewords, and even those stay
-  descriptive: `countCardsInHand`, not `countHand`). Flag bare-noun getters like `cardCost()`.
+- Getters start with `get`; the only other sanctioned getter prefixes are `is`, `has` and `can`
+  (boolean predicates) and `count` (methods doubling as expression-engine barewords, and even
+  those stay descriptive: `countCardsInHand`, not `countHand`). This covers any side-effect-free
+  method that returns a value, not just field accessors: a `calcScore()` or `findBestHex()` is a
+  getter and is named `get...`. Flag bare-noun getters like `cardCost()`.
 
 ### New code only (legacy is grandfathered)
 
@@ -125,6 +127,8 @@ This is an old game; do not flag existing code for these, but hold new and rewri
 - No direct SQL in game logic: go through the Deck objects (`$this->cards`, `$this->structures`)
   or the `db*` helpers in [tapcommon.php](../../../modules/tapcommon.php). A genuinely new query
   becomes a new `db*` helper, not an inline `DbQuery` string in a state or action handler.
+- A helper that reads or writes the database, directly or through another method, carries `db`
+  in its name, i.e. `getAllCubesDb`
 
 ### Docs
 
