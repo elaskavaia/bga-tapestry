@@ -1297,6 +1297,7 @@ $this->benefit_types = [
         // BE_VP_TILES
         "name" => clienttranslate("VP - Territory tiles"),
         "r" => "v",
+        "icon" => 1,
     ],
     67 => [
         // BE_REGRESS_E

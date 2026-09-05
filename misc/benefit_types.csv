@@ -65,7 +65,7 @@ id|-con|name|r|t|php
 63|BE_VP_HOUSE|VP - Houses|v||
 64||Overwrite tapestry card|||
 65|BE_GAIN_CIV|Civilization|||
-66|BE_VP_TILES|VP - Territory tiles|v||
+66|BE_VP_TILES|VP - Territory tiles|v||'icon'=>1
 67|BE_REGRESS_E|Regress - Exploration|t|1|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
 68|BE_REGRESS_S|Regress - Science|t|2|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
 69|BE_REGRESS_M|Regress - Military|t|3|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
