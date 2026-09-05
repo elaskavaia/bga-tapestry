@@ -2264,8 +2264,7 @@ abstract class PGameXBody extends tapcommon {
             }
         } elseif ($ben) {
             $this->warn("vp benefit is not number $ben for $reason");
-            $e = new Exception($reason);
-            $this->warn($e->getTraceAsString());
+            $this->logStackTrace($reason);
         } else {
             $this->dbIncStatChecked($count, "game_points_be_15", $player_id);
         }
@@ -8146,8 +8145,7 @@ abstract class PGameXBody extends tapcommon {
             if ($throw && $ben) {
                 $this->systemAssertTrue("Benefit $ben is not on stack");
             }
-            $e = new Exception("no benefit $ben found in " . $this->getStateName());
-            $this->error($e->getTraceAsString());
+            $this->logStackTrace("no benefit $ben found in " . $this->getStateName());
         }
         return null;
     }
@@ -8170,8 +8168,7 @@ abstract class PGameXBody extends tapcommon {
             if ($throw && $ben) {
                 $this->systemAssertTrue("Benefit $ben is not on stack");
             }
-            $e = new Exception("no benefit $ben found in " . $this->getStateName());
-            $this->error($e->getTraceAsString());
+            $this->logStackTrace("no benefit $ben found in " . $this->getStateName());
         }
         return null;
     }

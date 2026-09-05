@@ -165,7 +165,7 @@ abstract class tapcommon extends Table {
             }
         } catch (Exception $e) {
             $this->error("error while setting statistic $stat inc $inc for $player_id");
-            $this->error($e->getTraceAsString());
+            $this->logStackTrace($e->getMessage());
             return false;
         }
     }
@@ -212,6 +212,11 @@ abstract class tapcommon extends Table {
         throw new BgaUserException(self::_($message));
     }
 
+    /** Where we are, as a log line. Tests override it to a no-op: PHPUnit prints its own trace. */
+    function logStackTrace($message) {
+        $this->error((new Exception($message))->getTraceAsString());
+    }
+
     /**
      * This will throw an exception if condition is false.
      * This only can happened if user hacks the game, client must prevent this
@@ -228,8 +233,7 @@ abstract class tapcommon extends Table {
         }
         $move = $this->getGameStateValue("next_move_id");
         $this->error("Internal Error during move $move: $log|$logonly");
-        $e = new Exception($log);
-        $this->error($e->getTraceAsString());
+        $this->logStackTrace($log);
         throw new BgaUserException("Internal Error. That should not have happened. Please raise a bug.[$log]"); // NOI18N
     }
 
