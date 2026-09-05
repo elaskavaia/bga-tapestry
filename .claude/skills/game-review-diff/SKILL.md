@@ -26,6 +26,11 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
 
 Each bullet is a **preferred pattern or a check to run** - flag any changed code that does not follow it.
 
+The `## Conventions` section of [CLAUDE.md](../../../CLAUDE.md) is the source of truth for what new
+code should look like; read it and flag changes that break it. The bullets below are what a review
+needs beyond that list - the traps, the checks to run, and the places the convention is easy to
+follow in name but not in effect.
+
 ### Generated material (`misc/*.csv` -> `material.inc.php`)
 
 - Never hand-edit inside `/* --- gen php begin ... --- */` regions (`benefit_types`,
@@ -78,18 +83,15 @@ Each bullet is a **preferred pattern or a check to run** - flag any changed code
 - Adding `active_slot` to filter what is clickable is only half the change: the matching click
   handler needs an `isActiveSlot(id)` / `checkAction()` guard, or the dimmed element still fires
   the action and earns a server rejection toast.
-- Prefer `notifyWithName()` over raw `notifyAllPlayers` / `notifyPlayer`, and attach names with the
-  `notifArgsAdd*` helpers so the log stays translatable.
-- Player-visible strings use `clienttranslate()` (states, notifications) or `totranslate()`
-  (gameinfos, gameoptions, and assert messages).
+- Player-visible strings use `clienttranslate()`, including the message of a `userAssertTrue`.
+  `totranslate()` is deprecated by the framework - flag any new call to it, and flag a rewritten
+  block that carries an existing one along only if the line was actually changed, not just
+  re-indented.
 - `states.inc.php` header warns against changing it while a game is running - flag renumbered or
   removed states, not added ones.
 
 ### Tests (`tests/`)
 
-- Named after the feature (`WerefolkTest.php`), never after a bug number; bug numbers go in the
-  docblock. A test file never requires another test file - shared harness lives in
-  [tests/Stubs/GameUT.php](../../../tests/Stubs/GameUT.php).
 - Tests asserting on civ data must call `doAdjustMaterial($players, $variant)` first.
 - **A test written to guard a production-only path must be proven to fail without the fix.** The
   in-memory `GameUT` model bypasses the real SQL builders, so a test can exercise a different

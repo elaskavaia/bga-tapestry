@@ -141,8 +141,11 @@ the server engine described above maintains.
   collects `i18n` and `preserve` keys, routes private notifications via `_private`, and appends
   `Async` to the type for `noa`/`nop`/`nod` args. Use the `notifArgsAdd*` helpers to attach
   token/card/track names so the log stays translatable.
-- Wrap player-visible strings in `clienttranslate()` (states/notifications) or `totranslate()`
-  (gameinfos/gameoptions).
+- Wrap player-visible strings in `clienttranslate()` - states, notifications and the message of a
+  `userAssertTrue`. `totranslate()` is deprecated by the framework; do not introduce it in new code.
+  Existing uses stay until touched. [gameinfos.inc.php](gameinfos.inc.php) and
+  [gameoptions.inc.php](gameoptions.inc.php) still use it: the framework's replacement there is JSON
+  options/stats, not `clienttranslate()`, so leave those alone.
 - Name tests in [tests/](tests/) after the feature under test (e.g. `UtilitariansTest.php`), never
   after a bug report number - bug numbers belong in the test docblocks. Shared test harness classes
   live in [tests/Stubs/](tests/Stubs/) (`GameUT`); a test file never requires another test file.
