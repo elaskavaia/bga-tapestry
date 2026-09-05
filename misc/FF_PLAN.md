@@ -244,3 +244,88 @@ complexity order are called out below.
   type in `benefit_types.csv`. The only new row appears to be Faefolk's "score any building", which
   is a choose one over the existing farm, armory, house and market VP benefits.
 - Art is available, so `slots` coordinate tuning is unblocked.
+
+## Weefolk
+
+Three effects on one civ: give a player token to an opponent who plants it in their capital (income
+turns 2-5, or once on a mid game gain), an optional territory-for-building trade (income turns 2-4),
+and row and column scoring off the planted tokens (income turn 5). Nothing on the mat is clicked:
+the art has no token spots, so tokens come straight from the cube supply and there is no pile to
+keep in sync.
+
+### Shape
+
+- Material: `income_trigger` 2-5, `midgame_setup`, `automa => false`, no `slots`. Mid game gain
+  reuses the existing `midgame` benefit_data condition and gives one token only.
+- One civ row per phase, told apart by benefit_data the way Architects and Infiltrators do:
+  `""` give a token (mandatory, one button per eligible opponent via `slots_choice` with
+  `player_id`, the client renders those already), `build` the optional spend, `midgame` give only.
+- Two new benefit rows in the CSV, both `civ => CIV_WEEFOLK`:
+  - `BE_WEEFOLK_PLOT`, owned by the opponent. Genies proved an opponent-owned row makes them
+    active with no new state; this one routes into the existing `placeStructure` state with the
+    token sitting in `capital_structure` as the pending structure. `place_structure` currently
+    accepts landmarks and income buildings only and needs the cube case; `effect_placeOnCapitalMat`
+    then does the rest for free: `capital_occupied` becomes BUILDING_CUBE + 1, which every existing
+    reader already treats as filled but not an income type (district completion, rows and columns
+    at the opponent's income, Architects same-type bonus, MONARCHY skipped).
+  - `BE_WEEFOLK_SCORE`, owned by the Weefolk player, queued behind the plot row on turn 5 so the
+    fifth token counts. Resolved in `awardBenefits`, no interaction.
+- The spend is not a benefit row. It is answered inside the civ ability state, Historians style:
+  the owner clicks a territory tile in their supply then the button, the tile id travels in the
+  `extra` argument of `moveCivCube`, and the server discards it and queues the existing
+  `BE_GAIN_ANY_INCOME_BUILDING`. Decline is the generic civ ability decline.
+- Scoring reads the `structure` table, not the capital grid: for every Weefolk token in a
+  `capital_cell` location, 1 VP per income building in its row and per income building in its
+  column, and 1 VP per landmark whose footprint touches the row, plus 1 per landmark whose footprint
+  touches the column. Per token, so two tokens in one row score that row twice (see rulings).
+
+### Engine work
+
+- A shared "cells covered by a placed structure" helper. The rotation and mask walk is inlined
+  twice today (`effect_placeOnCapitalMat`, `argPlaceStructure`) and the scoring needs it a third
+  time, for landmarks.
+- Full city replacement: when the token has no legal empty plot, `argPlaceStructure` offers the
+  opponent's income building cells instead and the replaced building moves to a new `aside`
+  location that no count reads (not `capital_cell`, `income`, `land` or the Craftsmen mat), so it
+  neither scores nor produces. The cell stays occupied, now by the token, so districts and rows
+  keep their state. Landmarks are not offered as replacement targets (see rulings).
+- Zombie opponent: `zombieBenefit` plants the token on a random empty plot, or skips if the city
+  is full. Zombie owner: nothing to do, planted tokens stay put and simply never score.
+- Eligible opponents: real players who have not finished (past income turn 5), the Genies 5.6
+  reading. Zombies stay eligible. Nobody eligible skips the token for that turn.
+
+### Test infrastructure
+
+`GameUT` does not model the capital grid and the framework stubs run no SQL, so placement cannot be
+driven in a test today. Capital access goes through two seams, `getCapitalData` and a new
+`dbSetCapitalCell` that replaces the two inline `UPDATE capital` statements, and `GameUT` overrides
+both with an in-memory grid seeded from a capital mat in material. `getCapitalScoreVP` moves onto
+`getCapitalData` at the same time so the opponent's own row and column income is testable with a
+planted token. This lands as its own change, verified against the existing placement paths, before
+the civ.
+
+### Client
+
+- The token inside the opponent's grid renders for free: the generic cube placement drops
+  `cube_<id>` into whatever div the location names, and the capital cell divs exist. CSS sizes the
+  cube inside a cell.
+- `placeStructure` for the opponent: the capital helper must size a cube like an income building,
+  and cell clicks must accept occupied income building cells in the replacement case.
+- A `CIV_WEEFOLK` case in `onUpdateActionButtons_civAbility` for the `build` phase, the
+  Historians tile-then-button selection.
+
+### Rulings needed
+
+Proposed readings, to be confirmed and then recorded in FORMAL_RULES as 5.7 onward:
+
+- The turn 5 token is planted before the turn 5 scoring, so it counts.
+- Rows and columns are scored per token, not per distinct row: the card says "more than one
+  token's row", which is only meaningful if two tokens can share a row and both count.
+- Plots are empty cells only. Impassable cells are not plots even for an opponent with
+  TERRAFORMING or RIVERFOLK, since the token is not a building.
+- Replacement in a full city is limited to income buildings. A replaced landmark would leave
+  holes in its footprint and undo district completions; a full city with no income building at all
+  does not occur in practice. The set aside building leaves the game: no VP, not back on the income
+  track.
+- A planted token is nothing to the Weefolk player's own counts: not a structure of theirs on any
+  capital, not an outpost, not an income building.
