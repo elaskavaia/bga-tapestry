@@ -500,24 +500,10 @@ abstract class PGameXBody extends tapcommon {
         //
         // CIVILIZATIONS
         //
-        $cards = [];
-        foreach ($this->civilizations as $cid => $c) {
-            if (array_get($c, "exclude", false) === true) {
-                continue;
-            }
-            if ($automa && array_get($c, "automa", true) === false) {
-                //$this->debugConsole("Civilization excluded: " + $c["name"]);
-                continue;
-            }
-            $exp = array_get($c, "exp", "BA");
-            if (!$this->isExpansionIncluded($exp)) {
-                continue;
-            }
-
-            $cards[] = ["type" => CARD_CIVILIZATION, "type_arg" => $cid, "nbr" => 1];
-        }
+        $cards = $this->collectCivDeckCards($automa);
         $this->cards->createCards($cards, "deck_civ");
         $this->cards->shuffle("deck_civ");
+        $this->padCivDeck($automa, count($cards));
         if ($this->isAdjustments9()) {
             // testing option is pointless unless somebody is actually offered the reworked Alchemists
             $alchemists = $this->cards->getCardsOfTypeInLocation(CARD_CIVILIZATION, CIV_ALCHEMISTS, "deck_civ");
@@ -660,6 +646,45 @@ abstract class PGameXBody extends tapcommon {
             // pick fav
             $shadow_fav_track = $this->bgaRand(1, 4);
             $this->effect_automaChangeFavoriteTrack(PLAYER_SHADOW, $shadow_fav_track);
+        }
+    }
+
+    private function collectCivDeckCards(bool $automa, ?string $only_exp = null) {
+        $cards = [];
+        foreach ($this->civilizations as $cid => $c) {
+            if (array_get($c, "exclude", false) === true) {
+                continue;
+            }
+            if ($automa && array_get($c, "automa", true) === false) {
+                //$this->debugConsole("Civilization excluded: " + $c["name"]);
+                continue;
+            }
+            $exp = array_get($c, "exp", "BA");
+            if ($only_exp === null ? !$this->isExpansionIncluded($exp) : $exp !== $only_exp) {
+                continue;
+            }
+
+            $cards[] = ["type" => CARD_CIVILIZATION, "type_arg" => $cid, "nbr" => 1];
+        }
+        return $cards;
+    }
+
+    /**
+     * A testing-only civ set is too thin to deal from, so the original civs go under it - the
+     * selected set is still drawn first.
+     */
+    private function padCivDeck(bool $automa, int $count) {
+        if ($count >= CIV_DECK_MIN || $this->isExpansionIncluded(EXP_BA_FLAG)) {
+            return;
+        }
+        $extra = $this->collectCivDeckCards($automa, "BA");
+        if (!$extra) {
+            return;
+        }
+        $this->cards->createCards($extra, "deck_civ_pad");
+        $this->cards->shuffle("deck_civ_pad");
+        foreach ($this->cards->getCardsInLocation("deck_civ_pad", null, "card_location_arg") as $card) {
+            $this->cards->insertCardOnExtremePosition($card["id"], "deck_civ", false);
         }
     }
 

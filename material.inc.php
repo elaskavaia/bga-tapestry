@@ -308,6 +308,7 @@ if (!defined("TAPESTRY")) {
     define("EXP_AA_FLAG", 0b100);
     define("EXP_PP_FLAG", 0b010);
     define("EXP_BA_FLAG", 0b001);
+    define("CIV_DECK_MIN", 20); // below this the original civs are appended under the selected set
 }
 
 if (!defined("PREF_AUTO_CONFIRM")) {
