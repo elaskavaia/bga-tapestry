@@ -179,6 +179,14 @@ final class WerefolkTest extends TestCase {
         $this->assertNull($this->game->argSpaceExploration()["selected_space_tile"]);
     }
 
+    /** The face-down and VP branches never explore, so the ability clears its own marker at the end. */
+    function testMarkerIsClearedWhenTheAbilityEnds() {
+        $this->useAbility(Werefolk::FACE_DOWN);
+        $this->assertNotEquals(0, $this->game->getGameStateValue("selected_space_tile"));
+        $this->game->resolveBenefit(BE_CIV_END);
+        $this->assertEquals(0, $this->game->getGameStateValue("selected_space_tile"));
+    }
+
     function testNoMarkerLeavesEveryTileSelectable() {
         $this->game->setGameStateValue("selected_space_tile", 0);
         $this->assertNull($this->game->argSpaceExploration()["selected_space_tile"]);
@@ -211,6 +219,7 @@ final class WerefolkTest extends TestCase {
                 BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS .
                 "," .
                 BE_ADVANCE_TECHNOLOGY_BENEFIT_FREEBONUS,
+                (string) BE_CIV_END,
             ],
             $this->game->benefitLabels()
         );
@@ -219,25 +228,28 @@ final class WerefolkTest extends TestCase {
     function testFaceUpOffersRegressOrTheFourVP() {
         $this->game->putCubeOnTrack(2, 3);
         $this->useAbility(Werefolk::FACE_UP);
-        $this->assertEquals(["o," . BE_WEREFOLK_REGRESS . "," . Werefolk::VP_NO_REGRESS], $this->game->benefitLabels());
+        $this->assertEquals(
+            ["o," . BE_WEREFOLK_REGRESS . "," . Werefolk::VP_NO_REGRESS, (string) BE_CIV_END],
+            $this->game->benefitLabels()
+        );
     }
 
     /** Nothing to regress means the player did not regress, so the VP is taken with no prompt. */
     function testFaceUpWithNothingToRegressPaysTheVPDirectly() {
         $this->useAbility(Werefolk::FACE_UP);
-        $this->assertEquals([(string) Werefolk::VP_NO_REGRESS], $this->game->benefitLabels());
+        $this->assertEquals([(string) Werefolk::VP_NO_REGRESS, (string) BE_CIV_END], $this->game->benefitLabels());
     }
 
     function testCubeAtSpotZeroCannotRegress() {
         $this->game->putCubeOnTrack(3, 0);
         $this->useAbility(Werefolk::FACE_UP);
-        $this->assertEquals([(string) Werefolk::VP_NO_REGRESS], $this->game->benefitLabels());
+        $this->assertEquals([(string) Werefolk::VP_NO_REGRESS, (string) BE_CIV_END], $this->game->benefitLabels());
     }
 
     function testVirtualCubeCannotRegress() {
         $this->game->putCubeOnTrack(1, 5, CUBE_AI);
         $this->useAbility(Werefolk::FACE_UP);
-        $this->assertEquals([(string) Werefolk::VP_NO_REGRESS], $this->game->benefitLabels());
+        $this->assertEquals([(string) Werefolk::VP_NO_REGRESS, (string) BE_CIV_END], $this->game->benefitLabels());
     }
 
     /** Only the tracks that can actually move back are offered, and the explore follows the choice. */
@@ -249,7 +261,11 @@ final class WerefolkTest extends TestCase {
         $this->game->chooseOption(BE_WEREFOLK_REGRESS);
 
         $this->assertEquals(
-            ["o," . BE_REGRESS_EXPLORATION_NOBENEFIT . "," . BE_REGRESS_MILITARY_NOBENEFIT, (string) BE_WEREFOLK_EXPLORE],
+            [
+                "o," . BE_REGRESS_EXPLORATION_NOBENEFIT . "," . BE_REGRESS_MILITARY_NOBENEFIT,
+                (string) BE_WEREFOLK_EXPLORE,
+                (string) BE_CIV_END,
+            ],
             $this->game->benefitLabels()
         );
     }
@@ -259,7 +275,10 @@ final class WerefolkTest extends TestCase {
         $this->game->putCubeOnTrack(4, 1);
         $this->useAbility(Werefolk::FACE_UP);
         $this->game->chooseOption(BE_WEREFOLK_REGRESS);
-        $this->assertEquals([(string) BE_REGRESS_TECHNOLOGY_NOBENEFIT, (string) BE_WEREFOLK_EXPLORE], $this->game->benefitLabels());
+        $this->assertEquals(
+            [(string) BE_REGRESS_TECHNOLOGY_NOBENEFIT, (string) BE_WEREFOLK_EXPLORE, (string) BE_CIV_END],
+            $this->game->benefitLabels()
+        );
     }
 
     function testFlipIsReportedInTheLog() {

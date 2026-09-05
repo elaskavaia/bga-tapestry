@@ -104,23 +104,27 @@ class Werefolk extends AbsCivilization {
         $game->prepareUndoSavepoint();
 
         if (!$face_up) {
-            $game->queueBenefitInterrupt(
-                [
-                    "or" => [
-                        BE_ADVANCE_EXPLORATION_BENEFIT_FREEBONUS,
-                        BE_ADVANCE_SCIENCE_BENEFIT_FREEBONUS,
-                        BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS,
-                        BE_ADVANCE_TECHNOLOGY_BENEFIT_FREEBONUS,
-                    ],
+            $choice = [
+                "or" => [
+                    BE_ADVANCE_EXPLORATION_BENEFIT_FREEBONUS,
+                    BE_ADVANCE_SCIENCE_BENEFIT_FREEBONUS,
+                    BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS,
+                    BE_ADVANCE_TECHNOLOGY_BENEFIT_FREEBONUS,
                 ],
-                $player_id,
-                $reason
-            );
-            return true;
+            ];
+        } else {
+            $choice = count($this->regressableTracks($player_id))
+                ? ["or" => [BE_WEREFOLK_REGRESS, self::VP_NO_REGRESS]]
+                : self::VP_NO_REGRESS;
         }
-        $choice = count($this->regressableTracks($player_id)) ? ["or" => [BE_WEREFOLK_REGRESS, self::VP_NO_REGRESS]] : self::VP_NO_REGRESS;
         $game->queueBenefitInterrupt($choice, $player_id, $reason);
+        $game->queueBenefitNormal(BE_CIV_END, $player_id, $reason);
         return true;
+    }
+
+    /** Only the explore this ability may queue consumes the marker; the other branches leave it behind. */
+    function endCivAbility(int $player_id): void {
+        $this->game->setGameStateValue("selected_space_tile", 0);
     }
 
     function regressThenExplore(int $player_id, string $reason): bool {
