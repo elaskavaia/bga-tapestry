@@ -73,6 +73,18 @@ class GameUT extends Tapestry {
 
     function prepareUndoSavepoint($first = false) {}
 
+    /** PHPUnit prints the trace of anything that actually escapes, the manual dump is only noise. */
+    function logStackTrace($message) {}
+
+    /** The framework stub reports no stats at all, so dbIncStatChecked would reject every one. */
+    function getStatTypes() {
+        static $stats_type = null;
+        if ($stats_type === null) {
+            include __DIR__ . "/../../stats.inc.php";
+        }
+        return $stats_type;
+    }
+
     /** Everything sent so far, as the framework stub collected it: type, log, args. */
     function notifications(): array {
         return $this->notify->_getNotifications();

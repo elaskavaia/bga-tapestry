@@ -217,7 +217,7 @@ class Weefolk extends AbsCivilization {
             $vp += $this->countInLine($capital_owner, false, (int) getPart($token["card_location"], 4));
         }
         if ($vp) {
-            $game->awardVP($player_id, $vp * $count, $reason, null, BE_WEEFOLK_SCORE);
+            $game->awardVP($player_id, $vp * $count, $reason);
         }
         return true;
     }

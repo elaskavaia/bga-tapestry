@@ -79,10 +79,6 @@ NEW CIVILIZATIONS
       landmarks as much as to the Weefolk token; the token's own "only in a full city" rule is now
       enforced server-side, the general case is not.
 
-- [ ] Weefolk: game_points_be_350 has no entry in stats.inc.php, so the turn 5 scoring warns
-      "statistic not defined" and falls back to game_points_be_15 (VP - Plain). Same gap as
-      game_points_be_66 for Genies. Either add the two rows or decide the fallback is fine.
-
 - [ ] Weefolk: undo across the cross-player placement is untested. The plot row makes the opponent
       active inside the owner's income turn, which is the same shape as Genies but now with a capital
       grid write behind it, and prepareUndoSavepoint is never called on that path.
