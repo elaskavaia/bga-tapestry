@@ -46,6 +46,14 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
         }
     }
 
+    function setTypeArg($id, $type_arg): void {
+        $id = (int) $id;
+        if (!isset($this->rows[$id])) {
+            throw new feException("DeckInMem: no row $id in $this->table");
+        }
+        $this->rows[$id]["type_arg"] = (int) $type_arg;
+    }
+
     /** SQL column shape, keyed by card_id, the way getCollectionFromDB returns these tables. */
     function sqlRow(array $row): array {
         return [

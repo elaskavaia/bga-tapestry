@@ -969,6 +969,7 @@ abstract class PGameXBody extends tapcommon {
         foreach ($cc as $key => $value) {
             $im = explode("_", $key);
             switch ($im[0]) {
+                case "BUILDING":
                 case "CARD":
                 case "BE":
                 case "TERRAIN":
@@ -2305,22 +2306,22 @@ abstract class PGameXBody extends tapcommon {
             $rows[$a] = ["count" => 0, "values" => []];
             $cols[$a] = ["count" => 0, "values" => []];
         }
-        $grid_data = $this->getCollectionFromDB(
-            "SELECT capital_id, capital_x x, capital_y y, capital_occupied v FROM capital WHERE player_id='$player_id' AND (capital_x > 2) AND (capital_x<12) AND (capital_y > 2) AND (capital_y < 12) AND (capital_occupied > 0)"
-        );
-        foreach ($grid_data as $cell) {
-            $v = $cell["v"];
-            $x = $cell["x"];
-            $y = $cell["y"];
-            $rows[$x]["count"] = $rows[$x]["count"] + 1;
-            $cols[$y]["count"] = $cols[$y]["count"] + 1;
-            $v = $cell["v"];
-            if ($v > 1 && $v < 6) {
-                if (!in_array($v, $rows[$x]["values"])) {
-                    array_push($rows[$x]["values"], $v);
+        $capital = $this->getCapitalData($player_id);
+        for ($x = 3; $x < 12; $x++) {
+            for ($y = 3; $y < 12; $y++) {
+                $v = (int) $capital[$x][$y];
+                if ($v <= 0) {
+                    continue;
                 }
-                if (!in_array($v, $cols[$y]["values"])) {
-                    array_push($cols[$y]["values"], $v);
+                $rows[$x]["count"] = $rows[$x]["count"] + 1;
+                $cols[$y]["count"] = $cols[$y]["count"] + 1;
+                if ($v > 1 && $v < 6) {
+                    if (!in_array($v, $rows[$x]["values"])) {
+                        array_push($rows[$x]["values"], $v);
+                    }
+                    if (!in_array($v, $cols[$y]["values"])) {
+                        array_push($cols[$y]["values"], $v);
+                    }
                 }
             }
         }
@@ -4609,9 +4610,7 @@ abstract class PGameXBody extends tapcommon {
             $cy = getPart($location, 4);
             $type = $structure_data["type"] + 1; // 1 is already a dot on the mat, so increase by 1.
             // NOTE: this won't work for landmarks
-            $this->DbQuery(
-                "UPDATE capital SET capital_occupied='$type' WHERE player_id='$player_id' AND capital_x='$cx' AND capital_y='$cy'"
-            );
+            $this->dbSetCapitalCell($player_id, $cx, $cy, $type);
         }
         $this->notifyMoveStructure($message, $structure_id, [], $player_id);
     }
@@ -4740,6 +4739,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_ADVISORS:
             case CIV_FAEFOLK:
             case CIV_GENIES:
+            case CIV_WEEFOLK:
             case CIV_WEREFOLK:
                 $inst = $this->getCivilizationInstance($cid, true);
                 $inst->moveCivCube($player_id, $spot, $extra, $civ_args);
@@ -7308,6 +7308,7 @@ abstract class PGameXBody extends tapcommon {
         if (!$this->hasCiv($player_id, CIV_NOMADS)) {
             $this->systemAssertTrue("Player does not have NOMADS");
         }
+        $this->userAssertTrue(clienttranslate("Invalid structure placement"), !$this->isPendingForeignToken($player_id));
         $coord = $u . "_" . $v;
         $valid_locations = $this->getConquerTargets(true);
         if (!in_array($coord, $valid_locations)) {
@@ -8390,6 +8391,71 @@ abstract class PGameXBody extends tapcommon {
         return $districts;
     }
 
+    /**
+     * A cube in a capital that belongs to someone else is a WEEFOLK plot token: it is not a
+     * building of the capital's owner, so it neither claims their impassable cells nor is turned
+     * away by a full city (FORMAL_RULES 5.8, 5.9).
+     */
+    function isForeignToken($structure_data, $player_id) {
+        return $structure_data["card_type"] == BUILDING_CUBE && $structure_data["card_location_arg"] != $player_id;
+    }
+
+    /** A plot token waiting to be placed can only go on the capital mat, never on a Craftsmen slot or the map. */
+    function isPendingForeignToken($player_id) {
+        $structure = $this->getPendingStructure();
+        return $structure && $this->isForeignToken($structure, $player_id);
+    }
+
+    /** Placement masks of a structure type, one per rotation, plus the unrotated width and height. */
+    function getStructureMasks($stype, $landmark_id = 0) {
+        if ($stype == BUILDING_LANDMARK) {
+            $landmark = $this->landmark_data[$landmark_id];
+            return [$landmark["mask"], $landmark["width"], $landmark["height"]];
+        }
+        return [[0 => [0 => [0 => 1]]], 1, 1];
+    }
+
+    /** The capital cells a structure covers when placed at $x,$y with the given rotation. */
+    function getStructureCells($stype, $landmark_id, $x, $y, $rot = 0) {
+        [$masks, $width, $height] = $this->getStructureMasks($stype, $landmark_id);
+        $mask = $masks[$rot];
+        if ($rot % 2 == 0) {
+            [$width, $height] = [$height, $width];
+        }
+        $cells = [];
+        for ($dx = 0; $dx < $width; $dx++) {
+            for ($dy = 0; $dy < $height; $dy++) {
+                $this->systemAssertTrue("Landmark data is not set for $landmark_id rot $rot $dx,$dy", isset($mask[$dx][$dy]));
+                if ($mask[$dx][$dy] == 1) {
+                    $cells[] = [$x + $dx, $y + $dy];
+                }
+            }
+        }
+        return $cells;
+    }
+
+    /**
+     * The city is full, so the plot token takes an income building's cell and that building is set
+     * aside in `hand`, where a structure placed outside the mat also goes: no count reads it there,
+     * so it neither scores nor produces (FORMAL_RULES 5.9).
+     */
+    function effect_setAsideCapitalBuilding($player_id, $x, $y) {
+        $cell = "capital_cell_{$player_id}_{$x}_{$y}";
+        $replaced = $this->getStructureInfoSearch(null, null, $cell, $player_id);
+        $this->userAssertTrue(
+            clienttranslate("Invalid structure placement"),
+            $replaced && $this->checkValidIncomeType((int) $replaced["card_type"])
+        );
+
+        $this->dbSetStructureLocation(
+            (int) $replaced["card_id"],
+            "hand",
+            null,
+            clienttranslate('${player_name} sets aside their ${structure_name}, replaced by a player token'),
+            $player_id
+        );
+    }
+
     function effect_placeOnCapitalMat($structure_id, $x, $y, $rot = 0, $player_id = 0) {
         if (!$player_id) {
             $player_id = $this->getActivePlayerId();
@@ -8399,42 +8465,23 @@ abstract class PGameXBody extends tapcommon {
         $cell = "capital_cell_" . $player_id . "_" . $x . "_" . $y;
         $type = $structure_data["card_type"] + 1; // 1 is already a dot on the mat, so increase by 1.
         $building_type = $structure_data["card_type"];
+        $foreign_token = $this->isForeignToken($structure_data, $player_id);
+        $city_full = $foreign_token && !$this->getCapitalEmptyPlots($player_id);
         $terraforming_claimed = true;
-        $unpassable = $this->isTapestryActive($player_id, 39) ? 1 : 0; // TERRAFORMING
+        $unpassable = !$foreign_token && $this->isTapestryActive($player_id, 39) ? 1 : 0; // TERRAFORMING
         if ($unpassable) {
             $terraforming_claimed = false;
         }
-        if ($this->hasCiv($player_id, CIV_RIVERFOLK)) {
+        if (!$foreign_token && $this->hasCiv($player_id, CIV_RIVERFOLK)) {
             $unpassable = 1;
-        }
-        // Get structure mask
-        if ($building_type == BUILDING_LANDMARK) {
-            // landmark
-            $landmark_id = $structure_data["card_location_arg2"];
-            $landmark = $this->landmark_data[$landmark_id];
-            $width = $landmark["width"];
-            $height = $landmark["height"];
-            $masks = $landmark["mask"];
-        } else {
-            $masks = [];
-            $masks[0] = [0 => [0 => 1]];
-            $height = 1;
-            $width = 1;
-        }
-        // Orientate with rot.
-        $mask = $masks[$rot];
-        if ($rot % 2 == 0) {
-            $dummy = $height;
-            $height = $width;
-            $width = $dummy;
         }
         $oobounds = 0;
         if ($x >= 12 && $y >= 12) {
             // out of bounds
             $oobounds = 1;
-            $this->DbQuery("UPDATE structure SET card_location='hand', card_type_arg='$rot' WHERE card_id='$sid'");
+            $this->dbSetStructureLocationRot($sid, "hand", $rot);
         } else {
-            $this->DbQuery("UPDATE structure SET card_location='$cell', card_type_arg='$rot' WHERE card_id='$sid'");
+            $this->dbSetStructureLocationRot($sid, $cell, $rot);
         }
         $this->notifyMoveStructure(clienttranslate('${player_name} places a structure'), $sid, [], $player_id);
         if ($this->isTapestryActive($player_id, 27) && $type <= 5) {
@@ -8449,63 +8496,56 @@ abstract class PGameXBody extends tapcommon {
         }
         $riverfolk = $this->hasCiv($player_id, CIV_RIVERFOLK);
         $capital = $this->getCapitalData($player_id);
-        for ($dx = 0; $dx < $width; $dx++) {
-            for ($dy = 0; $dy < $height; $dy++) {
-                if ($mask[$dx][$dy] != 1) {
-                    continue;
-                }
-                $cx = $x + $dx;
-                $cy = $y + $dy;
-                $completed_block = true;
-                if ($capital[$cx][$cy] > 0) {
-                    if ($unpassable == 1 && $capital[$cx][$cy] == 1) {
-                        if (!$terraforming_claimed) {
-                            $this->awardVP($player_id, 5, reason_tapestry(39));
-                            $terraforming_claimed = true;
-                        }
-                    } else {
-                        $this->userAssertTrue(totranslate("Invalid structure placement"));
+        foreach ($this->getStructureCells($building_type, $structure_data["card_location_arg2"], $x, $y, $rot) as [$cx, $cy]) {
+            $completed_block = true;
+            if ($capital[$cx][$cy] > 0) {
+                if ($unpassable == 1 && $capital[$cx][$cy] == 1) {
+                    if (!$terraforming_claimed) {
+                        $this->awardVP($player_id, 5, reason_tapestry(39));
+                        $terraforming_claimed = true;
                     }
-                    $completed_block = false; // if we are on unpassable territory it does not complete a district
+                } elseif ($city_full) {
+                    $this->effect_setAsideCapitalBuilding($player_id, $cx, $cy);
+                } else {
+                    $this->userAssertTrue(totranslate("Invalid structure placement"));
                 }
-                $district_info_before = $this->getDistrictInfo($cx, $cy, $capital);
-                $this->DbQuery(
-                    "UPDATE capital SET capital_occupied='$type' WHERE player_id='$player_id' AND capital_x='$cx' AND capital_y='$cy'"
-                );
-                if (!$district_info_before) {
-                    continue;
-                }
-                // Check if this cell completed a block (district). If so, need to award a resource!
-                $capital[$cx][$cy] = $type;
-                $district_info = $this->getDistrictInfo($cx, $cy, $capital);
-                if ($riverfolk) {
-                    if (array_get($district_info_before["build_types"], BUILDING_IMPASS, 0) > 0) {
-                        if (array_get($district_info["build_types"], BUILDING_IMPASS, 0) == 0) {
-                            // last impassible slot is covered in district
-                            $this->interruptBenefit();
-                            $this->queueBenefitNormal(RES_ANY, $player_id, reason_civ(CIV_RIVERFOLK));
-                        }
+                $completed_block = false; // if we are on unpassable territory it does not complete a district
+            }
+            $district_info_before = $this->getDistrictInfo($cx, $cy, $capital);
+            $this->dbSetCapitalCell($player_id, $cx, $cy, $type);
+            if (!$district_info_before) {
+                continue;
+            }
+            // Check if this cell completed a block (district). If so, need to award a resource!
+            $capital[$cx][$cy] = $type;
+            $district_info = $this->getDistrictInfo($cx, $cy, $capital);
+            if ($riverfolk) {
+                if (array_get($district_info_before["build_types"], BUILDING_IMPASS, 0) > 0) {
+                    if (array_get($district_info["build_types"], BUILDING_IMPASS, 0) == 0) {
+                        // last impassible slot is covered in district
+                        $this->interruptBenefit();
+                        $this->queueBenefitNormal(RES_ANY, $player_id, reason_civ(CIV_RIVERFOLK));
                     }
                 }
-                $completed_block = $completed_block && $district_info["complete"];
-                if ($completed_block) {
-                    $income_same = $district_info["unique_income"] == 1;
-                    $this->interruptBenefit();
-                    $this->queueBenefitNormal(RES_ANY, $player_id, reason("str", clienttranslate("complete district")));
-                    if ($this->hasCiv($player_id, CIV_ARCHITECTS) && $income_same) {
-                        // Extra for Architect if all income types the same (and at least one).
-                        $this->queueBenefitNormal(RES_ANY, $player_id, reason("str", clienttranslate("district architect")));
-                    }
-                    $dn = $district_info["district"];
-                    $this->notifyAllPlayers("message", clienttranslate('${player_name} completes district #${dn}'), [
-                        "player_id" => $player_id,
-                        "player_name" => $this->getActivePlayerName(),
-                        "dn" => $dn,
-                    ]);
-                    $this->checkMysticPrediction(2, $player_id); // district
-                    // trigger
-                    $this->checkPrivateAchievement(5, $player_id);
+            }
+            $completed_block = $completed_block && $district_info["complete"];
+            if ($completed_block) {
+                $income_same = $district_info["unique_income"] == 1;
+                $this->interruptBenefit();
+                $this->queueBenefitNormal(RES_ANY, $player_id, reason("str", clienttranslate("complete district")));
+                if ($this->hasCiv($player_id, CIV_ARCHITECTS) && $income_same) {
+                    // Extra for Architect if all income types the same (and at least one).
+                    $this->queueBenefitNormal(RES_ANY, $player_id, reason("str", clienttranslate("district architect")));
                 }
+                $dn = $district_info["district"];
+                $this->notifyAllPlayers("message", clienttranslate('${player_name} completes district #${dn}'), [
+                    "player_id" => $player_id,
+                    "player_name" => $this->getActivePlayerName(),
+                    "dn" => $dn,
+                ]);
+                $this->checkMysticPrediction(2, $player_id); // district
+                // trigger
+                $this->checkPrivateAchievement(5, $player_id);
             }
         }
     }
@@ -8519,6 +8559,9 @@ abstract class PGameXBody extends tapcommon {
         if (array_get($bene, "lm")) {
             // landmark ok
             $ct = BUILDING_LANDMARK;
+        } elseif (array_get($bene, "tt") == "structure" && array_get($bene, "ct") == BUILDING_CUBE) {
+            // a plot token planted in this player's capital by an opponent
+            $ct = BUILDING_CUBE;
         } elseif (array_get($bene, "r") == "g" && array_get($bene, "tt") == "structure") {
             // income building ok
             $ct = (int) array_get($bene, "ct");
@@ -8526,7 +8569,7 @@ abstract class PGameXBody extends tapcommon {
             $this->systemAssertTrue("unexpected benefit on stack $bid");
         }
 
-        $structure_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
+        $structure_data = $this->getPendingStructure();
         $structure_id = $structure_data["card_id"];
         $this->systemAssertTrue("unexpected structure type $ct", $ct == $structure_data["card_type"]);
         $this->effect_placeOnCapitalMat($structure_id, $x, $y, $rot, $player_id);
@@ -8754,6 +8797,7 @@ abstract class PGameXBody extends tapcommon {
     function placeCraftsmen($slot) {
         $this->checkAction("placeCraftsmen");
         $player_id = $this->getActivePlayerId();
+        $this->userAssertTrue(clienttranslate("Invalid structure placement"), !$this->isPendingForeignToken($player_id));
         /** @var Craftsmen */
         $inst = $this->getCivilizationInstance(CIV_CRAFTSMEN, true);
         $inst->moveCivCube($player_id, $slot, "", []);
@@ -9692,6 +9736,7 @@ abstract class PGameXBody extends tapcommon {
                 case CIV_INFILTRATORS:
                 case CIV_ALCHEMISTS:
                 case CIV_ADVISORS:
+                case CIV_WEEFOLK:
                     return $civinst->argCivAbilitySingle($player_id, $benefit);
                 case CIV_ENTERTAINERS:
                     $data["slots"] = array_keys($slots);
@@ -9759,6 +9804,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_ADVISORS:
             case CIV_FAEFOLK:
             case CIV_GENIES:
+            case CIV_WEEFOLK:
             case CIV_WEREFOLK:
                 return $civinst->argCivAbilitySingle($player_id, $benefit);
 
@@ -10235,6 +10281,45 @@ abstract class PGameXBody extends tapcommon {
         return $capital;
     }
 
+    /** Every free cell of a capital mat, as [x, y] pairs. */
+    function getCapitalEmptyPlots($player_id) {
+        $capital = $this->getCapitalData($player_id);
+        $plots = [];
+        for ($x = 3; $x < 12; $x++) {
+            for ($y = 3; $y < 12; $y++) {
+                if ((int) $capital[$x][$y] == 0) {
+                    $plots[] = [$x, $y];
+                }
+            }
+        }
+        return $plots;
+    }
+
+    /**
+     * Cells a foreign plot token may take over when the city has no empty plot left: income
+     * buildings only, since replacing a landmark would leave holes in its footprint
+     * (FORMAL_RULES 5.9).
+     */
+    function getCapitalReplacementCells($player_id) {
+        $cells = [];
+        foreach ($this->getStructuresSearch(null, null, "capital\\_cell\\_{$player_id}\\_%", $player_id) as $building) {
+            if ($this->checkValidIncomeType((int) $building["card_type"])) {
+                $cells[] = getPart($building["card_location"], 3) . "_" . getPart($building["card_location"], 4);
+            }
+        }
+        return $cells;
+    }
+
+    /** Location and rotation of a structure placed on a capital mat; card_type_arg carries the rotation. */
+    function dbSetStructureLocationRot($structure_id, $location, $rot) {
+        $this->DbQuery("UPDATE structure SET card_location='$location', card_type_arg='$rot' WHERE card_id='$structure_id'");
+    }
+
+    /** The one writer of the capital grid, paired with getCapitalData. */
+    function dbSetCapitalCell($player_id, $x, $y, $type) {
+        $this->DbQuery("UPDATE capital SET capital_occupied='$type' WHERE player_id='$player_id' AND capital_x='$x' AND capital_y='$y'");
+    }
+
     function getPendingStructure() {
         return $this->getStructureInfoSearch(null, null, "capital_structure");
     }
@@ -10245,58 +10330,33 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getActivePlayerId();
         $capital = $this->getCapitalData($player_id);
         // Get dimensions of the structure.  (need mask for which we need id)
-        $structure = $this->getObjectFromDB("SELECT * FROM structure WHERE card_location='capital_structure' LIMIT 1");
+        $structure = $this->getPendingStructure();
         $name = "?";
         if (!$stype) {
             $stype = $structure["card_type"];
         }
-        if ($stype == 6) {
-            // landmark
-            $landmark_id = $structure["card_location_arg2"];
-            $landmark = $this->landmark_data[$landmark_id];
-            $width = $landmark["width"];
-            $height = $landmark["height"];
-            $masks = $landmark["mask"];
-            $name = $landmark["name"];
-        } else {
-            $masks = [];
-            $masks[0] = [0 => [0 => 1]];
-            $height = 1;
-            $width = 1;
-            $name = $this->structure_types[$stype]["name"];
-        }
-        $canunpass = $this->isTapestryActive($player_id, 39) || $this->hasCiv($player_id, CIV_RIVERFOLK); // TERRAFORMING
+        $landmark_id = $stype == BUILDING_LANDMARK ? $structure["card_location_arg2"] : 0;
+        $name = $landmark_id ? $this->landmark_data[$landmark_id]["name"] : $this->structure_types[$stype]["name"];
+        [$masks] = $this->getStructureMasks($stype, $landmark_id);
+        $foreign_token = $structure && $this->isForeignToken($structure, $player_id);
+        $craftsmen_slots = $foreign_token ? [] : $this->getCivilizationInstance(CIV_CRAFTSMEN, true)->getCraftsmenSlots($player_id);
+        $canunpass = !$foreign_token && ($this->isTapestryActive($player_id, 39) || $this->hasCiv($player_id, CIV_RIVERFOLK)); // TERRAFORMING
         $unpassable = $canunpass ? 1 : 0;
         // Build the options based on each rotation of the mask
         $any = false;
-        foreach ($masks as $rot => $mask) {
+        foreach (array_keys($masks) as $rot) {
             $options[$rot] = [];
-            if ($rot % 2 == 1) {
-                $mask_width = $width;
-                $mask_height = $height;
-            } else {
-                $mask_width = $height;
-                $mask_height = $width;
-            }
             for ($x = 0; $x < 12; $x++) {
                 for ($y = 0; $y < 12; $y++) {
                     $in_range = false;
                     $valid = true;
-                    for ($a = 0; $a < $mask_width; $a++) {
-                        for ($b = 0; $b < $mask_height; $b++) {
-                            $xd = $x + $a;
-                            $yd = $y + $b;
-                            $this->systemAssertTrue(
-                                "Landamrk data is not set for $name rot $rot $a,$b ($width,$height)",
-                                isset($mask[$a][$b])
-                            );
-                            if ($mask[$a][$b] == 1 && $capital[$xd][$yd] > $unpassable) {
-                                $valid = false;
-                                break 2;
-                            }
-                            if (!$in_range && $mask[$a][$b] == 1 && $this->onMat($xd, $yd)) {
-                                $in_range = true;
-                            }
+                    foreach ($this->getStructureCells($stype, $landmark_id, $x, $y, $rot) as [$xd, $yd]) {
+                        if ($capital[$xd][$yd] > $unpassable) {
+                            $valid = false;
+                            break;
+                        }
+                        if (!$in_range && $this->onMat($xd, $yd)) {
+                            $in_range = true;
                         }
                     }
                     if ($valid && $in_range) {
@@ -10306,6 +10366,10 @@ abstract class PGameXBody extends tapcommon {
                 }
             }
         }
+        if (!$any && $foreign_token) {
+            $options[0] = $this->getCapitalReplacementCells($player_id);
+            $any = count($options[0]) > 0;
+        }
         $stra = [
             "i18n" => ["structure_name"],
             "structure_name" => $name,
@@ -10313,14 +10377,11 @@ abstract class PGameXBody extends tapcommon {
             "id" => $structure ? $structure["card_id"] : 0,
         ];
         $this->addBenefitData($stra);
-        /** @var Craftsmen */
-        $cr = $this->getCivilizationInstance(CIV_CRAFTSMEN, true);
-        $slots = $cr->getCraftsmenSlots($player_id);
         return [
             "options" => $options,
-            "slots" => $slots,
+            "slots" => $craftsmen_slots,
             "anyoptions" => $any ? 1 : 0,
-            "conquer_targets" => $this->getConquerTargets(true),
+            "conquer_targets" => $foreign_token ? [] : $this->getConquerTargets(true),
         ] + $stra;
     }
 

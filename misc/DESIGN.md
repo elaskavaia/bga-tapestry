@@ -61,6 +61,7 @@ Structures
   Cube
    `card_location` - `tech_slot_1_2` ( `tech_slot_${track}_${slot}`) - when on track; `civ_15_2` (`civ_${civ_type}_${slot}`) - when on civ
    `card_location_arg` - owner; a cube on a civ mat can belong to an opponent (GENIES keeps the opponents' tokens in `civ_44_0`, its slot 0)
+              a cube in a `capital_cell_*` is a WEEFOLK plot token and belongs to the WEEFOLK player, not to the owner of that capital
               
 Benefit
    `benefit_id` - primary key

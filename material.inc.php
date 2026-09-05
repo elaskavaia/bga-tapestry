@@ -176,6 +176,8 @@ if (!defined("TAPESTRY")) {
     define("BE_WEREFOLK_EXPLORE", 346);
     define("BE_GENIES_WISH", 347);
     define("BE_GENIES_SQUARE", 348);
+    define("BE_WEEFOLK_PLOT", 349);
+    define("BE_WEEFOLK_SCORE", 350);
     define("BE_CIV_END", 604);
     define("BE_OP_UNIQUE", 600);
 
@@ -2391,6 +2393,18 @@ $this->benefit_types = [
         // BE_GENIES_SQUARE
         "name" => clienttranslate("GENIES gain a squared benefit adjacent to the picked circled one"),
         "civ" => CIV_GENIES,
+    ],
+    349 => [
+        // BE_WEEFOLK_PLOT
+        "name" => clienttranslate("WEEFOLK plant an opponent's player token in your capital"),
+        "civ" => CIV_WEEFOLK,
+        "tt" => "structure",
+        "ct" => BUILDING_CUBE,
+    ],
+    350 => [
+        // BE_WEEFOLK_SCORE
+        "name" => clienttranslate("WEEFOLK score the rows and columns of your planted tokens"),
+        "civ" => CIV_WEEFOLK,
     ],
     502 => [
         //
@@ -5680,6 +5694,28 @@ $this->civilizations = [
             7 => ["top" => 77.3, "left" => 53.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_EXPLORE]],
             8 => ["top" => 70.5, "left" => 58.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_VP_TECH]], //
         ],
+    ],
+    CIV_WEEFOLK => [
+        "name" => clienttranslate("WEEFOLK"),
+        "description" => [
+            clienttranslate(
+                "<i>Weefolk live unnoticed in woods and towns, giving blessings to nearby inhabitants - as long as they are not disturbed!</i>"
+            ),
+            clienttranslate(
+                "At the start of your income turns (2-5), or if you gain Weefolk mid-game, give a player token to an opponent. They choose a plot to place your token in their capital city. If their city is full, they replace an income building with your token; that building is set aside."
+            ),
+            clienttranslate(
+                "That plot, occupied by a clan of your people, is now considered filled, contributing to the resources and score of your opponent according to the rules of your opponent's capital city."
+            ),
+            clienttranslate("On income turns (2-4), you may spend 1 [TERRITORY]. If you do so, then gain 1 [ANY INCOME BUILDING]."),
+            clienttranslate(
+                "On your income turn 5, look at each row and column where your opponents placed your tokens. Score 1 [VP] per income building or landmark located anywhere in any of those rows or columns, once per token's row and once per token's column."
+            ),
+        ],
+        "exp" => "FF",
+        "automa" => false,
+        "midgame_setup" => true,
+        "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
     ],
     CIV_WEREFOLK => [
         "name" => clienttranslate("WEREFOLK"),

@@ -931,6 +931,14 @@ define([
             }
 
             break;
+          case this.CON.CIV_WEEFOLK:
+            if (!bene.build) {
+              this.setDescriptionOnMyTurn(_("WEEFOLK: Give a player token to an opponent, they place it in their capital"));
+              break;
+            }
+            this.setDescriptionOnMyTurn(_("WEEFOLK: You may discard a territory tile to gain an income building (select the tile first)"));
+            this.territory[this.player_id].getChildrenDivs().forEach((node) => node.classList.add("active_slot"));
+            break;
           case this.CON.CIV_HERALDS:
             this.setDescriptionOnMyTurn(_("HERALDS: You may place a player token to WHEN PLAYED tapestry card"));
             //tapestry_data
@@ -1554,7 +1562,7 @@ define([
           this.capitalRot = 0;
           this.capitalx = null;
           this.capitaly = null;
-          this.structure_id = "building_" + args.id;
+          this.structure_id = (args.structure_type == this.CON.BUILDING_CUBE ? "cube_" : "building_") + args.id;
           this.stripPosition(this.structure_id);
           this.capitalRotOptions = args.options;
           if (this.ownsCiv(3)) {
@@ -5505,6 +5513,15 @@ define([
         this.clientStateArgs.spot = id;
         const bid = this.clientStateArgs.bid;
         switch (this.clientStateArgs.cid) {
+          case this.CON.CIV_WEEFOLK:
+            if (!this.gamedatas.gamestate.args.benefits[bid].build) break;
+            const tiles = this.territory[this.player_id].getSelectedItems();
+            if (tiles.length != 1) {
+              this.showError(_("You must select a single territory tile first"));
+              return;
+            }
+            this.clientStateArgs.extra = tiles[0].type;
+            break;
           case this.CON.CIV_TREASURE_HUNTERS:
             const targets = this.gamedatas.gamestate.args.benefits[bid].slots_choice[id].targets;
             const terindex = this.civilizations[this.CON.CIV_TREASURE_HUNTERS].slots[id].ter;

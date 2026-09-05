@@ -4035,3 +4035,15 @@ div[data-income="0"] #subtitle_bar {
   bottom: auto;
   margin: 0 -3px;
 }
+
+/* weefolk: the plot token sits in a capital cell the way an income building does */
+.capital_cell .cube {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+}
+#capital_structure .cube {
+  position: absolute;
+  left: 37.5%;
+  top: 37.5%;
+}

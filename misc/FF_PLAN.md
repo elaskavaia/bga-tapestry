@@ -210,8 +210,11 @@ complexity order are called out below.
    opponent-benefit intercept in effect_onQueueBenefit and a zombie hook so a quitter cannot
    swallow someone else's ability. Two benefit rows, one civ class, the opponents' tokens as cubes
    on the mat, one CSS rule.
-4. Weefolk. Same cross-player machinery as Genies plus a token living in an opponent's capital grid
-   and row and column scoring at income 5.
+4. Weefolk. Done. Same cross-player machinery as Genies plus a token living in an opponent's capital
+   grid and row and column scoring at income 5. The engine work was the bigger half: the capital grid
+   got a writer seam so tests can drive placement at all, the mask walk became one helper, and the
+   placement paths learned that a cube belonging to someone else is not a building of the capital's
+   owner.
 5. Elder Ones. Build the post income 5 alternate turn loop first, as a standalone engine change
    verified against existing civilizations, then the civ itself, which adds nothing else new.
 6. Merfolk. The loop again, plus the hidden submerged card zone.
@@ -285,10 +288,10 @@ keep in sync.
   twice today (`effect_placeOnCapitalMat`, `argPlaceStructure`) and the scoring needs it a third
   time, for landmarks.
 - Full city replacement: when the token has no legal empty plot, `argPlaceStructure` offers the
-  opponent's income building cells instead and the replaced building moves to a new `aside`
-  location that no count reads (not `capital_cell`, `income`, `land` or the Craftsmen mat), so it
-  neither scores nor produces. The cell stays occupied, now by the token, so districts and rows
-  keep their state. Landmarks are not offered as replacement targets (see rulings).
+  opponent's income building cells instead and the replaced building goes to `hand`, where a
+  structure placed outside the mat already goes and where no count reads it, so it neither scores
+  nor produces. The cell stays occupied, now by the token, so districts and rows keep their state.
+  Landmarks are not offered as replacement targets (see rulings).
 - Zombie opponent: `zombieBenefit` plants the token on a random empty plot, or skips if the city
   is full. Zombie owner: nothing to do, planted tokens stay put and simply never score.
 - Eligible opponents: real players who have not finished (past income turn 5), the Genies 5.6
@@ -301,8 +304,8 @@ driven in a test today. Capital access goes through two seams, `getCapitalData` 
 `dbSetCapitalCell` that replaces the two inline `UPDATE capital` statements, and `GameUT` overrides
 both with an in-memory grid seeded from a capital mat in material. `getCapitalScoreVP` moves onto
 `getCapitalData` at the same time so the opponent's own row and column income is testable with a
-planted token. This lands as its own change, verified against the existing placement paths, before
-the civ.
+planted token. A third seam was needed once the tests ran: `dbSetStructureLocationRot`, since the
+placement writes the structure row with raw SQL too. All three landed with the civ, not before it.
 
 ### Client
 
@@ -314,9 +317,9 @@ the civ.
 - A `CIV_WEEFOLK` case in `onUpdateActionButtons_civAbility` for the `build` phase, the
   Historians tile-then-button selection.
 
-### Rulings needed
+### Rulings
 
-Proposed readings, to be confirmed and then recorded in FORMAL_RULES as 5.7 onward:
+Recorded in FORMAL_RULES 5.7 to 5.11:
 
 - The turn 5 token is planted before the turn 5 scoring, so it counts.
 - Rows and columns are scored per token, not per distinct row: the card says "more than one

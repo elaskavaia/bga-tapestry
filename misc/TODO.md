@@ -56,6 +56,44 @@ NEW CIVILIZATIONS
       another player's civ to that civ (AbsCivilization::zombieBenefit) before the delete; Genies
       answers with a random circle (FORMAL_RULES 5.6). Test: testOpponentQuittingAtThePromptGetsARandomCircle.
 
+- [ ] Weefolk: verify in the studio that the plot token renders inside the opponent's capital cell and
+      in the capital_helper preview. The two CSS rules at the end of tapestry.css were written blind
+      against the 26.5px cell and the helper box, never seen on a real mat.
+
+- [ ] Weefolk: same gap as the Faefolk and Genies items above - the three case CIV_WEEFOLK lines in
+      saction_civTokenAdvance and the two argCivAbilitySingle switches are only exercised by calling the
+      civ class directly, so deleting them leaves the suite green while a real game falls through to the
+      generic cube-placing path.
+
+- [ ] Weefolk: there are no JS tests, so the client half is unverified. Three pieces to check in the
+      studio: the cube div is found as "cube_<id>" in placeStructure (the branch keys off
+      args.structure_type == BUILDING_CUBE, and BUILDING_* constants were only just added to
+      addConstants; plantToken now notifies moveStructure so the div exists before the state opens);
+      the build prompt's territory tile selection reaches onCivSpotHandler as clientStateArgs.extra;
+      and the opponent's capital cells accept the click in the replacement case, where the cell is
+      occupied but marked possible.
+
+- [ ] place_structure never validates the requested x_y against the options argPlaceStructure computed,
+      so the only thing stopping an illegal cell is the client "possible" class plus whatever
+      effect_placeOnCapitalMat happens to assert. Pre-existing, and it applies to income buildings and
+      landmarks as much as to the Weefolk token; the token's own "only in a full city" rule is now
+      enforced server-side, the general case is not.
+
+- [ ] Weefolk: game_points_be_350 has no entry in stats.inc.php, so the turn 5 scoring warns
+      "statistic not defined" and falls back to game_points_be_15 (VP - Plain). Same gap as
+      game_points_be_66 for Genies. Either add the two rows or decide the fallback is fine.
+
+- [ ] Weefolk: undo across the cross-player placement is untested. The plot row makes the opponent
+      active inside the owner's income turn, which is the same shape as Genies but now with a capital
+      grid write behind it, and prepareUndoSavepoint is never called on that path.
+
+- [ ] Weefolk: interaction with Infiltrators and (later) Celestials, all three of which put something
+      into or onto another player's space, is only covered by the plan's integration list, not by tests.
+
+- [ ] Weefolk cleanup: queueEraCivAbility duplicates the income_trigger range test the parent does, the
+      same duplication the Werefolk item below calls out. Both should use the AbsCivilization helper
+      once it exists.
+
 - [ ] Werefolk cleanup: queueEraCivAbility reads income_trigger, computes from/to and calls in_range, then
       on a miss hands off to the parent which re-reads the same income_trigger and re-runs the same check
       just to reach its else branch and post the "not applicable in era" chat line. Extract the range test

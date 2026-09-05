@@ -89,3 +89,25 @@ This is my interpretation not actuall formal rules
     player is never blocked by a quitter; the zombie's own score is skipped, only the GENIES player
     scores. If no opponent can answer at all, the whole ability is skipped and the GENIES player
     scores nothing, not even the circled benefit. Ruled by Victoria.
+5.7 Weefolk row and column scoring is per token, not per distinct line. Two tokens in the same row
+    score that row twice, and a building in a token's row that is also in that token's column
+    scores once for each. A landmark counts once per line its footprint touches, however many
+    cells of that line it covers. The income turn 5 token is planted before the scoring row is
+    reached, so it counts.
+5.8 A Weefolk plot is an empty cell only. Impassable cells are not plots even for an opponent with
+    TERRAFORMING or RIVERFOLK, because the token is not a building of theirs and does not claim
+    their terrain. The same reason means no TERRAFORMING VP is ever awarded for a planted token.
+5.9 A full city has no plot, so the token replaces an income building of the opponent's choosing
+    and that building is set aside. Landmarks are never offered: replacing one would leave holes
+    in its footprint and undo district completions. The set aside building goes where a structure
+    placed outside the capital mat goes, so it neither scores nor produces and does not return to
+    the income track. The cell stays occupied, now by the token, so districts and rows keep their
+    state and no district is completed a second time.
+5.10 Weefolk token gift - an opponent past income turn 5 can no longer place, so they are not
+    offered a token. A zombie opponent is still offered one and the token is planted on a random
+    empty plot, or kept if their city is full, so the WEEFOLK player is never blocked by a quitter.
+    If no opponent can take a token at all the gift is skipped for that income turn, while the
+    turn 2-4 territory trade and the turn 5 scoring still happen.
+5.11 A planted token is nothing to the WEEFOLK player's own counts: not a structure of theirs on
+    any capital, not an outpost, not an income building. A cube of theirs in their own capital
+    (ARCHITECTS) is not a planted token and scores no rows or columns.

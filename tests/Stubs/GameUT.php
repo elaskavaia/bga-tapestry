@@ -199,13 +199,51 @@ class GameUT extends Tapestry {
         return $this->structures->addRow($type, $type_arg, $destination, $player_id, $arg2);
     }
 
-    /** The capital grid is not modelled, the rest mirrors the real method. */
+    /** The real one moves the row with raw SQL, which the in memory structure model never sees. */
     function dbSetStructureLocation($structure_id, $location, $state = null, $message = "", $player_id = null) {
         if ($structure_id === null) {
             return;
         }
         $this->structures->setLocation($structure_id, $location, $state);
+        if (startsWith($location, "capital_cell")) {
+            $type = $this->structures->getCard($structure_id)["type"] + 1;
+            $this->dbSetCapitalCell(getPart($location, 2), getPart($location, 3), getPart($location, 4), $type);
+        }
         $this->notifyMoveStructure($message, $structure_id, [], $player_id);
+    }
+
+    function dbSetStructureLocationRot($structure_id, $location, $rot) {
+        $this->structures->setLocation($structure_id, $location);
+        $this->structures->setTypeArg($structure_id, $rot);
+    }
+
+    // -------------------------------------------------------- capital table
+
+    /** capital_occupied per player, [player_id][x][y]; the framework stubs run no SQL. */
+    public array $capital = [];
+
+    /** Seeds the grid from a capital mat in material; mat 0 is an all empty one. */
+    function setCapitalMat($player_id, int $cap = 0): void {
+        $cells = array_fill(0, 15, array_fill(0, 15, 0));
+        $grid = $cap ? $this->capitals[$cap]["grid"] : array_fill(0, 9, "000000000");
+        foreach ($grid as $row => $line) {
+            for ($y = 0; $y < 9; $y++) {
+                $cells[$row + 3][$y + 3] = (int) substr($line, $y, 1);
+            }
+        }
+        $this->capital[(int) $player_id] = $cells;
+    }
+
+    function getCapitalData($player_id) {
+        if (!isset($this->capital[(int) $player_id])) {
+            $this->setCapitalMat($player_id);
+        }
+        return $this->capital[(int) $player_id];
+    }
+
+    function dbSetCapitalCell($player_id, $x, $y, $type) {
+        $this->getCapitalData($player_id);
+        $this->capital[(int) $player_id][(int) $x][(int) $y] = (int) $type;
     }
 
     /** Seeds the landmark supply on the mat, one structure per landmark type. */

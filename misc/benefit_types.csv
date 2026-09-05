@@ -239,6 +239,8 @@ id|-con|name|r|t|php
 346|BE_WEREFOLK_EXPLORE|Explore space|s||'state'=>'explore_space','civ'=>CIV_WEREFOLK
 347|BE_GENIES_WISH|GENIES a random opponent picks a circled benefit|||'civ'=>CIV_GENIES
 348|BE_GENIES_SQUARE|GENIES gain a squared benefit adjacent to the picked circled one|||'civ'=>CIV_GENIES
+349|BE_WEEFOLK_PLOT|WEEFOLK plant an opponent's player token in your capital|||'civ'=>CIV_WEEFOLK,'tt'=>'structure','ct'=>BUILDING_CUBE
+350|BE_WEEFOLK_SCORE|WEEFOLK score the rows and columns of your planted tokens|||'civ'=>CIV_WEEFOLK
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||
