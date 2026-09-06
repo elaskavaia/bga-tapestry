@@ -305,7 +305,7 @@ class Advisors extends AbsCivilization {
         $game->interruptBenefit();
         if ($game->isRealPlayer($opponent_id)) {
             $this->game->getCurrentEra($opponent_id);
-            $this->game->DbQuery("UPDATE card SET card_location='era$era',card_location_arg='$opponent_id' WHERE card_id='$card_id'");
+            $this->game->dbSetTapestryEraSlot($card_id, "era$era", $opponent_id);
 
             $this->game
                 ->notif("moveCard", $opponent_id)

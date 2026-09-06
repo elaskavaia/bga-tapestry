@@ -1218,7 +1218,8 @@ define([
             } else if (allowed == 0) dojo.addClass(spot, "illegal_slot");
             else if (allowed == -1) dojo.addClass(spot, "illegal_slot");
           }
-          this.addActionButton("button_income", _("Income"), "onIncomeTurn");
+          if (args.extended_play) this.addActionButton("button_income", _("End my game"), "onEndMyGame", undefined, undefined, "red");
+          else this.addActionButton("button_income", _("Income"), "onIncomeTurn");
 
           break;
         case "playerTurnEnd":
@@ -1648,6 +1649,11 @@ define([
           if (args.benefit_category == "bonus") prefix = _("BONUS:") + " ";
           if (args.benefit_quantity == -1) {
             this.setDescriptionOnMyTurn(prefix + _("${you} may choose to pay any number of ${pay_name} for ${bonus_name} each") + pgIcon);
+          } else if (args.benefit_quantity < -1) {
+            args.max_quantity = -args.benefit_quantity;
+            this.setDescriptionOnMyTurn(
+              prefix + _("${you} may choose to pay up to ${max_quantity} ${pay_name} for ${bonus_name} each") + pgIcon
+            );
           } else if (args.benefit_quantity == 1) {
             if (cannotDecline) this.setDescriptionOnMyTurn(prefix + _("${you} must pay ${pay_name} for ${bonus_name}") + pgIcon);
             else this.setDescriptionOnMyTurn(prefix + _("${you} may pay ${pay_name} to gain ${bonus_name}") + pgIcon);
@@ -2567,6 +2573,10 @@ define([
           var stock_ids = this.tapestry[this.player_id].getSelectedItems().map((item) => item.id);
           if (count > 0 && stock_ids.length != count) {
             this.showError(_("Select the correct number of cards ${count}"), { count: count });
+            return;
+          }
+          if (count < -1 && stock_ids.length > -count) {
+            this.showError(_("Select at most ${count} cards"), { count: -count });
             return;
           }
           ids = stock_ids.join(",");
@@ -4821,6 +4831,19 @@ define([
       } else {
         this.axcallwrapper("takeIncome");
       }
+    },
+
+    onEndMyGame: function (event) {
+      dojo.stopEvent(event);
+      if (!this.checkAction("endMyGame")) {
+        return;
+      }
+      this.confirmationDialog(
+        _("Are you sure you wish to end your game? You cannot take any more turns after this."),
+        dojo.hitch(this, function () {
+          this.axcallwrapper("endMyGame");
+        })
+      );
     },
 
     onCubeHolderClick: function (event) {

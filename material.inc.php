@@ -5627,6 +5627,27 @@ $this->civilizations = [
         "al" => 8,
     ],
     // FF
+    CIV_ELDER_ONES => [
+        "name" => clienttranslate("ELDER ONES"),
+        "description" => [
+            clienttranslate("<i>The Elder Ones keep the secrets of extraordinary longevity.</i>"),
+            clienttranslate("On your income turns (2-4), either gain [ANY RESOURCE] or gain [TAPESTRY] [TAPESTRY]."),
+            clienttranslate(
+                "On your income turn 5, discard up to 6 [TAPESTRY] from your hand and gain [ANY RESOURCE] [ANY RESOURCE] per [TAPESTRY] discarded."
+            ),
+            clienttranslate(
+                "After income turn 5, you may subsequently take advance turns as usual (but not play trap or other response cards, nor take additional income turns)."
+            ),
+            clienttranslate(
+                "<li>Any THIS ERA [TAPESTRY] on top of era 4 persists in its effect through the remainder of your game, unless you cover it by playing another tapestry.</li>"
+            ),
+            clienttranslate("<li>When you gain a landmark after income turn 5, score 10 [VP].</li>"),
+            clienttranslate("<li>The game ends for you when you are no longer able to take an advance turn.</li>"),
+        ],
+        "exp" => "FF",
+        "automa" => false,
+        "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
+    ],
     CIV_FAEFOLK => [
         "name" => clienttranslate("FAEFOLK"),
         "description" => [

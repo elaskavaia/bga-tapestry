@@ -61,6 +61,14 @@ abstract class AbsCivilization {
         return true;
     }
 
+    /** The owner keeps taking advance turns after their income turn 5 instead of finishing. */
+    function hasExtendedPlay(): bool {
+        return false;
+    }
+
+    /** The owner just gained a landmark, whatever granted it and whoever's turn it is. */
+    function onGainLandmark(int $player_id, int $landmark_type): void {}
+
     /** A benefit this civ hands to a player who does not own it is about to be queued; false drops it. */
     function interceptOpponentBenefit(int $ben, int $player_id, string $reason, int $count): bool {
         return true;

@@ -53,6 +53,13 @@ class action_tapestry extends APP_GameAction
         $this->ajaxResponse();
     }
     
+    public function endMyGame()
+    {
+        $this->setAjaxMode();
+        $this->game->action_endMyGame();
+        $this->ajaxResponse();
+    }
+
     public function unblock()
     {
         $this->setAjaxMode();

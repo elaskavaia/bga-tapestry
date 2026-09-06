@@ -95,7 +95,7 @@ $machinestates = [
         "action" => "stPlayerTurn",
         "type" => "activeplayer",
         "args" => "argPlayerTurn",
-        "possibleactions" => ["advance", "takeIncome"],
+        "possibleactions" => ["advance", "takeIncome", "endMyGame"],
         "transitions" => ["advance" => 18, "benefit" => 18, "next" => 18, "benefit" => 18],
     ],
 

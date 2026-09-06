@@ -3073,6 +3073,10 @@ abstract class PGameXBody extends tapcommon {
             }
         }
 
+        foreach ($this->getAllCivs($player_id) as $info) {
+            $this->getCivilizationInstance((int) $info["card_type_arg"])->onGainLandmark($player_id, (int) $landmark_type);
+        }
+
         /** @var Historians */
         $inst = $this->getCivilizationInstance(CIV_HISTORIANS, true);
         // placing landmark trigger historian benefits
@@ -3152,7 +3156,7 @@ abstract class PGameXBody extends tapcommon {
     // Checks if player has the tapestry active
     function isTapestryActive($player_id, $tapestry_id, $throw = false) {
         $taps = [];
-        $era = $this->getCurrentEra($player_id);
+        $era = $this->getTapestryEra($player_id);
         $current_tapestry = $this->getLatestTapestry($player_id, $era);
         if ($current_tapestry) {
             $taps[] = $current_tapestry;
@@ -3205,6 +3209,12 @@ abstract class PGameXBody extends tapcommon {
         );
     }
 
+    /** The one writer of a tapestry card's era slot, paired with getLatestTapestry. */
+    function dbSetTapestryEraSlot($card_id, $location, $player_id = 0) {
+        $arg = $player_id ? ",card_location_arg='$player_id'" : "";
+        $this->DbQuery("UPDATE card SET card_location='$location'$arg WHERE card_id='$card_id'");
+    }
+
     // Gets the players current era (n.b. Changes at start of income turn)
     function getCurrentEra($player_id) {
         return (int) $this->getUniqueValueFromDB("SELECT player_income_turns FROM playerextra WHERE player_id='$player_id'");
@@ -3212,6 +3222,38 @@ abstract class PGameXBody extends tapcommon {
 
     function isPlayerAlive($player_id) {
         return !$this->isPlayerFinished($player_id);
+    }
+
+    /** One of the player's civilizations keeps them taking advance turns after their income turn 5. */
+    function hasExtendedPlayCiv($player_id) {
+        foreach ($this->getAllCivs($player_id) as $info) {
+            if ($this->getCivilizationInstance((int) $info["card_type_arg"])->hasExtendedPlay()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * The player is past their income turn 5 and still taking turns. An income turn only ever
+     * happens inside the player's own turn, so era 5 outside their turn, or their turn without the
+     * income global, is the period after it (FORMAL_RULES 5.13).
+     */
+    function isExtendedPlay($player_id) {
+        if ($this->getCurrentEra($player_id) != 5) {
+            return false;
+        }
+        if ($this->getGameStateValue("current_player_turn") == $player_id && $this->getGameStateValue("income_turn")) {
+            return false;
+        }
+        return $this->hasExtendedPlayCiv($player_id);
+    }
+
+    /** The era slot tapestry cards are played on and read from: era 4 stays in force in extended play. */
+    function getTapestryEra($player_id) {
+        // isTapestryActive calls this constantly, so keep the era 1-4 path at the one query it was
+        $era = $this->getCurrentEra($player_id);
+        return $era == 5 && $this->isExtendedPlay($player_id) ? 4 : $era;
     }
 
     function isPlayerFinished($player_id) {
@@ -3266,7 +3308,7 @@ abstract class PGameXBody extends tapcommon {
             $player_id = $this->getActivePlayerId();
         }
 
-        $era = $this->getCurrentEra($player_id);
+        $era = $this->getTapestryEra($player_id);
         $ben = $this->getCurrentBenefitType();
 
         $card = $this->getCardInfoById($card_id);
@@ -3323,7 +3365,7 @@ abstract class PGameXBody extends tapcommon {
         $prev = $this->getLatestTapestry($player_id, $era);
         if ($prev && $prev["card_id"] != $card_id) {
             $prev_id = $prev["card_id"];
-            $this->DbQuery("UPDATE card SET card_location='era_6' WHERE card_id='$prev_id'");
+            $this->dbSetTapestryEraSlot($prev_id, "era_6");
             $args = $this->notifArgsAddCardInfo($prev_id, [
                 "espionage" => false,
                 "destination" => "tapestry_slot_{$player_id}_6",
@@ -3331,7 +3373,7 @@ abstract class PGameXBody extends tapcommon {
             $this->notifyWithName("tapestrycard", "", $args, $player_id);
         }
         $era_string = "era$era";
-        $this->DbQuery("UPDATE card SET card_location='$era_string',card_location_arg='$player_id' WHERE card_id='$card_id'");
+        $this->dbSetTapestryEraSlot($card_id, $era_string, $player_id);
 
         $tyranny = array_get($opargs, "tyranny");
         if ($tyranny) {
@@ -3920,12 +3962,19 @@ abstract class PGameXBody extends tapcommon {
 
     function takeIncome() {
         $this->checkAction("takeIncome");
+        $player_id = $this->getActivePlayerId();
+        $this->userAssertTrue(
+            clienttranslate("You cannot take additional income turns, use End my game to stop"),
+            !$this->isExtendedPlay($player_id)
+        );
         $this->takeIncomeAuto(false);
     }
 
     function takeIncomeAuto($auto) {
         $player_id = $this->getActivePlayerId();
-        $this->DbQuery("UPDATE playerextra SET player_income_turns=player_income_turns+1 WHERE player_id='$player_id'");
+        // before the era bump: era 5 without this global set reads as extended play (isExtendedPlay)
+        $this->setGameStateValue("income_turn", 1);
+        $this->dbSetPlayerIncomeTurns($player_id, $this->getCurrentEra($player_id) + 1);
         $notif = clienttranslate('${player_name} takes an income turn');
         if ($auto) {
             $notif = clienttranslate('${player_name} takes an income turn (auto-trigger)');
@@ -3934,7 +3983,6 @@ abstract class PGameXBody extends tapcommon {
         $this->notifyWithName("message_info", $notif);
 
         $this->setIncomeTurnPhase(INCOME_CIV, clienttranslate('${player_name} takes income turn ${turn_number}'), $player_id);
-        $this->setGameStateValue("income_turn", 1);
         $this->queueIncomeTurn();
         $this->gamestate->nextState("next");
     }
@@ -4765,6 +4813,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_ALCHEMISTS:
             case CIV_MYSTICS:
             case CIV_ADVISORS:
+            case CIV_ELDER_ONES:
             case CIV_FAEFOLK:
             case CIV_GENIES:
             case CIV_WEEFOLK:
@@ -5937,11 +5986,9 @@ abstract class PGameXBody extends tapcommon {
             $player_id = PLAYER_SHADOW;
         }
         if ($income_turn == 0) {
-            $this->DbQuery("UPDATE playerextra SET player_income_turns=player_income_turns+1 WHERE player_id='$player_id'");
-            $income_turn = $this->getCurrentEra($player_id);
-        } else {
-            $this->DbQuery("UPDATE playerextra SET player_income_turns=$income_turn WHERE player_id='$player_id'");
+            $income_turn = $this->getCurrentEra($player_id) + 1;
         }
+        $this->dbSetPlayerIncomeTurns($player_id, $income_turn);
         if ($income_turn > 5) {
             return;
         }
@@ -7559,7 +7606,7 @@ abstract class PGameXBody extends tapcommon {
             $this->setGameStateValue("toppled_by", $player_id);
             if (!$this->isTapestryActive($player_id, 30)) {
                 // PILLAGE AND PLUNDER
-                $this->queueBenefitNormal(140, $owner_id, $orig_reason); // topple pick
+                $this->queueTrapResponse($owner_id, $orig_reason);
             } else {
                 $this->notifyWithName("message_error", clienttranslate('${player_name} has PILLAGE AND PLUNDER, trap cannot be played'));
             }
@@ -9146,6 +9193,10 @@ abstract class PGameXBody extends tapcommon {
         if ($count > 0 && sizeOf($params) != $count) {
             throw new feException("Invalid quantity for bonus");
         }
+        if ($count < -1) {
+            // a quantity below -1 is an upper bound, -1 stays unlimited
+            $this->userAssertTrue(clienttranslate("Too many items selected for this bonus"), sizeOf($params) <= -$count);
+        }
         $this->userAssertTrue(totranslate("Cannot accept bonus without payment, use Decline"), count($params) > 0);
         $is_bonus = $args["benefit_category"] == "bonus";
         $reason = $args["reason_data"];
@@ -9257,6 +9308,20 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getActivePlayerId();
         $this->effect_trap($card_id, $player_id);
         $this->gamestate->nextState("next");
+    }
+
+    /** The toppled owner may answer with a response card, unless they are past their income turn 5. */
+    function queueTrapResponse($owner_id, $reason) {
+        if ($this->isExtendedPlay($owner_id)) {
+            $this->notifyWithName(
+                "message_error",
+                clienttranslate('${player_name} is past their income turn 5 and cannot play a response card'),
+                [],
+                $owner_id
+            );
+            return;
+        }
+        $this->queueBenefitNormal(140, $owner_id, $reason); // topple pick
     }
 
     function effect_trap($card_id, $player_id) {
@@ -9460,7 +9525,12 @@ abstract class PGameXBody extends tapcommon {
         $all = $this->getPossibleAdvances(false);
         $advance = array_keys($all, 1);
         $updates = $this->argUpdateCardList();
-        return ["advances" => $advance, "all_advances" => $all, "technology_updates" => $updates];
+        return [
+            "advances" => $advance,
+            "all_advances" => $all,
+            "technology_updates" => $updates,
+            "extended_play" => $this->isExtendedPlay($this->getActivePlayerId()),
+        ];
     }
 
     function argPlayerTurnEnd() {
@@ -9828,6 +9898,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_TRADERS:
             case CIV_ALCHEMISTS:
             case CIV_ADVISORS:
+            case CIV_ELDER_ONES:
             case CIV_FAEFOLK:
             case CIV_GENIES:
             case CIV_WEEFOLK:
@@ -10283,7 +10354,7 @@ abstract class PGameXBody extends tapcommon {
             return;
         }
         $actual = $this->getPayResourceCount($type, $player_id);
-        if ($actual < $count) {
+        if ($actual == 0 || $actual < $count) {
             $this->notifyWithName("message_error", clienttranslate('${player_name} cannot pay for bonus ${reason}'), [
                 "reason" => $reason,
             ]);
@@ -11237,9 +11308,27 @@ abstract class PGameXBody extends tapcommon {
         }
 
         if (count($this->getPossibleAdvances()) == 0) {
+            if ($this->isExtendedPlay($player_id)) {
+                $this->endExtendedPlay($player_id, clienttranslate('${player_name} can no longer take an advance turn'));
+                return;
+            }
             $this->takeIncomeAuto(true); // When cannot afford advancement.
             return;
         }
+    }
+
+    function action_endMyGame() {
+        $this->checkAction("endMyGame");
+        $player_id = $this->getActivePlayerId();
+        $this->userAssertTrue(clienttranslate("You are not playing on past your income turn 5"), $this->isExtendedPlay($player_id));
+        $this->endExtendedPlay($player_id, clienttranslate('${player_name} chooses to stop taking advance turns'));
+    }
+
+    /** The deferred end of income turn 5: score, mark finished, and let the transition skip them. */
+    function endExtendedPlay($player_id, $message) {
+        $this->notifyWithName("message_info", $message, [], $player_id);
+        $this->finishPlayer($player_id);
+        $this->gamestate->nextState("next");
     }
 
     function checkDictatorship($player_id, $forceEnd = false) {
@@ -11459,7 +11548,7 @@ abstract class PGameXBody extends tapcommon {
 
     function stTapestryCard() {
         $player_id = $this->getActivePlayerId();
-        $era = $this->getCurrentEra($player_id);
+        $era = $this->getTapestryEra($player_id);
         $type = $this->getCurrentBenefitType();
         if ($type == 64) {
             // tapestry overplay
@@ -11678,13 +11767,27 @@ abstract class PGameXBody extends tapcommon {
         $this->setIncomeTurnPhase(0, clienttranslate('${player_name} ends income turn'), $player_id);
         if ($income_turn_count == 5) {
             // FINAL INCOME
-            $this->finalGameScoring($player_id);
-            $this->DbQuery("UPDATE playerextra SET player_income_turns=6 WHERE player_id='$player_id'");
-            if ($player_id == PLAYER_AUTOMA) {
-                $this->DbQuery("UPDATE playerextra SET player_income_turns=6 WHERE player_id='2'"); // shadow is done also
+            if ($this->hasExtendedPlayCiv($player_id)) {
+                $this->notifyWithName("message_info", clienttranslate('${player_name} plays on after their income turn 5'), [], $player_id);
+                return;
             }
-            $this->setIncomeTurnPhase(0, "", $player_id); // to notify of update era to 6
+            $this->finishPlayer($player_id);
         }
+    }
+
+    /** Final scoring and the era 6 write, deferred to the end of extended play for who has it. */
+    function finishPlayer($player_id) {
+        $this->finalGameScoring($player_id);
+        $this->dbSetPlayerIncomeTurns($player_id, 6);
+        if ($player_id == PLAYER_AUTOMA) {
+            $this->dbSetPlayerIncomeTurns(PLAYER_SHADOW, 6); // shadow is done also
+        }
+        $this->setIncomeTurnPhase(0, "", $player_id); // to notify of update era to 6
+    }
+
+    /** The one writer of player_income_turns, paired with getCurrentEra. */
+    function dbSetPlayerIncomeTurns($player_id, $turns) {
+        $this->DbQuery("UPDATE playerextra SET player_income_turns='$turns' WHERE player_id='$player_id'");
     }
 
     function finalGameScoring($player_id) {
