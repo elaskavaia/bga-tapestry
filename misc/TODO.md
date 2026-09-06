@@ -1,40 +1,16 @@
 ## Victoria
 
-NEW CIVILIZATIONS
-
-- [ ] Faefolk: verify the 7 ring slot positions in the studio (measured off civ_ff.webp, not yet seen
-      rendered on a real mat).
-
-- [ ] Faefolk: no test goes through the game object, so the two case CIV_FAEFOLK lines in
-      saction_civTokenAdvance and argCivAbilitySingle are unverified - delete them and the suite still
-      passes, while a real game falls through to the generic path and places a second cube.
-
-- [ ] Faefolk: FaefolkUT::resolveFlicker scans the row list instead of popping the head of the stack, so
-      testCardPlayedWhileGainingIsCounted passes whether the flicker is queued before or after the
-      tapestry gain. It is the regression guard for the gain-then-count ordering and currently guards
-      nothing.
+CODE BUGS
 
 - [ ] BE_TECH_CARD (26) is broken as a queued benefit: awardBenefits case 26 sends it to the invent
       state, but stInvent asserts the benefit's r rule is "i" and row 26 has "g". Nothing used it until
       Faefolk did, which is how it surfaced. Faefolk now uses BE_INVENT instead; row 26 is still a trap
       for the next caller.
 
-- [ ] Werefolk: verify in the studio that the space tile explored onto the mat renders where the art
-      expects it. The generic ".civilization .space_tile" rule positions it, and no Werefolk specific
-      CSS was added.
-
 - [ ] Werefolk: onSpaceTileClick has no checkActiveSlot guard, unlike onTerritoryTileClick and the track
       handlers, so a space tile the new spaceExploration filter dimmed is still clickable and fires
       explore_space just to earn a server rejection toast. Add "if (!this.checkActiveSlot(id)) return;"
       to the default branch.
-
-- [x] Werefolk, ANSWERED: if no space tile can be gained (deck and discard both empty) there is nothing
-      to flip, so the whole ability is skipped - ruled by Victoria, recorded in FORMAL_RULES 5.3. flip()
-      now early-outs with a "cannot gain a space tile" message when drawTile gains nothing. Test:
-      testEmptyDeckAndDiscardSkipsTheFlip.
-
-- [ ] Genies: verify the 8 ring slot positions and the token pile (slot 0, 4 cubes wide) in the studio
-      (measured off civ_ff.webp, not yet seen rendered on a real mat).
 
 - [ ] Genies and Faefolk: clicking any holder on the mat during civAbility sends civTokenAdvance with
       that spot (the checkActiveSlot guard in onCubeHolderClick, tapestry.js around 4842, is commented
@@ -42,36 +18,7 @@ NEW CIVILIZATIONS
       system error toast; clicking spot 1 silently fires the ability like the button. Fix: either
       "case this.CON.CIV_GENIES: return;" beside "case 15: return;" in that handler, or restore the
       guard for every civ.
-
-- [x] Genies, RESOLVED by the redesign: the drawn opponent now answers a plain choose-one row in the
-      benefitOption state, so no civAbility description names them as the ability's owner.
-
-- [ ] Genies: same gap as the Faefolk item above - the two case CIV_GENIES lines in
-      saction_civTokenAdvance and argCivAbilitySingle are only exercised by calling the civ class
-      directly, so deleting them leaves the suite green while a real game falls through to the generic
-      cube-placing path.
-
-- [x] Genies, DONE: a drawn opponent who quits at the wish prompt no longer swallows the ability.
-      zombieTurn now goes through effect_zombieBenefits, which hands every row the quitter holds for
-      another player's civ to that civ (AbsCivilization::zombieBenefit) before the delete; Genies
-      answers with a random circle (FORMAL_RULES 5.6). Test: testOpponentQuittingAtThePromptGetsARandomCircle.
-
-- [ ] Weefolk: verify in the studio that the plot token renders inside the opponent's capital cell and
-      in the capital_helper preview. The two CSS rules at the end of tapestry.css were written blind
-      against the 26.5px cell and the helper box, never seen on a real mat.
-
-- [ ] Weefolk: same gap as the Faefolk and Genies items above - the three case CIV_WEEFOLK lines in
-      saction_civTokenAdvance and the two argCivAbilitySingle switches are only exercised by calling the
-      civ class directly, so deleting them leaves the suite green while a real game falls through to the
-      generic cube-placing path.
-
-- [ ] Weefolk: there are no JS tests, so the client half is unverified. Three pieces to check in the
-      studio: the cube div is found as "cube_<id>" in placeStructure (the branch keys off
-      args.structure_type == BUILDING_CUBE, and BUILDING_* constants were only just added to
-      addConstants; plantToken now notifies moveStructure so the div exists before the state opens);
-      the build prompt's territory tile selection reaches onCivSpotHandler as clientStateArgs.extra;
-      and the opponent's capital cells accept the click in the replacement case, where the cell is
-      occupied but marked possible.
+      Holder-click bug: reproduced. Clicking a ring holder during the ability state produced the "Internal Error ... [ERR:Genies:13]" toast in the log. The state survived and the button still worked afterwards. The fix in the TODO (early return for CIV_GENIES in onCubeHolderClick, or restoring the guard) is the right shape.
 
 - [ ] place_structure never validates the requested x_y against the options argPlaceStructure computed,
       so the only thing stopping an illegal cell is the client "possible" class plus whatever
@@ -79,12 +26,55 @@ NEW CIVILIZATIONS
       landmarks as much as to the Weefolk token; the token's own "only in a full city" rule is now
       enforced server-side, the general case is not.
 
-- [ ] Weefolk: undo across the cross-player placement is untested. The plot row makes the opponent
-      active inside the owner's income turn, which is the same shape as Genies but now with a capital
-      grid write behind it, and prepareUndoSavepoint is never called on that path.
+- [ ] Coal baron reset when spies was using it
 
-- [ ] Weefolk: interaction with Infiltrators and (later) Celestials, all three of which put something
-      into or onto another player's space, is only covered by the plan's integration list, not by tests.
+- [ ] Utilitarients - no city when they place landmark
+
+- [ ] Several civ mat queries build their LIKE pattern as `civ_$cid\_%` (PGameXBody.php 4849, 4951, 4955, 4996) or `civ_6_%` / `civ_9_%` / `civ_12_%` (3849, 7468, 11273) instead of escaping the underscore
+      the way getStructuresOnCiv does (`civ\_$cid\_%`). An unescaped underscore is a single character
+      wildcard, so those helpers do not search quite the same thing. Harmless with today's location names.
+
+- [ ] soft_block is registered as game state label id 99 (PGameXBody.php initGameStateLabels), but the
+      BGA docs only allow ids 10-89 for globals (1-9 framework, 100-199 gameoptions; 90-99 undocumented).
+      It works today and is debug-only, but it relies on unspecified framework behavior. Consider moving
+      it to a free id under 90; do not add more ids in 90-99.
+
+- [ ] During any plain benefit choice the client marks every track cube as active. That comes from the generic fallback at tapestry.js:2060.
+
+- [ ] Infiltrators::argCivAbilitySingle calls getStructuresSearch with six arguments, but that method
+      takes five (PGameXBody.php 1322). The trailing false is silently dropped, so whatever it was meant
+      to switch off has never been in effect. Decide what it was for and either drop it or add the
+      parameter.
+
+TEST GAPS
+
+- [ ] The pre-expansion civs have no test file at all (Architects, Renegades, Craftsmen, Gamblers,
+      Collectors, Infiltrators, Traders, Alchemists, Mystics, Advisors), so their case lines in
+      saction_civTokenAdvance and both argCivAbilitySingle switches can still be deleted with the suite
+      green. GameUT::civTokenAdvance is the harness the FF civs now use, so a test file per civ is all
+      it takes.
+
+- [ ] Weefolk: interaction with Celestials is still open - the civ is only a constant in
+      material.inc.php, there is nothing to test against yet.
+
+STUDIO CHECKS
+
+- [ ] Genies: verify the 8 ring slot positions and the token pile (slot 0, 4 cubes wide) in the studio
+      (measured off civ_ff.webp, not yet seen rendered on a real mat).
+
+- [ ] Weefolk: verify in the studio that the plot token renders inside the opponent's capital cell and
+      in the capital_helper preview. The two CSS rules at the end of tapestry.css were written blind
+      against the 26.5px cell and the helper box, never seen on a real mat.
+
+- [ ] Weefolk: there are no JS tests, so the client half is unverified. Three pieces to check in the
+      studio: the cube div is found as "cube*<id>" in placeStructure (the branch keys off
+      args.structure_type == BUILDING_CUBE, and BUILDING*\* constants were only just added to
+      addConstants; plantToken now notifies moveStructure so the div exists before the state opens);
+      the build prompt's territory tile selection reaches onCivSpotHandler as clientStateArgs.extra;
+      and the opponent's capital cells accept the click in the replacement case, where the cell is
+      occupied but marked possible.
+
+CLEANUP
 
 - [ ] Weefolk cleanup: queueEraCivAbility duplicates the income_trigger range test the parent does, the
       same duplication the Werefolk item below calls out. Both should use the AbsCivilization helper
@@ -101,18 +91,40 @@ NEW CIVILIZATIONS
       Werefolk do. Check first whether BE_ALCHEMISTS_DIE in the level 9 branch relies on
       getRemainingDice() seeing an empty mat.
 
-- [ ] Coal baron reset when spies was using it
-- [ ] Utilitarients - no city when they place landmark
+DONE
 
-- [ ] Several civ mat queries build their LIKE pattern as `civ_$cid\_%` (PGameXBody.php 4849, 4951, 4955,
-      4996) or `civ_6_%` / `civ_9_%` / `civ_12_%` (3849, 7468, 11273) instead of escaping the underscore
-      the way getStructuresOnCiv does (`civ\_$cid\_%`). An unescaped underscore is a single character
-      wildcard, so those helpers do not search quite the same thing. Harmless with today's location names.
+- [x] Faefolk, Genies, Weefolk and Werefolk, DONE: the four UT classes now press the button through
+      action_civTokenAdvance (GameUT::civTokenAdvance) and read their prompts through the game object's
+      argCivAbilitySingle, so all nine case lines of those civs are covered - deleting any one of them
+      now fails the suite.
 
-- [ ] soft_block is registered as game state label id 99 (PGameXBody.php initGameStateLabels), but the
-      BGA docs only allow ids 10-89 for globals (1-9 framework, 100-199 gameoptions; 90-99 undocumented).
-      It works today and is debug-only, but it relies on unspecified framework behavior. Consider moving
-      it to a free id under 90; do not add more ids in 90-99.
+- [x] Faefolk, DONE: GameUT::resolveBenefit pops the head of the stack instead of searching the row
+      list, so a test naming a row that is queued behind something else fails. Flipping the queue order
+      in Faefolk::moveCivCube now breaks testCardPlayedOntoTheMatWhileGainingIsCountedOnce and three
+      other tests.
+
+- [x] Weefolk, DONE: undo across the cross-player placement is covered. WeefolkUT::offerPlot runs the
+      real stBenefitManager, so switchPlayer takes the savepoint, and GameUT records every savepoint.
+      Tests: testMakingTheOpponentActiveTakesAnUndoSavepoint, testPlantingForAZombieTakesItsOwnUndoSavepoint,
+      testTradePromptTakesNoSavepoint.
+
+- [x] Weefolk, DONE: the Infiltrators interaction is covered in both directions - a token planted in a
+      capital does not count toward the Infiltrators third-cube bonus, and cubes on the start hex do not
+      score as planted tokens. Tests: testPlantedTokenDoesNotCountTowardTheInfiltratorsBonus,
+      testInfiltratorsCubesOnTheStartHexDoNotScore.
+
+- [x] Werefolk, ANSWERED: if no space tile can be gained (deck and discard both empty) there is nothing
+      to flip, so the whole ability is skipped - ruled by Victoria, recorded in FORMAL_RULES 5.3. flip()
+      now early-outs with a "cannot gain a space tile" message when drawTile gains nothing. Test:
+      testEmptyDeckAndDiscardSkipsTheFlip.
+
+- [x] Genies, RESOLVED by the redesign: the drawn opponent now answers a plain choose-one row in the
+      benefitOption state, so no civAbility description names them as the ability's owner.
+
+- [x] Genies, DONE: a drawn opponent who quits at the wish prompt no longer swallows the ability.
+      zombieTurn now goes through effect_zombieBenefits, which hands every row the quitter holds for
+      another player's civ to that civ (AbsCivilization::zombieBenefit) before the delete; Genies
+      answers with a random circle (FORMAL_RULES 5.6). Test: testOpponentQuittingAtThePromptGetsARandomCircle.
 
 RULES
 
