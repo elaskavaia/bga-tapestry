@@ -16,6 +16,11 @@ class ElderOnes extends AbsCivilization {
         return true;
     }
 
+    /** The card says so: no trap or other response card once income turn 5 is over. */
+    function playsResponseCards(): bool {
+        return false;
+    }
+
     /**
      * Turns 2-4 are the civ ability state, turn 5 is not: the trade is a bonus row, so it uses the
      * hand selection and the Decline button the bonus state already has.

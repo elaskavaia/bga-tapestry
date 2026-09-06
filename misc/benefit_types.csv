@@ -241,6 +241,9 @@ id|-con|name|r|t|php
 348|BE_GENIES_SQUARE|GENIES gain a squared benefit adjacent to the picked circled one|||'civ'=>CIV_GENIES
 349|BE_WEEFOLK_PLOT|WEEFOLK plant an opponent's player token in your capital|||'civ'=>CIV_WEEFOLK,'tt'=>'structure','ct'=>BUILDING_CUBE
 350|BE_WEEFOLK_SCORE|WEEFOLK score the rows and columns of your planted tokens|||'civ'=>CIV_WEEFOLK
+351|BE_MERFOLK_DIVE|MERFOLK gain a tapestry card, then place all but 2 under this mat|||'civ'=>CIV_MERFOLK
+352|BE_MERFOLK_SURFACE|MERFOLK gain a tapestry card, then return the submerged tapestry cards to your hand|||'civ'=>CIV_MERFOLK
+353|BE_MERFOLK_CULL|MERFOLK keep up to 5 tapestry cards|||'civ'=>CIV_MERFOLK
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

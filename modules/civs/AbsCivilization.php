@@ -61,10 +61,23 @@ abstract class AbsCivilization {
         return true;
     }
 
-    /** The owner keeps taking advance turns after their income turn 5 instead of finishing. */
+    /** The owner keeps taking turns after their income turn 5 instead of finishing. */
     function hasExtendedPlay(): bool {
         return false;
     }
+
+    /** The owner may still answer a topple with a trap in extended play. */
+    function playsResponseCards(): bool {
+        return true;
+    }
+
+    /** The start of an extended play turn: true when the civ ran the turn itself and moved the state on. */
+    function startExtendedTurn(int $player_id): bool {
+        return false;
+    }
+
+    /** The income turn is queued and about to end, between the VP income row and the confirm row. */
+    function queueEndOfIncome(int $player_id, int $incomeTurn): void {}
 
     /** The owner just gained a landmark, whatever granted it and whoever's turn it is. */
     function onGainLandmark(int $player_id, int $landmark_type): void {}

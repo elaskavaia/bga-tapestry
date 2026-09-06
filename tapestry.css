@@ -2840,6 +2840,21 @@ div[data-income="0"] #subtitle_bar {
   margin: 5px;
 }
 
+/* MERFOLK: the cards under the civilization mat, faces visible to their owner only */
+.submerged_cards {
+  padding: 4px;
+  border-radius: 10px;
+  background-color: rgba(0, 60, 90, 0.25);
+  outline: 2px dashed rgba(0, 60, 90, 0.6);
+}
+.submerged_cards > * {
+  display: inline-block;
+  margin-right: 2px;
+}
+.submerged_cards:empty {
+  display: none;
+}
+
 /*
 .tech_upgrade:hover {
     outline: blue solid 2px;

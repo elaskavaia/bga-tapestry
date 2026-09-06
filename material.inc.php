@@ -178,6 +178,9 @@ if (!defined("TAPESTRY")) {
     define("BE_GENIES_SQUARE", 348);
     define("BE_WEEFOLK_PLOT", 349);
     define("BE_WEEFOLK_SCORE", 350);
+    define("BE_MERFOLK_DIVE", 351);
+    define("BE_MERFOLK_SURFACE", 352);
+    define("BE_MERFOLK_CULL", 353);
     define("BE_CIV_END", 604);
     define("BE_OP_UNIQUE", 600);
 
@@ -2406,6 +2409,21 @@ $this->benefit_types = [
         // BE_WEEFOLK_SCORE
         "name" => clienttranslate("WEEFOLK score the rows and columns of your planted tokens"),
         "civ" => CIV_WEEFOLK,
+    ],
+    351 => [
+        // BE_MERFOLK_DIVE
+        "name" => clienttranslate("MERFOLK gain a tapestry card, then place all but 2 under this mat"),
+        "civ" => CIV_MERFOLK,
+    ],
+    352 => [
+        // BE_MERFOLK_SURFACE
+        "name" => clienttranslate("MERFOLK gain a tapestry card, then return the submerged tapestry cards to your hand"),
+        "civ" => CIV_MERFOLK,
+    ],
+    353 => [
+        // BE_MERFOLK_CULL
+        "name" => clienttranslate("MERFOLK keep up to 5 tapestry cards"),
+        "civ" => CIV_MERFOLK,
     ],
     502 => [
         //
@@ -5716,6 +5734,31 @@ $this->civilizations = [
             7 => ["top" => 77.3, "left" => 53.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_EXPLORE]],
             8 => ["top" => 70.5, "left" => 58.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_VP_TECH]], //
         ],
+    ],
+    CIV_MERFOLK => [
+        "name" => clienttranslate("MERFOLK"),
+        "description" => [
+            clienttranslate("<i>Merfolk build a hidden world underwater, beside an earthly domain.</i>"),
+            clienttranslate(
+                "At the start of income turns (2-4), gain a [TAPESTRY]. Then, place all but 2 of the [TAPESTRY] from your hand under this mat. During eras 2-4, you may look at these \"submerged\" [TAPESTRY] but may not play, spend, or score them. You may continue to use [TAPESTRY] in your hand (and gain [TAPESTRY] into your hand) as usual."
+            ),
+            clienttranslate(
+                "At the start of income turn 5, gain a [TAPESTRY] and return all submerged [TAPESTRY] to your hand. At the end of income turn 5, you may keep up to 5 [TAPESTRY]; discard the rest of your [TAPESTRY]."
+            ),
+            clienttranslate(
+                "After income turn 5, you will only use [TAPESTRY] (not take income or advance turns). Each time it is your turn:"
+            ),
+            clienttranslate("<li>Discard any number of [TAPESTRY] from your hand for 5 [VP] each, or</li>"),
+            clienttranslate(
+                "<li>Play a [TAPESTRY] as a tapestry onto the era 4 stack for its WHEN PLAYED ability. Any ERA 5 effect triggered occurs immediately. Gain any left-hand charm bonuses as usual.</li>"
+            ),
+            clienttranslate(
+                "If attacked, you may play response cards from your hand. Your game ends when you have expended your [TAPESTRY]."
+            ),
+        ],
+        "exp" => "FF",
+        "automa" => false,
+        "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
     ],
     CIV_WEEFOLK => [
         "name" => clienttranslate("WEEFOLK"),

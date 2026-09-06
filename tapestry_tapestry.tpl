@@ -248,6 +248,7 @@ var jstpl_automa_civ='<div id="automaciv_${cid}" class="automaciv automaciv_${ci
         </div>
         <div id="player_extras_{X}" class="player_extra hand">
             <div id="tapestry_cards_{X}" class="tapestry_cards"></div>
+            <div id="submerged_cards_{X}" class="submerged_cards"></div>
             <div id="territory_tiles_{X}" class="territory_tiles"></div>
             <div id="space_tiles_{X}" class="space_tiles"></div>
             <div id="space_explored_{X}" class="space_explored"></div>

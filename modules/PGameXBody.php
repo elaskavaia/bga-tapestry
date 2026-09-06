@@ -849,9 +849,14 @@ abstract class PGameXBody extends tapcommon {
             );
             if (!$setupphase) {
                 $result["players"][$player_id]["civilizations"] = $this->getCardsInHand($player_id, CARD_CIVILIZATION);
-                $result["players"][$player_id]["tapestry"] = $this->getCollectionFromDB(
+                $played = $this->getCollectionFromDB(
                     "SELECT *  FROM card WHERE card_type='3' AND card_location <> 'hand' AND card_location_arg='$player_id'"
                 );
+                if ($player_id != $current_player_id) {
+                    $submerged = array_filter($played, fn($card) => $card["card_location"] == "submerged");
+                    $played = $this->getCardsFaceDown($submerged) + $played;
+                }
+                $result["players"][$player_id]["tapestry"] = $played;
                 $result["players"][$player_id]["technology"] = $this->getCardsInHand($player_id, 4);
                 $result["players"][$player_id]["technology_updates"] = $this->argUpdateCardList($player_id);
                 $result["players"][$player_id]["space"] = $this->getCollectionFromDB(
@@ -3224,29 +3229,49 @@ abstract class PGameXBody extends tapcommon {
         return !$this->isPlayerFinished($player_id);
     }
 
-    /** One of the player's civilizations keeps them taking advance turns after their income turn 5. */
-    function hasExtendedPlayCiv($player_id) {
+    /**
+     * The player's civilization that keeps them taking turns after their income turn 5, or null.
+     * Two of them on one player is not supported: the first found decides. This is read on every
+     * getTapestryEra, so it warns rather than asserting - a throw here would brick the table.
+     */
+    function getExtendedPlayCiv($player_id): ?AbsCivilization {
+        $found = null;
         foreach ($this->getAllCivs($player_id) as $info) {
-            if ($this->getCivilizationInstance((int) $info["card_type_arg"])->hasExtendedPlay()) {
-                return true;
+            $inst = $this->getCivilizationInstance((int) $info["card_type_arg"]);
+            if (!$inst->hasExtendedPlay()) {
+                continue;
             }
+            if ($found) {
+                $this->warn("ERR:game:03 two extended play civs of player $player_id, " . $found->getType() . " decides");
+                continue;
+            }
+            $found = $inst;
         }
-        return false;
+        return $found;
+    }
+
+    function hasExtendedPlayCiv($player_id) {
+        return $this->getExtendedPlayCiv($player_id) !== null;
     }
 
     /**
-     * The player is past their income turn 5 and still taking turns. An income turn only ever
-     * happens inside the player's own turn, so era 5 outside their turn, or their turn without the
-     * income global, is the period after it (FORMAL_RULES 5.13).
+     * The civilization running the player's turns right now, null unless they are past their income
+     * turn 5 and still playing. An income turn only ever happens inside the player's own turn, so
+     * era 5 outside their turn, or their turn without the income global, is the period after it
+     * (FORMAL_RULES 5.13).
      */
-    function isExtendedPlay($player_id) {
+    function getCivInExtendedPlay($player_id): ?AbsCivilization {
         if ($this->getCurrentEra($player_id) != 5) {
-            return false;
+            return null;
         }
         if ($this->getGameStateValue("current_player_turn") == $player_id && $this->getGameStateValue("income_turn")) {
-            return false;
+            return null;
         }
-        return $this->hasExtendedPlayCiv($player_id);
+        return $this->getExtendedPlayCiv($player_id);
+    }
+
+    function isExtendedPlay($player_id) {
+        return $this->getCivInExtendedPlay($player_id) !== null;
     }
 
     /** The era slot tapestry cards are played on and read from: era 4 stays in force in extended play. */
@@ -4007,7 +4032,9 @@ abstract class PGameXBody extends tapcommon {
             $this->queueBenefitNormal(["choice" => [16, 129]], $player_id, $reason);
         } elseif ($income_turn_count == 1) {
             $this->queueBenefitNormal([16, 129], $player_id, $reason);
-        } elseif ($income_turn_count == 5) {
+        }
+        $this->queueEndOfIncomeCivAbilities($player_id, $income_turn_count);
+        if ($income_turn_count == 5) {
             $this->queueBenefitNormal(BE_CONFIRM, $player_id, $reason); // confirm
         }
         if ($income_turn_count == 1) {
@@ -4670,6 +4697,46 @@ abstract class PGameXBody extends tapcommon {
         $this->effect_moveCard($card_id, $player_id, $loc, $player_id, $state, $message);
     }
 
+    /** Relocate cards without any notification, for callers that send their own. */
+    function dbMoveCards(array $card_ids, string $location, int $location_arg): void {
+        foreach ($card_ids as $card_id) {
+            $this->checkNumber($card_id);
+        }
+        $ids = implode(",", $card_ids);
+        $this->DbQuery("UPDATE card SET card_location='$location', card_location_arg='$location_arg' WHERE card_id IN ($ids)");
+    }
+
+    /**
+     * Move cards into or out of a zone only their owner can see, the awardCard shape: the owner is
+     * told which cards moved, everyone else gets the same rows with the face stripped off.
+     */
+    function moveCardsHidden(array $card_ids, int $player_id, string $location, string $message): void {
+        if (!$card_ids) {
+            return;
+        }
+        $this->dbMoveCards($card_ids, $location, $player_id);
+        $cards = [];
+        foreach ($card_ids as $card_id) {
+            $cards[$card_id] = $this->getCardInfoById($card_id);
+        }
+        $this->notifyWithName("moveCardsHidden", "", ["cards" => $cards, "_private" => true], $player_id);
+        $this->notifyWithName(
+            "moveCardsHidden",
+            $message,
+            ["cards" => $this->getCardsFaceDown($cards), "count" => count($cards), "hidden" => true],
+            $player_id
+        );
+        $this->notifyDeckCounters();
+    }
+
+    /** The same rows with the type stripped, which the client renders as the FACE DOWN CARD. */
+    function getCardsFaceDown(array $cards): array {
+        foreach ($cards as $card_id => $card) {
+            $cards[$card_id]["card_type_arg"] = 0;
+        }
+        return $cards;
+    }
+
     function dbSetStructureLocation($structure_id, $location, $state = null, $message = "", $player_id = null) {
         if ($structure_id === null) {
             return;
@@ -4759,6 +4826,8 @@ abstract class PGameXBody extends tapcommon {
         $this->checkAction("civDecline");
         $player_id = $this->getActivePlayerId();
         $this->systemAssertTrue("invalid civilization for decline $cid", $cid > 0);
+        $income_trigger = $this->getRulesCiv($cid, "income_trigger", []);
+        $this->userAssertTrue(clienttranslate("This ability cannot be declined"), array_get($income_trigger, "decline", true));
         $this->notifyWithName(
             "message",
             clienttranslate('${player_name} declines to use their ${card_name} ability'),
@@ -4816,6 +4885,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_ELDER_ONES:
             case CIV_FAEFOLK:
             case CIV_GENIES:
+            case CIV_MERFOLK:
             case CIV_WEEFOLK:
             case CIV_WEREFOLK:
                 $inst = $this->getCivilizationInstance($cid, true);
@@ -9310,9 +9380,10 @@ abstract class PGameXBody extends tapcommon {
         $this->gamestate->nextState("next");
     }
 
-    /** The toppled owner may answer with a response card, unless they are past their income turn 5. */
+    /** The toppled owner may answer with a response card, unless their extended play civ forbids it. */
     function queueTrapResponse($owner_id, $reason) {
-        if ($this->isExtendedPlay($owner_id)) {
+        $civ = $this->getCivInExtendedPlay($owner_id);
+        if ($civ && !$civ->playsResponseCards()) {
             $this->notifyWithName(
                 "message_error",
                 clienttranslate('${player_name} is past their income turn 5 and cannot play a response card'),
@@ -9901,6 +9972,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_ELDER_ONES:
             case CIV_FAEFOLK:
             case CIV_GENIES:
+            case CIV_MERFOLK:
             case CIV_WEEFOLK:
             case CIV_WEREFOLK:
                 return $civinst->argCivAbilitySingle($player_id, $benefit);
@@ -11294,6 +11366,10 @@ abstract class PGameXBody extends tapcommon {
             $this->takeIncomeAuto(true); // Auto income for in first turn
             return;
         }
+        $extended = $this->getCivInExtendedPlay($player_id);
+        if ($extended && $extended->startExtendedTurn($player_id)) {
+            return; // the civilization ran the turn itself
+        }
         if ($this->ownsLighthouseAndCanPlayIt($player_id)) {
             return; // do not auto-income
         }
@@ -11472,6 +11548,13 @@ abstract class PGameXBody extends tapcommon {
     function queueEraCivAbility($cid, $player_id, $incomeTurn = 0) {
         $inst = $this->getCivilizationInstance($cid, false);
         $inst->queueEraCivAbility($player_id, $incomeTurn);
+    }
+
+    /** Rows a civilization wants resolved before the income turn's confirm row closes the undo window. */
+    function queueEndOfIncomeCivAbilities($player_id, $incomeTurn) {
+        foreach ($this->getAllCivs($player_id) as $info) {
+            $this->getCivilizationInstance((int) $info["card_type_arg"])->queueEndOfIncome((int) $player_id, (int) $incomeTurn);
+        }
     }
 
     function militantBenefits() {

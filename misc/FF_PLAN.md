@@ -220,7 +220,11 @@ complexity order are called out below.
    turned out to be three small pieces rather than a turn loop: the extended play predicate over
    the two existing globals, a finishPlayer helper both ends share, and getTapestryEra. Plan in the
    Elder Ones section below.
-6. Merfolk. The loop again, plus the hidden submerged card zone.
+6. Merfolk. Done. The hidden submerged card zone, and the first civ that takes its own turns in
+   extended play. The engine half was four small pieces rather than a turn loop: the extended play
+   predicate now hands back the civ instance, `startExtendedTurn` lets that civ run the turn,
+   `queueEndOfIncome` puts the cull inside the income turn's undo window, and `moveCardsHidden`
+   plus one `getAllDatas` mask is the whole hidden zone. Plan in the Merfolk section below.
 7. Illuminati. Global die roll provenance, and an opponent's roll leaving the die off the mat.
 8. Psionics. Draw two keep one on every random source in the game, composing additively with
    Empiricism. Out of complexity order deliberately: it is the harder of the two random hooks, but
@@ -250,91 +254,6 @@ complexity order are called out below.
   type in `benefit_types.csv`. The only new row appears to be Faefolk's "score any building", which
   is a choose one over the existing farm, armory, house and market VP benefits.
 - Art is available, so `slots` coordinate tuning is unblocked.
-
-## Weefolk
-
-Three effects on one civ: give a player token to an opponent who plants it in their capital (income
-turns 2-5, or once on a mid game gain), an optional territory-for-building trade (income turns 2-4),
-and row and column scoring off the planted tokens (income turn 5). Nothing on the mat is clicked:
-the art has no token spots, so tokens come straight from the cube supply and there is no pile to
-keep in sync.
-
-### Shape
-
-- Material: `income_trigger` 2-5, `midgame_setup`, `automa => false`, no `slots`. Mid game gain
-  reuses the existing `midgame` benefit_data condition and gives one token only.
-- One civ row per phase, told apart by benefit_data the way Architects and Infiltrators do:
-  `""` give a token (mandatory, one button per eligible opponent via `slots_choice` with
-  `player_id`, the client renders those already), `build` the optional spend, `midgame` give only.
-- Two new benefit rows in the CSV, both `civ => CIV_WEEFOLK`:
-  - `BE_WEEFOLK_PLOT`, owned by the opponent. Genies proved an opponent-owned row makes them
-    active with no new state; this one routes into the existing `placeStructure` state with the
-    token sitting in `capital_structure` as the pending structure. `place_structure` currently
-    accepts landmarks and income buildings only and needs the cube case; `effect_placeOnCapitalMat`
-    then does the rest for free: `capital_occupied` becomes BUILDING_CUBE + 1, which every existing
-    reader already treats as filled but not an income type (district completion, rows and columns
-    at the opponent's income, Architects same-type bonus, MONARCHY skipped).
-  - `BE_WEEFOLK_SCORE`, owned by the Weefolk player, queued behind the plot row on turn 5 so the
-    fifth token counts. Resolved in `awardBenefits`, no interaction.
-- The spend is not a benefit row. It is answered inside the civ ability state, Historians style:
-  the owner clicks a territory tile in their supply then the button, the tile id travels in the
-  `extra` argument of `moveCivCube`, and the server discards it and queues the existing
-  `BE_GAIN_ANY_INCOME_BUILDING`. Decline is the generic civ ability decline.
-- Scoring reads the `structure` table, not the capital grid: for every Weefolk token in a
-  `capital_cell` location, 1 VP per income building in its row and per income building in its
-  column, and 1 VP per landmark whose footprint touches the row, plus 1 per landmark whose footprint
-  touches the column. Per token, so two tokens in one row score that row twice (see rulings).
-
-### Engine work
-
-- A shared "cells covered by a placed structure" helper. The rotation and mask walk is inlined
-  twice today (`effect_placeOnCapitalMat`, `argPlaceStructure`) and the scoring needs it a third
-  time, for landmarks.
-- Full city replacement: when the token has no legal empty plot, `argPlaceStructure` offers the
-  opponent's income building cells instead and the replaced building goes to `hand`, where a
-  structure placed outside the mat already goes and where no count reads it, so it neither scores
-  nor produces. The cell stays occupied, now by the token, so districts and rows keep their state.
-  Landmarks are not offered as replacement targets (see rulings).
-- Zombie opponent: `zombieBenefit` plants the token on a random empty plot, or skips if the city
-  is full. Zombie owner: nothing to do, planted tokens stay put and simply never score.
-- Eligible opponents: real players who have not finished (past income turn 5), the Genies 5.6
-  reading. Zombies stay eligible. Nobody eligible skips the token for that turn.
-
-### Test infrastructure
-
-`GameUT` does not model the capital grid and the framework stubs run no SQL, so placement cannot be
-driven in a test today. Capital access goes through two seams, `getCapitalData` and a new
-`dbSetCapitalCell` that replaces the two inline `UPDATE capital` statements, and `GameUT` overrides
-both with an in-memory grid seeded from a capital mat in material. `getCapitalScoreVP` moves onto
-`getCapitalData` at the same time so the opponent's own row and column income is testable with a
-planted token. A third seam was needed once the tests ran: `dbSetStructureLocationRot`, since the
-placement writes the structure row with raw SQL too. All three landed with the civ, not before it.
-
-### Client
-
-- The token inside the opponent's grid renders for free: the generic cube placement drops
-  `cube_<id>` into whatever div the location names, and the capital cell divs exist. CSS sizes the
-  cube inside a cell.
-- `placeStructure` for the opponent: the capital helper must size a cube like an income building,
-  and cell clicks must accept occupied income building cells in the replacement case.
-- A `CIV_WEEFOLK` case in `onUpdateActionButtons_civAbility` for the `build` phase, the
-  Historians tile-then-button selection.
-
-### Rulings
-
-Recorded in FORMAL_RULES 5.7 to 5.11:
-
-- The turn 5 token is planted before the turn 5 scoring, so it counts.
-- Rows and columns are scored per token, not per distinct row: the card says "more than one
-  token's row", which is only meaningful if two tokens can share a row and both count.
-- Plots are empty cells only. Impassable cells are not plots even for an opponent with
-  TERRAFORMING or RIVERFOLK, since the token is not a building.
-- Replacement in a full city is limited to income buildings. A replaced landmark would leave
-  holes in its footprint and undo district completions; a full city with no income building at all
-  does not occur in practice. The set aside building leaves the game: no VP, not back on the income
-  track.
-- A planted token is nothing to the Weefolk player's own counts: not a structure of theirs on any
-  capital, not an outpost, not an income building.
 
 ## Elder Ones
 
@@ -454,3 +373,135 @@ Recorded in FORMAL_RULES 5.13 to 5.17:
 - Income turn 5 itself is unchanged: VP income, achievement VP and the confirm row all happen; only
   final scoring and the era 6 write are deferred to the end, so a second civ with final scoring
   (Islanders, Riverfolk) scores when the Elder Ones player actually stops.
+
+## Merfolk
+
+Three effects on one civ: on income turns 2-4 gain a tapestry card and submerge all but 2 of the
+hand under the mat (hidden, unusable), on income turn 5 gain a card, surface everything and at the
+end of that turn cull the hand to 5, and extended play afterwards where every turn is either a
+discard for 5 VP each or a play onto the era 4 stack, until the hand is empty. Traps stay playable.
+The mat has no token spots, so no `slots`.
+
+### Shape
+
+- Material: `income_trigger` 2-5 with `decline => false`, `automa => false`, no `slots`, no mid
+  game setup: a civ gained mid game starts submerging at its next income turn in range.
+- Three new CSV rows, all `civ => CIV_MERFOLK`, resolved in `awardBenefits` with no interaction
+  of their own, the Werefolk pattern: the row does the deterministic part and queues a prompt only
+  when there is something to choose. Dive, Surface and Cull are code names only. Row names,
+  buttons and log lines use the card's own words: "submerged" is the card's term, the rest is
+  "place all but 2 under this mat", "return the submerged tapestry cards to your hand" and "keep
+  up to 5 tapestry cards".
+  - `BE_MERFOLK_DIVE` (turns 2-4): `awardCard` one tapestry, a real gain so ACADEMIA style
+    triggers fire, then if the hand holds more than 2, interrupt with the civ row in phase
+    `submerge`.
+  - `BE_MERFOLK_SURFACE` (turn 5): gain one tapestry, then move every `submerged` card back to
+    `hand` with `effect_moveCard`, a return rather than a gain, so no trigger fires.
+  - `BE_MERFOLK_CULL` (end of turn 5): if the hand holds more than 5, interrupt with the civ row
+    in phase `keep`.
+- One civ row, three phases in benefit_data the Weefolk way (`submerge`, `keep`, `turn`), all
+  answered in the civ ability state Historians style: the owner selects cards in their hand and
+  the ids travel comma separated in the `extra` argument of `moveCivCube`.
+  - `submerge`: select the 2 cards to keep, the rest go to `submerged`.
+  - `keep`: select the 5 cards to keep, the rest are discarded.
+  - `turn`: two buttons. "Discard selected cards" awards 5 VP per card, at least one. "Play a
+    tapestry" needs no selection: it queues benefit 64, the existing overplay, which lands on era
+    4 through `getTapestryEra` and covers the old card as usual, and the player picks the card in
+    the play tapestry state. The button is offered only when an era 4 card exists to cover.
+- Submerged cards are plain tapestry rows in location `submerged` with the owner in
+  `card_location_arg`. Nothing that reads the hand sees them, which is the whole rule: hand
+  counts, bonus payments, reveal-hand, the Faefolk visible count.
+
+### Engine work
+
+Two pieces: a hook that lets a civ take over the turn in extended play, and the hidden zone from
+the shared work items. Extended play is the period after income turn 5 for a player whose civ
+answers `hasExtendedPlay()`: `player_income_turns` stays 5, `isExtendedPlay` reads that together
+with the `current_player_turn` and `income_turn` globals, `stTransition` keeps handing the player
+turns, and `finishPlayer` (final scoring, then the era 6 write) is what ends their game.
+
+- `AbsCivilization::startExtendedTurn($player_id): bool`, default false. `stPlayerTurn` asks it
+  right after the first turn check, before the lighthouse and activated ability checks, when the
+  player is in extended play; true means the civ took the turn over and the state moves on.
+  Merfolk: an empty hand ends the game through `endExtendedPlay`, otherwise it queues the civ row
+  in phase `turn` and transitions to the benefit manager the way `takeIncomeAuto` does. A civ on
+  the default keeps the ordinary advance turn.
+- `queueTrapResponse` today drops the response row for any player in extended play. It gates on
+  the civ instead: `AbsCivilization::playsResponseCards()`, true by default and on Merfolk, false
+  on ElderOnes. `isExtendedPlay` gets a sibling that returns the civ instance so the trap gate and
+  the turn hook do not each walk the civ list.
+- An end of income hook: `queueIncomeTurn` calls `queueEndOfIncome($player_id, $incomeTurn)` on
+  each civ between the VP income row and the confirm row, so the cull stays inside the undo window
+  of the income turn. Merfolk queues `BE_MERFOLK_CULL` there at turn 5.
+- Hidden zone. `awardCard` already shows the shape: the owner gets the cards on a private
+  notification, everyone else a public one with the cards stripped. Submerge and surface go
+  through one `moveCardsHidden` helper doing the same, the public half carrying ids and count
+  only. `getAllDatas` masks `card_type_arg` to 0 on another player's `submerged` rows, which the
+  client already renders as the FACE DOWN CARD. A `submerged` entry joins the `tapestry` hand
+  counter in the per-player counters.
+- Nothing to do for the finish: `effect_endOfIncome` already defers `finishPlayer` for a civ with
+  extended play, `getTapestryEra` already answers era 4 in extended play so the play lands on the
+  right stack, and the finished-player guards (`checkAliveForBenefit`, `getPlayersInGame`, the
+  Genies and Weefolk eligibility checks) read era 5 as still playing. The empty hand is the only
+  new end condition and it lives in the civ.
+- Not supported: two extended play civs on one player. The first civ found decides, and a
+  systemAssert says so.
+
+### Test infrastructure
+
+- `effect_moveCard` is raw SQL and gets an in-memory version in `GameUT` over the card model, as
+  `getLatestTapestry`, `awardCard` and `effect_discardCard` already have.
+- Per-player eras (`getCurrentEra` by player id) and the `current_player_turn` and `income_turn`
+  globals are driven from the test. ElderOnesUT carries those overrides today; they move into
+  GameUT now that a second test wants them.
+- Cases: turn 2-4 with 5 cards keeps 2 and submerges 3, with 2 or fewer no prompt; submerged cards
+  invisible to the hand count, a bonus payment and reveal-hand; turn 5 gains, surfaces, then the
+  cull with 7 cards keeps 5 and with 5 has no prompt; after income 5 the era stays 5 and final
+  scoring has not run; an extended turn discarding 3 scores 15 VP, zero selected refused; the play
+  button queues 64 and is absent without an era 4 card; an empty hand at turn start finishes the
+  player exactly once; a trap is still offered to a Merfolk defender and its discard can empty the
+  hand; Merfolk and Elder Ones at one table both in extended play, the game ending once the last
+  finishes.
+
+### Client
+
+- A `submerged_cards_{X}` div next to `tapestry_cards_{X}` in the template, hidden while empty.
+  The owner's is a stock like the hand; an opponent's gets the `tapestry_deck` back and a counter,
+  exactly how their hand is drawn today. Built as the mask only: the face down cards are the
+  count, so no per-player submerged counter was added.
+- `getCardDivLocatonId` maps `submerged` to that div.
+- `case CIV_MERFOLK` in `onUpdateActionButtons_civAbility`: the hand becomes multi selectable in
+  every phase with a description per phase, and the button handler puts the selected ids into
+  `clientStateArgs.extra`, the Weefolk build shape with a list instead of one tile.
+- One handler for the hidden moves, keyed on whether the cards carry a type: faces for the owner,
+  backs and a counter for everyone else.
+
+### Inspect
+
+- Once implemented, a blind review of the diff with `game-review-diff` in offline mode; each
+  finding fixed, or logged in TODO.md when not.
+
+### Rulings
+
+Proposed, to be recorded in FORMAL_RULES
+
+- Submerge means the player picks the 2 cards to keep; a hand of 2 or fewer has nothing to
+  submerge and gets no prompt. Submerged cards are not in hand for anything: counts, payments,
+  reveal-hand effects, opponents' effects that read a hand, and a Faefolk count on the same player.
+- Returning the submerged cards at income 5 is not gaining them, so no "whenever you gain a
+  tapestry" trigger fires. The single card drawn on each of turns 2-5 is a gain.
+- "Keep up to 5" is answered as exactly 5: discarding more gains nothing in extended play, where
+  every card is worth at least 5 VP, so the prompt asks for the 5 to keep and is skipped at 5 or
+  fewer.
+- An extended turn is mandatory: at least one card is discarded when discarding, and there is no
+  pass. A free pass would let a player stall the table indefinitely.
+- Any card can be played in extended play. A WHEN PLAYED effect applies, and a THIS ERA card played
+  there is in effect for the rest of the player's game, since era 4 stays the active tapestry slot
+  in extended play. "ERA 5 effects" and "left-hand charm bonuses" belong to Fantasies & Futures
+  tapestry cards that are not in the code; nothing to do until those cards land.
+- The game ends at the start of a Merfolk turn with an empty hand, not the moment the last card
+  leaves. A trap played in defence counts: it comes out of the hand.
+- Merfolk keeps trap and other response cards in extended play; the card says so explicitly.
+- Income turn 5 is otherwise unchanged: VP income, achievement VP and the confirm row all happen.
+  Only final scoring and the era 6 write are deferred to the end, so a second civ with final
+  scoring (Islanders, Riverfolk) scores when the Merfolk player actually stops.

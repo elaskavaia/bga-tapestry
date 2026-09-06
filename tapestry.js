@@ -931,6 +931,16 @@ define([
             }
 
             break;
+          case this.CON.CIV_MERFOLK:
+            if (bene.phase == "submerge") {
+              this.setDescriptionOnMyTurn(_("MERFOLK: Select the 2 tapestry cards to keep, the rest go under your mat"));
+            } else if (bene.phase == "keep") {
+              this.setDescriptionOnMyTurn(_("MERFOLK: Select the 5 tapestry cards to keep, the rest are discarded"));
+            } else {
+              this.setDescriptionOnMyTurn(_("MERFOLK: Select tapestry cards to discard for 5 VP each, or play one as a tapestry"));
+            }
+            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot multi-select");
+            break;
           case this.CON.CIV_WEEFOLK:
             if (!bene.build) {
               this.setDescriptionOnMyTurn(_("WEEFOLK: Give a player token to an opponent, they place it in their capital"));
@@ -5536,6 +5546,22 @@ define([
         this.clientStateArgs.spot = id;
         const bid = this.clientStateArgs.bid;
         switch (this.clientStateArgs.cid) {
+          case this.CON.CIV_MERFOLK: {
+            const bene = this.gamedatas.gamestate.args.benefits[bid];
+            if (bene.slots_choice[id].play) break; // playing a tapestry needs no selection
+            const cards = this.tapestry[this.player_id].getSelectedItems();
+            if (bene.keep && cards.length != bene.keep) {
+              this.showError(dojo.string.substitute(_("You must select ${keep} tapestry cards to keep"), bene));
+              return;
+            }
+            if (!bene.keep && cards.length == 0) {
+              this.showError(_("You must select at least one tapestry card"));
+              return;
+            }
+            // a list has to travel as extra_js: the extra argument is alphanum_dash, no commas
+            this.clientStateArgs.extra = cards.map((card) => parseInt(card.id));
+            break;
+          }
           case this.CON.CIV_WEEFOLK:
             if (!this.gamedatas.gamestate.args.benefits[bid].build) break;
             const tiles = this.territory[this.player_id].getSelectedItems();
@@ -5693,6 +5719,8 @@ define([
       dojo.subscribe("discardCard", this, "notif_discardCard");
       dojo.subscribe("moveCard", this, "notif_moveCard");
       this.notifqueue.setSynchronous("moveCard", 500);
+      dojo.subscribe("moveCardsHidden", this, "notif_moveCardsHidden");
+      this.notifqueue.setSynchronous("moveCardsHidden", 500);
       //dojo.subscribe('advance', this, "notif_advance");
       dojo.subscribe("trap", this, "notif_trap");
 
@@ -6527,6 +6555,9 @@ define([
           if (card_location == "hand") {
             return "tapestry_cards_" + card.card_location_arg;
           }
+          if (card_location == "submerged") {
+            return "submerged_cards_" + card.card_location_arg;
+          }
           if (card_location == "discard") {
             return "tapestry_deck";
           }
@@ -6685,6 +6716,24 @@ define([
       console.log("notif_moveCard", notif.args);
       if (notif.args.cards) this.moveCards(player_id, notif.args.cards, from);
       else this.moveCard(notif.args, from);
+    },
+
+    // MERFOLK submerge and surface: the owner gets the faces privately, everyone else the backs
+    notif_moveCardsHidden: function (notif) {
+      console.log("notif_moveCardsHidden", notif.args);
+      const player_id = notif.args.player_id;
+      if (notif.args.hidden && player_id == this.player_id) return;
+      for (const key in notif.args.cards) {
+        const card = this.normCard(notif.args.cards[key]);
+        if (notif.args.hidden && card.card_location != "submerged") {
+          // an opponent's hand is drawn as a deck back, so the card back has nowhere to go
+          const div = this.findCardDiv(card.card_id);
+          if (div) dojo.destroy(div);
+          continue;
+        }
+        this.moveCard(card);
+      }
+      // the hand counter comes from the deckCounters notification, which is right for every player
     },
 
     notif_topple: function (notif) {

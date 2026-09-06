@@ -135,3 +135,21 @@ This is my interpretation not actuall formal rules
 5.17 Income turn 5 of an ELDER ONES player is unchanged: VP income, achievement VP and the confirm
     row all happen. Only final scoring and the era 6 write are deferred to the end, so a second civ
     with final scoring (ISLANDERS, RIVERFOLK) scores when the player actually stops.
+5.18 MERFOLK submerge - the player picks the 2 tapestry cards to keep and the rest go under the mat,
+    so a hand of 2 or fewer has nothing to submerge and gets no prompt. Submerged cards are not in
+    hand for anything: hand counts, payments, reveal-hand effects, an opponent's effect that reads
+    a hand, and a FAEFOLK visible count on the same player.
+5.19 Returning the submerged cards at income turn 5 is not gaining them, so no "whenever you gain a
+    tapestry" trigger fires on them. The single card drawn on each of income turns 2-5 is a gain
+    and does trigger.
+5.20 MERFOLK "keep up to 5" is answered as exactly 5. Discarding more gains nothing in extended
+    play, where every card is worth at least 5 VP, so the prompt asks for the 5 to keep and is
+    skipped at 5 cards or fewer.
+5.21 A MERFOLK extended turn is mandatory: at least one card is discarded when discarding, and
+    there is no pass. A free pass would let a player stall the table indefinitely.
+5.22 Any card can be played on a MERFOLK extended turn. A WHEN PLAYED effect applies, and a THIS
+    ERA card played there is in effect for the rest of the player's game, since era 4 stays the
+    active tapestry slot (5.13). The game ends at the start of a turn with an empty hand, not the
+    moment the last card leaves, so a trap played in defence ends the game on the next turn.
+5.23 MERFOLK keeps trap and other response cards in extended play; the card says so explicitly,
+    which is the exception to 5.16. Income turn 5 is otherwise unchanged as in 5.17.

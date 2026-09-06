@@ -50,6 +50,14 @@ The table contains tech cards, tapestry cards, civ cards, tiles and space tiles.
 - `card_location_arg` - player_id when location is `hand` or `era*`; deck position when
   `deck_tapestry` or `discard`
 - `card_location_arg2` - used for special effects
+- `draw` - temporary location of a draw N keep M pick (`keepCard` state), the rest is discarded
+- `submerged` - MERFOLK cards under the civilization mat, `card_location_arg` is the owner. Not in
+  hand for anything that reads the hand, and only the owner sees the faces: `moveCardsHidden` sends
+  the owner the rows and everyone else the same rows with `card_type_arg` zeroed, and `getAllDatas`
+  masks them the same way
+- a draw notifies the owner with the cards (`newCardsMine`) and everyone else without them
+  (`newCards`); `getAllDatas` sends only the current player's tapestry hand, opponents get the
+  `counters.tapestry` count
 
 #### Hex tiles in `card`
 
