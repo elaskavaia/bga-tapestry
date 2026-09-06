@@ -1,5 +1,45 @@
 ## Victoria
 
+REGRESSION REVIEW
+
+Review of every non-civ change since 1fad461 (2026-08-26, the base of the Fantasies and Futures
+work): PGameXBody, tapcommon, taputils, AbsCivilization, the touched Advisors, Historians and
+Infiltrators lines, states, action, material and CSV, client JS and CSS, gameoptions. No hard
+regression found. Behavior changes and risks first, worst first:
+
+- [ ] stBonus drops any bonus row the player holds zero of the payment for, not only a positive
+      quantity they cannot cover (the "$actual == 0 ||" added for the Elder Ones trade). The one
+      pre-existing producer that notices is DEMOCRACY's unlimited row (democracy(), quantity -1):
+      a player whose 3 card draw came up empty now gets "cannot pay for bonus" in the log instead
+      of a Decline-only prompt. Same outcome, different log. Pinned by tests/BonusTest.php.
+      Recommendation: keep as is. A row the player can only decline is better dropped, and the log
+      line says why it vanished. No action.
+
+- [ ] Global 38 (selected_space_tile) is written at every turn start and end of every table, old
+      tables included, and nothing inserts the row: the project never calls
+      setGameStateInitialValue and upgradeTableDb is empty. Reads are gated behind
+      BE_WEREFOLK_EXPLORE, so an old table only ever UPDATEs a missing row. starting_player (37)
+      was added the same way in June 2024. Low.
+      Recommendation: optional insurance, one line in upgradeTableDb behind a $from_version check:
+      INSERT IGNORE INTO global (global_id, global_value) VALUES (38, 0). Without it, grep the
+      error log for selected_space_tile after the deploy.
+
+- [ ] Era 5 cost: getTapestryEra runs isExtendedPlay on every isTapestryActive, stTapestryCard and
+      playTapestryCard call for a player in era 5, and that runs getAllCivs plus a
+      getCivilizationInstance per civ in hand. 42 isTapestryActive call sites, none inside a hex
+      loop. Correctness is unchanged without an extended play civ; this is the hasExtendedPlayCiv
+      memoization item under CLEANUP.
+      Recommendation: do the memoization before the FF deploy. This is the one item that touches
+      every table, not only FF ones, since every player passes through era 5. A per-request cache
+      array on hasExtendedPlayCiv keyed by player id is about five lines.
+
+- [ ] effect_onQueueBenefit runs getCivOwner plus a non-strict getCivilizationInstance for every row
+      queued for a real player under a civ reason. Every caller passes a real civ constant, so the
+      ERR:game:02 assert inside cannot fire today; a reason_civ with a bogus id would now be a
+      system error instead of a log line. Pass-through pinned by tests/BenefitQueueTest.php.
+      Recommendation: no action. It only bites a future bug, and a loud system error is the right
+      response to a bogus civ id.
+
 CODE BUGS
 
 - [ ] BE_TECH_CARD (26) is broken as a queued benefit: awardBenefits case 26 sends it to the invent
