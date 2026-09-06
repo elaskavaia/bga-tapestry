@@ -71,7 +71,7 @@ class Infiltrators extends AbsCivilization {
             $o_count = count($game->getOutpostsInHand($opponent_id));
             $start_info = $game->getStartingPosition($opponent_id);
             $location = $start_info['location'];
-            $cubes = $game->getStructuresSearch(BUILDING_CUBE, null, $location, $player_id, null, false);
+            $cubes = $game->getStructuresSearch(BUILDING_CUBE, null, $location, $player_id, null);
             $prev_cubes = count($cubes);
             $data['slots_choice'][$no]['benefit'] = [171];
             $data['slots_choice'][$no]['player_id'] = $opponent_id;

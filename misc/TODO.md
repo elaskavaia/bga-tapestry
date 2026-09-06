@@ -41,15 +41,10 @@ CODE BUGS
 
 - [ ] During any plain benefit choice the client marks every track cube as active. That comes from the generic fallback at tapestry.js:2060.
 
-- [ ] Infiltrators::argCivAbilitySingle calls getStructuresSearch with six arguments, but that method
-      takes five (PGameXBody.php 1322). The trailing false is silently dropped, so whatever it was meant
-      to switch off has never been in effect. Decide what it was for and either drop it or add the
-      parameter.
-
 TEST GAPS
 
 - [ ] The pre-expansion civs have no test file at all (Architects, Renegades, Craftsmen, Gamblers,
-      Collectors, Infiltrators, Traders, Alchemists, Mystics, Advisors), so their case lines in
+      Collectors, Traders, Alchemists, Mystics, Advisors), so their case lines in
       saction_civTokenAdvance and both argCivAbilitySingle switches can still be deleted with the suite
       green. GameUT::civTokenAdvance is the harness the FF civs now use, so a test file per civ is all
       it takes.
@@ -92,6 +87,20 @@ CLEANUP
       getRemainingDice() seeing an empty mat.
 
 DONE
+
+- [x] Infiltrators, DONE: the sixth argument of the getStructuresSearch call in argCivAbilitySingle was
+      a copy of the ownership flag of effect_placeOnMap, which that method never had - dropped. The two
+      filters it does pass are now pinned by testTokensOnOneCapitalDoNotCountTowardAnother and
+      testCubesOfOtherPlayersOnTheCapitalDoNotCount in the new tests/InfiltratorsTest.php.
+
+- [x] Infiltrators, ANSWERED: the third token counts every cube of the player on that capital
+      territory, whatever civilization put it there - player tokens are indistinguishable in the
+      physical game, so it is threaded in the player's favor. Ruled by Victoria, recorded in
+      FORMAL_RULES 5.12. Test: testATokenLeftByAnotherCivilizationCountsTowardTheThird.
+
+- [x] Infiltrators, DONE: tests/InfiltratorsTest.php covers both slots through action_civTokenAdvance,
+      the third token civilization bonus, midgame entry, the adjustment pack 8 setup tokens and the
+      draw 3 keep 1 rerouting of BE_GAIN_CIV.
 
 - [x] Faefolk, Genies, Weefolk and Werefolk, DONE: the four UT classes now press the button through
       action_civTokenAdvance (GameUT::civTokenAdvance) and read their prompts through the game object's

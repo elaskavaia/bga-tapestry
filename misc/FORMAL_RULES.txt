@@ -111,3 +111,7 @@ This is my interpretation not actuall formal rules
 5.11 A planted token is nothing to the WEEFOLK player's own counts: not a structure of theirs on
     any capital, not an outpost, not an income building. A cube of theirs in their own capital
     (ARCHITECTS) is not a planted token and scores no rows or columns.
+5.12 INFILTRATORS third token - every player token of yours on that opponent's capital city
+    territory counts, whatever put it there. Player tokens are indistinguishable in the physical
+    game, so one left by another civilization (an ISOLATIONISTS token on a territory you conquered)
+    counts toward the third, in the player's favor.
