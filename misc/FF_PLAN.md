@@ -215,7 +215,11 @@ complexity order are called out below.
    got a writer seam so tests can drive placement at all, the mask walk became one helper, and the
    placement paths learned that a cube belonging to someone else is not a building of the capital's
    owner.
-5. Elder Ones. Special handling of era 5, fall back on era 4 tapesrty slot. Special handling of "income" during that (end the game, no extra income). Plan in the Elder Ones section below.
+5. Elder Ones. Done. Special handling of era 5, fall back on era 4 tapestry slot, and special
+   handling of "income" during that (end the game, no extra income). The shared end of game work
+   turned out to be three small pieces rather than a turn loop: the extended play predicate over
+   the two existing globals, a finishPlayer helper both ends share, and getTapestryEra. Plan in the
+   Elder Ones section below.
 6. Merfolk. The loop again, plus the hidden submerged card zone.
 7. Illuminati. Global die roll provenance, and an opponent's roll leaving the die off the mat.
 8. Psionics. Draw two keep one on every random source in the game, composing additively with
@@ -425,9 +429,13 @@ built is the predicate, the deferred finish and the tapestry fallback.
 - The finished panel state keys on the income notification with turn 6, which `finishPlayer` sends,
   so the player greys out when they end and not before.
 
+### Inspect
+
+- after done impl launch blind agent using `game-review-diff` in offline mode to code inspect, review and fix or log finding (not implemented finding log into TODO.md)
+
 ### Rulings
 
-Proposed, to be recorded in FORMAL_RULES 5.13 onwards once confirmed:
+Recorded in FORMAL_RULES 5.13 to 5.17:
 
 - The era 4 tapestry is inactive during income turn 5 itself (1.3 applies as for everyone) and
   active again from the end of income turn 5 until the player's game ends. The predicate gives

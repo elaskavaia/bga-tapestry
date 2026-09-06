@@ -41,7 +41,21 @@ CODE BUGS
 
 - [ ] During any plain benefit choice the client marks every track cube as active. That comes from the generic fallback at tapestry.js:2060.
 
+- [ ] Elder Ones: stPlayerTurn returns early when a civ has activated abilities or the player owns a
+      playable lighthouse (PGameXBody.php around 11290), before the "no affordable advance" test, so an
+      extended play player in that position is never auto-finished and has to press "End my game"
+      themselves. That mirrors what happens to everyone else (no auto income either), but for an Elder
+      Ones player the only other button ends their game for good. Confirm this is the wanted reading of
+      FORMAL_RULES 5.14, or move the extended play test above the two early returns.
+
 TEST GAPS
+
+- [ ] stBonus now drops any bonus row whose payment resource count is 0, not just one whose count is
+      below a positive quantity (PGameXBody.php around 10356, the "$actual == 0 ||" added for the Elder
+      Ones trade). That also changes the pre-existing unlimited row queued at PGameXBody.php:2690
+      (discard any tapestry for 2 VP each): a player with an empty hand now has it dropped silently
+      instead of being shown a Decline button. ElderOnesTest covers the -6 case only; nothing pins the
+      -1 case.
 
 - [ ] The pre-expansion civs have no test file at all (Architects, Renegades, Craftsmen, Gamblers,
       Collectors, Traders, Alchemists, Mystics, Advisors), so their case lines in
@@ -53,6 +67,12 @@ TEST GAPS
       material.inc.php, there is nothing to test against yet.
 
 STUDIO CHECKS
+
+- [ ] Elder Ones: the whole client half is unverified, there are no JS tests. Four things to see on a
+      real table: the two generic slots_choice buttons on income turns 2-4, the bonus state on income
+      turn 5 with a hand of tapestry cards (multi select plus the new "up to 6" prompt), the red "End my
+      game" button with its confirmation dialog on an extended play turn, and the player panel greying
+      out only when the player actually stops rather than at income turn 5.
 
 - [ ] Genies: verify the 8 ring slot positions and the token pile (slot 0, 4 cubes wide) in the studio
       (measured off civ_ff.webp, not yet seen rendered on a real mat).
@@ -70,6 +90,17 @@ STUDIO CHECKS
       occupied but marked possible.
 
 CLEANUP
+
+- [ ] Elder Ones engine methods added to PGameXBody (hasExtendedPlayCiv, isExtendedPlay, getTapestryEra,
+      finishPlayer, endExtendedPlay, dbSetPlayerIncomeTurns, dbSetTapestryEraSlot, queueTrapResponse,
+      action_endMyGame) declare no parameter or return types, unlike everything in modules/civs/. Adding
+      them means touching the GameUT/ElderOnesUT overrides of getCurrentEra, dbSetPlayerIncomeTurns,
+      getPossibleAdvances and finalGameScoring in the same pass, which is why it was left out here.
+
+- [ ] hasExtendedPlayCiv runs a getAllCivs query and instantiates every civ class of the player on each
+      call. isTapestryActive reaches it through getTapestryEra on every era 5 lookup, which for an Elder
+      Ones player is the whole of extended play. getTapestryEra already short circuits eras 1-4 on the
+      era value alone; memoizing the civ answer per player per request would close the rest.
 
 - [ ] Weefolk cleanup: queueEraCivAbility duplicates the income_trigger range test the parent does, the
       same duplication the Werefolk item below calls out. Both should use the AbsCivilization helper
@@ -140,6 +171,15 @@ RULES
 VISUAL EFFECTS
 
 - [ ] Show color of player who owns Nomads buildings?s TODO
+
+- [ ] The benefit stack tooltip prints a bonus row's raw quantity (tapestry.js around 4785), so the
+      Elder Ones trade reads "Bonus:-6 x Tapestry" and the older unlimited row reads "Bonus:-1 x".
+      Render negatives as "up to 6" and "any number of" instead.
+
+- [ ] Elder Ones: during extended play updateCurrentEra finds no era 5 slot and drops the income mat
+      highlight, so the era 4 tapestry that is still in force looks inactive. Keeping era 4 lit while
+      isExtendedPlay holds needs the flag on the client side (argPlayerTurn already sends
+      extended_play, the panel does not get it).
 
 TOOLTIPS
 

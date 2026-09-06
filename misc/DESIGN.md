@@ -173,7 +173,15 @@ Income:
 `playerextra.player_income_turns`:
 
 - 1..5 - current era, bumped at the start of the income turn (`takeIncomeAuto`)
-- 6 - finished, written by `effect_endOfIncome` at turn 5 after `finalGameScoring`
+- 6 - finished, written by `finishPlayer` after `finalGameScoring`. `dbSetPlayerIncomeTurns` is
+  the only writer of the column, `getCurrentEra` the only reader.
+- `effect_endOfIncome` calls `finishPlayer` at the end of income turn 5, except for a player whose
+  civilization has `hasExtendedPlay` (ELDER ONES): they stay at 5 and keep taking advance turns,
+  and `finishPlayer` runs when they stop (`endExtendedPlay`).
+- `isExtendedPlay` - era 5, such a civilization, and income turn 5 over. "Over" is read off the
+  `current_player_turn` and `income_turn` globals below, since an income turn only ever happens
+  inside the player's own turn. `getTapestryEra` returns 4 instead of 5 while it holds, so the
+  era 4 tapestry stays in force (FORMAL_RULES 5.13).
 - `isPlayerFinished` - era > 5, or a zombie real player. `getPlayersInGame` filters on it,
   `stTransition` skips finished players and calls `endOfGame` when nobody is left.
 - The client greys a player out on the `income` notification with `turn_number` >= 6.

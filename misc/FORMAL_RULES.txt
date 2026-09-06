@@ -115,3 +115,23 @@ This is my interpretation not actuall formal rules
     territory counts, whatever put it there. Player tokens are indistinguishable in the physical
     game, so one left by another civilization (an ISOLATIONISTS token on a territory you conquered)
     counts toward the third, in the player's favor.
+5.13 ELDER ONES extended play begins when income turn 5 is over, not when it starts. During income
+    turn 5 itself the player is treated as everyone else is: the era 4 tapestry is inactive (1.3),
+    and a landmark gained then scores no bonus VP. From the end of income turn 5 until their game
+    ends, a THIS ERA card on top of era 4 is in effect again and a tapestry played over it (an
+    overplay benefit) lands on era 4 and covers the old card into era_6 as usual.
+5.14 "No longer able to take an advance turn" is judged at the start of the player's turn by the
+    same affordability test that auto-triggers an income turn for everyone else. Effects that block
+    a track (THEOCRACY, DICTATORSHIP, BROKER OF PEACE) are not consulted, as they are not today.
+    Ending is also voluntary: "may take advance turns" reads as optional, so a player who would
+    rather stop than spend down their tie-break resources gets a button. Ending is final, the way
+    income turn 5 is final after its confirm row, and a further income turn is refused.
+5.15 Every landmark gained after income turn 5 scores the 10 VP, whatever granted it and whoever's
+    turn it is - a SOCIALISM push counts - and track landmarks, district landmarks and landmark
+    cards alike.
+5.16 A player in extended play is still in the game for opponent-facing prompts: they can answer a
+    GENIES wish and receive a WEEFOLK token. They cannot play trap or other response cards, so the
+    row a topple queues for them is dropped.
+5.17 Income turn 5 of an ELDER ONES player is unchanged: VP income, achievement VP and the confirm
+    row all happen. Only final scoring and the era 6 write are deferred to the end, so a second civ
+    with final scoring (ISLANDERS, RIVERFOLK) scores when the player actually stops.
