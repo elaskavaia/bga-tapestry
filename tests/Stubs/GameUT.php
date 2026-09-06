@@ -66,7 +66,8 @@ class GameUT extends Tapestry {
 
     /** The real one moves the row with raw SQL, which the in memory card model never sees. */
     function effect_discardCard($card_id, $player_id = null, $location = null, $private = false) {
-        foreach (is_array($card_id) ? $card_id : [$card_id] as $id) {
+        foreach (is_array($card_id) ? $card_id : [$card_id] as $card) {
+            $id = is_array($card) ? $card["card_id"] : $card;
             $this->cards->setLocation((int) $id, $location ?? "discard");
         }
     }
@@ -174,6 +175,28 @@ class GameUT extends Tapestry {
     function getCivOwner($civ_id) {
         $card = $this->getCardInfoSearch(CARD_CIVILIZATION, $civ_id, "hand");
         return $card ? $card["card_location_arg"] : null;
+    }
+
+    /**
+     * The real ones read the card table with raw SQL, which the in memory card model never sees.
+     * The SQL takes the highest card_id of the era, which is the card played last over the others.
+     */
+    function getLatestTapestry($player_id, $era = "%") {
+        $found = $this->getCardsSearch(CARD_TAPESTRY, null, "era$era", $player_id);
+        return $found ? end($found) : null;
+    }
+
+    function getTapestryOn($player_id, $loc) {
+        $found = $this->getCardsSearch(CARD_TAPESTRY, null, $loc, $player_id);
+        return $found ? end($found) : null;
+    }
+
+    /** The real one moves the row with raw SQL, which the in memory card model never sees. */
+    function dbSetTapestryEraSlot($card_id, $location, $player_id = 0) {
+        $this->cards->setLocation((int) $card_id, $location);
+        if ($player_id) {
+            $this->cards->setLocationArg((int) $card_id, $player_id);
+        }
     }
 
     /** Give a player a civilization the way the setup deal does, as a card in their hand. */
@@ -430,5 +453,18 @@ class GameUT extends Tapestry {
 
     function getCurrentEra($player_id) {
         return $this->era ?? parent::getCurrentEra($player_id);
+    }
+
+    // ------------------------------------------------------------- scores
+
+    /** player_score per player, playerextra is not modelled. */
+    public array $scores = [];
+
+    function dbGetScore($player_id) {
+        return $this->scores[(int) $player_id] ?? 0;
+    }
+
+    function dbSetScore($player_id, $count) {
+        $this->scores[(int) $player_id] = (int) $count;
     }
 }

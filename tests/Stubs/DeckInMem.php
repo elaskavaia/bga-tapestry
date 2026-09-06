@@ -46,6 +46,14 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
         }
     }
 
+    function setLocationArg($id, $location_arg): void {
+        $id = (int) $id;
+        if (!isset($this->rows[$id])) {
+            throw new feException("DeckInMem: no row $id in $this->table");
+        }
+        $this->rows[$id]["location_arg"] = (int) $location_arg;
+    }
+
     function setTypeArg($id, $type_arg): void {
         $id = (int) $id;
         if (!isset($this->rows[$id])) {
