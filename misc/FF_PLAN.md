@@ -215,8 +215,7 @@ complexity order are called out below.
    got a writer seam so tests can drive placement at all, the mask walk became one helper, and the
    placement paths learned that a cube belonging to someone else is not a building of the capital's
    owner.
-5. Elder Ones. Build the post income 5 alternate turn loop first, as a standalone engine change
-   verified against existing civilizations, then the civ itself, which adds nothing else new.
+5. Elder Ones. Special handling of era 5, fall back on era 4 tapesrty slot. Special handling of "income" during that (end the game, no extra income)
 6. Merfolk. The loop again, plus the hidden submerged card zone.
 7. Illuminati. Global die roll provenance, and an opponent's roll leaving the die off the mat.
 8. Psionics. Draw two keep one on every random source in the game, composing additively with
