@@ -191,6 +191,14 @@ class GameUT extends Tapestry {
         return $found ? end($found) : null;
     }
 
+    /** The real one moves the rows with raw SQL, which the in memory card model never sees. */
+    function dbMoveCards(array $card_ids, string $location, int $location_arg): void {
+        foreach ($card_ids as $card_id) {
+            $this->cards->setLocation((int) $card_id, $location);
+            $this->cards->setLocationArg((int) $card_id, $location_arg);
+        }
+    }
+
     /** The real one moves the row with raw SQL, which the in memory card model never sees. */
     function dbSetTapestryEraSlot($card_id, $location, $player_id = 0) {
         $this->cards->setLocation((int) $card_id, $location);
@@ -451,8 +459,31 @@ class GameUT extends Tapestry {
         return -1;
     }
 
+    /** getCurrentEra() per player, for tests where the players are not all in the same era. */
+    public array $eras = [];
+
     function getCurrentEra($player_id) {
-        return $this->era ?? parent::getCurrentEra($player_id);
+        return $this->eras[(int) $player_id] ?? ($this->era ?? parent::getCurrentEra($player_id));
+    }
+
+    /** The real one writes playerextra, which the framework stubs do not model. */
+    function dbSetPlayerIncomeTurns($player_id, $turns) {
+        $this->eras[(int) $player_id] = (int) $turns;
+    }
+
+    /** The player is inside their own income turn: the era may be 5 but extended play has not begun. */
+    function startIncomeTurn(int $player_id, int $era): void {
+        $this->eras[$player_id] = $era;
+        $this->setGameStateValue("current_player_turn", $player_id);
+        $this->setGameStateValue("income_turn", 1);
+        $this->gamestate->changeActivePlayer($player_id);
+    }
+
+    /** An ordinary turn, the state every turn is in once its income phase is over. */
+    function startPlayerTurn(int $player_id): void {
+        $this->setGameStateValue("current_player_turn", $player_id);
+        $this->setGameStateValue("income_turn", 0);
+        $this->gamestate->changeActivePlayer($player_id);
     }
 
     // ------------------------------------------------------------- scores

@@ -17,8 +17,6 @@ class ElderOnesUT extends GameUT {
     const OWNER = 11;
     const OPPONENT = 12;
 
-    /** getCurrentEra() per player, on top of the single era GameUT models. */
-    public array $eras = [];
     /** What getPossibleAdvances() answers, playerextra and the track cubes are not modelled. */
     public array $advances = [];
     /** Players finalGameScoring() ran for, in order. */
@@ -40,35 +38,12 @@ class ElderOnesUT extends GameUT {
         $this->gamestate->jumpToState(2);
     }
 
-    function getCurrentEra($player_id) {
-        return $this->eras[$player_id] ?? parent::getCurrentEra($player_id);
-    }
-
-    function dbSetPlayerIncomeTurns($player_id, $turns) {
-        $this->eras[(int) $player_id] = (int) $turns;
-    }
-
     function getPossibleAdvances($onlyValid = true) {
         return $this->advances;
     }
 
     function finalGameScoring($player_id) {
         $this->finalScored[] = (int) $player_id;
-    }
-
-    /** The player is inside their own income turn: the era is 5 but extended play has not begun. */
-    function startIncomeTurn(int $player_id, int $era): void {
-        $this->eras[$player_id] = $era;
-        $this->setGameStateValue("current_player_turn", $player_id);
-        $this->setGameStateValue("income_turn", 1);
-        $this->gamestate->changeActivePlayer($player_id);
-    }
-
-    /** An ordinary advance turn, the state every turn is in once its income phase is over. */
-    function startPlayerTurn(int $player_id): void {
-        $this->setGameStateValue("current_player_turn", $player_id);
-        $this->setGameStateValue("income_turn", 0);
-        $this->gamestate->changeActivePlayer($player_id);
     }
 
     function useCivAbility(int $player_id, int $spot): void {
