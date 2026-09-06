@@ -49,13 +49,8 @@ class GeniesUT extends GameUT {
         $this->_setPlayerBasicInfo($players);
     }
 
-    /** What action_civTokenAdvance does: cash the civ row, then let the civ queue its work. */
     function useCivAbility(int $player_id): void {
-        $row = $this->getCurrentBenefit(CIV_GENIES, "civ");
-        $args = ["benefit_data" => $row["benefit_data"]];
-        $this->benefitCashed($row);
-        $this->interruptBenefit();
-        $this->genies()->moveCivCube($player_id, Genies::CHOICE_USE, "", $args);
+        $this->civTokenAdvance(CIV_GENIES, $player_id, Genies::CHOICE_USE);
     }
 
     function tokenLocation(int $player_id): string {
@@ -169,7 +164,7 @@ final class GeniesTest extends TestCase {
     function testEveryIncomeTurnOffersOneButtonAndNoDecline() {
         foreach ([2, 5] as $era) {
             $this->game->era = $era;
-            $args = $this->game->genies()->argCivAbilitySingle(GeniesUT::OWNER, ["benefit_data" => ""]);
+            $args = $this->game->argCivAbilitySingle(GeniesUT::OWNER, CIV_GENIES, ["benefit_data" => ""]);
             $this->assertFalse($args["decline"], "era $era");
             $this->assertEquals([Genies::CHOICE_USE], array_keys($args["slots_choice"]), "era $era");
         }

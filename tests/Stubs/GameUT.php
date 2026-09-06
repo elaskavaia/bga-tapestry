@@ -71,7 +71,22 @@ class GameUT extends Tapestry {
         }
     }
 
-    function prepareUndoSavepoint($first = false) {}
+    /** Active player at every savepoint taken, in order; the real one writes the undo tables. */
+    public array $undoSavepoints = [];
+
+    function prepareUndoSavepoint($first = false) {
+        $this->undoSavepoints[] = (int) $this->getActivePlayerId();
+    }
+
+    /**
+     * The civ ability action as the client sends it, so the civ dispatch in argCivAbilitySingle and
+     * saction_civTokenAdvance is exercised rather than the civ class being called directly.
+     */
+    function civTokenAdvance(int $cid, int $player_id, int $spot, $extra = ""): void {
+        $this->gamestate->changeActivePlayer($player_id);
+        $this->gamestate->jumpToState(14);
+        $this->action_civTokenAdvance($cid, $spot, $extra);
+    }
 
     /** PHPUnit prints the trace of anything that actually escapes, the manual dump is only noise. */
     function logStackTrace($message) {}
@@ -96,6 +111,16 @@ class GameUT extends Tapestry {
 
     function notificationsOfType(string $type): array {
         return array_values(array_filter($this->notifications(), fn($notif) => $notif["type"] == $type));
+    }
+
+    /** The first notification whose log holds the fragment, for logs that share a type. */
+    function notificationLike(string $fragment): array {
+        foreach ($this->notifications() as $notif) {
+            if (str_contains($notif["log"], $fragment)) {
+                return $notif;
+            }
+        }
+        throw new BgaSystemException("no notification containing $fragment");
     }
 
     // ------------------------------------------------------------ card table
@@ -306,11 +331,17 @@ class GameUT extends Tapestry {
         $this->benefits->deleteOfPlayer($player_id);
     }
 
-    /** What stBenefitManager does with a pending standard row: resolve it, then cash it on true. */
+    /**
+     * What stBenefitManager does with the row on top of the stack: resolve it, then cash it on
+     * true. It pops the head rather than searching, so a test naming a row that is queued behind
+     * something else fails instead of quietly resolving out of order.
+     */
     function resolveBenefit(int $ben, int $player_id = 1): void {
-        $row = $this->benefits->first(["benefit_category" => "standard", "benefit_type" => $ben]);
-        if (!$row) {
-            throw new BgaSystemException("no pending row for benefit $ben");
+        $row = $this->benefitQueue()[0] ?? null;
+        if (!$row || $row["benefit_category"] != "standard" || $row["benefit_type"] != $ben || $row["benefit_player_id"] != $player_id) {
+            throw new BgaSystemException(
+                "benefit $ben of player $player_id is not on top of the stack: " . implode(",", $this->benefitLabels())
+            );
         }
         if ($this->awardBenefits($player_id, $ben, 1, $row["benefit_data"])) {
             $this->benefitCashed($row["benefit_id"]);

@@ -27,11 +27,8 @@ class WerefolkUT extends GameUT {
         return $this->addCard(CARD_SPACE, "civilization_" . CIV_WEREFOLK);
     }
 
-    /** What action_civTokenAdvance does: cash the civ row, then let the civ queue its work. */
     function useCivAbility(int $spot, int $player_id = 1): void {
-        $this->benefitCashed($this->getCurrentBenefit(CIV_WEREFOLK, "civ"));
-        $this->interruptBenefit();
-        $this->getCivilizationInstance(CIV_WEREFOLK, true)->moveCivCube($player_id, $spot, "", []);
+        $this->civTokenAdvance(CIV_WEREFOLK, $player_id, $spot);
     }
 }
 
@@ -106,7 +103,7 @@ final class WerefolkTest extends TestCase {
      * civ ability state offers a player the order of when a second income civ is pending.
      */
     function testAbilityOffersOneButtonAndNoDecline() {
-        $args = $this->werefolk()->argCivAbilitySingle(1, ["benefit_data" => ""]);
+        $args = $this->game->argCivAbilitySingle(1, CIV_WEREFOLK, ["benefit_data" => ""]);
         $this->assertFalse($args["decline"]);
         $this->assertEquals([Werefolk::CHOICE_FLIP], array_keys($args["slots_choice"]));
     }
@@ -183,6 +180,7 @@ final class WerefolkTest extends TestCase {
     function testMarkerIsClearedWhenTheAbilityEnds() {
         $this->useAbility(Werefolk::FACE_DOWN);
         $this->assertNotEquals(0, $this->game->getGameStateValue("selected_space_tile"));
+        $this->game->benefitCashed($this->game->benefitQueue()[0]); // the advance the flip queued, answered
         $this->game->resolveBenefit(BE_CIV_END);
         $this->assertEquals(0, $this->game->getGameStateValue("selected_space_tile"));
     }

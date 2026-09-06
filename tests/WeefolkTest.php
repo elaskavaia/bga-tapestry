@@ -55,23 +55,17 @@ class WeefolkUT extends GameUT {
         $this->_setPlayerBasicInfo($players);
     }
 
-    /** What action_civTokenAdvance does: cash the civ row, then let the civ queue its work. */
     function useCivAbility(int $player_id, int $spot, $extra = ""): void {
-        $row = $this->getCurrentBenefit(CIV_WEEFOLK, "civ");
-        if (!$row) {
-            throw new BgaSystemException("no pending civ row for weefolk");
-        }
-        $args = $this->weefolk()->argCivAbilitySingle($player_id, $row);
-        $this->benefitCashed($row);
-        $this->interruptBenefit();
-        $this->weefolk()->moveCivCube($player_id, $spot, $extra, $args);
+        $this->civTokenAdvance(CIV_WEEFOLK, $player_id, $spot, $extra);
     }
 
-    /** What stBenefitManager does with the plot row: make the opponent active, then resolve it. */
+    /** The real pop of the plot row: stBenefitManager switches to the opponent and resolves it. */
     function offerPlot(int $opponent_id): void {
-        $this->gamestate->changeActivePlayer($opponent_id);
         $this->gamestate->jumpToState(18);
-        $this->resolveBenefit(BE_WEEFOLK_PLOT, $opponent_id);
+        $this->stBenefitManager();
+        if ($this->getActivePlayerId() != $opponent_id) {
+            throw new BgaSystemException("the plot row did not make $opponent_id active");
+        }
     }
 
     function plotOptions(): array {
@@ -168,7 +162,7 @@ final class WeefolkTest extends TestCase {
     function testGivePromptOffersOneMandatoryButtonPerOpponent() {
         $game = $this->newGame(3);
         $game->queueEraCivAbility(CIV_WEEFOLK, WeefolkUT::OWNER, 2);
-        $args = $game->weefolk()->argCivAbilitySingle(WeefolkUT::OWNER, $game->getCurrentBenefit(CIV_WEEFOLK, "civ"));
+        $args = $game->argCivAbilitySingle(WeefolkUT::OWNER, CIV_WEEFOLK, $game->getCurrentBenefit(CIV_WEEFOLK, "civ"));
 
         $this->assertFalse($args["decline"]);
         $this->assertEquals([1, 2], array_keys($args["slots_choice"]));
@@ -180,7 +174,7 @@ final class WeefolkTest extends TestCase {
         $game = $this->newGame(3);
         $game->eras[WeefolkUT::OPPONENT] = 6;
         $game->queueEraCivAbility(CIV_WEEFOLK, WeefolkUT::OWNER, 2);
-        $args = $game->weefolk()->argCivAbilitySingle(WeefolkUT::OWNER, $game->getCurrentBenefit(CIV_WEEFOLK, "civ"));
+        $args = $game->argCivAbilitySingle(WeefolkUT::OWNER, CIV_WEEFOLK, $game->getCurrentBenefit(CIV_WEEFOLK, "civ"));
 
         $this->assertEquals([WeefolkUT::OPPONENT + 1], array_column($args["slots_choice"], "player_id"));
     }
@@ -383,6 +377,42 @@ final class WeefolkTest extends TestCase {
         $this->game->conquer_structure(3, 3);
     }
 
+    // ------------------------------------------------------------------ undo
+
+    /**
+     * The plot row makes the opponent active inside the owner's income turn. Without a savepoint at
+     * that switch the opponent's undo would rewind into the owner's turn and replay the gift.
+     */
+    function testMakingTheOpponentActiveTakesAnUndoSavepoint() {
+        $this->giveToken();
+        $this->assertEquals([], $this->game->undoSavepoints, "the gift alone makes nobody else active");
+
+        $this->game->offerPlot(WeefolkUT::OPPONENT);
+        $this->assertEquals([WeefolkUT::OPPONENT], $this->game->undoSavepoints);
+        $this->assertEquals(WeefolkUT::OPPONENT, (int) $this->game->getActivePlayerId());
+    }
+
+    /** Nobody becomes active on the zombie branch, so the civ has to take the savepoint itself. */
+    function testPlantingForAZombieTakesItsOwnUndoSavepoint() {
+        $this->game->makeZombie(WeefolkUT::OPPONENT);
+        $this->game->seedRand(0);
+        $this->giveToken();
+
+        $this->assertEquals([WeefolkUT::OWNER], $this->game->undoSavepoints);
+    }
+
+    /** The trade prompt stays with the owner, so it adds no savepoint of its own. */
+    function testTradePromptTakesNoSavepoint() {
+        $this->game->addCard(CARD_TERRITORY, "hand", WeefolkUT::OWNER, 3);
+        $this->giveToken();
+        $this->game->offerPlot(WeefolkUT::OPPONENT);
+        $this->game->place_structure(0, 5, 7);
+        $savepoints = $this->game->undoSavepoints;
+
+        $this->game->useCivAbility(WeefolkUT::OWNER, Weefolk::CHOICE_BUILD, 3);
+        $this->assertEquals($savepoints, $this->game->undoSavepoints);
+    }
+
     // ----------------------------------------------------------------- trade
 
     function testTradeDiscardsTheTileAndQueuesTheIncomeBuilding() {
@@ -407,7 +437,7 @@ final class WeefolkTest extends TestCase {
     function testTradePromptCanBeDeclined() {
         $this->game->addCard(CARD_TERRITORY, "hand", WeefolkUT::OWNER, 3);
         $this->giveToken();
-        $args = $this->game->weefolk()->argCivAbilitySingle(WeefolkUT::OWNER, $this->game->getCurrentBenefit(CIV_WEEFOLK, "civ"));
+        $args = $this->game->argCivAbilitySingle(WeefolkUT::OWNER, CIV_WEEFOLK, $this->game->getCurrentBenefit(CIV_WEEFOLK, "civ"));
 
         $this->assertTrue($args["decline"]);
         $this->assertTrue($args["build"]);
@@ -495,6 +525,54 @@ final class WeefolkTest extends TestCase {
         $this->assertEquals(0, $this->scoredVP());
     }
 
+    // --------------------------------------------------- other civilizations
+
+    /**
+     * INFILTRATORS is the other civ that puts a cube of its owner into someone else's space, on the
+     * opponent's start hex rather than in their capital. Only what sits in a capital cell is a
+     * planted token, so the two cube stacks are scored apart (FORMAL_RULES 5.11).
+     */
+    function testInfiltratorsCubesOnTheStartHexDoNotScore() {
+        $game = $this->game;
+        $game->putStructure(WeefolkUT::OPPONENT, BUILDING_MARKET, 5, 5);
+        $game->addCubeAt(WeefolkUT::OWNER, $this->startHex(WeefolkUT::OPPONENT));
+        $game->addCubeAt(WeefolkUT::OWNER, "capital_cell_" . WeefolkUT::OPPONENT . "_5_7");
+        $game->queueBenefitNormal(BE_WEEFOLK_SCORE, WeefolkUT::OWNER, reason_civ(CIV_WEEFOLK));
+        $game->resolveBenefit(BE_WEEFOLK_SCORE, WeefolkUT::OWNER);
+
+        $this->assertEquals(1, $this->scoredVP(), "the market in the planted token's row, and nothing else");
+    }
+
+    /**
+     * The other direction: INFILTRATORS counts its own cubes on the start hex to decide the third
+     * cube civilization bonus, and a token planted in that same opponent's capital is not one.
+     */
+    function testPlantedTokenDoesNotCountTowardTheInfiltratorsBonus() {
+        $game = $this->game;
+        $game->giveCiv(WeefolkUT::OWNER, CIV_INFILTRATORS);
+        $start = $this->startHex(WeefolkUT::OPPONENT);
+        $game->addCubeAt(WeefolkUT::OWNER, $start);
+        $game->addCubeAt(WeefolkUT::OWNER, "capital_cell_" . WeefolkUT::OPPONENT . "_5_7");
+
+        $args = $game->argCivAbilitySingle(WeefolkUT::OWNER, CIV_INFILTRATORS, ["benefit_data" => ""]);
+        $choices = array_filter($args["slots_choice"], fn($slot) => array_get($slot, "player_id") == WeefolkUT::OPPONENT);
+        $this->assertCount(1, $choices);
+        $choice = reset($choices);
+        $this->assertEquals(1, $choice["cubes"], "one cube on the hex, the planted token is not on it");
+        $this->assertEquals([171], $choice["benefit"], "no civilization bonus, that needs a third hex cube");
+    }
+
+    /** A foreign cube fills a plot but is no building of that capital, so tokens never score each other. */
+    function testPlantedTokensDoNotScoreEachOther() {
+        $game = $this->game;
+        $game->addCubeAt(WeefolkUT::OWNER, "capital_cell_" . WeefolkUT::OPPONENT . "_5_7");
+        $game->addCubeAt(WeefolkUT::OWNER, "capital_cell_" . WeefolkUT::OPPONENT . "_5_9");
+        $game->queueBenefitNormal(BE_WEEFOLK_SCORE, WeefolkUT::OWNER, reason_civ(CIV_WEEFOLK));
+        $game->resolveBenefit(BE_WEEFOLK_SCORE, WeefolkUT::OWNER);
+
+        $this->assertEquals(0, $this->scoredVP());
+    }
+
     // ---------------------------------------------------------------- zombie
 
     /**
@@ -554,6 +632,12 @@ final class WeefolkTest extends TestCase {
 
         $this->assertNull($this->game->getPendingStructure());
         $this->assertEquals("hand", $this->game->structureLocation($pending));
+    }
+
+    /** The opponent's start hex, where INFILTRATORS parks a cube. */
+    private function startHex(int $player_id): string {
+        $this->game->addCard(CARD_CAPITAL, "hand", $player_id, 1);
+        return $this->game->getStartingPosition($player_id)["location"];
     }
 
     private function scoredVP(): int {
