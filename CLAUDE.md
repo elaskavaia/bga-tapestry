@@ -124,21 +124,7 @@ the server engine described above maintains.
 
 ## Conventions
 
-- Assertions: `userAssertTrue($message, $cond)` for player-facing rule violations,
-  `systemAssertTrue("ERR:Class:NN", $cond)` for internal invariants. The `ERR:` codes are stable
-  identifiers used in bug reports - reuse the existing numbering scheme per class.
-- Prefer `notifyWithName()` over raw `notifyAllPlayers` / `notifyPlayer`: it injects `player_name`,
-  collects `i18n` and `preserve` keys, routes private notifications via `_private`, and appends
-  `Async` to the type for `noa`/`nop`/`nod` args. Use the `notifArgsAdd*` helpers to attach
-  token/card/track names so the log stays translatable.
-- Wrap player-visible strings in `clienttranslate()` - states, notifications and the message of a
-  `userAssertTrue`. `totranslate()` is deprecated by the framework; do not introduce it in new code.
-  Existing uses stay until touched. [gameinfos.inc.php](gameinfos.inc.php) and
-  [gameoptions.inc.php](gameoptions.inc.php) still use it: the framework's replacement there is JSON
-  options/stats, not `clienttranslate()`, so leave those alone.
-- Name tests in [tests/](tests/) after the feature under test (e.g. `UtilitariansTest.php`), never
-  after a bug report number - bug numbers belong in the test docblocks. Shared test harness classes
-  live in [tests/Stubs/](tests/Stubs/) (`GameUT`); a test file never requires another test file.
-- `_ide_helper.php` and `bga-framework.d.ts` exist only for IDE autocomplete; do not edit them.
-- `misc/` and `tests/` are not deployed to BGA - `misc/` holds docs, CSV sources and tools only.
+Naming, assertion, notification, test and formatting conventions are in
+[misc/CODE_STYLE.md](misc/CODE_STYLE.md) - read it before writing code.
+
 - `misc/rename.sh` produces the renamed `taptest` copy of the project used for studio testing.
