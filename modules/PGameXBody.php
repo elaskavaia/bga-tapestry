@@ -503,7 +503,8 @@ abstract class PGameXBody extends tapcommon {
         $cards = $this->collectCivDeckCards($automa);
         $this->cards->createCards($cards, "deck_civ");
         $this->cards->shuffle("deck_civ");
-        $this->padCivDeck($automa, count($cards));
+        $pickedCivs = count($cards);
+
         if ($this->isAdjustments9()) {
             // testing option is pointless unless somebody is actually offered the reworked Alchemists
             $alchemists = $this->cards->getCardsOfTypeInLocation(CARD_CIVILIZATION, CIV_ALCHEMISTS, "deck_civ");
@@ -591,6 +592,9 @@ abstract class PGameXBody extends tapcommon {
                 $this->dbAddCube($player_id, "tech_spot_" . $a . "_0");
             }
         }
+        // add extra civs to deck if starting with less then 20
+        $this->padCivDeck($automa, $pickedCivs);
+
         $this->reloadPlayersBasicInfos();
         // $no = $this->getGameStateValue('automa_no');
         // $playerswithbots = $this->loadPlayersBasicInfosWithBots();
