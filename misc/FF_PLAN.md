@@ -215,7 +215,7 @@ complexity order are called out below.
    got a writer seam so tests can drive placement at all, the mask walk became one helper, and the
    placement paths learned that a cube belonging to someone else is not a building of the capital's
    owner.
-5. Elder Ones. Special handling of era 5, fall back on era 4 tapesrty slot. Special handling of "income" during that (end the game, no extra income)
+5. Elder Ones. Special handling of era 5, fall back on era 4 tapesrty slot. Special handling of "income" during that (end the game, no extra income). Plan in the Elder Ones section below.
 6. Merfolk. The loop again, plus the hidden submerged card zone.
 7. Illuminati. Global die roll provenance, and an opponent's roll leaving the die off the mat.
 8. Psionics. Draw two keep one on every random source in the game, composing additively with
@@ -331,3 +331,118 @@ Recorded in FORMAL_RULES 5.7 to 5.11:
   track.
 - A planted token is nothing to the Weefolk player's own counts: not a structure of theirs on any
   capital, not an outpost, not an income building.
+
+## Elder Ones
+
+Three effects on one civ: a choose-one gain on income turns 2-4, a tapestry-for-resources trade on
+income turn 5, and extended play after income turn 5 (advance turns only, the era 4 tapestry stays in
+effect, 10 VP per landmark, the game ends when no advance is affordable). The mat has no token spots,
+so nothing on it is clicked and there are no `slots`.
+
+### Shape
+
+- Material: `income_trigger` 2-5, `automa => false` (the bot has no advance turns to extend), no
+  `slots`, no mid game setup.
+- Turns 2-4 go through the civ ability state the Faefolk way: two `slots_choice` buttons, one queueing
+  `BE_ANYRES`, the other `[BE_TAPESTRY, BE_TAPESTRY]`, `decline => false`. A choose-one row cannot
+  hold a two-benefit option, and the civ state keeps the ability in the pool a player orders other
+  income civs against.
+- Turn 5 is not a civ state at all. `queueEraCivAbility` queues a bonus row, the DEMOCRACY shape:
+  pay `BE_TAPESTRY`, gain `5,5` per card. The bonus state already offers the hand for selection and
+  a Decline button, and `action_acceptBonus` already discards the paid cards and queues the gain once
+  per card. Only the cap is missing (see engine work).
+- No new benefit rows in the CSV: every gain is an existing type, and the trade is a bonus row.
+- The landmark VP is `awardVP(10)` from a new `onGainLandmark` civ hook, guarded by the extended play
+  predicate.
+
+### Engine work
+
+The "post income 5 alternate turn loop" from the shared work items turns out not to be a loop: a
+player is finished when `player_income_turns` is 6 and `stTransition` already skips finished
+players, so a player left at 5 keeps getting turns with no state machine change. What has to be
+built is the predicate, the deferred finish and the tapestry fallback.
+
+- `AbsCivilization::hasExtendedPlay()`, false by default, true on ElderOnes. Merfolk sets it too
+  later; its turn content is its own problem, this item only keeps the player in the game.
+- `isExtendedPlay($player_id)`: era 5, a civ with extended play, and income turn 5 over. The last
+  part is the existing `income_turn` global together with `current_player_turn`: an income turn
+  only ever happens inside the player's own turn, so era 5 while it is not their turn, or their
+  turn without that global, is extended play. No schema change.
+- `effect_endOfIncome` at turn 5 for such a player skips final scoring and the era 6 write and
+  announces that they play on. The two lines it skips move into a `finishPlayer($player_id)`
+  helper (final scoring, era 6, the income notification the client keys on) so the deferred end
+  and the normal end are the same code.
+- `stPlayerTurn`: today "no affordable advance" auto-takes income. In extended play it calls
+  `finishPlayer` and moves to the next player instead. `takeIncome` refuses with `userAssertTrue`
+  in extended play and `argPlayerTurn` gains an `extended_play` flag so the client can swap the
+  button. An explicit `endGame` action on the same state lets the player stop while an advance is
+  still affordable (see rulings).
+- `getTapestryEra($player_id)`: 4 in extended play, `getCurrentEra` otherwise. Readers to switch:
+  `isTapestryActive`, `playTapestryCard` (both the previous-card lookup and the `era$era`
+  destination, so an overplay lands on era 4 and covers the old card into `era_6` as usual),
+  `stTapestryCard` for benefit 64 (its "no tapestry in round 5" refusal). The income tapestry (2-4
+  only) and "first to era" (below 5) never see era 5 and stay as they are.
+- Bonus cap: `benefit_quantity` below -1 on a bonus row is an upper bound (-6 = up to six), -1
+  stays unlimited. `action_acceptBonus` asserts the count, `stBonus` skips the row when the player
+  holds no card at all (today only a positive count can trigger that skip), the client bonus
+  handler reports the cap the way it reports a wrong count.
+- Trap: the row queued for the toppled owner is dropped with a message when that owner is in
+  extended play. No other response card exists in the code today; a future one gates on the same
+  predicate.
+- `gainLandmarkTriggers` calls `onGainLandmark($player_id, $landmark_type)` on each civ of the
+  player. Utilitarians stays inline for now; moving it there is a cleanup for another day.
+  Assumption to verify while implementing: every landmark gain funnels through that function.
+- Nothing to do for finished-player guards: `checkAliveForBenefit`, `queueBonus`, `getPlayersInGame`,
+  `getGameProgression`, `actionEliminate` and the Genies and Weefolk eligibility checks all read
+  era 5 as "still playing", which is right.
+- Zombie in extended play: `isPlayerFinished` already treats a quitter as finished, so they are
+  skipped like any quitter and their final scoring runs where a quitter's does today.
+
+### Test infrastructure
+
+- Per-player eras the WeefolkUT way, plus the two globals above driven through the stub
+  `setGameStateValue`.
+- `getLatestTapestry` and `getTapestryOn` are raw SQL. Give `GameUT` in-memory versions over the
+  card model so `isTapestryActive` and the overplay path run for real instead of being stubbed as
+  WeefolkUT does.
+- `getPossibleAdvances` and `finalGameScoring` read `playerextra` with SQL: the test subclass
+  scripts the first and records the second, the same seam style as the capital grid.
+- Cases: both turn 2-4 buttons; turn 5 paying 0, 3 and 6 cards, 7 refused, two resource rows per
+  card, empty hand skipped; after income 5 the era stays 5 and final scoring has not run; a turn
+  with an affordable advance continues, one without finishes the player exactly once; income
+  refused; trap dropped; landmark 10 VP only in extended play, not during income turn 5, not
+  before; the era 4 THIS ERA card inactive during income turn 5 and active in extended play;
+  overplay in extended play lands on era 4 and covers the old card; the game ends once the last
+  extended player finishes; Elder Ones and a finished opponent share a table.
+
+### Client
+
+- `playerTurn` buttons: with `extended_play` set, the Income button becomes "End my game" with a
+  confirmation dialog, red.
+- Turn 5 uses the bonus UI unchanged apart from the cap message.
+- `updateCurrentEra` finds no slot 5 and simply drops the highlight, which is what happens for
+  everyone at income 5 today. Keeping era 4 lit during extended play is polish, not required.
+- The finished panel state keys on the income notification with turn 6, which `finishPlayer` sends,
+  so the player greys out when they end and not before.
+
+### Rulings
+
+Proposed, to be recorded in FORMAL_RULES 5.13 onwards once confirmed:
+
+- The era 4 tapestry is inactive during income turn 5 itself (1.3 applies as for everyone) and
+  active again from the end of income turn 5 until the player's game ends. The predicate gives
+  exactly this reading for free.
+- "No longer able to take an advance turn" is judged at the start of the player's turn by the same
+  affordability test that auto-triggers income today. Effects that block a track (THEOCRACY,
+  DICTATORSHIP, BROKER OF PEACE) are not consulted, as they are not today.
+- Ending is also voluntary: "may take advance turns" reads as optional, and a player who would
+  rather stop than spend down their tie-break resources gets the button. Ending is final, the way
+  income turn 5 is final after its confirm row.
+- Every landmark gain after income turn 5 scores the 10 VP, whatever gave it and whoever's turn it
+  is (a SOCIALISM push counts), track landmarks, district landmarks and landmark cards alike. A
+  landmark gained during income turn 5 does not.
+- An extended play player is still in the game for opponent-facing prompts: they can answer a
+  Genies wish and receive a Weefolk token.
+- Income turn 5 itself is unchanged: VP income, achievement VP and the confirm row all happen; only
+  final scoring and the era 6 write are deferred to the end, so a second civ with final scoring
+  (Islanders, Riverfolk) scores when the Elder Ones player actually stops.
