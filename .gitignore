@@ -110,3 +110,4 @@ dist
 
 # PHPUnit
 .phpunit.result.cache
+misc/time.timeclock
