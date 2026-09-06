@@ -223,6 +223,14 @@ VISUAL EFFECTS
 
 TOOLTIPS
 
+- [ ] Merfolk review leftovers (blind review of the Merfolk diff, 2026-09-06), all judged not worth
+      code changes now: `Merfolk::queuePhase` calls `interruptBenefit()` on the extended turn path
+      where the benefit table is guaranteed empty, so the bump is dead there (harmless, keeps the
+      one helper); `testTrapDiscardCanEmptyTheHandAndEndTheGameNextTurn` discards through
+      `effect_discardCard` rather than actually playing a trap, so it only covers half its name;
+      `testEmptyHandFinishesThePlayerExactlyOnce` re-enters `playerTurn` at era 6, which exercises
+      `takeIncomeAuto` rather than the `stTransition` skip the name implies.
+
 - [ ] No tooltips on on-board achievement
 - [ ] Tooltips on slots of Civ cards especiall mystic
 

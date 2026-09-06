@@ -118,9 +118,34 @@ the server engine described above maintains.
 
 ### Debug
 
-`debug_*` methods on `PGameXBody` are callable from the studio chat box (see
-[misc/DEBUG.txt](misc/DEBUG.txt) for the incantations): `debug_maxRes()`, `debug_awardCard(type, num)`,
-`debug_giveCard`, `debug_res`, `debug_q`, `debug_next`. `isStudio()` / `isTestEnv()` gate them.
+`debug_*` methods on `PGameXBody` (see [misc/DEBUG.txt](misc/DEBUG.txt) for the incantations):
+`debug_maxRes()`, `debug_awardCard(type, num)`, `debug_res`, `debug_q`, `debug_next`.
+`isStudio()` / `isTestEnv()` gate them. In the studio they are called from the debug functions
+panel, not the chat box (see the `game-play-in-studio` skill).
+
+### Studio
+
+- The studio project is `tapestry`: manage page
+  `studio.boardgamearena.com/studiogame?game=tapestry`, lobby game number `4009`.
+  `misc/rename.sh` produces the separate renamed `taptest` copy, which is a stale side project.
+- `~/Develop/bga/remote/` is the sshfs mount of the studio filesystem, and
+  `~/Develop/bga/remote/tapestry/` mirrors this working tree, so an edit here is live in the studio
+  with no deploy step. `diff` a changed file against it to confirm before testing.
+- Test seats: `laskava0` = 2300662, `laskava1` = 2300663.
+- The FF pack is exercised with the Civilization Set option value "Fantasies & Futures Only - For
+  Testing", which is preselected on a new table.
+- Driving a turn from JS (the `game-play-in-studio` stepper): taking income pops an "Are you sure?"
+  dialog whose button reads "I confirm"; `resourceChoice` needs one `.payment_resource` clicked per
+  `.payment_box` (the box gains `complete`) before `button_confirm` does anything; and
+  `upgradeTechnology` often offers only `button_upgrade_decline`, so a stepper that skips every
+  decline button stalls there.
+
+### Client action arguments
+
+`tapestry.action.php` declares each argument's type. `extra` on `civTokenAdvance` is
+`AT_alphanum_dash`, so it cannot carry commas: a list of ids goes through `extra_js` (`AT_json`)
+instead. Setting `clientStateArgs.extra` to an array makes `ajaxClientStateAction` do that
+conversion, and the action handler hands the array to the civ (MYSTICS and MERFOLK both use this).
 
 ## Conventions
 
