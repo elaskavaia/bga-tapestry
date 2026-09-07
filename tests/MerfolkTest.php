@@ -491,6 +491,7 @@ final class MerfolkTest extends TestCase {
         $game->giveCiv(MerfolkUT::OWNER, CIV_ELDER_ONES);
         $game->getCivilizationInstance(CIV_ELDER_ONES, true);
 
+        $this->expectOutputRegex("/ERR:game:03 two extended play civs of player 11, 46 decides/");
         $this->assertEquals(CIV_MERFOLK, $game->getExtendedPlayCiv(MerfolkUT::OWNER)->getType());
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->startPlayerTurn(MerfolkUT::OWNER);
@@ -515,6 +516,7 @@ final class MerfolkTest extends TestCase {
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
 
+        $this->expectOutputRegex("/Internal Error during move 0: ERR:Merfolk:21/");
         $this->expectExceptionMessage("ERR:Merfolk:21");
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY);
     }

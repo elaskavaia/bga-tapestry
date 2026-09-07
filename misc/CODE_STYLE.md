@@ -101,8 +101,13 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
   restore. Flag any new guard test that survives its own fix being reverted.
 - A `GameUT` override that replaces production behaviour needs a docblock saying why the real one
   cannot run in tests.
-- Randomness is seeded through `seedRand()`; an unseeded `bgaRand` only warns to stderr, so a test
-  that flips a coin without seeding is passing by luck. Flag it.
+- Randomness is seeded through `seedRand()`; an unseeded `bgaRand` prints a warning, which now
+  fails the test (see below), so a test that flips a coin without seeding cannot pass by luck.
+- **The suite is silent.** `phpunit.xml` sets `beStrictAboutOutputDuringTests` with `failOnRisky`,
+  so anything a test prints - `$this->error()` / `$this->warn()` from the game, a leftover
+  `var_dump` - fails it. A test whose subject is an error path declares what it expects with
+  `expectOutputRegex()`, which doubles as the assertion that the error was raised; never write to
+  `STDERR` from a test helper, since that escapes the capture.
 
 ## Formatting (all files)
 

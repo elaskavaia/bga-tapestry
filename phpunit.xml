@@ -6,6 +6,8 @@
          testdox="false"
          displayDetailsOnTestsThatTriggerDeprecations="true"
          displayDetailsOnTestsThatTriggerWarnings="true"
+         beStrictAboutOutputDuringTests="true"
+         failOnRisky="true"
          failOnWarning="true">
     <testsuites>
         <testsuite name="default">
