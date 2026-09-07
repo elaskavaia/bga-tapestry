@@ -79,7 +79,15 @@ CODE BUGS
       It works today and is debug-only, but it relies on unspecified framework behavior. Consider moving
       it to a free id under 90; do not add more ids in 90-99.
 
-- [ ] During any plain benefit choice the client marks every track cube as active. That comes from the generic fallback at tapestry.js:2060.
+- [ ] Client/UI: during any plain benefit choice (benefitOption, benefitChoice, client_benefitChoice) every
+      track cube glows orange. Cause: the else fallback in updateToolbarForBenefit (tapestry.js around
+      2077) does dojo.query(".tech_spot .cube").addClass("active_slot"). Visual only: cubes keep the
+      inline pointer-events none set at state entry, so clicks do nothing. History: added 2023-01-22
+      ("spies" commit, old taptest repo) for the trackSelect default branch, which called
+      updateToolbarForBenefit(ben, true) and then removed the player's own cubes; that branch was
+      rewritten 2023-02-06 ("tinkerers") to highlight args.cubes directly, leaving the fallback orphaned.
+      Fix: delete that line; the selectCubes parameter is dead too (the only caller never passes it).
+      Parked until the current work in progress lands.
 
 - [ ] Elder Ones: stPlayerTurn returns early when a civ has activated abilities or the player owns a
       playable lighthouse (PGameXBody.php around 11290), before the "no affordable advance" test, so an
@@ -276,3 +284,10 @@ c. If you are conquering a nomadic structure, does this count as a topple? Assum
 id=86694803
 
 Bug: cap mats
+
+ILLUMINATI:
+- Black face 1 outside a conquer (rows 324/330) reads whatever hex `getSelectedMapHex` still holds.
+  Before any conquer that is coords 0_0, `getMapHexData` answers null and `getTileBenefit` raises a
+  PHP warning before falling through to "no benefit". The roller already hits this today through
+  row 330; ILLUMINATI makes it reachable for the owner too, including when the roller declines row
+  330 in favour of 202. Guard `getTileBenefit` against a missing hex.

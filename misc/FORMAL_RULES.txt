@@ -153,3 +153,29 @@ This is my interpretation not actuall formal rules
     moment the last card leaves, so a trap played in defence ends the game on the next turn.
 5.23 MERFOLK keeps trap and other response cards in extended play; the card says so explicitly,
     which is the exception to 5.16. Income turn 5 is otherwise unchanged as in 5.17.
+5.24 ILLUMINATI conquer dice - the card's sentence is read as this amended text, from the
+    publisher's answer (Joe of Stonemaier Games on their Discord, relayed by Alex S in BGG thread
+    3245586 "Treasure Hunters vs Illuminati"): "When an opponent takes any of the three dice from
+    your mat, you gain the benefit rolled on that die (ignoring any rerolls). If multiple dice are
+    taken at the same time, you get the benefit of each die." Dice are taken one at a time, so an
+    opponent rolling only the black die takes only the black die and a conquer takes both. A die
+    leaves the mat on its first roll: every later roll of it, EMPIRICISM's second roll included, is
+    an ordinary roll that pays nothing until the owner's next income turn returns the die.
+5.25 The ILLUMINATI science die is taken by any science roll from the mat, including one a tapestry
+    card triggers (Mike Young, designer, BGG thread 3058558 "Illuminati - Chimera"): research, AGE
+    OF DISCOVERY, the tech card research benefit and row 302 all count.
+5.26 The ILLUMINATI conquer die pays what the roller would gain from that face, so black face 1 is
+    the benefit of the territory the roller is conquering and a face with no benefit pays nothing.
+    The science die pays an optional single advance on the track rolled with no spot benefit and no
+    bonus; a track landmark reached that way is still gained, as on every other no-benefit advance.
+5.27 The ILLUMINATI owner resolves their gain from a taken die before the roller does anything with
+    the roll, on every roll: before the die pick on a conquer, before the research decision, before
+    the roller's advance on AGE OF DISCOVERY and the tech card research, and before a keep-or-
+    reroll choice. From the card's "immediately after they take the die". A race to the same track
+    landmark between owner and roller therefore goes to the owner.
+5.28 The ILLUMINATI owner rolling a die from their own mat, on any turn and for any effect, leaves
+    it on the mat. A finished or zombie owner gains nothing from a taken die, and their dice never
+    return.
+5.29 The ILLUMINATI income ability scores the dice on the mat at the start of the income turn. A civ
+    gained in the civ phase of an income turn 2-5 fires in that same turn with all three dice on the
+    mat, the engine's rule for every income civ gained there.

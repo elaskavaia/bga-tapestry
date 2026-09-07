@@ -368,7 +368,7 @@ Done, `npm run predeploy` green at 300 tests (284 before):
   301, 303 and 304, and Alchemists - `getCurrentBenefit()` orders by prerequisite then id with no
   category priority, so `benefitCivEntry` after `rollAllDice` is already behind the roll's rows.
 
-Open, for review before stage 2:
+Open:
 
 - The plan's fourth timing item, "the tech card research benefit (`r` in the card benefit switch)",
   is `queueBenefitAutomaSingle` case `"r"` - the only roll-then-advance-inline site left in the
@@ -377,6 +377,51 @@ Open, for review before stage 2:
   alone rather than churning bot code. Confirm that is what the item meant.
 - The conquer ordering test drives `effect_conquer` with the map, outpost pool and
   `effect_placeOnMap` stubbed in the test subclass, since none of those are modelled by `GameUT`.
+
+#### Stage 2 status
+
+Done, `npm run predeploy` green at 320 tests. The civ itself:
+
+- Two CSV rows, `BE_ILLUMINATI_DRAW` (354) and `BE_ILLUMINATI_INCOME` (355), plus a name for row 76,
+  `BE_ADVANCE_EXPLORATION_NOBENEFIT`, which is the family the owner's science gain queues. The draw
+  row is row 175's shape with `ct => CARD_TAPESTRY` and joins its `case` group, so `arg_keepCard`
+  and `effect_keepCard` need nothing.
+- `CIV_ILLUMINATI` material entry, `illuminati_dice` global (39), `dice.on_mat` and `dice.mat_owner`
+  in `getAllDatas`, and [Illuminati.php](../modules/civs/Illuminati.php).
+- Client: `notif_illuminatiDice`, the setup path from `gamedatas.dice`, `.on_civ_mat` (a FontAwesome
+  eye in the owner's colour on the die wrapper) and "On the ILLUMINATI mat" in the die tooltip. The
+  tooltip build came out of `rolldie` into `updateDieTooltip` so a mask change can refresh a tooltip
+  without re-running the roll animation.
+- [IlluminatiTest.php](../tests/IlluminatiTest.php), 21 cases over the list above.
+
+Found by the blind review and fixed here rather than in stage 1, where they belonged:
+
+- ALCHEMISTS `alchemistRoll` (adjustment variants 1, 2 and 4) queued its bust benefit with
+  `queueBenefitInterrupt` after the science roll, so the roller's consolation jumped the owner's
+  gain. Stage 1 only checked `rollAllDice` (variants 8 and 9). Same recipe as rows 324/325:
+  interrupt before the roll, queue Normal after. Pinned by
+  `testAnAlchemistsBustResolvesAfterTheOwnersGain`, which was confirmed to fail without the fix.
+- `notif_conquer_roll` guarded its `gamedatas.dice` writes with `if (die_red)`, dropping face 0,
+  which is a real face. Harmless until `updateDieTooltip` started reading that value back.
+
+Rulings are recorded as FORMAL_RULES clauses 5.24-5.29. `getTileBenefit` warning on a missing hex
+when black face 1 comes up outside a conquer is logged in [TODO.md](TODO.md).
+
+#### Studio run, 2 players, FF only
+
+Played through, and it found one bug the tests could not: the eye badge was painting *behind* the
+conquer dice. `.die_wrapper` is `transform-style: preserve-3d`, so the `::after` sat at z 0 while
+the cube's front face is translated forward; `#science_die` is flat, which is why only that one
+looked right. Fixed with `transform: translateZ(40px)` on the badge.
+
+Confirmed in the studio: the mat renders and the card text reads; setup logs the dice and hands the
+owner a keepCard of 3; an opponent's research logs roll then take, makes the *owner* active with a
+choose-one of "advance on the rolled track (no benefits)" and Decline, and only hands the roller
+their research decision afterwards; an opponent's conquer takes both dice and pays both benefits
+before the die pick; the owner's own conquer leaves both bits set and queues nothing; income turn 2
+with an empty mat scores nothing and refills, income turn 3 with three dice scores 18 VP and
+refills; the badges clear and restore per die, the inline colour is cleared with them, and a page
+reload restores mask, badges and the "On the ILLUMINATI mat" tooltip line from `getAllDatas`.
 
 ### Test infrastructure
 
