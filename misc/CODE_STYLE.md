@@ -14,8 +14,6 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
   descriptive: `countCardsInHand`, not `countHand`). This covers any side-effect-free method that
   returns a value, not just field accessors: a `calcScore()` or `findBestHex()` is a getter and is
   named `get...`. No bare-noun getters like `cardCost()`.
-- A helper that reads or writes the database, directly or through another method, carries `db` in
-  its name, i.e. `getAllCubesDb`.
 - Never shorten identifiers (`button`, not `btn`). Concise, not cryptic.
 
 ## Assertions and error codes (php)
