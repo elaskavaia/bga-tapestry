@@ -69,6 +69,19 @@ class GameUT extends Tapestry {
         }
     }
 
+    /**
+     * The real one moves the row with raw SQL, which the in memory card model never sees; the
+     * parent still runs for its notification. card_location_arg2 is not modelled.
+     */
+    function effect_moveCard($card_id, $player_id = null, $location = "hand", $location_arg = 0, $location_arg2 = null, $message = null) {
+        foreach (is_array($card_id) ? $card_id : [$card_id] as $card) {
+            $id = (int) (is_array($card) ? $card["card_id"] : $card);
+            $this->cards->setLocation($id, $location);
+            $this->cards->setLocationArg($id, (int) $location_arg);
+        }
+        parent::effect_moveCard($card_id, $player_id, $location, $location_arg, $location_arg2, $message);
+    }
+
     /** Active player at every savepoint taken, in order; the real one writes the undo tables. */
     public array $undoSavepoints = [];
 

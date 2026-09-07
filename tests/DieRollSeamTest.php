@@ -25,19 +25,6 @@ class DieProbeUT extends DiceUT {
         $this->rolls[] = [$die, $face, $roller_id];
         $this->queueBenefitNormal($this->getMarker(), self::OTHER, reason("die", $die));
     }
-
-    /** The conquer flow reads the map and the outpost pool with raw SQL, neither is modelled. */
-    function getMapHexData($xcoords, $map = null) {
-        return ["map_owners" => []];
-    }
-
-    function getOutpostsInHand($player_id) {
-        return $this->getStructuresSearch(BUILDING_OUTPOST, null, "hand", $player_id);
-    }
-
-    function effect_placeOnMap($player_id, $structure_id, $location, $notif = "*", $ownership = true) {
-        $this->structures->setLocation((int) $structure_id, $location);
-    }
 }
 
 /** Records the hook instead of acting on it, to show which civilizations it is offered to. */

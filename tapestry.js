@@ -499,6 +499,7 @@ define([
         // DICE
         this.updateConquerDice(this.gamedatas.dice.red, this.gamedatas.dice.black);
         this.updateScienceDie(this.gamedatas.dice.science);
+        this.updateIlluminatiDice(this.gamedatas.dice.on_mat, this.gamedatas.dice.mat_owner);
 
         // CONNECTIONS
         //	this.connectClass("building", "onmouseover", "onRaiseBuilding");
@@ -3570,6 +3571,28 @@ define([
       return '<div class="' + image_types + '"></div>';
     },
 
+    /** Rebuilds the tooltip of one die and answers the name of the face shown. */
+    updateDieTooltip: function (color, r) {
+      var onmat = this.isDieOnCivMat(color) ? this.getTooltipMessage(_("On the ILLUMINATI mat")) : "";
+      if (color != "science") {
+        var tooltip = this.getTr(this.gamedatas.dice_names[color][r].name);
+        var tooltipx = this.getTooltipTitle(_("Conquer die")) + this.getTooltipMessage(_("Roll:") + " " + tooltip) + onmat;
+        var image = this.getConqDieDiv(color, r);
+
+        tooltipx += this.getTooltipMessage(_("Side Distribution:"));
+        for (let index = 0; index < 6; index++) {
+          tooltipx += this.getConqDieDiv(color, index);
+        }
+        this.addTooltipHtml(color + "_die", this.getTooptipHtml(tooltipx, image), 800);
+        return tooltip;
+      }
+      if (!this.gamedatas.tech_track_types[r + 1]) return "";
+      var tooltip = _("Science die");
+      tooltip += ":<br>" + _("Roll:") + " " + this.getTr(this.gamedatas.tech_track_types[r + 1].name) + onmat;
+      this.addTooltipHtml("science_die", tooltip, 400);
+      return tooltip;
+    },
+
     rolldie: function (color, num) {
       if (num === undefined) return;
       var die = $(color + "_die");
@@ -3583,27 +3606,7 @@ define([
       //console.log("the result is " + (r + 1));
       dojo.removeClass(die, "rolling");
       dojo.setAttr(die, "data-num", r);
-      if (sides == 6) {
-        var tooltip = this.getTr(this.gamedatas.dice_names[color][r].name);
-        var tooltipx = this.getTooltipTitle(_("Conquer die")) + this.getTooltipMessage(_("Roll:") + " " + tooltip);
-
-        var image = this.getConqDieDiv(color, r);
-
-        tooltipx += this.getTooltipMessage(_("Side Distribution:"));
-        for (let index = 0; index < 6; index++) {
-          //const node = this.gamedatas.dice_names[color][index];
-          tooltipx += this.getConqDieDiv(color, index);
-          //if (index<5) tooltip += ', ';
-        }
-
-        this.addTooltipHtml(die.id, this.getTooptipHtml(tooltipx, image), 800);
-      } else {
-        if (this.gamedatas.tech_track_types[r + 1]) {
-          var tooltip = _("Science die");
-          tooltip += ":<br>" + _("Roll:") + " " + this.getTr(this.gamedatas.tech_track_types[r + 1].name);
-          this.addTooltipHtml(die.id, tooltip, 400);
-        }
-      }
+      var tooltip = this.updateDieTooltip(color, r);
 
       if (this.instantaneousMode || typeof g_replayFrom != "undefined" || this.inSetup) {
         dojo.addClass(die, "rolled");
@@ -3823,6 +3826,34 @@ define([
 
     updateScienceDie: function (die) {
       this.rolldie("science", die - 1);
+    },
+
+    // ILLUMINATI: the dice never move, they carry a badge while they sit on the mat
+    ILLUMINATI_DICE: { black: 1, red: 2, science: 4 },
+
+    isDieOnCivMat: function (color) {
+      var owner = this.gamedatas.dice.mat_owner;
+      return owner && (this.gamedatas.dice.on_mat & this.ILLUMINATI_DICE[color]) != 0;
+    },
+
+    // the badge sits on the wrapper, not on the rotating cube, so the roll animation leaves it alone
+    getDieMatNode: function (color) {
+      var die = $(color == "science" ? "science_die" : color + "_die");
+      if (!die) return null;
+      return color == "science" ? die : die.parentNode;
+    },
+
+    updateIlluminatiDice: function (mask, owner) {
+      this.gamedatas.dice.on_mat = mask;
+      this.gamedatas.dice.mat_owner = owner;
+      for (var color in this.ILLUMINATI_DICE) {
+        var node = this.getDieMatNode(color);
+        if (!node) continue;
+        var on = this.isDieOnCivMat(color);
+        dojo.toggleClass(node, "on_civ_mat", on);
+        dojo.style(node, "color", on ? "#" + this.getPlayerColor(owner) : "");
+        this.updateDieTooltip(color, this.gamedatas.dice[color] - (color == "science" ? 1 : 0));
+      }
     },
 
     updateTapestryCount: function (player_id, delta) {
@@ -5708,6 +5739,7 @@ define([
       dojo.subscribe("conquer_roll", this, "notif_conquer_roll");
       dojo.subscribe("conquer", this, "notif_conquer");
       dojo.subscribe("science_roll", this, "notif_science_roll");
+      dojo.subscribe("illuminatiDice", this, "notif_illuminatiDice");
 
       dojo.subscribe("techtransfer", this, "notif_techtransfer");
       dojo.subscribe("VP", this, "notif_VP");
@@ -5968,14 +6000,19 @@ define([
       var die_red = notif.args.die_red;
       var die_black = notif.args.die_black;
       this.updateConquerDice(die_red, die_black);
-      if (die_red) this.gamedatas.dice.red = parseInt(die_red);
-      if (die_black) this.gamedatas.dice.black = parseInt(die_black);
+      // face 0 is a real face, so this cannot be a falsy test
+      if (die_red !== undefined) this.gamedatas.dice.red = parseInt(die_red);
+      if (die_black !== undefined) this.gamedatas.dice.black = parseInt(die_black);
     },
 
     notif_science_roll: function (notif) {
       var die = notif.args.die;
       this.updateScienceDie(die);
       this.gamedatas.dice.science = parseInt(die);
+    },
+
+    notif_illuminatiDice: function (notif) {
+      this.updateIlluminatiDice(parseInt(notif.args.on_mat), parseInt(notif.args.mat_owner));
     },
 
     notif_techtransfer: function (notif) {

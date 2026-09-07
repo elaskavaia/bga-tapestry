@@ -75,7 +75,7 @@ id|-con|name|r|t|php
 73||Conquer - both dice if toppled|a||'flags'=>(FLAG_CONQ_BOTH_DICE | FLAG_CONQ_OPPONENT), 'icon'=>1
 74||Conquer - both dice|a||'flags'=>2, 'icon'=>1
 75||Conquer (anywhere)|a||'flags'=>1, 'icon'=>1
-76||Advance (no benefits) - Exploration|t|1|'flags'=>0
+76|BE_ADVANCE_EXPLORATION_NOBENEFIT|Advance (no benefits) - Exploration|t|1|'flags'=>0
 77||Advance (no benefits) - Science|t|2|'flags'=>0
 78||Advance (no benefits) - Military|t|3|'flags'=>0
 79||Advance (no benefits) - Technology|t|4|'flags'=>0
@@ -244,6 +244,8 @@ id|-con|name|r|t|php
 351|BE_MERFOLK_DIVE|MERFOLK gain a tapestry card, then place all but 2 under this mat|||'civ'=>CIV_MERFOLK
 352|BE_MERFOLK_SURFACE|MERFOLK gain a tapestry card, then return the submerged tapestry cards to your hand|||'civ'=>CIV_MERFOLK
 353|BE_MERFOLK_CULL|MERFOLK keep up to 5 tapestry cards|||'civ'=>CIV_MERFOLK
+354|BE_ILLUMINATI_DRAW|ILLUMINATI draw 3 tapestry cards and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>3,'keep'=>1
+355|BE_ILLUMINATI_INCOME|ILLUMINATI score 6 VP per die still on this mat|||'civ'=>CIV_ILLUMINATI
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

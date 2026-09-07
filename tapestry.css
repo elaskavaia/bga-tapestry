@@ -1312,6 +1312,20 @@ div[data-income="0"] #subtitle_bar {
   left: 2px;
 }
 
+/* a die still on the ILLUMINATI mat, badged in the owner's colour */
+.on_civ_mat {
+  position: relative;
+  font: normal normal normal 14px/1 FontAwesome;
+}
+.on_civ_mat::after {
+  content: "\f06e"; /* fa-eye */
+  position: absolute;
+  top: -12px;
+  left: 2px;
+  /* .die_wrapper is preserve-3d, so without this the badge paints behind the cube's front face */
+  transform: translateZ(40px);
+}
+
 .tech_spot .cube {
   display: inline-block;
   margin: unset;

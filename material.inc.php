@@ -106,6 +106,7 @@ if (!defined("TAPESTRY")) {
     define("BE_REGRESS_T", 70);
     define("BE_VP_TAPESTY", 71);
     define("BE_RESEARCH_MAXOUT", 72);
+    define("BE_ADVANCE_EXPLORATION_NOBENEFIT", 76);
     define("BE_ADVANCE_EXPLORATION_BENEFIT_NOBONUS", 80);
     define("BE_ADVANCE_SCIENCE_BENEFIT_NOBONUS", 81);
     define("BE_ADVANCE_MILITARY_BENEFIT_NOBONUS", 82);
@@ -183,6 +184,8 @@ if (!defined("TAPESTRY")) {
     define("BE_MERFOLK_DIVE", 351);
     define("BE_MERFOLK_SURFACE", 352);
     define("BE_MERFOLK_CULL", 353);
+    define("BE_ILLUMINATI_DRAW", 354);
+    define("BE_ILLUMINATI_INCOME", 355);
     define("BE_CIV_END", 604);
     define("BE_OP_UNIQUE", 600);
 
@@ -1372,7 +1375,7 @@ $this->benefit_types = [
         "icon" => 1,
     ],
     76 => [
-        //
+        // BE_ADVANCE_EXPLORATION_NOBENEFIT
         "name" => clienttranslate("Advance (no benefits) - Exploration"),
         "r" => "t",
         "t" => 1,
@@ -2426,6 +2429,20 @@ $this->benefit_types = [
         // BE_MERFOLK_CULL
         "name" => clienttranslate("MERFOLK keep up to 5 tapestry cards"),
         "civ" => CIV_MERFOLK,
+    ],
+    354 => [
+        // BE_ILLUMINATI_DRAW
+        "name" => clienttranslate("ILLUMINATI draw 3 tapestry cards and keep 1"),
+        "icon" => "no",
+        "tt" => "card",
+        "ct" => CARD_TAPESTRY,
+        "draw" => 3,
+        "keep" => 1,
+    ],
+    355 => [
+        // BE_ILLUMINATI_INCOME
+        "name" => clienttranslate("ILLUMINATI score 6 VP per die still on this mat"),
+        "civ" => CIV_ILLUMINATI,
     ],
     502 => [
         //
@@ -5736,6 +5753,28 @@ $this->civilizations = [
             7 => ["top" => 77.3, "left" => 53.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_EXPLORE]],
             8 => ["top" => 70.5, "left" => 58.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_VP_TECH]], //
         ],
+    ],
+    CIV_ILLUMINATI => [
+        "name" => clienttranslate("ILLUMINATI"),
+        "description" => [
+            clienttranslate("<i>The Illuminati profit from the lowest and highest urges of humanity.</i>"),
+            clienttranslate(
+                "At the start of the game, or if you gain the Illuminati mid-game, draw 3 [TAPESTRY], keep 1, and discard the other 2. Then, place all 3 dice on this mat."
+            ),
+            clienttranslate("When an opponent takes the conquest dice from your mat, you gain both of the benefits rolled."),
+            clienttranslate(
+                "When an opponent takes the science die from your mat, you may advance on the track rolled. Do not gain the benefit or the bonus."
+            ),
+            clienttranslate(
+                "If you take a die from your mat to roll it, put it back onto your mat after you roll. But if an opponent rolls a die, leave it off your mat until your next income turn. If an opponent rerolls a die, you may gain only from the first roll immediately after they take the die."
+            ),
+            clienttranslate(
+                "At the start of your income turns 2-5, gain 6 [VP] per die still on this mat. Then place all 3 dice on this mat."
+            ),
+        ],
+        "exp" => "FF",
+        "automa" => false,
+        "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
     ],
     CIV_MERFOLK => [
         "name" => clienttranslate("MERFOLK"),

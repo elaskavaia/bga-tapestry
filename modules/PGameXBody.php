@@ -91,6 +91,7 @@ abstract class PGameXBody extends tapcommon {
             "map_coords_selected" => 36, //
             "starting_player" => 37,
             "selected_space_tile" => 38, // card_id an effect drew that must be the one explored with
+            "illuminati_dice" => 39, // bitmask of the dice on the ILLUMINATI mat: black 1, red 2, science 4
             // debug
             "soft_block" => 99,
             // variants
@@ -896,6 +897,8 @@ abstract class PGameXBody extends tapcommon {
         $result["dice"]["black"] = $this->getGameStateValue("conquer_die_black");
         $result["dice"]["science"] = $this->getGameStateValue("science_die");
         $result["dice"]["empiricism"] = $this->getGameStateValue("science_die_empiricism");
+        $result["dice"]["on_mat"] = $this->getGameStateValue("illuminati_dice");
+        $result["dice"]["mat_owner"] = $this->getCivOwner(CIV_ILLUMINATI);
         $this->addConstants($result);
         $result["tech_deck_visible"] = $this->getCollectionFromDb("SELECT * FROM card WHERE card_location='deck_tech_vis'");
         if ($setupphase) {
@@ -1888,6 +1891,7 @@ abstract class PGameXBody extends tapcommon {
             //case 171: // infiltrators abilities hadled with default case
             case 172:
             case 175:
+            case BE_ILLUMINATI_DRAW:
                 $card_type = $this->getRulesBenefit($ben, "ct", 0);
                 $draw = $this->getRulesBenefit($ben, "draw", 1);
                 $type_info = $this->card_types[$card_type];
