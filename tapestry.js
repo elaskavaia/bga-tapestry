@@ -5568,13 +5568,17 @@ define([
         switch (this.clientStateArgs.cid) {
           case this.CON.CIV_MERFOLK: {
             const bene = this.gamedatas.gamestate.args.benefits[bid];
-            if (bene.slots_choice[id].play) break; // playing a tapestry needs no selection
             const cards = this.tapestry[this.player_id].getSelectedItems();
-            if (bene.keep && cards.length != bene.keep) {
+            if (bene.slots_choice[id].play) {
+              // no selection is fine, the server asks which card to play then
+              if (cards.length > 1) {
+                this.showError(_("You can only play one tapestry card"));
+                return;
+              }
+            } else if (bene.keep && cards.length != bene.keep) {
               this.showError(dojo.string.substitute(_("You must select ${keep} tapestry cards to keep"), bene));
               return;
-            }
-            if (!bene.keep && cards.length == 0) {
+            } else if (!bene.keep && cards.length == 0) {
               this.showError(_("You must select at least one tapestry card"));
               return;
             }

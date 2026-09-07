@@ -167,9 +167,11 @@ class Merfolk extends AbsCivilization {
                 ];
                 if ($game->getLatestTapestry($player_id, 4)) {
                     $data["slots_choice"][self::CHOICE_PLAY] = [
-                        "play" => true, // the client asks for no card selection on this one
+                        "play" => true, // the client sends the one picked card here, or none and the server asks
                         "title" => clienttranslate("Play a tapestry"),
-                        "tooltip" => clienttranslate("Play a tapestry card over the era 4 stack for its WHEN PLAYED ability"),
+                        "tooltip" => clienttranslate(
+                            "Play a tapestry card over the era 4 stack for its WHEN PLAYED ability; select the card first, or leave the hand unselected to be asked"
+                        ),
                     ];
                 }
                 return $data;
@@ -197,7 +199,9 @@ class Merfolk extends AbsCivilization {
                     // without an era 4 card to cover the overplay is void, and the turn would be spent
                     $offered = $this->argCivAbilitySingle($player_id, $civ_args)["slots_choice"];
                     $this->systemAssertTrue("ERR:Merfolk:21", isset($offered[self::CHOICE_PLAY]));
-                    $this->playTapestry($player_id);
+                    $selected = $this->getSelectedCards($player_id, $extra);
+                    $game->userAssertTrue(clienttranslate("Select a single tapestry card to play"), count($selected) <= 1);
+                    $this->playTapestry($player_id, (int) array_key_first($selected));
                     return;
                 }
                 $this->systemAssertTrue("ERR:Merfolk:19", $spot == self::CHOICE_DISCARD);
@@ -256,8 +260,11 @@ class Merfolk extends AbsCivilization {
         $game->queueBenefitNormal(BE_VP, $player_id, reason_civ($this->civ), self::DISCARD_VP * count($discard));
     }
 
-    /** The overplay lands on era 4 through getTapestryEra and covers the old card as usual. */
-    function playTapestry(int $player_id): void {
-        $this->game->queueBenefitNormal(64, $player_id, reason_civ($this->civ));
+    /**
+     * The overplay lands on era 4 through getTapestryEra and covers the old card as usual. A card
+     * picked in the prompt rides along in the reason, so stTapestryCard plays it without asking again.
+     */
+    function playTapestry(int $player_id, int $card_id = 0): void {
+        $this->game->queueBenefitNormal(64, $player_id, reason_civ($this->civ, $card_id));
     }
 }

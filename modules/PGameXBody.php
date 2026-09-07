@@ -11648,6 +11648,16 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
+    /** MERFOLK carries the card picked in its own prompt on the row, so nothing is left to ask here. */
+    function getPreselectedTapestryCard(int $player_id): int {
+        $data = array_get($this->getCurrentBenefit(), "benefit_data", "");
+        if (getReasonCiv($data) != CIV_MERFOLK) {
+            return 0;
+        }
+        $card_id = (int) $this->getReasonArg($data, 3);
+        return isset($this->getCardsInHand($player_id, CARD_TAPESTRY)[$card_id]) ? $card_id : 0;
+    }
+
     function stTapestryCard() {
         $player_id = $this->getActivePlayerId();
         $era = $this->getTapestryEra($player_id);
@@ -11670,6 +11680,12 @@ abstract class PGameXBody extends tapcommon {
                     "message_error",
                     clienttranslate("Cannot overplay tapestry card at this moment, no tapestry is played yet")
                 );
+                $this->nextStateBenefitManager();
+                return;
+            }
+            $preselected = $this->getPreselectedTapestryCard($player_id);
+            if ($preselected) {
+                $this->playTapestryCard($preselected, $player_id);
                 $this->nextStateBenefitManager();
                 return;
             }
