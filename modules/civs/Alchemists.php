@@ -248,6 +248,8 @@ class Alchemists extends AbsCivilization {
         $civ = $this->civ;
         $game = $this->game;
 
+        // interrupt before the roll, so a civilization reacting to it is ahead of the bust benefit
+        $game->interruptBenefit();
         $die_roll = $game->rollScienceDie(reason_civ($civ));
         $token_data = $this->getAllCubesOnCiv();
         $bust = false;
@@ -264,9 +266,9 @@ class Alchemists extends AbsCivilization {
 
             if ($game->isAdjustments4()) {
                 $track = $die_roll;
-                $game->queueBenefitInterrupt(["or" => [BE_REGRESS_E - 1 + $track, 401]], $player_id, reason_civ(CIV_ALCHEMISTS)); // Regress with BB
+                $game->queueBenefitNormal(["or" => [BE_REGRESS_E - 1 + $track, 401]], $player_id, reason_civ(CIV_ALCHEMISTS)); // Regress with BB
             } else {
-                $game->queueBenefitInterrupt(BE_ANYRES, $player_id, reason_civ(CIV_ALCHEMISTS));
+                $game->queueBenefitNormal(BE_ANYRES, $player_id, reason_civ(CIV_ALCHEMISTS));
             }
             $this->removeCubes();
         }
