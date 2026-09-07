@@ -218,14 +218,16 @@ complexity order are called out below.
 5. Elder Ones. Done. Special handling of era 5, fall back on era 4 tapestry slot, and special
    handling of "income" during that (end the game, no extra income). The shared end of game work
    turned out to be three small pieces rather than a turn loop: the extended play predicate over
-   the two existing globals, a finishPlayer helper both ends share, and getTapestryEra. Plan in the
-   Elder Ones section below.
+   the two existing globals, a finishPlayer helper both ends share, and getTapestryEra.
 6. Merfolk. Done. The hidden submerged card zone, and the first civ that takes its own turns in
    extended play. The engine half was four small pieces rather than a turn loop: the extended play
    predicate now hands back the civ instance, `startExtendedTurn` lets that civ run the turn,
    `queueEndOfIncome` puts the cull inside the income turn's undo window, and `moveCardsHidden`
-   plus one `getAllDatas` mask is the whole hidden zone. Plan in the Merfolk section below.
-7. Illuminati. Global die roll provenance, and an opponent's roll leaving the die off the mat.
+   plus one `getAllDatas` mask is the whole hidden zone.
+7. Illuminati. We need to track if die "on mat" or not, but it does not need to be physically there
+   in UX, can just have some overlays on dice itself (similar to what we do when we mark marriage of
+   state cube). We need die roll interceptor but after first roll on mat flag is cleared, so all
+   subsequent re-rolls are normal until civ owner gets it back. Plan in the Illuminati section below.
 8. Psionics. Draw two keep one on every random source in the game, composing additively with
    Empiricism. Out of complexity order deliberately: it is the harder of the two random hooks, but
    doing it straight after Illuminati means one seam gets designed once instead of twice.
@@ -255,226 +257,158 @@ complexity order are called out below.
   is a choose one over the existing farm, armory, house and market VP benefits.
 - Art is available, so `slots` coordinate tuning is unblocked.
 
-## Elder Ones
+## Illuminati
 
-Three effects on one civ: a choose-one gain on income turns 2-4, a tapestry-for-resources trade on
-income turn 5, and extended play after income turn 5 (advance turns only, the era 4 tapestry stays in
-effect, 10 VP per landmark, the game ends when no advance is affordable). The mat has no token spots,
-so nothing on it is clicked and there are no `slots`.
-
-### Shape
-
-- Material: `income_trigger` 2-5, `automa => false` (the bot has no advance turns to extend), no
-  `slots`, no mid game setup.
-- Turns 2-4 go through the civ ability state the Faefolk way: two `slots_choice` buttons, one queueing
-  `BE_ANYRES`, the other `[BE_TAPESTRY, BE_TAPESTRY]`, `decline => false`. A choose-one row cannot
-  hold a two-benefit option, and the civ state keeps the ability in the pool a player orders other
-  income civs against.
-- Turn 5 is not a civ state at all. `queueEraCivAbility` queues a bonus row, the DEMOCRACY shape:
-  pay `BE_TAPESTRY`, gain `5,5` per card. The bonus state already offers the hand for selection and
-  a Decline button, and `action_acceptBonus` already discards the paid cards and queues the gain once
-  per card. Only the cap is missing (see engine work).
-- No new benefit rows in the CSV: every gain is an existing type, and the trade is a bonus row.
-- The landmark VP is `awardVP(10)` from a new `onGainLandmark` civ hook, guarded by the extended play
-  predicate.
-
-### Engine work
-
-The "post income 5 alternate turn loop" from the shared work items turns out not to be a loop: a
-player is finished when `player_income_turns` is 6 and `stTransition` already skips finished
-players, so a player left at 5 keeps getting turns with no state machine change. What has to be
-built is the predicate, the deferred finish and the tapestry fallback.
-
-- `AbsCivilization::hasExtendedPlay()`, false by default, true on ElderOnes. Merfolk sets it too
-  later; its turn content is its own problem, this item only keeps the player in the game.
-- `isExtendedPlay($player_id)`: era 5, a civ with extended play, and income turn 5 over. The last
-  part is the existing `income_turn` global together with `current_player_turn`: an income turn
-  only ever happens inside the player's own turn, so era 5 while it is not their turn, or their
-  turn without that global, is extended play. No schema change.
-- `effect_endOfIncome` at turn 5 for such a player skips final scoring and the era 6 write and
-  announces that they play on. The two lines it skips move into a `finishPlayer($player_id)`
-  helper (final scoring, era 6, the income notification the client keys on) so the deferred end
-  and the normal end are the same code.
-- `stPlayerTurn`: today "no affordable advance" auto-takes income. In extended play it calls
-  `finishPlayer` and moves to the next player instead. `takeIncome` refuses with `userAssertTrue`
-  in extended play and `argPlayerTurn` gains an `extended_play` flag so the client can swap the
-  button. An explicit `endGame` action on the same state lets the player stop while an advance is
-  still affordable (see rulings).
-- `getTapestryEra($player_id)`: 4 in extended play, `getCurrentEra` otherwise. Readers to switch:
-  `isTapestryActive`, `playTapestryCard` (both the previous-card lookup and the `era$era`
-  destination, so an overplay lands on era 4 and covers the old card into `era_6` as usual),
-  `stTapestryCard` for benefit 64 (its "no tapestry in round 5" refusal). The income tapestry (2-4
-  only) and "first to era" (below 5) never see era 5 and stay as they are.
-- Bonus cap: `benefit_quantity` below -1 on a bonus row is an upper bound (-6 = up to six), -1
-  stays unlimited. `action_acceptBonus` asserts the count, `stBonus` skips the row when the player
-  holds no card at all (today only a positive count can trigger that skip), the client bonus
-  handler reports the cap the way it reports a wrong count.
-- Trap: the row queued for the toppled owner is dropped with a message when that owner is in
-  extended play. No other response card exists in the code today; a future one gates on the same
-  predicate.
-- `gainLandmarkTriggers` calls `onGainLandmark($player_id, $landmark_type)` on each civ of the
-  player. Utilitarians stays inline for now; moving it there is a cleanup for another day.
-  Assumption to verify while implementing: every landmark gain funnels through that function.
-- Nothing to do for finished-player guards: `checkAliveForBenefit`, `queueBonus`, `getPlayersInGame`,
-  `getGameProgression`, `actionEliminate` and the Genies and Weefolk eligibility checks all read
-  era 5 as "still playing", which is right.
-- Zombie in extended play: `isPlayerFinished` already treats a quitter as finished, so they are
-  skipped like any quitter and their final scoring runs where a quitter's does today.
-
-### Test infrastructure
-
-- Per-player eras the WeefolkUT way, plus the two globals above driven through the stub
-  `setGameStateValue`.
-- `getLatestTapestry` and `getTapestryOn` are raw SQL. Give `GameUT` in-memory versions over the
-  card model so `isTapestryActive` and the overplay path run for real instead of being stubbed as
-  WeefolkUT does.
-- `getPossibleAdvances` and `finalGameScoring` read `playerextra` with SQL: the test subclass
-  scripts the first and records the second, the same seam style as the capital grid.
-- Cases: both turn 2-4 buttons; turn 5 paying 0, 3 and 6 cards, 7 refused, two resource rows per
-  card, empty hand skipped; after income 5 the era stays 5 and final scoring has not run; a turn
-  with an affordable advance continues, one without finishes the player exactly once; income
-  refused; trap dropped; landmark 10 VP only in extended play, not during income turn 5, not
-  before; the era 4 THIS ERA card inactive during income turn 5 and active in extended play;
-  overplay in extended play lands on era 4 and covers the old card; the game ends once the last
-  extended player finishes; Elder Ones and a finished opponent share a table.
-
-### Client
-
-- `playerTurn` buttons: with `extended_play` set, the Income button becomes "End my game" with a
-  confirmation dialog, red.
-- Turn 5 uses the bonus UI unchanged apart from the cap message.
-- `updateCurrentEra` finds no slot 5 and simply drops the highlight, which is what happens for
-  everyone at income 5 today. Keeping era 4 lit during extended play is polish, not required.
-- The finished panel state keys on the income notification with turn 6, which `finishPlayer` sends,
-  so the player greys out when they end and not before.
-
-### Inspect
-
-- after done impl launch blind agent using `game-review-diff` in offline mode to code inspect, review and fix or log finding (not implemented finding log into TODO.md)
-
-### Rulings
-
-Recorded in FORMAL_RULES 5.13 to 5.17:
-
-- The era 4 tapestry is inactive during income turn 5 itself (1.3 applies as for everyone) and
-  active again from the end of income turn 5 until the player's game ends. The predicate gives
-  exactly this reading for free.
-- "No longer able to take an advance turn" is judged at the start of the player's turn by the same
-  affordability test that auto-triggers income today. Effects that block a track (THEOCRACY,
-  DICTATORSHIP, BROKER OF PEACE) are not consulted, as they are not today.
-- Ending is also voluntary: "may take advance turns" reads as optional, and a player who would
-  rather stop than spend down their tie-break resources gets the button. Ending is final, the way
-  income turn 5 is final after its confirm row.
-- Every landmark gain after income turn 5 scores the 10 VP, whatever gave it and whoever's turn it
-  is (a SOCIALISM push counts), track landmarks, district landmarks and landmark cards alike. A
-  landmark gained during income turn 5 does not.
-- An extended play player is still in the game for opponent-facing prompts: they can answer a
-  Genies wish and receive a Weefolk token.
-- Income turn 5 itself is unchanged: VP income, achievement VP and the confirm row all happen; only
-  final scoring and the era 6 write are deferred to the end, so a second civ with final scoring
-  (Islanders, Riverfolk) scores when the Elder Ones player actually stops.
-
-## Merfolk
-
-Three effects on one civ: on income turns 2-4 gain a tapestry card and submerge all but 2 of the
-hand under the mat (hidden, unusable), on income turn 5 gain a card, surface everything and at the
-end of that turn cull the hand to 5, and extended play afterwards where every turn is either a
-discard for 5 VP each or a play onto the era 4 stack, until the hand is empty. Traps stay playable.
-The mat has no token spots, so no `slots`.
+Four effects on one civ: a draw 3 keep 1 tapestry at setup, a gain whenever an opponent takes one
+of the three dice from the mat (both conquer die benefits, or an optional no-benefit no-bonus
+advance on the science track rolled), the taken die staying off the mat until the owner's next
+income turn, and 6 VP per die still on the mat at the start of income turns 2-5, after which all
+three come back. The mat has no token spots, so no `slots`. The dice are never physically on the
+mat in the UI: each die carries an overlay while it is "on the mat", the MARRIAGE OF STATE marker
+style.
 
 ### Shape
 
-- Material: `income_trigger` 2-5 with `decline => false`, `automa => false`, no `slots`, no mid
-  game setup: a civ gained mid game starts submerging at its next income turn in range.
-- Three new CSV rows, all `civ => CIV_MERFOLK`, resolved in `awardBenefits` with no interaction
-  of their own, the Werefolk pattern: the row does the deterministic part and queues a prompt only
-  when there is something to choose. Dive, Surface and Cull are code names only. Row names,
-  buttons and log lines use the card's own words: "submerged" is the card's term, the rest is
-  "place all but 2 under this mat", "return the submerged tapestry cards to your hand" and "keep
-  up to 5 tapestry cards".
-  - `BE_MERFOLK_DIVE` (turns 2-4): `awardCard` one tapestry, a real gain so ACADEMIA style
-    triggers fire, then if the hand holds more than 2, interrupt with the civ row in phase
-    `submerge`.
-  - `BE_MERFOLK_SURFACE` (turn 5): gain one tapestry, then move every `submerged` card back to
-    `hand` with `effect_moveCard`, a return rather than a gain, so no trigger fires.
-  - `BE_MERFOLK_CULL` (end of turn 5): if the hand holds more than 5, interrupt with the civ row
-    in phase `keep`.
-- One civ row, three phases in benefit_data the Weefolk way (`submerge`, `keep`, `turn`), all
-  answered in the civ ability state Historians style: the owner selects cards in their hand and
-  the ids travel comma separated in the `extra` argument of `moveCivCube`.
-  - `submerge`: select the 2 cards to keep, the rest go to `submerged`.
-  - `keep`: select the 5 cards to keep, the rest are discarded.
-  - `turn`: two buttons. "Discard selected cards" awards 5 VP per card, at least one. "Play a
-    tapestry" needs no selection: it queues benefit 64, the existing overplay, which lands on era
-    4 through `getTapestryEra` and covers the old card as usual, and the player picks the card in
-    the play tapestry state. The button is offered only when an era 4 card exists to cover.
-- Submerged cards are plain tapestry rows in location `submerged` with the owner in
-  `card_location_arg`. Nothing that reads the hand sees them, which is the whole rule: hand
-  counts, bonus payments, reveal-hand, the Faefolk visible count.
+- Material: `income_trigger` 2-5 with `decline => false`, `automa => false` (the bot never rolls,
+  so there is nobody to take a die), no `slots`, no mid game setup entry: `setupCiv` runs the same
+  code for a start and a mid game gain.
+- Two new CSV rows. `BE_ILLUMINATI_DRAW` is the Draw 3, Keep 1 Technology row (175) with
+  `ct => CARD_TAPESTRY`: the same handler draws into `draw`, the keepCard state offers the three,
+  and the generic tail of `effect_keepCard` moves the kept one to hand and discards the rest, so no
+  new keep logic. `BE_ILLUMINATI_INCOME` is `civ => CIV_ILLUMINATI`, resolved in `awardBenefits`.
+- Dice on the mat are one new global, `illuminati_dice` (id 39), a bitmask: black 1, red 2,
+  science 4. Only one Illuminati exists at a table, so "whose mat did this die come from" is "the
+  bit is set" plus `getCivOwner(CIV_ILLUMINATI)`. Globals sit inside the undo savepoint, so a
+  roller's undo puts the die back on the mat along with dropping the owner's queued gain.
+- The income ability is a deterministic row, the Merfolk shape, not a civ state: nothing is
+  chosen, and 6 VP has no ordering interaction with another income civ. It counts the set bits,
+  queues `BE_VP` for 6 per die with the civ reason, sets all three bits and notifies.
+- The gain from a taken die is queued at roll time, from the hook below, on the owner, with
+  `reason_civ(CIV_ILLUMINATI)`:
+  - a conquer die queues what `getConquerDieBenefit($die)` answers for the face rolled, the
+    Traders shape, including the territory benefit on black face 1 and a "no benefit" message on
+    a zero face;
+  - the science die queues a choose-one of row 76 plus track minus 1 (rows 76-79, Advance no
+    benefits, `flags => 0`) and 401 (decline): an optional single advance with no benefit and no
+    bonus. Not rows 84-87: those write `science_die` and `science_die_empiricism`, and the owner's
+    row now resolves before the roller's research decision reads them.
+- A die stays where it is when the owner rolls it. There is no "put it back" step: the bit is
+  simply not cleared.
 
 ### Engine work
 
-Two pieces: a hook that lets a civ take over the turn in extended play, and the hidden zone from
-the shared work items. Extended play is the period after income turn 5 for a player whose civ
-answers `hasExtendedPlay()`: `player_income_turns` stays 5, `isExtendedPlay` reads that together
-with the `current_player_turn` and `income_turn` globals, `stTransition` keeps handing the player
-turns, and `finishPlayer` (final scoring, then the era 6 write) is what ends their game.
+The "die roll provenance" item from the shared work list. Built so Psionics hooks the same place
+later.
 
-- `AbsCivilization::startExtendedTurn($player_id): bool`, default false. `stPlayerTurn` asks it
-  right after the first turn check, before the lighthouse and activated ability checks, when the
-  player is in extended play; true means the civ took the turn over and the state moves on.
-  Merfolk: an empty hand ends the game through `endExtendedPlay`, otherwise it queues the civ row
-  in phase `turn` and transitions to the benefit manager the way `takeIncomeAuto` does. A civ on
-  the default keeps the ordinary advance turn.
-- `queueTrapResponse` today drops the response row for any player in extended play. It gates on
-  the civ instead: `AbsCivilization::playsResponseCards()`, true by default and on Merfolk, false
-  on ElderOnes. `isExtendedPlay` gets a sibling that returns the civ instance so the trap gate and
-  the turn hook do not each walk the civ list.
-- An end of income hook: `queueIncomeTurn` calls `queueEndOfIncome($player_id, $incomeTurn)` on
-  each civ between the VP income row and the confirm row, so the cull stays inside the undo window
-  of the income turn. Merfolk queues `BE_MERFOLK_CULL` there at turn 5.
-- Hidden zone. `awardCard` already shows the shape: the owner gets the cards on a private
-  notification, everyone else a public one with the cards stripped. Submerge and surface go
-  through one `moveCardsHidden` helper doing the same, the public half carrying ids and count
-  only. `getAllDatas` masks `card_type_arg` to 0 on another player's `submerged` rows, which the
-  client already renders as the FACE DOWN CARD. A `submerged` entry joins the `tapestry` hand
-  counter in the per-player counters.
-- Nothing to do for the finish: `effect_endOfIncome` already defers `finishPlayer` for a civ with
-  extended play, `getTapestryEra` already answers era 4 in extended play so the play lands on the
-  right stack, and the finished-player guards (`checkAliveForBenefit`, `getPlayersInGame`, the
-  Genies and Weefolk eligibility checks) read era 5 as still playing. The empty hand is the only
-  new end condition and it lives in the civ.
-- Not supported: two extended play civs on one player. The first civ found decides, and a
-  systemAssert says so.
+Stage 1 (the seam and the timing moves, no civ yet) is done, see "Stage 1 status" at the end of this
+section for what landed and what is still open.
+
+- `rollDieFace(string $die): int` pulls the `bgaRand` call and the face remap (5 becomes 1 on
+  black, 2 on red, 1-4 on science) out of `rollConquerDice`, `rollRedConquerDie`,
+  `rollBlackConquerDie` and `rollScienceDie`. One function produces every die value in the game;
+  Psionics' roll twice keep one wraps it.
+- `dieRolled(string $die, int $face, int $roller_id)` runs at the end of those four functions,
+  after the roll notification so the log reads roll first, effect second. `rollConquerDice` calls
+  it twice. It calls a new `AbsCivilization::onDieRolled($die, $face, $roller_id)` on every civ in
+  play, the `getAllCivs` walk over all players. `rollScienceDie` resolves its `-1` default to the
+  active player before the hook.
+- Illuminati's `onDieRolled`: return when the roller is the owner or the bit is clear; clear the
+  bit and notify (this is the "die leaves the mat" moment); return with a message when the owner
+  is finished or zombie; otherwise queue the gain above. Because the first roll clears the bit,
+  every later roll of that die (Empiricism's second roll, the second roll of rows 301 and 304,
+  an Alchemists reroll) sees a clear bit and does nothing: the card's "only from the first roll"
+  falls out with no reroll tracking.
+- Ordering, ruled owner-first everywhere: the owner's rows are queued Normal at roll time, and
+  the rule for every flow is that whatever the roller does with the roll is queued Normal after
+  the roll too, so the owner's rows sit ahead by id. Where the roller's continuation must jump
+  the queue, `interruptBenefit()` is called before the roll, never after it. Per flow:
+  - `conquer()`: nothing to change, the die pick row (141) is already queued after the roll.
+  - Rows 301, 303, 304: nothing to change, the roller's gains are queued after each roll.
+  - `research()` (the science track research spots): today it rolls and jumps straight into the
+    research state. It becomes interrupt, roll, queue a new `BE_RESEARCH_DECISION` row for the
+    roller that enters the research state without touching the dice globals, and return to the
+    manager. Without an Illuminati at the table the timing is exactly today's.
+  - The tech card research benefit (`r` in the card benefit switch): today it rolls and advances
+    inline. It becomes interrupt, roll, queue the advance row of the matching family for the
+    track and the row's flags. This is the costliest of the four.
+  - Age of Discovery: the roller's advance is queued with interrupt after the roll today. Move
+    the interrupt before the roll and queue the advance Normal.
+  - Rows 324 and 325: `interruptBenefit()` moves from after the roll to before it.
+  - Alchemists rolling from the mat: verify the keep-or-reroll civ row resolves after the owner's
+    rows; if the civ category jumps ahead, apply the same recipe in `rollAllDice`.
+- `getAllDatas` adds `dice.on_mat` (the mask, 0 without an Illuminati) and `dice.mat_owner`.
+- `setupCiv` on the civ class: queue `BE_ILLUMINATI_DRAW`, set the mask to 7, notify. Same for
+  start and mid game. A civ gained in phase 1 of an income turn 2-5 fires its income ability in
+  that turn, as every income civ does today, so it scores all three dice at once (see rulings).
+- Nothing to do for the finished-player guards: a finished owner's rows are dropped by
+  `checkAliveForBenefit`, and the hook stops before queueing anyway. No `zombieBenefit` is
+  needed: unlike Genies, every row this civ queues belongs to the owner.
+- Not covered: the black die's territory benefit outside a conquer reads whatever hex
+  `getSelectedMapHex` still holds, for the owner exactly as for the roller today.
+
+#### Stage 1 status
+
+Done, `npm run predeploy` green at 300 tests (284 before):
+
+- `rollDieFace` and `dieRolled` in [PGameXBody.php](../modules/PGameXBody.php), wired into all four
+  roll functions. `rollConquerDice` reports red then black, the order it rolls them in.
+  `AbsCivilization::onDieRolled` is the no-op default.
+- `research()` takes the research row and the player, interrupts before the roll, and queues the
+  optional advance row of the rolled track instead of transitioning: 88-91 for `BE_RESEARCH`, 84-87
+  for `BE_RESEARCH_NB`, 97-100 for `BE_RESEARCH_MAXOUT`. Rows 72 and 97 had no constant, so they
+  got one (`BE_RESEARCH_MAXOUT`, `BE_ADVANCE_EXPLORATION_NOBENEFIT_MAXOUT_OPT`) - the `-con` column
+  of the CSV only emits the comment, the `define()` itself is hand-maintained in
+  [material.inc.php](../material.inc.php). No new `BE_RESEARCH_DECISION` row was needed - those
+  three families already carry exactly the flags `action_research_decision` reads off the stack,
+  and already enter the research state without re-rolling. Empiricism's second track survives
+  because the advance row only rewrites `science_die` with the value already there.
+- Age of Discovery interrupts before the roll and queues the roller's advance Normal.
+- Rows 324 and 325 interrupt before the roll.
+- Verified as needing nothing, now with tests: `conquer()` (row 141 already after the roll), rows
+  301, 303 and 304, and Alchemists - `getCurrentBenefit()` orders by prerequisite then id with no
+  category priority, so `benefitCivEntry` after `rollAllDice` is already behind the roll's rows.
+
+Open, for review before stage 2:
+
+- The plan's fourth timing item, "the tech card research benefit (`r` in the card benefit switch)",
+  is `queueBenefitAutomaSingle` case `"r"` - the only roll-then-advance-inline site left in the
+  codebase. It is Automa only (`$player_id = PLAYER_AUTOMA` is hardcoded) and the Automa exists
+  only in solo, which Illuminati is out of by `automa => false`, so the two can never meet. Left
+  alone rather than churning bot code. Confirm that is what the item meant.
+- The conquer ordering test drives `effect_conquer` with the map, outpost pool and
+  `effect_placeOnMap` stubbed in the test subclass, since none of those are modelled by `GameUT`.
 
 ### Test infrastructure
 
-- `effect_moveCard` is raw SQL and gets an in-memory version in `GameUT` over the card model, as
-  `getLatestTapestry`, `awardCard` and `effect_discardCard` already have.
-- Per-player eras (`getCurrentEra` by player id) and the `current_player_turn` and `income_turn`
-  globals are driven from the test. ElderOnesUT carries those overrides today; they move into
-  GameUT now that a second test wants them.
-- Cases: turn 2-4 with 5 cards keeps 2 and submerges 3, with 2 or fewer no prompt; submerged cards
-  invisible to the hand count, a bonus payment and reveal-hand; turn 5 gains, surfaces, then the
-  cull with 7 cards keeps 5 and with 5 has no prompt; after income 5 the era stays 5 and final
-  scoring has not run; an extended turn discarding 3 scores 15 VP, zero selected refused; the play
-  button queues 64 and is absent without an era 4 card; an empty hand at turn start finishes the
-  player exactly once; a trap is still offered to a Merfolk defender and its discard can empty the
-  hand; Merfolk and Elder Ones at one table both in extended play, the game ending once the last
-  finishes.
+- `seedRand` already drives the rolls; `rollConquerDice` consumes red then black.
+- `getSelectedMapHex` and `getTileBenefit` are raw SQL over `map`: the test subclass scripts the
+  tile benefit, the same seam style as the capital grid.
+- Cases: the material entry; setup draws 3 and the keepCard keeps 1 and discards 2, at start and
+  mid game, mask 7 afterwards; an opponent's conquer clears black and red and queues both
+  benefits ahead of row 141, territory benefit on black 1, a zero face gives a message and no row;
+  row 301 rolled by an opponent queues the first face only; an opponent's research clears science
+  and queues the optional no-benefit advance for the track rolled ahead of the roller's research
+  decision row, Empiricism's second roll ignored and both tracks still offered to the roller;
+  Age of Discovery orders owner, roller, then the other players; the tech card research and row
+  324 put the owner's row before the roller's; a table without Illuminati keeps today's order on
+  every one of those flows; the owner rolling any die leaves the bits alone and queues nothing;
+  income turns 2-5
+  score 18, 12, 6 and 0 VP for 3, 2, 1 and 0 dice and reset the mask, income turn 1 nothing;
+  a finished or zombie owner gains nothing; a table without Illuminati rolls exactly as before
+  (the regression guard for the seam); `getAllDatas` carries the mask and owner.
 
 ### Client
 
-- A `submerged_cards_{X}` div next to `tapestry_cards_{X}` in the template, hidden while empty.
-  The owner's is a stock like the hand; an opponent's gets the `tapestry_deck` back and a counter,
-  exactly how their hand is drawn today. Built as the mask only: the face down cards are the
-  count, so no per-player submerged counter was added.
-- `getCardDivLocatonId` maps `submerged` to that div.
-- `case CIV_MERFOLK` in `onUpdateActionButtons_civAbility`: the hand becomes multi selectable in
-  every phase with a description per phase, and the button handler puts the selected ids into
-  `clientStateArgs.extra`, the Weefolk build shape with a list instead of one tile.
-- One handler for the hidden moves, keyed on whether the cards carry a type: faces for the owner,
-  backs and a counter for everyone else.
+- `notif_illuminatiDice` (mask, owner) and the same on setup from `gamedatas.dice`: toggle an
+  `on_civ_mat` class on the two `.die_wrapper` divs and on `#science_die`, coloured with the
+  owner's player colour.
+- CSS: `.on_civ_mat::after` is a FontAwesome eye badge in the corner of the die, the
+  `.marriage::after` recipe. It sits on the wrapper, not the rotating cube, so the roll animation
+  and the board rotation leave it in place.
+- `rolldie` adds "On the ILLUMINATI mat" to the die tooltip while the bit is set.
+- The keepCard state already renders three drawn tapestry cards for Gamblers; verify it does for
+  this row too.
+- The owner's pending gains show up in `notif_benefitQueue` for free.
 
 ### Inspect
 
@@ -485,23 +419,32 @@ turns, and `finishPlayer` (final scoring, then the era 6 write) is what ends the
 
 Proposed, to be recorded in FORMAL_RULES
 
-- Submerge means the player picks the 2 cards to keep; a hand of 2 or fewer has nothing to
-  submerge and gets no prompt. Submerged cards are not in hand for anything: counts, payments,
-  reveal-hand effects, opponents' effects that read a hand, and a Faefolk count on the same player.
-- Returning the submerged cards at income 5 is not gaining them, so no "whenever you gain a
-  tapestry" trigger fires. The single card drawn on each of turns 2-5 is a gain.
-- "Keep up to 5" is answered as exactly 5: discarding more gains nothing in extended play, where
-  every card is worth at least 5 VP, so the prompt asks for the 5 to keep and is skipped at 5 or
-  fewer.
-- An extended turn is mandatory: at least one card is discarded when discarding, and there is no
-  pass. A free pass would let a player stall the table indefinitely.
-- Any card can be played in extended play. A WHEN PLAYED effect applies, and a THIS ERA card played
-  there is in effect for the rest of the player's game, since era 4 stays the active tapestry slot
-  in extended play. "ERA 5 effects" and "left-hand charm bonuses" belong to Fantasies & Futures
-  tapestry cards that are not in the code; nothing to do until those cards land.
-- The game ends at the start of a Merfolk turn with an empty hand, not the moment the last card
-  leaves. A trap played in defence counts: it comes out of the hand.
-- Merfolk keeps trap and other response cards in extended play; the card says so explicitly.
-- Income turn 5 is otherwise unchanged: VP income, achievement VP and the confirm row all happen.
-  Only final scoring and the era 6 write are deferred to the end, so a second civ with final
-  scoring (Islanders, Riverfolk) scores when the Merfolk player actually stops.
+- The card's conquer dice sentence is read as this amended text, ruled by Victoria from the
+  publisher's answer (Joe of Stonemaier Games on their Discord, relayed by Alex S in BGG thread
+  3245586 "Treasure Hunters vs Illuminati"): "When an opponent takes any of the three dice from
+  your mat, you gain the benefit rolled on that die (ignoring any rerolls). If multiple dice are
+  taken at the same time, you get the benefit of each die." So dice are taken one at a time, an
+  opponent rolling only the black die takes only the black die, a conquer takes both, and a die
+  leaves the mat on its first roll: every later roll of it, including Empiricism's second roll,
+  is an ordinary roll with no gain until the owner's next income turn returns the die.
+- The science die is taken by any science roll from the mat, including one a tapestry card
+  triggers (Mike Young, designer, BGG thread 3058558 "Illuminati - Chimera"): research, Age of
+  Discovery, the tech card research benefit, row 302.
+- The conquer die gain is what the roller would gain from that face: black face 1 is the benefit
+  of the territory the roller is conquering, a zero-effect face gives nothing.
+- The science die gain is an optional single-step advance on the track rolled with no spot
+  benefit and no bonus; a track landmark reached this way is still gained, as on every other
+  no-benefit advance in the game.
+- The owner resolves their gain from a taken die before the roller does anything with the roll,
+  on every roll: before the die pick on a conquer, before the research decision, before the
+  roller's advance on Age of Discovery and the tech card research, before a keep-or-reroll
+  choice. Ruled by Victoria from the card's "immediately after they take the die". A race to the
+  same track landmark between owner and roller therefore goes to the owner.
+- The owner rolling a die from the mat, on any turn and for any effect, leaves it on the mat.
+- A finished or zombie owner gains nothing from a taken die, and their dice never return.
+- The income ability scores the dice on the mat at the start of the income turn. A civ gained in
+  the civ phase of an income turn 2-5 fires in that same turn with all three dice on the mat,
+  the engine's rule for every income civ gained there.
+- Illuminati against Psionics (a Psionics opponent rolls twice and keeps one): decided in the
+  Psionics section, the hook above fires once per physical roll and Psionics decides what a
+  physical roll is.

@@ -129,6 +129,14 @@ STUDIO CHECKS
       and the opponent's capital cells accept the click in the replacement case, where the cell is
       occupied but marked possible.
 
+- [ ] Research state title names the advance row, not "Research". research() now queues the
+      optional advance row of the rolled track (84-91, 97-100) instead of transitioning with the
+      research row on top, so argResearch's bid is that row and tapestry.js "research" shows
+      "Advance (optional, benefits) - Science: You must confirm"; the benefit queue panel shows the
+      advance row too. The reason subtitle and the roll are unchanged. If the old wording is wanted:
+      special-case the three families in the client research case, or carry the research row's
+      name in the queued row's reason (game-review-diff, 2026-09-07, deferred).
+
 CLEANUP
 
 - [ ] Elder Ones engine methods added to PGameXBody (hasExtendedPlayCiv, isExtendedPlay, getTapestryEra,
