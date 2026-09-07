@@ -18,7 +18,7 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
   its name, i.e. `getAllCubesDb`.
 - Never shorten identifiers (`button`, not `btn`). Concise, not cryptic.
 
-## Assertions and error codes
+## Assertions and error codes (php)
 
 - `userAssertTrue($message, $cond)` for player-facing rule violations, `systemAssertTrue("ERR:...")`
   for internal invariants. Flag a `userAssertTrue` guarding something a player cannot cause, and a
@@ -26,7 +26,7 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
 - `ERR:` codes are stable bug-report identifiers: unique per class, reuse the class's existing
   numbering, never renumber existing ones.
 
-## Notifications and strings
+## Notifications and strings (php)
 
 - Prefer `notifyWithName()` over raw `notifyAllPlayers` / `notifyPlayer`: it injects `player_name`,
   collects `i18n` and `preserve` keys, routes private notifications via `_private`, and appends
@@ -146,7 +146,6 @@ This is an old game; do not flag existing code for these, but hold new and rewri
 
 Raised as review findings before, intentional or correct here:
 
-- `FLAG_GAIN_BENFIT` and other misspelled established constants - they are the API, leave them.
 - Near-identical entries in the generated `material.inc.php` regions - that is the CSV; never
   suggest deduplication there.
 - `<li>` in civ `description` arrays without a wrapping `<ul>` or a closing `</li>` - existing

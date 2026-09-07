@@ -16,14 +16,14 @@ id|-con|name|r|t|php
 15|BE_VP|Gain victory points|v||
 16|BE_INCOME_RES|Gain resources (Income)|||'icon' => 'no'
 17|BE_EXPLORE|Explore|e||'flags'=>0
-18|BE_RESEARCH|Research|r|5|'adv'=>1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+18|BE_RESEARCH|Research|r|5|'adv'=>1,'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
 19|BE_RESEARCH_NB|Research (no benefits)|r|5|'adv'=>1,'flags'=>0
 20|BE_INVENT|Invent|i||'flags'=>(FLAG_FACE_BOTH)
 21|BE_CONQUER|Conquer|a||'flags'=>0
-22|BE_ADVANCE_E|Advance - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
-23|BE_ADVANCE_S|Advance - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
-24|BE_ADVANCE_M|Advance - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
-25|BE_ADVANCE_T|Advance - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+22|BE_ADVANCE_E|Advance - Exploration|t|1|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
+23|BE_ADVANCE_S|Advance - Science|t|2|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
+24|BE_ADVANCE_M|Advance - Military|t|3|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
+25|BE_ADVANCE_T|Advance - Technology|t|4|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
 26|BE_TECH_CARD|Tech Card|g||'tt'=>'card','ct'=>CARD_TECHNOLOGY
 27|BE_VP_TECH|VP - Tech cards|v||
 28|BE_VP_CAPITAL|VP - Capital score|v||
@@ -61,15 +61,15 @@ id|-con|name|r|t|php
 59||Landmark - Library|||'lm'=>16
 60||Landmark - Stock Market|||'lm'=>17
 61||Landmark - Treasury|||'lm'=>18
-62||Repeat current position|||'adv'=>0,'flags'=> (FLAG_GAIN_BENFIT | FLAG_PAY_BONUS),'s'=>'c', 'sflags'=>(FLAG_SELF)
+62||Repeat current position|||'adv'=>0,'flags'=> (FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS),'s'=>'c', 'sflags'=>(FLAG_SELF)
 63|BE_VP_HOUSE|VP - Houses|v||
 64||Overwrite tapestry card|||
 65|BE_GAIN_CIV|Civilization|||
 66|BE_VP_TILES|VP - Territory tiles|v||'icon'=>1
-67|BE_REGRESS_E|Regress - Exploration|t|1|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
-68|BE_REGRESS_S|Regress - Science|t|2|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
-69|BE_REGRESS_M|Regress - Military|t|3|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
-70|BE_REGRESS_T|Regress - Technology|t|4|'adv'=>-1,'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+67|BE_REGRESS_E|Regress - Exploration|t|1|'adv'=>-1,'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
+68|BE_REGRESS_S|Regress - Science|t|2|'adv'=>-1,'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
+69|BE_REGRESS_M|Regress - Military|t|3|'adv'=>-1,'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
+70|BE_REGRESS_T|Regress - Technology|t|4|'adv'=>-1,'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
 71|BE_VP_TAPESTY|VP - Tapestry cards|v||
 72||Research (no benefit, maxout bonus)|r||'flags'=>(FLAG_MAXOUT_BONUS)
 73||Conquer - both dice if toppled|a||'flags'=>(FLAG_CONQ_BOTH_DICE | FLAG_CONQ_OPPONENT), 'icon'=>1
@@ -79,18 +79,18 @@ id|-con|name|r|t|php
 77||Advance (no benefits) - Science|t|2|'flags'=>0
 78||Advance (no benefits) - Military|t|3|'flags'=>0
 79||Advance (no benefits) - Technology|t|4|'flags'=>0
-80|BE_ADVANCE_EXPLORATION_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT)
-81|BE_ADVANCE_SCIENCE_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT)
-82|BE_ADVANCE_MILITARY_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT)
-83|BE_ADVANCE_TECHNOLOGY_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT)
+80|BE_ADVANCE_EXPLORATION_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENEFIT)
+81|BE_ADVANCE_SCIENCE_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Science|t|2|'flags'=>(FLAG_GAIN_BENEFIT)
+82|BE_ADVANCE_MILITARY_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Military|t|3|'flags'=>(FLAG_GAIN_BENEFIT)
+83|BE_ADVANCE_TECHNOLOGY_BENEFIT_NOBONUS|Advance (benefit, but not bonus) - Technology|t|4|'flags'=>(FLAG_GAIN_BENEFIT)
 84|BE_ADVANCE_EXPLORATION_NOBENEFIT_OPT|Advance (choice, no benefits) - Exploration|t|1|'flags'=>0
 85|BE_ADVANCE_SCIENCE_NOBENEFIT_OPT|Advance (optional, no benefits) - Science|t|2|'flags'=>0
 86|BE_ADVANCE_MILITARY_NOBENEFIT_OPT|Advance (optional, no benefits) - Military|t|3|'flags'=>0
 87|BE_ADVANCE_TECHNOLOGY_NOBENEFIT_OPT|Advance (optional, no benefits) - Technology|t|4|'flags'=>0
-88|BE_ADVANCE_EXPLORATION_BENEFIT_OPT|Advance (optional, benefits) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
-89|BE_ADVANCE_SCIENCE_BENEFIT_OPT|Advance (optional, benefits) - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
-90|BE_ADVANCE_MILITARY_BENEFIT_OPT|Advance (optional, benefits) - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
-91|BE_ADVANCE_TECHNOLOGY_BENEFIT_OPT|Advance (optional, benefits) - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)
+88|BE_ADVANCE_EXPLORATION_BENEFIT_OPT|Advance (optional, benefits) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
+89|BE_ADVANCE_SCIENCE_BENEFIT_OPT|Advance (optional, benefits) - Science|t|2|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
+90|BE_ADVANCE_MILITARY_BENEFIT_OPT|Advance (optional, benefits) - Military|t|3|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
+91|BE_ADVANCE_TECHNOLOGY_BENEFIT_OPT|Advance (optional, benefits) - Technology|t|4|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
 92||Advance (no benefit, free bonus) - Exploration|t|1|'flags'=>(FLAG_FREE_BONUS)
 93||Advance (no benefit, free bonus) - Science|t|2|'flags'=>(FLAG_FREE_BONUS)
 94||Advance (no benefit, free bonus) - Military|t|3|'flags'=>(FLAG_FREE_BONUS)
@@ -150,10 +150,10 @@ id|-con|name|r|t|php
 152||Jump - Science|t|2|'adv'=>4,'flags'=>(FLAG_JUMP)
 153||Jump - Military|t|3|'adv'=>4,'flags'=>(FLAG_JUMP)
 154||Jump - Technology|t|4|'adv'=>4,'flags'=>(FLAG_JUMP)
-156||Advance (benefits, maxout bonus) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
-157||Advance (benefits, maxout bonus) - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
-158||Advance (benefits, maxout bonus) - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
-159||Advance (benefits, maxout bonus) - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
+156||Advance (benefits, maxout bonus) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
+157||Advance (benefits, maxout bonus) - Science|t|2|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
+158||Advance (benefits, maxout bonus) - Military|t|3|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
+159||Advance (benefits, maxout bonus) - Technology|t|4|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)
 160||Automa income stage|||'i'=>0
 161||Automa income stage|||'i'=>1
 162||Automa income stage|||'i'=>2
@@ -173,10 +173,10 @@ id|-con|name|r|t|php
 179||Islanders's Explore (with Benefits)|e||'icon' => 'no', 'state' => 'explore'
 180|BE_MIDGAME_SETUP|Midgame setup for Civilization|||'icon' => 'no'
 181||Discard Tapestry card|||'icon' => 'icon_ben_7','tt'=>'card','ct'=>CARD_TAPESTRY, 'state'=>'playTapestryCard'
-182|BE_ADVANCE_EXPLORATION_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENFIT|FLAG_FREE_BONUS)
-183|BE_ADVANCE_SCIENCE_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Science|t|2|'flags'=>(FLAG_GAIN_BENFIT|FLAG_FREE_BONUS)
-184|BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Military|t|3|'flags'=>(FLAG_GAIN_BENFIT|FLAG_FREE_BONUS)
-185|BE_ADVANCE_TECHNOLOGY_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Technology|t|4|'flags'=>(FLAG_GAIN_BENFIT|FLAG_FREE_BONUS)
+182|BE_ADVANCE_EXPLORATION_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Exploration|t|1|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_FREE_BONUS)
+183|BE_ADVANCE_SCIENCE_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Science|t|2|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_FREE_BONUS)
+184|BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Military|t|3|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_FREE_BONUS)
+185|BE_ADVANCE_TECHNOLOGY_BENEFIT_FREEBONUS|Advance (benefit, free bonus) - Technology|t|4|'flags'=>(FLAG_GAIN_BENEFIT|FLAG_FREE_BONUS)
 190||Gain the benefit of a neighbor’s current position on any advancement track (no bonus)|||'s'=>'c','sflags'=>(FLAG_NEIGHBOUR),'adv'=>0,'state'=>'trackSelect'
 191||Gain the benefit of a territory or space tile in a neighbor’s supply|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'
 192||Gain the benefit of a neighbor’s tech card, matching its current row|||'icon' => 'no','tt'=>'card','keep'=>1,'flags'=>(FLAG_NEIGHBOUR),'state'=>'keepCard'

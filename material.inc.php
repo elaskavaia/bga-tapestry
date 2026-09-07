@@ -262,7 +262,7 @@ if (!defined("TAPESTRY")) {
     define("TAP_TRAP", 42);
     define("TAP_TYRANNY", 43);
     // BENEFIT FLAGS
-    define("FLAG_GAIN_BENFIT", 0b0001); // gain befit
+    define("FLAG_GAIN_BENEFIT", 0b0001); // gain befit
     define("FLAG_PAY_BONUS", 0b0010); // may pay for bonus
     define("FLAG_FREE_BONUS", 0b0100); // gain free bonus
     define("FLAG_MAXOUT_BONUS", 0b1000); // gain 5VP if maxout
@@ -1043,7 +1043,7 @@ $this->benefit_types = [
         "r" => "r",
         "t" => 5,
         "adv" => 1,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     19 => [
         // BE_RESEARCH_NB
@@ -1070,28 +1070,28 @@ $this->benefit_types = [
         "name" => clienttranslate("Advance - Exploration"),
         "r" => "t",
         "t" => 1,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     23 => [
         // BE_ADVANCE_S
         "name" => clienttranslate("Advance - Science"),
         "r" => "t",
         "t" => 2,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     24 => [
         // BE_ADVANCE_M
         "name" => clienttranslate("Advance - Military"),
         "r" => "t",
         "t" => 3,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     25 => [
         // BE_ADVANCE_T
         "name" => clienttranslate("Advance - Technology"),
         "r" => "t",
         "t" => 4,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     26 => [
         // BE_TECH_CARD
@@ -1282,7 +1282,7 @@ $this->benefit_types = [
         //
         "name" => clienttranslate("Repeat current position"),
         "adv" => 0,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
         "s" => "c",
         "sflags" => FLAG_SELF,
     ],
@@ -1311,7 +1311,7 @@ $this->benefit_types = [
         "r" => "t",
         "t" => 1,
         "adv" => -1,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     68 => [
         // BE_REGRESS_S
@@ -1319,7 +1319,7 @@ $this->benefit_types = [
         "r" => "t",
         "t" => 2,
         "adv" => -1,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     69 => [
         // BE_REGRESS_M
@@ -1327,7 +1327,7 @@ $this->benefit_types = [
         "r" => "t",
         "t" => 3,
         "adv" => -1,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     70 => [
         // BE_REGRESS_T
@@ -1335,7 +1335,7 @@ $this->benefit_types = [
         "r" => "t",
         "t" => 4,
         "adv" => -1,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     71 => [
         // BE_VP_TAPESTY
@@ -1402,28 +1402,28 @@ $this->benefit_types = [
         "name" => clienttranslate("Advance (benefit, but not bonus) - Exploration"),
         "r" => "t",
         "t" => 1,
-        "flags" => FLAG_GAIN_BENFIT,
+        "flags" => FLAG_GAIN_BENEFIT,
     ],
     81 => [
         // BE_ADVANCE_SCIENCE_BENEFIT_NOBONUS
         "name" => clienttranslate("Advance (benefit, but not bonus) - Science"),
         "r" => "t",
         "t" => 2,
-        "flags" => FLAG_GAIN_BENFIT,
+        "flags" => FLAG_GAIN_BENEFIT,
     ],
     82 => [
         // BE_ADVANCE_MILITARY_BENEFIT_NOBONUS
         "name" => clienttranslate("Advance (benefit, but not bonus) - Military"),
         "r" => "t",
         "t" => 3,
-        "flags" => FLAG_GAIN_BENFIT,
+        "flags" => FLAG_GAIN_BENEFIT,
     ],
     83 => [
         // BE_ADVANCE_TECHNOLOGY_BENEFIT_NOBONUS
         "name" => clienttranslate("Advance (benefit, but not bonus) - Technology"),
         "r" => "t",
         "t" => 4,
-        "flags" => FLAG_GAIN_BENFIT,
+        "flags" => FLAG_GAIN_BENEFIT,
     ],
     84 => [
         // BE_ADVANCE_EXPLORATION_NOBENEFIT_OPT
@@ -1458,28 +1458,28 @@ $this->benefit_types = [
         "name" => clienttranslate("Advance (optional, benefits) - Exploration"),
         "r" => "t",
         "t" => 1,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     89 => [
         // BE_ADVANCE_SCIENCE_BENEFIT_OPT
         "name" => clienttranslate("Advance (optional, benefits) - Science"),
         "r" => "t",
         "t" => 2,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     90 => [
         // BE_ADVANCE_MILITARY_BENEFIT_OPT
         "name" => clienttranslate("Advance (optional, benefits) - Military"),
         "r" => "t",
         "t" => 3,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     91 => [
         // BE_ADVANCE_TECHNOLOGY_BENEFIT_OPT
         "name" => clienttranslate("Advance (optional, benefits) - Technology"),
         "r" => "t",
         "t" => 4,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS,
     ],
     92 => [
         //
@@ -1850,28 +1850,28 @@ $this->benefit_types = [
         "name" => clienttranslate("Advance (benefits, maxout bonus) - Exploration"),
         "r" => "t",
         "t" => 1,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
     ],
     157 => [
         //
         "name" => clienttranslate("Advance (benefits, maxout bonus) - Science"),
         "r" => "t",
         "t" => 2,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
     ],
     158 => [
         //
         "name" => clienttranslate("Advance (benefits, maxout bonus) - Military"),
         "r" => "t",
         "t" => 3,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
     ],
     159 => [
         //
         "name" => clienttranslate("Advance (benefits, maxout bonus) - Technology"),
         "r" => "t",
         "t" => 4,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
     ],
     160 => [
         //
@@ -2000,28 +2000,28 @@ $this->benefit_types = [
         "name" => clienttranslate("Advance (benefit, free bonus) - Exploration"),
         "r" => "t",
         "t" => 1,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_FREE_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_FREE_BONUS,
     ],
     183 => [
         // BE_ADVANCE_SCIENCE_BENEFIT_FREEBONUS
         "name" => clienttranslate("Advance (benefit, free bonus) - Science"),
         "r" => "t",
         "t" => 2,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_FREE_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_FREE_BONUS,
     ],
     184 => [
         // BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS
         "name" => clienttranslate("Advance (benefit, free bonus) - Military"),
         "r" => "t",
         "t" => 3,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_FREE_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_FREE_BONUS,
     ],
     185 => [
         // BE_ADVANCE_TECHNOLOGY_BENEFIT_FREEBONUS
         "name" => clienttranslate("Advance (benefit, free bonus) - Technology"),
         "r" => "t",
         "t" => 4,
-        "flags" => FLAG_GAIN_BENFIT | FLAG_FREE_BONUS,
+        "flags" => FLAG_GAIN_BENEFIT | FLAG_FREE_BONUS,
     ],
     190 => [
         //

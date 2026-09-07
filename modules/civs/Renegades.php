@@ -27,7 +27,7 @@ class Renegades extends AbsCivilization {
     function triggerPreGainBenefit($player_id, $track, $spot, $flags, $advance) {
         $this->systemAssertTrue("not applicable", $this->game->hasCiv($player_id, CIV_RENEGADES));
         if ($advance) {
-            $benefit_available = ($flags & FLAG_GAIN_BENFIT) != 0 ? 1 : 0;
+            $benefit_available = ($flags & FLAG_GAIN_BENEFIT) != 0 ? 1 : 0;
             if (!$benefit_available) {
                 return true;
             }

@@ -1546,7 +1546,7 @@ abstract class PGameXBody extends tapcommon {
             case 24:
             case 25:
                 $track = (int) array_get_def($this->benefit_types, $ben, "t", 0);
-                return $this->trackMovementInteractive($track, SPOT_SELECT, +1, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, false, $player_id);
+                return $this->trackMovementInteractive($track, SPOT_SELECT, +1, FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS, false, $player_id);
             case BE_PLAY_TAPESTY_INCOME: // case 128
                 $this->setIncomeTurnPhase(INCOME_TAPESTRY);
                 // play tapestry in income turn
@@ -1697,7 +1697,7 @@ abstract class PGameXBody extends tapcommon {
             case 82:
             case 83:
                 $track = (int) $this->getRulesBenefit($ben, "t", 0);
-                return $this->trackMovementInteractive($track, SPOT_SELECT, ACTION_ADVANCE, FLAG_GAIN_BENFIT, false, $player_id);
+                return $this->trackMovementInteractive($track, SPOT_SELECT, ACTION_ADVANCE, FLAG_GAIN_BENEFIT, false, $player_id);
             case 84:
             case 85:
             case 86:
@@ -4280,7 +4280,7 @@ abstract class PGameXBody extends tapcommon {
                     ->notifyAll(clienttranslate('${player_name} selects ${player_name2} on ${spot_name} ${reason}'));
                 // You gain the benefit
                 $this->assertCanUseBenefitOnTrackSpot($player_id, $track, $spot);
-                $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENFIT, $reason);
+                $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENEFIT, $reason);
                 // If bonus, opponent gets for free
                 if (array_key_exists("option", $this->tech_track_data[$track][$spot])) {
                     $this->processSpotBenefits($track, $spot, $owner, FLAG_FREE_BONUS, $reason);
@@ -4299,7 +4299,7 @@ abstract class PGameXBody extends tapcommon {
                     ->notifyAll(clienttranslate('${player_name} selects ${player_name2} on ${spot_name} ${reason}'));
                 // You gain the benefit
                 $this->assertCanUseBenefitOnTrackSpot($player_id, $track, $spot);
-                $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENFIT, $reason);
+                $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENEFIT, $reason);
                 $this->setTargetPlayer($owner);
                 $this->queueBenefitNormal(["or" => [194, 401]], $player_id, $reason);
                 break;
@@ -4315,7 +4315,7 @@ abstract class PGameXBody extends tapcommon {
                 $this->queueBenefitNormal($cost, $player_id, reason("be", $ben));
                 break;
             case 108: // DICTATORSHIP:  Advance on any track and gain the benefit (you may pay to gain the bonus). Opponents may not advance on that track until after your next turn.
-                $this->trackMovementProper($track, $spot, ACTION_ADVANCE, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, true, $player_id);
+                $this->trackMovementProper($track, $spot, ACTION_ADVANCE, FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS, true, $player_id);
                 $turn = $this->getPlayerTurn($player_id);
                 $data = "dic_{$turn}_{$track}";
                 $this->DbQuery("UPDATE structure SET card_location_arg2='$data' WHERE card_id='$cube_id'");
@@ -4338,7 +4338,7 @@ abstract class PGameXBody extends tapcommon {
             case BE_TINKERERS_2: // 196
                 $start = $this->checkClosestOpponent($player_id, $track, $spot, FLAG_ADVANCE);
                 $change = $spot - $start;
-                $this->trackMovementProper($track, $start, $change, FLAG_GAIN_BENFIT, true, $player_id);
+                $this->trackMovementProper($track, $start, $change, FLAG_GAIN_BENEFIT, true, $player_id);
                 break;
             case BE_TINKERERS_2a: // 322
                 $start = $this->checkClosestOpponent($player_id, $track, $spot, FLAG_ADVANCE);
@@ -4347,11 +4347,11 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case BE_TINKERERS_3: // 197
                 $this->checkSpot($spot - 3);
-                $this->trackMovementProper($track, $spot, -3, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, true, $player_id);
+                $this->trackMovementProper($track, $spot, -3, FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS, true, $player_id);
                 break;
             case BE_TINKERERS_3a: // 323
                 $this->checkSpot($spot - 3);
-                $this->trackMovementProper($track, $spot, -3, FLAG_GAIN_BENFIT, true, $player_id);
+                $this->trackMovementProper($track, $spot, -3, FLAG_GAIN_BENEFIT, true, $player_id);
                 break;
             case BE_TINKERERS_4:
                 //Advance to the next bonus on any track and gain that bonus for free. Do not gain the benefit or any landmarks you pass
@@ -4369,7 +4369,7 @@ abstract class PGameXBody extends tapcommon {
                 // Make sure player has token on that spot then repeat the bonus!
                 $this->userAssertTrue(totranslate("Cannot repeat virtual AI Singularity"), $cube["card_type_arg"] != CUBE_AI);
                 $this->assertCanUseBenefitOnTrackSpot($player_id, $track, $spot);
-                $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, $current_benefit["benefit_data"]);
+                $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS, $current_benefit["benefit_data"]);
                 break;
             default:
                 throw new feException("Invalid benefit type for select_cube $ben");
@@ -4815,9 +4815,9 @@ abstract class PGameXBody extends tapcommon {
             $cube_spot = $cube["spot"];
             $change = $spot - $cube_spot;
             $this->notifyWithName("message", '${player_name} is cheating, can only advance one spot (this is enabled for testing)!!!');
-            $this->trackMovementProper($track, $cube_spot, $change, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_JUMP, true, $player_id);
+            $this->trackMovementProper($track, $cube_spot, $change, FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS | FLAG_JUMP, true, $player_id);
         } else {
-            $this->trackMovementProper($track, $cube_spot, $change, FLAG_GAIN_BENFIT | FLAG_PAY_BONUS, true, $player_id);
+            $this->trackMovementProper($track, $cube_spot, $change, FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS, true, $player_id);
         }
         $this->gamestate->nextState("advance");
     }
@@ -5612,7 +5612,7 @@ abstract class PGameXBody extends tapcommon {
             ],
             $player_id
         );
-        $flags = $player_id == PLAYER_AUTOMA ? FLAG_GAIN_BENFIT : 0;
+        $flags = $player_id == PLAYER_AUTOMA ? FLAG_GAIN_BENEFIT : 0;
         $this->interruptBenefit();
         $this->trackMovementProper($track, $spot, +1, $flags, false, $player_id);
     }
@@ -7839,7 +7839,7 @@ abstract class PGameXBody extends tapcommon {
      * @param boolean $mandatory
      *            - true - through exception if not possible, false message if not possibe
      * @param int $flags
-     *            FLAG_GAIN_BENFIT // gain befit
+     *            FLAG_GAIN_BENEFIT // gain befit
      *            FLAG_PAY_BONUS // may pay for bonus
      *            FLAG_FREE_BONUS // gain free bonus
      *            FLAG_MAXOUT_BONUS // gain 5VP if maxout
@@ -8227,8 +8227,8 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-    function processSpotBenefits($track, $spot, $player_id, $flags = FLAG_GAIN_BENFIT, $reason = null) {
-        $benefit_available = ($flags & FLAG_GAIN_BENFIT) != 0 ? 1 : 0;
+    function processSpotBenefits($track, $spot, $player_id, $flags = FLAG_GAIN_BENEFIT, $reason = null) {
+        $benefit_available = ($flags & FLAG_GAIN_BENEFIT) != 0 ? 1 : 0;
         $bonus_state = ($flags & FLAG_PAY_BONUS) != 0 ? 1 : 0;
         $bonus_state = ($flags & FLAG_FREE_BONUS) != 0 ? 2 : $bonus_state;
 

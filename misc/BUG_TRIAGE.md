@@ -149,88 +149,6 @@ confirmed two are still OPEN on the tracker.
 
 ### Priority: Adjustment Civilization Pack (adj=8), plus anything proven to hit it
 
-- [x] **BGA #202072** - "civ: Utilitarians first action errors". OPEN on BGA, **27 votes** (the
-      tracker's top defect), `action`, created 2026-01-19, latest player comment 2026-08-10. Listed
-      here rather than under the deprecated options because it was **proven
-      adjustment-independent** - it hits Pack tables too. After choosing Utilitarians the UI offers
-      "Move token into <landmark> from [empty slot] [empty slot]", and any click returns the server
-      error `[missing benefit]`. ~15 "same here" comments; one reporter (sslib) hit it gaining
-      Utilitarians as a _third_ civ midgame instead of at setup.
-      **CONFIRMED 2026-08-26**, twice over. Victoria reproduced it live in the studio (studio log
-      27/08 00:59 UTC, table T950560, move 11) - that production stack trace is the real proof. Test
-      `tests/UtilitariansTest.php`, methods
-      `testUtilitariansTriggeredCrashesOnStateArgsReload`,
-      `testUtilitariansMidgameCrashesOnStateArgsReload`,
-      `testUtilitariansLandmarkSlotsAreAdjustmentIndependent` - green, pinning the buggy behaviour.
-      Verified here: 3 tests, 11 assertions, OK.
-      Root cause, three things composing: (1) `action_civTokenAdvance`
-      ([PGameXBody.php:4698](../modules/PGameXBody.php#L4698)) calls `benefitCashed()` but only
-      transitions at [:4702](../modules/PGameXBody.php#L4702), leaving a window inside the action
-      where the game sits in state 14 (`civAbility`, `args => argCivAbility`) with a drained stack;
-      (2) the triggered branch at [:4923](../modules/PGameXBody.php#L4923) and the midgame branch at
-      [:4911](../modules/PGameXBody.php#L4911) both call `dbSetStructureLocation($id, $spot, 0)` with
-      three arguments, so `$player_id` defaults to null all the way to
-      [tapcommon.php:277](../modules/tapcommon.php#L277), which sends it into
-      `getMostlyActivePlayerId()` -> `$this->gamestate->state()` -> the framework re-evaluating the
-      current state's args; (3) [PGameXBody.php:9624](../modules/PGameXBody.php#L9624) throws instead
-      of returning `[]`.
-      It is intermittent because the crash needs the civ benefit to be the **last** row on the stack;
-      with anything else pending, `argCivAbility` returns `[]` at
-      [:9626](../modules/PGameXBody.php#L9626) and nobody notices.
-      sslib's midgame report is the **same defect**, not a second one - identical three-argument call
-      on the `$is_midgame` branch. TODO.md line 6 ("Utilitarients - no city when they place
-      landmark") is **separate**: that is the `isAdjustments8()` branch at
-      [:4926](../modules/PGameXBody.php#L4926), which only calls `queueBenefitInterrupt`.
-      Adjustment-independence was verified by construction: the `lm` slot map for CIV_UTILITARIENS is
-      byte-identical across variants 1, 2, 4, 8 and 9, so the 13 adj=1 player tables and the studio
-      repro are one bug.
-      Proposed fix, the investigation's pick: make [tapcommon.php:237](../modules/tapcommon.php#L237)
-      call `$this->gamestate->state(true)`. The framework signature already carries the escape hatch
-      (`state(bool $bSkipStateArgs = false, ...)`), `getMostlyActivePlayerId()` only reads
-      `$state["type"]`, and skipping the arg load kills the **whole class** of failure - no
-      null-player_id notification from any action in any state can re-enter an `arg*` method again.
-      It is also a free performance win. Hardening `argCivAbility` to return `[]` instead would only
-      cover this one state (`argBenefitChoice` at
-      [:9605](../modules/PGameXBody.php#L9605) has the same shape); passing an explicit `$player_id`
-      at :4911 and :4923 fixes only those two lines but is worth doing anyway, as a second commit,
-      since a `moveStructure` notification whose player is guessed from the active player is wrong on
-      its own terms.
-      **Verify in the studio before shipping:** the vendored stub implements `state()` as a plain
-      lookup and ignores `$bSkipStateArgs` entirely
-      (`BgaFrameworkStubs.php:1196` - checked), so nothing local can prove production's `state(true)`
-      actually skips `loadStateArgs()`. The doc comment says it does; `getCurrentMainState()` is the
-      other candidate. This needs a live check, not a test.
-      Same reason the test is partly synthetic: it overrides `getMostlyActivePlayerId()` in the UT
-      subclass to do what the studio trace documents. Every other link in the chain is unmodified
-      production code, and the test independently proves both facts that make the crash inevitable -
-      `getMostlyActivePlayerId()` is reached, and `getCurrentBenefit()` is null at that moment.
-      The reporter's table 792096537 is 5 players, adj=1 (with Adjustments), set=3 (Original + Plans
-      & Ploys), Marriage of State kept, Renaissance kept, dump state 34 move 8. All 13 tables named
-      in the report are adj=1: 792096537, 805148071, 813143236, 815820844, 819892187, 822175391,
-      823545866, 825509956, 826092475, 827581079, 828703921, 862485195, 876708471.
-      Note the whole-game backend log showed no `missing benefit` event in its retained window
-      (2026-07-27 onward) even while the bug was live - absence there proves nothing for this assert.
-      **FIXED 2026-08-26** (committed, not deployed). `getMostlyActivePlayerId()`
-      ([tapcommon.php:236](../modules/tapcommon.php#L236)) now calls
-      `gamestate->isMultiactiveState()` instead of the deprecated `state()` - the predicate reads
-      the state row without the arg reload. Victoria chose it over the `state(true)` variant
-      proposed above. Tests: `tests/UtilitariansTest.php` (renamed from
-      `UtilitariansBenefitTest.php`, tests are now named by feature), 5 tests / 14 assertions,
-      driving the real crash path end to end - the stubs now model `loadStateArgs()` (opt-in via
-      `gamestate->game`), and reverting the fix reproduces the production error. Blind-reviewed;
-      the review confirmed fix semantics, stub back-compat and test non-tautology.
-      **NOTE for Victoria - studio check before marking fixed on BGA:** the real framework's
-      `isMultiactiveState()` body must not itself reload args (the stub assumes it does not;
-      nothing local can prove it). Replaying T950560's move 11 would settle it.
-      Review follow-ups, all out of scope here: `action_unblock`
-      ([PGameXBody.php:8620](../modules/PGameXBody.php#L8620)) has the same mid-action
-      `state()["transitions"]` reload after `clearCurrentBenefit()` and is reachable in state 14
-      (would still crash the same way); lower risk `state()` sites at PGameXBody:8549 (error
-      paths), :12042 (zombieTurn) and tapcommon:62 (doUndoSavePoint) - `state(true)` them in a
-      follow-up. The explicit `$player_id` at :4911/:4923 remains a good second commit. The
-      predeploy FakeTestCase gate only runs `GameTest`, so the new tests run under real phpunit
-      only - Victoria declined extending the legacy shim (since resolved: the shim is gone and
-      predeploy runs all of `tests/`).
 - [ ] **BGA #183142** - "Islanders gained exploration tiles after the opportunity to use civ
       ability". OPEN on BGA, 11 votes, `rules`. Table 726016713, 5 players, dump state 15 move 9,
       created 2025-09-06. Options: adj=8 (Pack), set=7 (All: Original + PP + AA), Marriage of State
@@ -293,50 +211,6 @@ confirmed two are still OPEN on the tracker.
       is only queued for income turns 2-4 ([:3895](../modules/PGameXBody.php#L3895)) - so the dump
       was taken after the incident. The reporter's own pointer is "before move #10".
       No fix commit.
-- [x] **BGA #203108** - "Gaining Historian Midgame." **FIXED 2026-08-26.** Reporter gained
-      HISTORIANS midgame in era 4 with no advancement-track landmarks left and got none of the
-      exposed benefits. `Historians::noLandmarksLeft()` counted every `landmark_mat_slot%` row, but
-      landmarks 13-19 are the extra pool (Bakery, Barn, Com Tower, Library, Stock Market, Treasury,
-      Urban Center) and never sit on a track, so the count was never zero and the clause never
-      fired. Renamed to `noTrackLandmarksLeft()` and filtered to `card_location_arg2 <= 12`, the
-      same cut already used at [PGameXBody.php:9431](../modules/PGameXBody.php#L9431) and
-      [Historians.php:93](../modules/civs/Historians.php#L93). Tests: `tests/HistoriansTest.php`,
-      `testTrackLandmarksExhaustedButMatStillHoldsExtras`,
-      `testTrackLandmarkRemainingBlocksTheClause`,
-      `testEmptyMatAwardsNothingWithoutTheAdjustmentPack`.
-      Also gated the clause on `isAdjustments4or8()`: it is printed only on `description@a4a8`
-      ("<i>Then, if there are no landmarks remaining on advancement tracks, gain the exposed
-      benefits.</i>"), the base card stops at "leaving the squares exposed on this mat". Without the
-      gate the filter fix would have started awarding variants 1/2 four benefits the printed card
-      never promises - the clause was previously dead code there, so this was latent, not a
-      regression.
-      **NOTE (not studio-verified)** - the stubs run no SQL, so the tests model the structure table
-      rather than executing it. The filter itself is now plain PHP and is exercised, but a live
-      table 795801647 check would be the real confirmation.
-      **Also fixed (same family, no separate report).** Benefit 111's guard accepted any
-      `landmark_mat_slot%` row while its arg builder and
-      [selectLandmark](../modules/PGameXBody.php#L8280) both cut at 12. Setup seeds all 19 landmarks
-      at `landmark_mat_slot1..19` ([:610](../modules/PGameXBody.php#L610)) even though the client
-      draws 13-19 in a separate `landmark_extra` container, so the prefix does match the extras.
-      With only extras left the guard passed, state 34 opened with empty `choices` and has no
-      decline action - the active player soft-locked instead of getting the "No more landmarks left"
-      skip. Deferred once as rare (needs all 12 track landmarks claimed and Dystopia firing
-      afterwards), then taken once `getUnclaimedTrackLandmarks()` made it a one-liner. Test
-      `tests/LandmarksTest.php::testDystopiaSkipsWhenOnlyTheExtraPoolIsLeft`.
-      **NOTE (unverified, pre-existing)** - `activateBenefits`
-      ([Historians.php:116](../modules/civs/Historians.php#L116)) queries `civ_7_%` with no owner
-      filter; harmless with one owner, latent if the a4/a8 "discard and draw another in era 1-2"
-      path can leave a prior holder's cubes behind. Not traced.
-      **NOTE (cosmetic)** - the literal 12 now appears in five places (Historians.php 93 and 109,
-      PGameXBody.php 3009, 8268, 9431). A `LANDMARK_TRACK_MAX` constant would be the tidy-up; not
-      done, to keep the fix diff small.
-      Related but a separate ticket: the `Invalid historian token` auto-error is thrown at
-      [Historians.php:41](../modules/civs/Historians.php#L41) when the chosen token is not at
-      `civ_7_$token_id`; after a midgame acquisition all 4 tokens have moved to `pb_X`, so if the
-      income-turn "send a historian" action is still offered the server throws. Same civ, same
-      midgame state, but a different code path and the table ids were not cross-checked - a guess.
-      Note it is a bare `feException`, not `userAssertTrue`, so it surfaces as a crash rather than a
-      friendly message.
 
 ### Lower priority (deprecated adjustment options)
 
@@ -385,8 +259,7 @@ prioritise, and per the skill no BGA report should be opened for them. Event/use
 that window.
 
 - [ ] `feException: Invalid territory tile` - **106 events / 75 users**, 2026-08-05 to today, still
-      firing. Biggest blast radius on the tracker by a wide margin. Two ids for the same text
-      (`...146A8F` and `...145Y47`, the older one 42 events to 2026-08-05), so the real count is ~148.
+      firing. Biggest blast radius on the tracker by a wide margin.
 - [ ] `feException: This transition (benefit) is impossible at this state (20)` - **89 events / 11
       users** (plus `...3814642R`, 39 events / 7 users). Few users, many events - that is people stuck
       retrying, i.e. a block, and it deserves priority above its raw count. State 20 is a benefit state.

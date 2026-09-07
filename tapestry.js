@@ -4497,7 +4497,7 @@ define([
       }
     },
 
-    //define("FLAG_GAIN_BENFIT",0b0001); // gain befit
+    //define("FLAG_GAIN_BENEFIT",0b0001); // gain befit
     //define("FLAG_PAY_BONUS",  0b0010); // may pay for bonus
     //define("FLAG_FREE_BONUS", 0b0100); // gain free bonus
     //define("FLAG_MAXOUT_BONUS", 0b1000); // gain 5VP if maxout
@@ -4505,7 +4505,7 @@ define([
       var str = "";
       if (flags == 0) str = _("no benefits");
       else {
-        if (flags & this.CON.FLAG_GAIN_BENFIT) {
+        if (flags & this.CON.FLAG_GAIN_BENEFIT) {
           str = _("benefit");
         } else {
           str = _("no benefit");

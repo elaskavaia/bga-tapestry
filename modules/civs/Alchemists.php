@@ -311,7 +311,7 @@ class Alchemists extends AbsCivilization {
                 $withben[] = $game->matFindBenefit([
                     "t" => $track,
                     "adv" => 1,
-                    "flags" => FLAG_GAIN_BENFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
+                    "flags" => FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS | FLAG_MAXOUT_BONUS,
                 ]);
             }
             $withben[] = 401;

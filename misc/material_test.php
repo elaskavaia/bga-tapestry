@@ -1,14 +1,13 @@
 <?php
 
-
 class material_test {
     function __construct() {
-        include '../material.inc.php';
-        include '../stats.inc.php';
+        include "../material.inc.php";
+        include "../stats.inc.php";
 
         //var_dump($this->card_types); // whatever your var
         //$cc = get_defined_constants(true)['user'];
-        //foreach ($cc as $key => $value) {          
+        //foreach ($cc as $key => $value) {
         //    print ("const $key = $value;\n");
         //}
 
@@ -53,10 +52,10 @@ class material_test {
         //         if ($r == 't')
         //             switch ($flags) {
         //                 case 1 :
-        //                     $nval = "(FLAG_GAIN_BENFIT)";
+        //                     $nval = "(FLAG_GAIN_BENEFIT)";
         //                     break;
         //                 case 3 :
-        //                     $nval = "(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS)";
+        //                     $nval = "(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)";
         //                     break;
         //                 case FLAG_MAXOUT_BONUS:
         //                     $nval = "(FLAG_MAXOUT_BONUS)";
@@ -67,8 +66,8 @@ class material_test {
         //                 case FLAG_JUMP:
         //                     $nval = "(FLAG_JUMP)";
         //                     break;
-        //                 case FLAG_GAIN_BENFIT | FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS :
-        //                     $nval = "(FLAG_GAIN_BENFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)";
+        //                 case FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS :
+        //                     $nval = "(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS|FLAG_MAXOUT_BONUS)";
         //                     break;
         //             }
         //         $ben_data['flags']=str_replace("|", "\|", $nval);
@@ -89,19 +88,18 @@ class material_test {
 
         // }
 
-
-        print("id,name, description\n");
+        print "id,name, description\n";
         //$this->doAdjustMaterial(2, 4);
         ksort($this->civilizations, SORT_NUMERIC);
         foreach ($this->civilizations as $civ => $civ_data) {
-            $description = $civ_data['description'];
+            $description = $civ_data["description"];
             if (is_array($description)) {
                 $description = implode("\n", $description);
             }
-            $name = $civ_data['name'];
+            $name = $civ_data["name"];
 
             //print("$civ,$name,\"$description\"\n");
-            print("$civ => clienttranslate('$name'),\n");
+            print "$civ => clienttranslate('$name'),\n";
         }
     }
 }
@@ -118,21 +116,21 @@ function startsWith($haystack, $needle) {
 }
 
 function addConstants(&$result) {
-    $cc = get_defined_constants(true)['user'];
+    $cc = get_defined_constants(true)["user"];
     foreach ($cc as $key => $value) {
-        $im = explode('_', $key);
+        $im = explode("_", $key);
         switch ($im[0]) {
-            case 'CARD':
-            case 'BE':
-            case 'TERRAIN':
-            case 'CIV':
-            case 'TRACK':
-            case 'RES':
-            case 'INCOME':
-            case 'TAP':
-            case 'FLAG':
-                $result['constants'][$key] = $value;
-                $result['constants_reverse'][$im[0]][$value] = $key;
+            case "CARD":
+            case "BE":
+            case "TERRAIN":
+            case "CIV":
+            case "TRACK":
+            case "RES":
+            case "INCOME":
+            case "TAP":
+            case "FLAG":
+                $result["constants"][$key] = $value;
+                $result["constants_reverse"][$im[0]][$value] = $key;
                 break;
             default:
                 break;
@@ -140,8 +138,7 @@ function addConstants(&$result) {
     }
 }
 
-if (!function_exists('array_get')) {
-
+if (!function_exists("array_get")) {
     /**
      * Get an item from an array using "dot" notation.
      *
@@ -151,11 +148,13 @@ if (!function_exists('array_get')) {
      * @return mixed
      */
     function array_get($array, $key, $default = null) {
-        if (is_null($key))
+        if (is_null($key)) {
             return $array;
-        if (array_key_exists($key, $array))
+        }
+        if (array_key_exists($key, $array)) {
             return $array[$key];
-        foreach (explode('.', $key) as $segment) {
+        }
+        foreach (explode(".", $key) as $segment) {
             if (!is_array($array) || !array_key_exists($segment, $array)) {
                 return $default;
             }

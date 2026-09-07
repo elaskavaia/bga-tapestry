@@ -79,7 +79,7 @@ final class WerefolkTest extends TestCase {
             $row = $this->game->benefit_types[$ben];
             $this->assertEquals("t", $row["r"], "benefit $ben");
             $this->assertEquals($track, $row["t"], "benefit $ben");
-            $this->assertEquals(FLAG_GAIN_BENFIT | FLAG_FREE_BONUS, $row["flags"], "benefit $ben");
+            $this->assertEquals(FLAG_GAIN_BENEFIT | FLAG_FREE_BONUS, $row["flags"], "benefit $ben");
         }
     }
 
