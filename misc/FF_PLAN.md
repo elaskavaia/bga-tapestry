@@ -86,8 +86,8 @@ not new steps.
 
 - Nothing to do for the mat itself: `civ_ff.webp` and all ten `.civilization_4N` position rules are
   already in place.
-- Any civ-local overlay art (Faefolk ring, Genies ring, Weefolk plot token, Celestials map token)
-  gets its own class next to the existing per-civ CSS.
+- Any civ-local overlay art (Faefolk ring, Genies ring, Weefolk plot token) gets its own class
+  next to the existing per-civ CSS. The Celestials map token is a plain player token, no skin.
 - Tokens placed on a mat are positioned by the `slots` percentages, not by CSS offsets - CSS only
   has to size and skin them.
 

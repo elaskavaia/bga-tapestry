@@ -15,14 +15,16 @@ of their capital city and gains 5 VP per landmark that does not. Gained mid game
 discarded to draw another, the existing 173/174 pair.
 
 The engine half is a hex occupant that is not an owner, and a reader for "does this landmark
-footprint leave the mat". The second one turns out to be nearly free: overhang is already a legal,
-reachable and tested state (see stage 1 below). The first one is where the work is.
+footprint leave the mat". Both turn out to exist already: an Infiltrators cube on land is exactly
+such an occupant, and overhang is already a legal, reachable and tested state (see stage 1 below).
+The work is making the map testable and fixing two places that mishandle a cube on a hex.
 
 ## Shape
 
 - Material entry `CIV_CELESTIALS` (41, already defined at [material.inc.php](../material.inc.php)
-  line 235): `exp => "FF"`, `income_trigger => ["from" => 2, "to" => 5, "decline" => true]` (the
-  move is optional; turn 5 is scoring only and does not prompt), `midgame_ben => ["or" => [174,
+  line 235): `exp => "FF"`, `income_trigger => ["from" => 2, "to" => 5]` (the move is optional
+  through the state's decline button; no material key exists for that, and turn 5 is scoring only
+  and does not prompt), `midgame_ben => ["or" => [174,
   173]]` for the discard-and-redraw sentence, no `slots` (the token lives on the map, not on the
   mat, so there is nothing for `populateSlotChoiceForArgs` to offer), no `tokens_count` (the token
   is created on the map by `setupCiv`, not on a civ slot).
@@ -37,15 +39,15 @@ reachable and tested state (see stage 1 below). The first one is where the work 
     The Illuminati and Weefolk income shape: deterministic, nothing chosen.
 - No new globals and no new DB columns. The token is one `structure` row: `card_type`
   `BUILDING_CUBE`, `card_location` `land_${x}_${y}`, `card_location_arg` the owner, and
-  `card_location_arg2` set to `reason_civ(CIV_CELESTIALS)` as its marker. `addCivToken`
-  (PGameXBody.php:1404) already puts a reason string in `card_location_arg2`, and
-  `getStructureInfoSearch(BUILDING_CUBE, CUBE_CIV, $card, null, reason_civ(CIV_INVENTORS))` at
-  PGameXBody.php:6735 already searches by it, so this is an existing convention, not a new one.
-  `card_type_arg` stays `CUBE_NORMAL`, deliberately not `1`: reusing the toppled flag to hide the
-  token from `isHexOwner` would make it a stand-up target and a topple-award occupant.
+  `card_type_arg` 1, placed through `effect_placeOnMap(..., $ownership = false)` exactly as an
+  Infiltrators cube is (Infiltrators.php:138). Nothing marks it as the Celestials token: player
+  tokens are indistinguishable once placed (5.12), so no civ reason in `card_location_arg2` and no
+  civ-specific read anywhere. The only thing the DB records is the role every structure on land
+  already carries in `card_type_arg`: 0 stands and controls (an outpost, or a MILITANTS cube used as
+  one under adjustment variant 4, `getOutpostId` PGameXBody.php:7508), 1 is an inert item.
 - Client visible state: none beyond the structure row itself. `getAllDatas` already ships every
-  structure, `moveStructure` in [tapestry.js](../tapestry.js) already renders a cube on a land slot
-  (the Infiltrators path), and the marker in `card_location_arg2` is what the CSS keys on.
+  structure, and `moveStructure` in [tapestry.js](../tapestry.js) already places a cube on a land
+  slot, but only for an Infiltrators owner (line 6385); stage 2 widens that gate.
 - No new state global for the move: `setSelectedMapHex` (PGameXBody.php:9375) already carries the
   hex the dice are rolled against and is what black face 1 reads.
 
@@ -77,27 +79,25 @@ Two things also have to move while in there:
 - The `array_unique` / `array_values` pair at PGameXBody.php:5823-5824 sits *outside* the foreach,
   so it dedupes only whichever hex the last structure row happened to be on. It works today only
   because every caller that reads `map_owners` for a decision goes through `getMapHexData` with a
-  single coord. That is a latent bug and Celestials adds a second occupant kind to the same lists;
-  move both lines inside the loop and pin the "two of my own outposts on one hex" case.
+  single coord. That is a latent bug, and cubes on land already put a second occupant kind in the
+  same lists; move both lines inside the loop and pin the "two of my own outposts on one hex" case.
 - `getNeighbourHexes` (PGameXBody.php:7146) defaults `$valid_coords` to `SELECT map_coords FROM
   map`. Give it a `getMapCoordsDb()` helper backed by `getInitMapData`, which is pure material, so
   adjacency is testable too. The Celestials move needs adjacency; nothing else in the civ does.
 
-### S2. isControllingStructure - an occupant that is not an owner
+### S2. isControllingStructure - name the rule getMap already applies
 
 `getMap` decides ownership inline: `$toppled = $struc["card_type_arg"]; if ($toppled != 1) {
 $map[$coords]["map_owners"][] = ... }` (PGameXBody.php:5816-5819). Extract that into
 
 `isControllingStructure(array $structure): bool`
 
-with today's rule (not toppled) plus one clause: a civilization token marked in
-`card_location_arg2` controls nothing. `occupancy` and `map_occupants` are untouched, so the token
-counts as an item for `isHexBlockedForConquer` (occupancy >= 2, PGameXBody.php:7142) for free,
-which is exactly the card's "a territory with 2 items may not be conquered".
-
-Deliberately narrow: the predicate excludes only the marked token, not cubes on land generally. An
-Isolationists token and an Infiltrators cube on land keep controlling exactly as today, and 5.12
-depends on that.
+with today's rule and nothing more: `card_type_arg` 0 controls, 1 does not, whatever the
+structure type. That is already what makes an Infiltrators cube an occupant without being an
+owner, and what lets a MILITANTS cube placed as an outpost (variant 4) control. `occupancy` and
+`map_occupants` are untouched, so a token counts as an item for `isHexBlockedForConquer`
+(occupancy >= 2, PGameXBody.php:7142) for free, which is exactly the card's "a territory with 2
+items may not be conquered". No civ, no marker, no structure type in the predicate.
 
 What this makes true, all of it verified against the call sites rather than assumed:
 
@@ -148,14 +148,24 @@ footprint, including the `card_type_arg` is the rotation convention on the capit
 No new column, no placement-time bookkeeping, no migration for games in flight: the answer is
 recomputed from the anchor and the mask whenever it is asked for.
 
+### S5. Stand-up flips only outposts
+
+`action_standup` (PGameXBody.php:7457) toggles `card_type_arg` on every structure on the hex:
+`UPDATE structure SET card_type_arg = 1-card_type_arg WHERE card_location='$land_coords'`. A
+token sharing that hex silently becomes a controlling structure, and a toppled MILITANTS cube
+becomes one again. The target itself is already guarded (the handler asserts `card_type ==
+BUILDING_OUTPOST` at 7453), the toggle is not. Restrict the toggle to `card_type =
+BUILDING_OUTPOST`. This is an Infiltrators bug today, fixed here because Celestials is the civ
+that puts a token next to a stand-up.
+
 ### What does not need a seam
 
-The movable token needs no new engine primitive. `dbSetStructureLocation` (PGameXBody.php:4759)
-moves a structure row and notifies, and the client's `moveStructure` relocates an existing cube div
-by id. `effect_placeOnMap` is deliberately not reused for the move: it writes `map.map_owner`,
-which is the opposite of what this civ does. (Aside: `map_owner` is written by seven call sites and
-read by none - ownership is derived from structures. Not this civ's problem, but the plan should
-not add an eighth writer.)
+The movable token needs no new engine primitive. `effect_placeOnMap($player_id, $token_id,
+$location, $message, false)` (PGameXBody.php:7636) is the whole move: with `$ownership` false it
+never writes `map.map_owner`, it re-asserts `card_type_arg` 1, and it emits the `moveStructure`
+notification the client already relocates a cube div by. The same call places the token at setup.
+(Aside: `map_owner` is written by six call sites and read by none - ownership is derived from
+structures. Not this civ's problem, but the plan should not add a seventh writer.)
 
 ### Regression tests that land with stage 1
 
@@ -169,6 +179,8 @@ cases that pass before and after the seams:
 - `effect_endOfConquer` awards the topple achievement exactly when `toppled_player` is set, at 1,
   2 and 3 occupants.
 - `getMap` dedupes owners on every hex, not just the last one (fails before S1).
+- `action_standup` on a hex holding an Infiltrators cube stands the outpost up and leaves the
+  cube's flag alone (fails before S5).
 - `getCapitalScoreVP` and `argPlaceStructure` unchanged (the existing CapitalMatTest cases already
   cover this; S4 adds no write path, so they are the guard).
 - The whole set run with no Celestials in play is the "the seams change nothing" proof; the same
@@ -183,9 +195,12 @@ cases that pass before and after the seams:
   - `setupCiv($player_id, $start)`. Start: `stFinishSetup` (PGameXBody.php:10670) has already put
     two outposts on the start hex before it calls `setupCiv`, so this removes one of them back to
     `hand` (where `getOutpostsInHand` finds it again, its `card_location NOT LIKE 'land%'` filter)
-    and creates the token on the same hex. Mid game: the same code, against the hex the outpost is
-    actually on rather than the nominal start hex; see rulings for the cases where there is no
-    outpost of theirs left to replace.
+    and places a cube on the same hex through `addCube` plus `effect_placeOnMap` with ownership
+    false, the Infiltrators call. The removed outpost is still in the `$outpost_ids` list that
+    `stFinishSetup` ships in the setup notification; check the client copes with an outpost at
+    `hand` rather than assuming. Mid game: the same code, against the hex the outpost is actually
+    on rather than the nominal start hex; see rulings for the cases where there is no outpost of
+    theirs left to replace.
   - `queueEraCivAbility` overridden the Weefolk way: turns 2-4 queue `BE_CELESTIALS_MOVE`, turn 5
     queues `BE_CELESTIALS_SCORE`, anything else falls through to the parent's not-applicable
     message.
@@ -194,7 +209,10 @@ cases that pass before and after the seams:
     hanging` as one `awardVP` with `reason_civ(CIV_CELESTIALS)`. Opens with the
     `systemAssertTrue("ERR:Celestials:NN", isRealPlayer)` / `hasCiv` pair and closes with the
     unowned-benefit assert, per CODE_STYLE.
-  - `getToken($player_id)` / `getMoveTargets($player_id)`: the token row, and
+  - `getTokens($player_id)` / `getMoveTargets($player_id)`: every cube of the owner on land with
+    `card_type_arg` 1, since tokens are indistinguishable once placed. Normally that is the one
+    Celestials cube; for an owner who also holds Infiltrators or Isolationists it includes their
+    cubes too, and a standing MILITANTS cube is never in the list. Targets per token are
     `getNeighbourHexes(coords)` filtered to hexes with a tile on them (`map_tile_id != 0`) - no
     occupancy filter, since the card allows moving onto a full territory.
   - No `finalScoring`. The scoring is an income turn 5 row, not end of game.
@@ -202,18 +220,20 @@ cases that pass before and after the seams:
   `argCelestialMove`, actions `celestialMove` and `decline`, transitions both to 18; plus
   `"celestialMove" => 40` in state 18's transition list. Adding a state at the end is safe per
   CODE_STYLE; renumbering is not.
-- `argCelestialMove` on `PGameXBody`: `["targets" => [...], "decline" => true]` plus
-  `notifArgsAddBen`, the `argConquer` shape (PGameXBody.php:9581), so the client can reuse the
-  land-slot highlighting.
-- `action_celestialMove($u, $v)` on `PGameXBody`, declared in `tapestry.action.php` with two
-  `AT_posint`-style arguments the way `conquer` is: validate against the arg targets with
-  `userAssertTrue`, clear the row, move the structure, `setSelectedMapHex($coord)`,
-  `rollConquerDice($player_id)`, then `conquerDieBenefit("red", ...)` and `conquerDieBenefit
-  ("black", ...)` for both benefits, then `nextState("next")`. Never `effect_conquer`, never row
-  141, never `map_owner`: this is not a conquer, so no "whenever you conquer" trigger, no die pick,
-  no Traders leftover die, no Utilitariens barracks, no trap.
-- `action_decline` already exists for the generic decline path; confirm it clears the row for a
-  `state` row and returns to 18 rather than needing its own handler.
+- `argCelestialMove` on `PGameXBody`: `["targets" => [token_id => [coords...]], "decline" =>
+  true]` plus `notifArgsAddBen`, the `argConquer` shape (PGameXBody.php:9581) keyed by token, so
+  the client can reuse the land-slot highlighting. With one token the client skips the token pick.
+- `action_celestialMove($token_id, $u, $v)` on `PGameXBody`, declared in `tapestry.action.php`
+  with `AT_posint`-style arguments the way `conquer` is: validate token and hex against the arg
+  targets with `userAssertTrue`, clear the row, `effect_placeOnMap` with ownership false and its
+  own message, `setSelectedMapHex($coord)`, `rollConquerDice($player_id)`, then
+  `conquerDieBenefit("red", ...)` and `conquerDieBenefit ("black", ...)` for both benefits, then
+  `nextState("next")`. Never `effect_conquer`, never row 141, never `map_owner`: this is not a
+  conquer, so no "whenever you conquer" trigger, no die pick, no Traders leftover die, no
+  Utilitariens barracks, no trap.
+- `action_decline` (PGameXBody.php:8799) is a switch on the state name, not a generic path. Add a
+  `celestialMove` case that clears the row and returns to 18, or verify the default branch does
+  exactly that for a `state` row before relying on it.
 - `zombieTurn` (PGameXBody.php:12427) walks the state's transitions for an active-player state, so
   state 40 must declare a transition it can take; verify a zombie in `celestialMove` declines
   rather than throwing.
@@ -222,8 +242,9 @@ cases that pass before and after the seams:
 
 - `tests/Stubs/MapUT.php`, new, built on the S1 seam: `setTile($coord, $tile_id, $rot)` writing a
   `CARD_TERRITORY` row at `map` with `card_location_arg2` the coord (the shape `getMapDataFromDb`
-  reads), `addOutpostAt`, `addCelestialTokenAt`, and a `hexOccupants($coord)` reader. With S1 in
-  place these need no method overrides at all, which is the point of doing S1 first.
+  reads), `addOutpostAt`, `addTokenAt` (a cube with `card_type_arg` 1, the Infiltrators shape),
+  and a `hexOccupants($coord)` reader. With S1 in place these need no method overrides at all,
+  which is the point of doing S1 first.
 - What `GameUT` still does not model and needs a stub in the test subclass, the same way the
   Illuminati plan stubbed `getSelectedMapHex` and `getTileBenefit`:
   - `getSelectedMapHex` / `setSelectedMapHex` are `map_id` and `map_coords_selected` globals plus
@@ -242,8 +263,9 @@ cases that pass before and after the seams:
 Setup and the token:
 
 - Material entry: `exp`, `income_trigger`, `midgame_ben`, `automa`, and no `slots`.
-- Start setup leaves one outpost and one marked token on the start hex, and the second outpost is
-  back in the supply where `getOutpostsInHand` finds it.
+- Start setup leaves one outpost and one cube with `card_type_arg` 1 on the start hex, nothing in
+  `card_location_arg2`, and the second outpost is back in the supply where `getOutpostsInHand`
+  finds it.
 - Mid game setup replaces one outpost on the hex the owner still holds; the redraw option (173) is
   offered and taking it runs no setup.
 - The token is not a controlling structure: `isHexOwner` false, the hex is absent from
@@ -254,10 +276,12 @@ Conquest against the token:
 
 - Token plus one outpost is not in any player's `getConquerTargets`, including the owner's, and
   including with `anywhere`.
-- Token alone on a hex is conquerable; after the conquer the conqueror is the single owner, nobody
-  was toppled, no trap row was queued, and the topple achievement was not awarded (fails before S3).
+- Token alone on a hex is conquerable; after the conquer the token is still there next to the
+  conqueror's outpost, the conqueror is the single owner, nobody was toppled, no trap row was
+  queued, and the topple achievement was not awarded (fails before S3).
 - Token on a hex the owner also has an outpost on: an opponent cannot conquer it; after the token
   moves away the same hex becomes conquerable again.
+- A stand-up on a hex the token shares leaves the token inert (fails before S5).
 - Nomads, Militants and the `anywhere` conquer rows all see the same blocking.
 
 The move:
@@ -265,6 +289,8 @@ The move:
 - Income turns 2, 3 and 4 queue `BE_CELESTIALS_MOVE`; turn 1 and turn 5 do not.
 - `argCelestialMove` offers exactly the adjacent tiled hexes, including one with two outposts on
   it, and excludes untiled hexes and the token's own hex.
+- An owner with a Celestials cube and an Infiltrators cube on the map is offered both; a standing
+  MILITANTS cube (variant 4) is not offered.
 - Moving rolls both dice and queues both benefits, in red then black order, with the civ reason,
   and queues no row 141.
 - Black face 1 pays the benefit of the destination territory, not the origin (the
@@ -298,18 +324,20 @@ Guards:
 ## Client
 
 - The token renders through the existing cube path in `moveStructure` ([tapestry.js](../tapestry.js)
-  line 6382): `location.startsWith("land")` maps to the hex slot, and the cube div is created or
-  relocated. The one addition is a class from `card_location_arg2` carrying the Celestials reason,
-  the way the `dic_` prefix already adds `dictator` a few lines below.
-- CSS: a `.celestial` skin on the cube (the floating capital art), sized like the Isolationists
-  token on a land slot, plus a tooltip "Floating capital - this territory cannot be conquered while
-  a second item is on it". Reuse the existing land-slot token positioning; do not add offsets.
-- `onUpdateActionButtons_celestialMove(args)`: add `active_slot` to `land_${coord}` for every entry
-  of `args.targets`, and a decline button. The conquer state (tapestry.js:1388) and the
-  `placeStructure` state's `conquer_targets` (tapestry.js:1594) are the two precedents; both also
-  show the click-handler guard that CODE_STYLE requires alongside `active_slot`, in `onLandClick`.
-- `onLandClick` gets a `celestialMove` case calling `axcallwrapper("celestialMove", {u, v})`, with
-  a `checkActiveSlot` guard so a dimmed hex does not fire.
+  line 6382). That path keeps a cube on its land slot only when the owner holds Infiltrators
+  (`this.ownsCiv(this.CON.CIV_INFILTRATORS, player_id)` at line 6385); widen the gate to any cube
+  whose location starts with `land`. One civ special case fewer, and a MILITANTS cube under
+  variant 4 gets the same fix for free.
+- No skin, no civ tooltip, no class from `card_location_arg2`: it is a plain player token, styled
+  and positioned exactly as an Infiltrators cube on a land slot is. Do not add offsets.
+- `onUpdateActionButtons_celestialMove(args)`: with one token in `args.targets`, add `active_slot`
+  to `land_${coord}` for each of its hexes and a decline button. With several, first highlight the
+  owner's cubes on the map and let the click pick the token (`clientStateArgs.token`), then the
+  hexes. The conquer state (tapestry.js:1388) and the `placeStructure` state's `conquer_targets`
+  (tapestry.js:1594) are the two precedents; both also show the click-handler guard that
+  CODE_STYLE requires alongside `active_slot`, in `onLandClick`.
+- `onLandClick` gets a `celestialMove` case calling `axcallwrapper("celestialMove", {token_id, u,
+  v})`, with a `checkActiveSlot` guard so a dimmed hex does not fire.
 - The move's dice show through the existing `conquer_roll` notification and `updateConquerDice`, so
   no new notification is needed for the roll. The move itself is a `moveStructure` notification with
   a log line of its own.
@@ -319,14 +347,17 @@ Guards:
 
 ## Rulings
 
-Proposed, to be recorded in FORMAL_RULES as 5.30 and following.
+Proposed. The first is a general map rule and belongs with the conquest rules in FORMAL_RULES; the
+rest are Celestials rulings for 5.30 and following.
 
-- The player token is an item on the territory but never controls it. It counts toward the two
-  items that make a territory unconquerable, it does not make the owner the controller, and it is
-  invisible to everything that reads control: conquer targeting and adjacency, the territory count
-  benefits, the Isolationists landmass, the central island achievement, and the Mystics controlled
-  territory prediction. It is not an outpost, so it is never toppled, never stood up, and never
-  counts toward the topple achievement.
+- A player token placed on a territory as a token is an inert item. It counts toward the two items
+  that make a territory unconquerable, it controls nothing, and it is invisible to everything that
+  reads control: conquer targeting and adjacency, the territory count benefits, the Isolationists
+  landmass, the central island achievement, and the Mystics controlled territory prediction. It is
+  never toppled, never stood up, and never counts toward the topple achievement. A token placed as
+  an outpost (MILITANTS out of outposts, adjustment variant 4) is an outpost in every respect.
+  Once placed, tokens are indistinguishable (5.12): the Celestials move may float any inert token
+  of the owner, an INFILTRATORS or ISOLATIONISTS one included.
 - Against each conquest path: an opponent may conquer a territory holding only the token, and the
   token stays on the territory afterwards, sharing it with the conqueror's outpost, which then
   makes the territory unconquerable at two items. An opponent may not conquer a territory holding
@@ -389,8 +420,6 @@ For Victoria:
   earlier phases, i.e. is it start-of-turn as the card says, or after the income phase? The plan
   reads it as the start, alongside the other income civ abilities.
 - `automa => true` or `false`, pending the three Automa checks above.
-- Should the token be a distinct structure type rather than a marked cube? A new
-  `BUILDING_SKYCAPITAL` would be inert to every existing `card_type` query and self-documenting,
-  at the cost of a new case in the client's `moveStructure` and a new `structure_types` entry. The
-  plan proposes the marked cube because the client path already exists, but the type is the cleaner
-  long-term answer if more FF civs put things on the map.
+- A toppled MILITANTS cube (variant 4) carries the same flag as an inert token, and `action_standup`
+  already refuses it. Treat it as an inert token from then on (proposed, and what the table shows),
+  or make it stand-up-able? Not Celestials' problem, but the ruling above decides it either way.
