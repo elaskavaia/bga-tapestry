@@ -2845,11 +2845,11 @@ div[data-income="0"] #subtitle_bar {
   padding: 4px;
   border-radius: 10px;
   background-color: rgba(0, 60, 90, 0.25);
-  outline: 2px dashed rgba(0, 60, 90, 0.6);
 }
 .submerged_cards > * {
   display: inline-block;
   margin-right: 2px;
+  margin-top: 10px;
 }
 .submerged_cards:empty {
   display: none;
