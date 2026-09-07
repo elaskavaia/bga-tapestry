@@ -4507,7 +4507,8 @@ $this->civilizations = [
         "income_trigger" => ["from" => 2, "to" => 5], //
         "al" => 8,
     ],
-    12 => [
+    CIV_MILITANTS => [
+        // 12
         "name" => clienttranslate("MILITANTS"),
         "description" => [
             clienttranslate(
