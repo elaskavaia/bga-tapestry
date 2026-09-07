@@ -82,6 +82,14 @@ abstract class AbsCivilization {
     /** The owner just gained a landmark, whatever granted it and whoever's turn it is. */
     function onGainLandmark(int $player_id, int $landmark_type): void {}
 
+    /**
+     * A die was rolled and announced, before the roller does anything with the result. Called on
+     * every civilization in play, not only the roller's.
+     *
+     * @param string $die - "black", "red" or "science"
+     */
+    function onDieRolled(string $die, int $face, int $roller_id): void {}
+
     /** A benefit this civ hands to a player who does not own it is about to be queued; false drops it. */
     function interceptOpponentBenefit(int $ben, int $player_id, string $reason, int $count): bool {
         return true;

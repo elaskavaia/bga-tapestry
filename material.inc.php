@@ -105,6 +105,7 @@ if (!defined("TAPESTRY")) {
     define("BE_REGRESS_M", 69);
     define("BE_REGRESS_T", 70);
     define("BE_VP_TAPESTY", 71);
+    define("BE_RESEARCH_MAXOUT", 72);
     define("BE_ADVANCE_EXPLORATION_BENEFIT_NOBONUS", 80);
     define("BE_ADVANCE_SCIENCE_BENEFIT_NOBONUS", 81);
     define("BE_ADVANCE_MILITARY_BENEFIT_NOBONUS", 82);
@@ -117,6 +118,7 @@ if (!defined("TAPESTRY")) {
     define("BE_ADVANCE_SCIENCE_BENEFIT_OPT", 89);
     define("BE_ADVANCE_MILITARY_BENEFIT_OPT", 90);
     define("BE_ADVANCE_TECHNOLOGY_BENEFIT_OPT", 91);
+    define("BE_ADVANCE_EXPLORATION_NOBENEFIT_MAXOUT_OPT", 97);
     define("BE_ADVANCE_EXPLORATION_BENEFIT_FREEBONUS", 182);
     define("BE_ADVANCE_SCIENCE_BENEFIT_FREEBONUS", 183);
     define("BE_ADVANCE_MILITARY_BENEFIT_FREEBONUS", 184);
@@ -1343,7 +1345,7 @@ $this->benefit_types = [
         "r" => "v",
     ],
     72 => [
-        //
+        // BE_RESEARCH_MAXOUT
         "name" => clienttranslate("Research (no benefit, maxout bonus)"),
         "r" => "r",
         "flags" => FLAG_MAXOUT_BONUS,
@@ -1516,7 +1518,7 @@ $this->benefit_types = [
         "flags" => 6,
     ],
     97 => [
-        //
+        // BE_ADVANCE_EXPLORATION_NOBENEFIT_MAXOUT_OPT
         "name" => clienttranslate("Advance (optional, no benefits, maxout bonus) - Exploration"),
         "r" => "t",
         "t" => 1,

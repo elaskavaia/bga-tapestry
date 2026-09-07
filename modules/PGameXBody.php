@@ -1529,10 +1529,9 @@ abstract class PGameXBody extends tapcommon {
                 $this->ageOfSailCheck($player_id);
                 $this->gamestate->nextState("explore");
                 return false;
-            case 18: // RESEARCH - WITH BENEFIT
-            case 19: // RESEARCH - NO BENEFIT
-                $this->research($reason);
-                return false;
+            case BE_RESEARCH:
+            case BE_RESEARCH_NB:
+                return $this->research($ben, $reason, $player_id);
             case 20:
                 $this->setGameStateValue("invent_face_up", 0);
                 $this->gamestate->nextState("invent");
@@ -1671,9 +1670,8 @@ abstract class PGameXBody extends tapcommon {
             case 136:
                 $this->VPTapestryCardsInHand($player_id, $count, $reason, null, $ben);
                 return true;
-            case 72:
-                $this->research($reason); // RESEARCH - NO BENEFIT, BUT MAXOUT BONUS
-                return false;
+            case BE_RESEARCH_MAXOUT:
+                return $this->research($ben, $reason, $player_id);
             case 73:
                 $this->setGameStateValue("conquer_bonus", 1);
                 $this->gamestate->nextState("conquer");
@@ -2042,8 +2040,8 @@ abstract class PGameXBody extends tapcommon {
                 return true;
 
             case 324:
-                $this->rollBlackConquerDie($player_id, true);
                 $this->interruptBenefit();
+                $this->rollBlackConquerDie($player_id, true);
 
                 if ($count > 1) {
                     $this->queueBenefitNormal(["or" => [330, 202]], $player_id, $reason);
@@ -2055,8 +2053,8 @@ abstract class PGameXBody extends tapcommon {
                 return true;
 
             case 325:
-                $this->rollScienceDie($reason, "science_die", $player_id, true);
                 $this->interruptBenefit();
+                $this->rollScienceDie($reason, "science_die", $player_id, true);
 
                 if ($count > 1) {
                     $this->queueBenefitNormal(["or" => [332, 202]], $player_id, $reason);
@@ -2639,9 +2637,11 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_ageOfDiscovery($player_id = null) {
         $reason = reason_tapestry(TAP_AGE_OF_DISCOVERY);
+        // interrupt before the roll, so a civilization reacting to it is ahead of the roller
+        $this->interruptBenefit();
         $track = $this->rollScienceDie2($reason);
         $next_player_list = $this->getOpponentsStartingFromLeft($player_id);
-        $this->queueBenefitInterrupt(21 + $track, $player_id, $reason);
+        $this->queueBenefitNormal(21 + $track, $player_id, $reason);
         foreach ($next_player_list as $other) {
             $this->queueBenefitNormal(75 + $track, $other, $reason); // age of discovery
         }
@@ -3420,10 +3420,24 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-    function research($reason) {
-        $this->rollScienceDie2($reason);
-        $this->gamestate->nextState("research");
-        return false;
+    /**
+     * The three research rows all roll and then hand the player the research state. The state is
+     * entered through a queued row rather than a direct transition, so anything a civilization
+     * queues off the roll resolves before the player decides. The row queued is the optional
+     * advance of the rolled track carrying the same flags as the research row, which is what
+     * action_research_decision reads off the stack.
+     */
+    function research(int $ben, string $reason, int $player_id): bool {
+        $decision = [
+            BE_RESEARCH => BE_ADVANCE_EXPLORATION_BENEFIT_OPT,
+            BE_RESEARCH_NB => BE_ADVANCE_EXPLORATION_NOBENEFIT_OPT,
+            BE_RESEARCH_MAXOUT => BE_ADVANCE_EXPLORATION_NOBENEFIT_MAXOUT_OPT,
+        ];
+        $this->systemAssertTrue("ERR:dice:02 not a research benefit $ben", isset($decision[$ben]));
+        $this->interruptBenefit();
+        $track = $this->rollScienceDie2($reason);
+        $this->queueBenefitNormal($decision[$ben] + $track - 1, $player_id, $reason);
+        return true;
     }
 
     function rollScienceDie2($reason) {
@@ -3439,7 +3453,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function rollScienceDie($data, $dievar = "science_die", $player_id = -1, $undosave = true) {
-        $die_roll = $this->bgaRand(1, 4);
+        $die_roll = $this->rollDieFace("science");
         $this->setGameStateValue($dievar, $die_roll);
         $this->notifyWithTrack(
             "science_roll",
@@ -3451,6 +3465,7 @@ abstract class PGameXBody extends tapcommon {
             ],
             $player_id
         );
+        $this->dieRolled("science", $die_roll, $player_id == -1 ? $this->getActivePlayerId() : $player_id);
         if ($undosave) {
             $this->prepareUndoSavepoint();
         }
@@ -12250,16 +12265,38 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
+    /**
+     * Every die face in the game comes from here: the raw roll plus the sixth face remap. The one
+     * seam a civilization that changes what a roll produces wraps.
+     *
+     * @param string $die - "black", "red" or "science"
+     */
+    function rollDieFace(string $die): int {
+        if ($die == "science") {
+            return $this->bgaRand(1, 4);
+        }
+        $this->systemAssertTrue("ERR:dice:01 unknown die $die", $die == "black" || $die == "red");
+        $face = $this->bgaRand(0, 5);
+        if ($face == 5) {
+            return $die == "black" ? 1 : 2;
+        }
+        return $face;
+    }
+
+    /**
+     * Runs after every die roll and its notification, before the roller acts on the result, so a
+     * civilization that reacts to the roll gets its rows on the stack first.
+     */
+    function dieRolled(string $die, int $face, int $roller_id): void {
+        foreach ($this->getAllCivs(null) as $info) {
+            $this->getCivilizationInstance((int) $info["card_type_arg"])->onDieRolled($die, $face, $roller_id);
+        }
+    }
+
     function rollConquerDice($player_id) {
         // Roll conquer dice
-        $die_red = $this->bgaRand(0, 5);
-        $die_black = $this->bgaRand(0, 5);
-        if ($die_black == 5) {
-            $die_black = 1;
-        }
-        if ($die_red == 5) {
-            $die_red = 2;
-        }
+        $die_red = $this->rollDieFace("red");
+        $die_black = $this->rollDieFace("black");
         $this->setGameStateValue("conquer_die_red", $die_red);
         $this->setGameStateValue("conquer_die_black", $die_black);
         $this->notifyAllPlayers("conquer_roll", clienttranslate('${player_name} rolls the conquer dice ${black_name}/${red_name}'), [
@@ -12272,21 +12309,21 @@ abstract class PGameXBody extends tapcommon {
             "i18n" => ["black_name", "red_name"],
             "preserve" => ["die_red", "die_black"],
         ]);
+        $this->dieRolled("red", $die_red, $player_id);
+        $this->dieRolled("black", $die_black, $player_id);
         $this->prepareUndoSavepoint();
     }
 
     function rollRedConquerDie(int $player_id, bool $undosave) {
         // Roll conquer dice
-        $die_red = $this->bgaRand(0, 5);
-        if ($die_red == 5) {
-            $die_red = 2;
-        }
+        $die_red = $this->rollDieFace("red");
         $this->setGameStateValue("conquer_die_red", $die_red);
         $this->notif("conquer_roll")
             ->withPlayer($player_id)
             ->withArg("red_name", $this->dice_names["red"][$die_red]["name"])
             ->withPreserveArg("die_red", $die_red)
             ->notifyAll(clienttranslate('${player_name} rolls red conquer dice ${red_name}'));
+        $this->dieRolled("red", $die_red, $player_id);
         if ($undosave) {
             $this->prepareUndoSavepoint();
         }
@@ -12295,10 +12332,7 @@ abstract class PGameXBody extends tapcommon {
 
     function rollBlackConquerDie($player_id, bool $undosave) {
         // Roll conquer dice
-        $die_black = $this->bgaRand(0, 5);
-        if ($die_black == 5) {
-            $die_black = 1;
-        }
+        $die_black = $this->rollDieFace("black");
         $this->setGameStateValue("conquer_die_black", $die_black);
         $ben_name = $this->dice_names["black"][$die_black]["name"];
         $notif = $this->notif("conquer_roll", $player_id)->withArg("black_name", $ben_name)->withPreserveArg("die_black", $die_black);
@@ -12318,6 +12352,7 @@ abstract class PGameXBody extends tapcommon {
         } else {
             $notif->notifyAll(clienttranslate('${player_name} rolls black conquer die ${black_name}'));
         }
+        $this->dieRolled("black", $die_black, $player_id);
 
         if ($undosave) {
             $this->prepareUndoSavepoint();

@@ -71,7 +71,7 @@ id|-con|name|r|t|php
 69|BE_REGRESS_M|Regress - Military|t|3|'adv'=>-1,'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
 70|BE_REGRESS_T|Regress - Technology|t|4|'adv'=>-1,'flags'=>(FLAG_GAIN_BENEFIT|FLAG_PAY_BONUS)
 71|BE_VP_TAPESTY|VP - Tapestry cards|v||
-72||Research (no benefit, maxout bonus)|r||'flags'=>(FLAG_MAXOUT_BONUS)
+72|BE_RESEARCH_MAXOUT|Research (no benefit, maxout bonus)|r||'flags'=>(FLAG_MAXOUT_BONUS)
 73||Conquer - both dice if toppled|a||'flags'=>(FLAG_CONQ_BOTH_DICE | FLAG_CONQ_OPPONENT), 'icon'=>1
 74||Conquer - both dice|a||'flags'=>2, 'icon'=>1
 75||Conquer (anywhere)|a||'flags'=>1, 'icon'=>1
@@ -96,7 +96,7 @@ id|-con|name|r|t|php
 94||Advance (no benefit, free bonus) - Military|t|3|'flags'=>(FLAG_FREE_BONUS)
 95||Advance (no benefit, free bonus) - Technology|t|4|'flags'=>(FLAG_FREE_BONUS)
 96||Invent and instantly upgrade|i||'flags'=>6
-97||Advance (optional, no benefits, maxout bonus) - Exploration|t|1|'flags'=>(FLAG_MAXOUT_BONUS)
+97|BE_ADVANCE_EXPLORATION_NOBENEFIT_MAXOUT_OPT|Advance (optional, no benefits, maxout bonus) - Exploration|t|1|'flags'=>(FLAG_MAXOUT_BONUS)
 98||Advance (optional, no benefits, maxout bonus) - Science|t|2|'flags'=>(FLAG_MAXOUT_BONUS)
 99||Advance (optional, no benefits, maxout bonus) - Military|t|3|'flags'=>(FLAG_MAXOUT_BONUS)
 100||Advance (optional, no benefits, maxout bonus) - Technology|t|4|'flags'=>(FLAG_MAXOUT_BONUS)
@@ -259,4 +259,4 @@ id|-con|name|r|t|php
 #Adjust benefit - no name
 603||-|||'auto'=>1
 604|BE_CIV_END|End of civilization ability|||'auto'=>1
-#of of benefits
+#end of benefits
