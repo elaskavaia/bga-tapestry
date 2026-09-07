@@ -51,10 +51,7 @@ class GameUT extends Tapestry {
 
     function bgaRand(int $min, int $max): int {
         if (!$this->randQueue) {
-            fwrite(
-                STDERR,
-                "\nWARNING: bgaRand($min, $max) with an empty randQueue, returning $min. Use seedRand() to make this test deterministic.\n"
-            );
+            echo "WARNING: bgaRand($min, $max) with an empty randQueue, returning $min. Use seedRand() to make this test deterministic.\n";
             return $min;
         }
         return (int) array_shift($this->randQueue);
@@ -91,6 +88,13 @@ class GameUT extends Tapestry {
 
     /** PHPUnit prints the trace of anything that actually escapes, the manual dump is only noise. */
     function logStackTrace($message) {}
+
+    /** The framework stub drops every incStat, this keeps them per player so tests can assert on the buckets. */
+    public array $stats = [];
+
+    function incStat(int $inc, string $name, ?int $playerId = null, bool $bDoNotLoop = false): void {
+        $this->stats[$playerId][$name] = ($this->stats[$playerId][$name] ?? 0) + $inc;
+    }
 
     /** The framework stub reports no stats at all, so dbIncStatChecked would reject every one. */
     function getStatTypes() {

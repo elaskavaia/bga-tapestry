@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-use function PHPUnit\Framework\assertEquals;
-use function PHPUnit\Framework\assertNotNull;
-use function PHPUnit\Framework\assertTrue;
-
 require_once __DIR__ . "/Stubs/GameUT.php";
 
 /**
@@ -404,5 +400,19 @@ final class GameTest extends TestCase {
         $game = new GameUT();
         $this->expectException(feException::class);
         $game->checkValue("tech\\_spot\\_1", false);
+    }
+
+    /** Only the VP sources stats.inc.php names get their own bucket, everything else is plain VP. */
+    function testVpStatBucketFallsBackToPlainVp() {
+        $game = $this->game;
+        $game->awardVP(1, 3, null, null, BE_VP_TECH);
+        $game->awardVP(1, 5, null, null, BE_GAIN_COIN);
+        $game->awardVP(1, 2, null, null, 502);
+        $game->awardVP(1, 1);
+
+        $this->assertEquals(3, $game->stats[1]["game_points_be_27"]);
+        $this->assertEquals(8, $game->stats[1]["game_points_be_15"]);
+        $this->assertArrayNotHasKey("game_points_be_1", $game->stats[1]);
+        $this->assertArrayNotHasKey("game_points_be_502", $game->stats[1]);
     }
 }

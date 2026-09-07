@@ -149,11 +149,13 @@ abstract class tapcommon extends Table {
         return $count;
     }
 
+    function hasPlayerStat(string $stat): bool {
+        return isset($this->getStatTypes()["player"][$stat]);
+    }
+
     function dbIncStatChecked($inc, $stat, $player_id) {
         try {
-            $all_stats = $this->getStatTypes();
-            $player_stats = $all_stats["player"];
-            if (isset($player_stats[$stat])) {
+            if ($this->hasPlayerStat($stat)) {
                 if ($this->isRealPlayer($player_id)) {
                     $this->incStat($inc, $stat, $player_id);
                     return true;

@@ -2289,12 +2289,12 @@ abstract class PGameXBody extends tapcommon {
         // stats by method
         if (is_numeric($ben)) {
             if ($this->isRealPlayer($player_id)) {
-                if ($ben > 500 && $ben < 599) {
-                    $this->dbIncStatChecked($count, "game_points_be_15", $player_id);
-                } elseif (!$this->dbIncStatChecked($count, "game_points_be_$ben", $player_id)) {
-                    $this->warn("vp benefit is not defined for ben $ben");
-                    $this->dbIncStatChecked($count, "game_points_be_15", $player_id);
+                // only the sources stats.inc.php names get their own bucket, the rest are plain VP
+                $stat = "game_points_be_$ben";
+                if (($ben > 500 && $ben < 599) || !$this->hasPlayerStat($stat)) {
+                    $stat = "game_points_be_15";
                 }
+                $this->dbIncStatChecked($count, $stat, $player_id);
             }
         } elseif ($ben) {
             $this->warn("vp benefit is not number $ben for $reason");
