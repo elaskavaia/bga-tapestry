@@ -2041,7 +2041,7 @@ define([
       }
     },
 
-    updateToolbarForBenefit: function (type, selectCubes) {
+    updateToolbarForBenefit: function (type) {
       var ben = type;
       if (Array.isArray(ben)) {
         var firstItem = ben.find((x) => x !== undefined);
@@ -2056,25 +2056,14 @@ define([
           var tspot = "tech_spot_" + spot;
 
           this.addTrackSlotActionButton(spot, "button_benefit_" + ben, "onOptionBenefitClick");
-          if (!selectCubes) {
-            if (!$(tspot)) continue;
-            dojo.addClass(tspot, "active_slot");
-          }
-        }
-
-        var cubes = args.tracks[ben].cubes;
-        if (cubes && selectCubes) {
-          for (var i in cubes) {
-            var cube = cubes[i];
-            dojo.addClass(cube, "active_slot");
-          }
+          if (!$(tspot)) continue;
+          dojo.addClass(tspot, "active_slot");
         }
       } else if (type == 317) {
         // urban planners action do not allow to click
         this.setDescriptionOnMyTurn(name + ". " + _("Click on landmark to place or click Decline."));
         // If you decline now placing another landmark right after won't trigger the benefit
       } else {
-        dojo.query(".tech_spot .cube").addClass("active_slot");
         var id = "button_benefit_" + ben + "_0_0";
         if ($(id)) {
           id += "_x";
