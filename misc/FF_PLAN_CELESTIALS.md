@@ -3,7 +3,7 @@
 Part of the Fantasies & Futures pack, see [FF_PLAN.md](FF_PLAN.md) for the pack wide plan,
 classification and sequencing. Rules arbitration is against [FORMAL_RULES.txt](FORMAL_RULES.txt).
 
-Status: planned, not started.
+Status: stage 1 done (the engine seams, see below), stage 2 not started.
 
 Three effects on one civ. Setup replaces one of the two starting outposts with a player token, the
 floating capital, so the start hex holds one outpost and one token. At the start of income turns
@@ -51,7 +51,7 @@ The work is making the map testable and fixing two places that mishandle a cube 
 - No new state global for the move: `setSelectedMapHex` (PGameXBody.php:9375) already carries the
   hex the dice are rolled against and is what black face 1 reads.
 
-## Stage 1 - engine seams
+## Stage 1 - engine seams - DONE
 
 Everything here changes existing engine code, lands with tests, and provably changes nothing
 without a Celestials at the table. The Weefolk work opened the analogous seam on the capital table

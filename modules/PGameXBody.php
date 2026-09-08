@@ -1345,6 +1345,11 @@ abstract class PGameXBody extends tapcommon {
         return $this->getCollectionFromDB($sql);
     }
 
+    /** Every structure on a territory, or on the one territory a coord names; toppled and inert ones included. */
+    function getStructuresOnMapDb($xcoords = null) {
+        return $this->getStructuresSearch(null, null, $xcoords === null ? "land\\_%" : "land_$xcoords");
+    }
+
     function addStructure($player_id, $destination, $type, $type_arg = 0, $arg2 = 0) {
         $structure = $this->getStructureInfoSearch($type, null, "hand", $player_id);
         if ($structure) {
@@ -5803,27 +5808,27 @@ abstract class PGameXBody extends tapcommon {
             $map[$coords]["occupancy"] = 0;
         }
 
-        if ($xcoords !== null) {
-            $structures = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location = 'land_$xcoords'");
-        } else {
-            $structures = $this->getCollectionFromDB("SELECT * FROM structure WHERE card_location LIKE 'land\\_%'");
-        }
-
-        foreach ($structures as $struc) {
+        foreach ($this->getStructuresOnMapDb($xcoords) as $struc) {
             $coords = substr($struc["card_location"], 5); // land_
             $map[$coords]["structures"][] = $struc;
             $map[$coords]["occupancy"] += 1;
-            $toppled = $struc["card_type_arg"];
-            if ($toppled != 1) {
+            if ($this->isControllingStructure($struc)) {
                 $map[$coords]["map_owners"][] = $struc["card_location_arg"];
             }
             $map[$coords]["map_occupants"][] = $struc["card_location_arg"];
+            $map[$coords]["map_owners"] = array_values(array_unique($map[$coords]["map_owners"]));
+            $map[$coords]["map_occupants"] = array_values(array_unique($map[$coords]["map_occupants"]));
         }
 
-        $map[$coords]["map_owners"] = array_values(array_unique($map[$coords]["map_owners"]));
-        $map[$coords]["map_occupants"] = array_values(array_unique($map[$coords]["map_occupants"]));
-
         return $map;
+    }
+
+    /**
+     * Whether a structure on a territory takes control of it: card_type_arg 0 stands and controls
+     * (an outpost, or a cube placed as one), 1 is an inert item that only occupies the territory.
+     */
+    function isControllingStructure(array $structure): bool {
+        return (int) $structure["card_type_arg"] != 1;
     }
 
     function getMapHexData($xcoords, $map = null) {
@@ -6975,6 +6980,11 @@ abstract class PGameXBody extends tapcommon {
         return array_prefix_all(array_keys($map_data), "islanders_");
     }
 
+    /** The coords the map table holds, which is what getInitMapData seeded it with at setup. */
+    function getMapCoordsDb() {
+        return $this->getInitMapData("map");
+    }
+
     function getMapDataFromDb($location = null, $xcoords = null) {
         // card_location_arg2='$coord', card_location_arg='$rot' WHERE card_id='$tile_id'"
         if ($location == "land" || !$location) {
@@ -7145,7 +7155,7 @@ abstract class PGameXBody extends tapcommon {
 
     function getNeighbourHexes($coords, $valid_coords = null) {
         if ($valid_coords == null) {
-            $valid_coords = $this->getCollectionFromDB("SELECT map_coords FROM map");
+            $valid_coords = $this->getMapCoordsDb();
         }
         $axis = explode("_", $coords);
         $neighbours = [];
@@ -7446,7 +7456,7 @@ abstract class PGameXBody extends tapcommon {
             if ($card_id == 0) {
                 break;
             } // decline
-            $structure_data = $this->getObjectFromDB("SELECT * FROM structure WHERE card_id='$card_id'");
+            $structure_data = $this->getStructureInfoById($card_id);
             $land_coords = $structure_data["card_location"];
             $this->systemAssertTrue("Outpost is not toppled", $structure_data["card_type_arg"] == 1);
             $this->systemAssertTrue("Outpost is not yours", $structure_data["card_location_arg"] == $player_id);
@@ -7454,9 +7464,12 @@ abstract class PGameXBody extends tapcommon {
             $u = getPart($land_coords, 1);
             $v = getPart($land_coords, 2);
             $coords = $u . "_" . $v;
-            $this->DbQuery("UPDATE structure SET card_type_arg = 1-card_type_arg WHERE card_location='$land_coords'"); // toggle topple flag.
+            // standing up topples the opponent outpost sharing the territory; a token there is not an outpost
+            $affected = $this->getStructuresSearch(BUILDING_OUTPOST, null, $land_coords);
+            foreach ($affected as $outpost) {
+                $this->dbSetStructureToppled($outpost["card_id"], 1 - (int) $outpost["card_type_arg"]);
+            }
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coords'");
-            $affected = $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location='$land_coords'");
             $this->notifyWithName("trap", clienttranslate('${player_name} stands up an outpost'), [
                 "outposts" => $affected,
             ]);
@@ -7639,14 +7652,14 @@ abstract class PGameXBody extends tapcommon {
         if ($ownership && $map == "land") {
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coord'");
         }
-        $this->DbQuery("UPDATE structure SET card_location='land_$coord' WHERE card_id='$structure_id'");
         if ($ownership == false) {
-            $this->DbQuery("UPDATE structure SET card_type_arg=1 WHERE card_id='$structure_id'");
+            $this->dbSetStructureToppled($structure_id, 1);
         }
-        $this->notifyMoveStructure(
-            $notif == "*" ? clienttranslate('${player_name} conquers a territory at ${coord_text}') : $notif,
+        $this->dbSetStructureLocation(
             $structure_id,
-            [],
+            "land_$coord",
+            null,
+            $notif == "*" ? clienttranslate('${player_name} conquers a territory at ${coord_text}') : $notif,
             $player_id
         );
     }
@@ -7686,10 +7699,9 @@ abstract class PGameXBody extends tapcommon {
         $this->setSelectedMapHex($coord);
         if ($owner_id) {
             // TOPPLE...
-            $oid = $this->getUniqueValueFromDB(
-                "SELECT card_id FROM structure WHERE card_location='$location' AND card_location_arg='$owner_id'"
-            );
-            $this->DbQuery("UPDATE structure SET card_type_arg=1 WHERE card_id='$oid'");
+            $standing = $this->getStructureInfoSearch(null, 0, $location, $owner_id); // what made them the owner
+            $oid = $standing["card_id"];
+            $this->dbSetStructureToppled($oid, 1);
             $this->notifyAllPlayers("topple", "", ["bid" => $oid]);
             $this->setGameStateValue("toppled_player", $owner_id);
             $this->setGameStateValue("toppled_by", $player_id);
@@ -8594,6 +8606,23 @@ abstract class PGameXBody extends tapcommon {
             }
         }
         return $cells;
+    }
+
+    /** A landmark hangs off the side when any cell of its placed footprint is outside the 9 by 9 mat. */
+    function isLandmarkOverhanging(array $structure): bool {
+        $cells = $this->getStructureCells(
+            BUILDING_LANDMARK,
+            $structure["card_location_arg2"],
+            (int) getPart($structure["card_location"], 3),
+            (int) getPart($structure["card_location"], 4),
+            (int) $structure["card_type_arg"]
+        );
+        foreach ($cells as [$x, $y]) {
+            if (!$this->onMat($x, $y)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -10498,6 +10527,11 @@ abstract class PGameXBody extends tapcommon {
         return $cells;
     }
 
+    /** The one writer of the topple flag of a structure on a territory, paired with isControllingStructure. */
+    function dbSetStructureToppled($structure_id, $toppled) {
+        $this->DbQuery("UPDATE structure SET card_type_arg='$toppled' WHERE card_id='$structure_id'");
+    }
+
     /** Location and rotation of a structure placed on a capital mat; card_type_arg carries the rotation. */
     function dbSetStructureLocationRot($structure_id, $location, $rot) {
         $this->DbQuery("UPDATE structure SET card_location='$location', card_type_arg='$rot' WHERE card_id='$structure_id'");
@@ -12235,7 +12269,7 @@ abstract class PGameXBody extends tapcommon {
         $owner = array_shift($owners);
         $this->checkConqueredTerritories();
         // AWARD 2: Somebody has been toppled, have they done it twice (must be shown on board, e.g. no history.)
-        $toppled = count($map_data["map_occupants"]) == 2;
+        $toppled = $this->getGameStateValue("toppled_player") != 0;
         if ($toppled) {
             $this->checkToppleAward($owner);
         }

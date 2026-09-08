@@ -57,6 +57,18 @@ This is my interpretation not actuall formal rules
     e) The upgrade card benefit goes on the top stack
     f) Triggered effects of "if upgraded" go on stack after     
 
+3.6 Items on a territory
+    Every structure on a territory is an item, and a territory holding 2 items may not be conquered
+    by anyone. An item either stands, and controls the territory, or is inert, and controls nothing.
+    An outpost stands until it is toppled. A token placed as an outpost (MILITANTS out of outposts,
+    adjustment variant 4) is an outpost in every respect; a player token placed as a token
+    (INFILTRATORS, ISOLATIONISTS) is inert.
+    An inert item is invisible to everything that reads control: conquer targeting and adjacency,
+    the controlled territory counts, the ISOLATIONISTS landmass, the central island achievement and
+    the MYSTICS controlled territory prediction. It is never toppled, never stood up and never
+    counts toward the topple achievement, and it stays on the territory when the territory changes
+    hands.
+
 4. Imperativeness
 4.1 When drawing X cards or tiles: if no more available can reshuffle deck. If not enough left - draw as much as possible.
 4.3 Track spot benefit - mandatory if possible, is not possible is void

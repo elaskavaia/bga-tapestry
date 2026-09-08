@@ -33,6 +33,12 @@ class CapitalMatUT extends GameUT {
     function occupy(int $x, int $y, int $building = BUILDING_FARM): void {
         $this->dbSetCapitalCell(self::PLAYER, $x, $y, $building + 1);
     }
+
+    /** A landmark as placed: the anchor in the location, the landmark in arg2, the rotation in type_arg. */
+    function placedLandmark(int $landmark, int $x, int $y, int $rot = 0): array {
+        $cell = "capital_cell_" . self::PLAYER . "_{$x}_{$y}";
+        return $this->getStructureInfoById($this->dbAddStructure(self::PLAYER, BUILDING_LANDMARK, $rot, $cell, $landmark));
+    }
 }
 
 /**
@@ -150,5 +156,28 @@ final class CapitalMatTest extends TestCase {
         $game->awardBenefits(CapitalMatUT::PLAYER, BE_VP_CAPITAL, 1);
 
         $this->assertEquals(3, $game->dbGetScore(CapitalMatUT::PLAYER), "2 for the farm row, 1 for the mixed column");
+    }
+
+    /**
+     * Hanging over an edge is legal and already scores nothing for rows and columns; this is the
+     * reader that names the state, for the civilizations that pay or charge for it.
+     */
+    function testALandmarkHangsOffWhenAnyCellLeavesTheMat() {
+        $game = $this->game;
+        $hub = CapitalMatUT::TECH_HUB;
+
+        $this->assertFalse($game->isLandmarkOverhanging($game->placedLandmark($hub, 3, 3)));
+        $this->assertTrue($game->isLandmarkOverhanging($game->placedLandmark($hub, 2, 3)), "off the left");
+        $this->assertTrue($game->isLandmarkOverhanging($game->placedLandmark($hub, 3, 2)), "off the top");
+        $this->assertTrue($game->isLandmarkOverhanging($game->placedLandmark($hub, 11, 3)), "off the right");
+        $this->assertTrue($game->isLandmarkOverhanging($game->placedLandmark($hub, 3, 10)), "off the bottom");
+    }
+
+    function testTheRotationAloneCanHangALandmarkOff() {
+        $game = $this->game;
+        $hub = CapitalMatUT::TECH_HUB;
+
+        $this->assertFalse($game->isLandmarkOverhanging($game->placedLandmark($hub, 10, 3, 0)));
+        $this->assertTrue($game->isLandmarkOverhanging($game->placedLandmark($hub, 10, 3, 1)));
     }
 }

@@ -165,6 +165,28 @@ CLEANUP
 
 DONE
 
+- [x] Map, DONE: getMap deduped map_owners and map_occupants once after the structure loop, so only
+      whichever hex the last structure row happened to be on was cleaned. Two outposts of one player
+      on a hex made that player two owners of it, which effect_endOfConquer asserts against. Both
+      lines moved inside the loop, pinned by testTwoOutpostsOfOnePlayerAreOneOwnerOnEveryHex in the
+      new tests/MapTest.php.
+
+- [x] Map, DONE: action_standup toggled card_type_arg on every structure of the territory, so a cube
+      sharing it (an INFILTRATORS token, a toppled MILITANTS cube) silently became a controlling
+      structure and the client toggled its topple visual too. The toggle now selects outposts only.
+      Pinned by testStandingUpFlipsTheOutpostsAndLeavesATokenAlone.
+
+- [x] Map, DONE: effect_endOfConquer read "somebody was toppled" off count(map_occupants) == 2, which
+      is wrong on any territory with a third occupant or with a single one. It now reads the
+      toppled_player global effect_conquer writes on both branches a few lines earlier. This drives
+      the topple achievement and the both-dice conquer_bonus paths.
+
+- [x] Map, DONE: getMap, getNeighbourHexes and the two conquer flows no longer reach the map and
+      structure tables with raw SQL, so tests can drive the map at all. getStructuresOnMapDb,
+      getMapCoordsDb, isControllingStructure and dbSetStructureToppled are the new seams, and
+      tests/Stubs/MapUT.php needs no method override. DiceUT and InfiltratorsUT dropped the
+      getMapHexData, getOutpostsInHand and effect_placeOnMap fakes they used instead.
+
 - [x] Infiltrators, DONE: the sixth argument of the getStructuresSearch call in argCivAbilitySingle was
       a copy of the ownership flag of effect_placeOnMap, which that method never had - dropped. The two
       filters it does pass are now pinned by testTokensOnOneCapitalDoNotCountTowardAnother and

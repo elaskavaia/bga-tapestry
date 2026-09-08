@@ -302,6 +302,20 @@ class GameUT extends Tapestry {
         $this->structures->setTypeArg($structure_id, $rot);
     }
 
+    /** The real one writes the row with raw SQL, which the in memory structure model never sees. */
+    function dbSetStructureToppled($structure_id, $toppled) {
+        $this->structures->setTypeArg((int) $structure_id, (int) $toppled);
+    }
+
+    /** The real one reads the structure table with raw SQL, NOT LIKE included, which the model never sees. */
+    function getOutpostsInHand($player_id) {
+        $found = $this->getStructuresSearch(BUILDING_OUTPOST, null, null, $player_id);
+        return array_filter(
+            $found,
+            fn($row) => !startsWith($row["card_location"], "land") && !startsWith($row["card_location"], "civ_21_")
+        );
+    }
+
     // -------------------------------------------------------- capital table
 
     /** capital_occupied per player, [player_id][x][y]; the framework stubs run no SQL. */

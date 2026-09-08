@@ -31,21 +31,6 @@ class DiceUT extends GameUT {
         return in_array($tapestry_id, $this->tapestries) ? ["card_type_arg" => $tapestry_id] : null;
     }
 
-    /** The conquer flow reads the map and the outpost pool with raw SQL, neither is modelled. */
-    function getMapHexData($xcoords, $map = null) {
-        return ["map_owners" => []];
-    }
-
-    /** Same again: the real one reads the structure table with raw SQL. */
-    function getOutpostsInHand($player_id) {
-        return $this->getStructuresSearch(BUILDING_OUTPOST, null, "hand", $player_id);
-    }
-
-    /** Same again, without the notification: the real one moves the row with raw SQL. */
-    function effect_placeOnMap($player_id, $structure_id, $location, $notif = "*", $ownership = true) {
-        $this->structures->setLocation((int) $structure_id, $location);
-    }
-
     function stateName(): string {
         return $this->gamestate->state()["name"];
     }

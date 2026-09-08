@@ -50,25 +50,6 @@ class InfiltratorsUT extends GameUT {
         return $this->getStartingPosition($player_id)["location"];
     }
 
-    /** The real one moves the row with raw SQL, which the in memory structure model never sees. */
-    function effect_placeOnMap($player_id, $structure_id, $location, $notif = "*", $ownership = true) {
-        $this->structures->setLocation((int) $structure_id, $location);
-        if (!$ownership) {
-            $this->structures->setTypeArg((int) $structure_id, 1);
-        }
-        $this->notifyMoveStructure(
-            $notif == "*" ? clienttranslate('${player_name} conquers a territory at ${coord_text}') : $notif,
-            $structure_id,
-            [],
-            $player_id
-        );
-    }
-
-    /** The real one reads the structure table with raw SQL, which the in memory model never sees. */
-    function getOutpostsInHand($player_id) {
-        return $this->getStructuresSearch(BUILDING_OUTPOST, null, "hand", $player_id);
-    }
-
     function giveOutposts(int $player_id, int $count): void {
         for ($i = 0; $i < $count; $i++) {
             $this->dbAddStructure($player_id, BUILDING_OUTPOST, 0, "hand");
@@ -135,10 +116,7 @@ final class InfiltratorsTest extends TestCase {
 
         $this->assertEquals([0, 1, 2], array_keys($slots));
         $this->assertEquals([170], $slots[0]["benefit"]);
-        $this->assertEquals(
-            [InfiltratorsUT::OPPONENT, InfiltratorsUT::OTHER],
-            [$slots[1]["player_id"], $slots[2]["player_id"]]
-        );
+        $this->assertEquals([InfiltratorsUT::OPPONENT, InfiltratorsUT::OTHER], [$slots[1]["player_id"], $slots[2]["player_id"]]);
     }
 
     /** The VP on offer is one per outpost the opponent still has off the board. */
