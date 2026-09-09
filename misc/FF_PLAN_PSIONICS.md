@@ -40,10 +40,10 @@ stage 1 is engine work with no civ in sight.
   - `BE_PSIONICS_SPACE` (`ct => CARD_SPACE`)
   - `BE_PSIONICS_CIV` (`ct => CARD_CIVILIZATION`) - this one must join the `$ben != 172` branch of
     `effect_keepCard`, because a kept civilization card stays in `draw` rather than moving to hand.
-  No income row is needed: `queueEraCivAbility` maps the turn straight onto `BE_TERRITORY` (6),
-  `BE_TAPESTRY` (7), the technology row and `BE_RESEARCH` (18), and those rows then get intercepted
-  by the civ's own hook like any other random gain. Which technology row income turn 4 means is an
-  open question below.
+    No income row is needed: `queueEraCivAbility` maps the turn straight onto `BE_TERRITORY` (6),
+    `BE_TAPESTRY` (7), the technology row and `BE_RESEARCH` (18), and those rows then get intercepted
+    by the civ's own hook like any other random gain. Which technology row income turn 4 means is an
+    open question below.
 - New globals, in the same 10-89 block, after `illuminati_dice` (39):
   - `science_die_psionics` (40) - the third science option, exactly parallel to the existing
     `science_die` (12) and `science_die_empiricism` (27). Chosen over redesigning the science
@@ -53,8 +53,8 @@ stage 1 is engine work with no civ in sight.
   - `conquer_die_red_2` (41) and `conquer_die_black_2` (42) - the second face of each conquer die,
     parallel to `conquer_die_red` (10) and `conquer_die_black` (11). Zero means "no second face",
     which is the framework default, so a table with no Psionics never writes them.
-  Lifetime is the bug magnet here (CODE_STYLE): all three are written by the roll that produced them
-  and must be cleared by every roll that does not, in the same function, never "prepared early".
+    Lifetime is the bug magnet here (CODE_STYLE): all three are written by the roll that produced them
+    and must be cleared by every roll that does not, in the same function, never "prepared early".
 - Client visible state: `getAllDatas` gains `dice.psionics`, `dice.red2` and `dice.black2` next to
   the existing `dice.empiricism`; the roll notifications carry the second face; the research state
   args carry the third track. No new state: every choice Psionics creates is either an existing
@@ -245,6 +245,7 @@ afterwards at a table with no Psionics:
 ## Test cases
 
 Material and income:
+
 - The material entry: `exp` FF, `automa` false, `income_trigger` 2-5 with `decline` false, no `slots`.
 - Income turns 2, 3, 4 and 5 each queue their one row with the civ reason; income turn 1 queues
   nothing and prints the not-applicable message.
@@ -252,6 +253,7 @@ Material and income:
   tiles rather than a territory in hand.
 
 Dice, all seeded:
+
 - A plain conquer by a Psionics roller consumes four rand values and offers one `or` over the
   benefits of all four faces; the same conquer by a non-Psionics roller consumes two and is
   byte-identical to today.
@@ -269,6 +271,7 @@ Dice, all seeded:
   consumption. This is the seam's regression guard.
 
 Cards:
+
 - Each of `BE_TERRITORY`, `BE_TAPESTRY`, the technology row, the space row and `BE_GAIN_CIV` for a
   Psionics owner enters keepCard with two cards, keeps one and returns the other; for a non-owner it
   goes straight to hand.
@@ -285,6 +288,7 @@ Cards:
   bypasses `effect_onQueueBenefit`).
 
 Edge:
+
 - A finished or zombie Psionics owner: the income rows are dropped by `checkAliveForBenefit`, and no
   extra roll or draw is generated for a player who cannot answer the choice.
 - Undo across a keepCard and across a die choice restores the pre-roll state including the new
@@ -311,47 +315,21 @@ Edge:
 
 ## Rulings
 
-Proposed, to be recorded in FORMAL_RULES as clauses under 5.47 (CIV_PSIONICS).
+Recorded in FORMAL_RULES as CIV.PSIONICS.1-8.
 
-- PSIONICS gives one extra option, never a doubled one. Where an effect already offers the player a
-  choice among N randomly generated options, PSIONICS makes it N+1: EMPIRICISM plus PSIONICS is
-  three science rolls and one choice, row 301 is three black rolls and one choice, row 302 is three
-  science rolls and one choice, a draw-3-keep-1 row becomes draw 4 keep 1. From the card's own
-  worked example. Where an effect rolls a die more than once and gains EACH result (rows 303 and
-  304, and the conquer both-dice case), each of those is a separate option set and each gets its own
-  extra roll and its own choice.
-- PSIONICS applies to gaining a random card from a deck or supply. It does not apply to a face-up
-  option (the visible technology market, the face-up half of invent), nor to revealing a card
-  without gaining it, nor to a card moved from a discard, another player's hand, or a private civ
-  deck by an effect that names the card.
-- The unchosen card is discarded rather than shuffled back. The decks in this implementation
-  reshuffle their discard when they run out (`dbPickCardsForLocation`), so the two are equivalent in
-  outcome and discarding is what every existing draw-and-keep row already does.
-- PSIONICS against ILLUMINATI: a PSIONICS roll of a die from the ILLUMINATI mat is ONE roll. The
-  ILLUMINATI hook fires once, on the first of the two faces, and the owner gains the benefit of that
-  first face regardless of which face the roller keeps. This composes 5.24's "you may gain only from
-  the first roll immediately after they take the die" with the PSIONICS extra roll being a reroll
-  from the owner's point of view, and it needs no ordering surgery: `dieRolled` keeps firing at the
-  same point with the same argument. The die still leaves the mat on that first roll.
-- PSIONICS against EMPIRICISM: three rolls, one choice, as above. The extra roll is added once per
-  research decision, not once per physical roll, which is what makes it additive.
-- PSIONICS against GAMBLERS: rows 311 and 319 draw one more card. The "play a WHEN PLAYED card if
-  you can" constraint is unchanged and is checked over the enlarged set, so a draw of 4 with one
-  WHEN PLAYED card still forces that card.
-- PSIONICS against INFILTRATORS: row 172 draws 4 civilizations and keeps 1. PSIONICS against
-  ILLUMINATI's setup draw: 4 tapestry cards, keep 1.
-- PSIONICS against ADVISORS: ADVISORS intercepts an opponent's tapestry gain before PSIONICS sees
-  it. The opponent still gains their tapestry, so PSIONICS still applies to that gain; the ADVISORS
-  owner's copy is a separate gain and PSIONICS applies to it only if the ADVISORS owner is the
-  PSIONICS owner.
+Implementation notes those clauses deliberately leave out:
+
+- CIV.PSIONICS.1 sites: rows 301 and 302 become three rolls and one choice, rows 303 and 304 get an
+  extra face and a choice per roll, row 172 draws 4 civilizations and keeps 1, GAMBLERS rows 311 and
+  319 draw one more, ILLUMINATI's setup draw becomes 4 tapestry cards keep 1.
+- CIV.PSIONICS.1 excludes the face-up technology market and the face-up half of invent, which is why
+  which row income turn 4 uses matters (open question 2).
+- The unchosen card is discarded rather than shuffled back. The decks reshuffle their discard when
+  they run out (`dbPickCardsForLocation`), so the two are the same in outcome and discarding is what
+  every existing draw-and-keep row already does.
+- CIV.PSIONICS.6 needs no ordering surgery: `dieRolled` keeps firing at the same point with the same
+  argument, the extra face being a reroll from the ILLUMINATI owner's point of view.
 - PSIONICS against ALCHEMISTS: unresolved, see open questions.
-- WEREFOLK's coin flip is not a die roll, so PSIONICS does not double it. WEREFOLK's space tile IS a
-  random gain and is doubled if the same player somehow holds both civs.
-- A PSIONICS owner who is finished or zombie generates no extra roll and no extra draw; an effect
-  that would have given them a choice resolves as it does without the civ.
-- PSIONICS does not apply to the initial deal at setup, including the draw that hands out PSIONICS
-  itself. Proposed on the grounds that setup is not a gain during play, and that the alternative is
-  circular.
 
 ## Open questions
 
@@ -363,22 +341,22 @@ For Victoria.
    (b) ALCHEMISTS' keep choice is itself the option set, so PSIONICS adds exactly one extra die roll
    to each pass and the owner picks one from the enlarged set; (c) PSIONICS does not apply, because
    ALCHEMISTS' rerolls are rerolls in the sense clause CIV.ILLUMINATI.1 already uses. Reading (b) is the one that
-   fits the additive rule best and is the cheapest to build.
+   fits the additive rule best and is the cheapest to build. Answer: see PSIONICS rules on the card: "This effect adds (not multiplies)"
 2. Which row is income turn 4's [TECHNOLOGY]? `BE_TECH_CARD` (26), which routes to the `invent`
    state and lets the player choose face-up or face-down, or `BE_INVENT` (20) with `FLAG_FACE_BOTH`,
    or row 126, invent from the top of the deck face down? The distinction matters precisely because
    PSIONICS applies to one branch and not the other, so this civ's own income turn 4 is the place a
-   player will first notice the face-up exclusion.
+   player will first notice the face-up exclusion. A: BE_INVENT
 3. Income turn 5's [RESEARCH]: `BE_RESEARCH` (18, gains the spot benefit and pays the bonus) or
-   `BE_RESEARCH_NB` (19, neither)? The transcribed icon does not distinguish them.
+   `BE_RESEARCH_NB` (19, neither)? The transcribed icon does not distinguish them. A: BE_RESEARCH
 4. `automa => false`? Nothing about the civ needs a live opponent, unlike Genies, Weefolk and
    Illuminati, so it could legally be in solo. It is excluded here only because the Automa would
    need a keep policy for six decks and three dice. If solo support matters, the cheapest policy is
-   "always keep the first option", which makes PSIONICS a no-op for the bot.
+   "always keep the first option", which makes PSIONICS a no-op for the bot. A; why excluded? No its proper for solo
 5. The card's [LANDMARK CARD] bullet has no site: nothing in this implementation gains a landmark at
    random. Is that a base-game gap I should not worry about, an FF-only effect from another civ in
    the pack that has not been transcribed yet, or a sign that landmarks in the physical game are
-   drawn rather than chosen?
+   drawn rather than chosen? A: landmark card for expansion not in this game
 6. On a conquer, is collapsing "pick a face per die, then pick a die" into one choice among four
    (die, face) pairs acceptable, given the outcomes are identical and it saves a whole state's worth
-   of UI? The visible difference is only in the log and in how the dice render.
+   of UI? The visible difference is only in the log and in how the dice render. A: yes you roll 4 dice

@@ -208,34 +208,11 @@ reload restores mask, badges and the "On the ILLUMINATI mat" tooltip line from `
 
 ## Rulings
 
-Proposed, to be recorded in FORMAL_RULES
+Recorded in FORMAL_RULES as CIV.ILLUMINATI.1-7.
 
-- The card's conquer dice sentence is read as this amended text, ruled by Victoria from the
-  publisher's answer (Joe of Stonemaier Games on their Discord, relayed by Alex S in BGG thread
-  3245586 "Treasure Hunters vs Illuminati"): "When an opponent takes any of the three dice from
-  your mat, you gain the benefit rolled on that die (ignoring any rerolls). If multiple dice are
-  taken at the same time, you get the benefit of each die." So dice are taken one at a time, an
-  opponent rolling only the black die takes only the black die, a conquer takes both, and a die
-  leaves the mat on its first roll: every later roll of it, including Empiricism's second roll,
-  is an ordinary roll with no gain until the owner's next income turn returns the die.
-- The science die is taken by any science roll from the mat, including one a tapestry card
-  triggers (Mike Young, designer, BGG thread 3058558 "Illuminati - Chimera"): research, Age of
-  Discovery, the tech card research benefit, row 302.
-- The conquer die gain is what the roller would gain from that face: black face 1 is the benefit
-  of the territory the roller is conquering, a zero-effect face gives nothing.
-- The science die gain is an optional single-step advance on the track rolled with no spot
-  benefit and no bonus; a track landmark reached this way is still gained, as on every other
-  no-benefit advance in the game.
-- The owner resolves their gain from a taken die before the roller does anything with the roll,
-  on every roll: before the die pick on a conquer, before the research decision, before the
-  roller's advance on Age of Discovery and the tech card research, before a keep-or-reroll
-  choice. Ruled by Victoria from the card's "immediately after they take the die". A race to the
-  same track landmark between owner and roller therefore goes to the owner.
-- The owner rolling a die from the mat, on any turn and for any effect, leaves it on the mat.
-- A finished or zombie owner gains nothing from a taken die, and their dice never return.
-- The income ability scores the dice on the mat at the start of the income turn. A civ gained in
-  the civ phase of an income turn 2-5 fires in that same turn with all three dice on the mat,
-  the engine's rule for every income civ gained there.
-- Illuminati against Psionics (a Psionics opponent rolls twice and keeps one): decided in the
-  Psionics section, the hook above fires once per physical roll and Psionics decides what a
-  physical roll is.
+Implementation notes those clauses deliberately leave out:
+
+- CIV.ILLUMINATI.2 covers row 302 as the tech card research benefit.
+- Illuminati against Psionics (a Psionics opponent rolls twice and keeps one): the hook above
+  fires once per physical roll, and Psionics decides what a physical roll is. Still open, to be
+  recorded with the rest of the Psionics rulings.

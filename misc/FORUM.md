@@ -1,15 +1,17 @@
 # BGG forum dump - Tapestry: Fantasies & Futures
-*Scraped 2026-09-09T00:37:39Z*
 
-- Source: forums 66 (Rules) and 65 (General) of BGG expansion 379578 (Fantasies and Futures),
-  plus two base game Tapestry threads (thing 286096) that settle where a building counts.
-- Threads: **36**. This is a selection, not the whole forum: the threads that bear on the ten
-  Fantasies & Futures civilizations, or on a general rule those civilizations depend on.
-- Articles: **194**
-- Designer posts: **19** across **16** threads.
-- Stonemaier staff posts: **10** across **5** threads.
+*Scraped 2026-09-09*
 
-Who is who on that forum, since the usernames give nothing away:
+Every thread in the Fantasies & Futures forums (BGG expansion 379578, all six sub-forums)
+that names one of the ten expansion civilizations, plus a handful that settle a general rule
+those civilizations lean on, plus two base game Tapestry threads (thing 286096) about where a
+building counts.
+
+- Threads: **42**
+- Articles: **257**
+- Designer posts: **22**. Stonemaier staff posts: **21**.
+
+Who is who, since the usernames give nothing away:
 
 - `Buggy` = Mike Young, co-designer. Answers most rules questions; speaks as "we".
 - `ferventworkshop` = Chris Scaffidi, co-designer.
@@ -17,14 +19,112 @@ Who is who on that forum, since the usernames give nothing away:
 - `JoeAubrey` = Joe Aubrey, Stonemaier Games.
 - `Alexras` = Alex S, reliable relayer of Stonemaier Discord answers.
 
-Threads marked `(v)` contain at least one designer or Stonemaier reply; treat those as
-authoritative. Everything else is player opinion. Rulings taken from here are cited by
-thread number in [FORMAL_RULES.txt](FORMAL_RULES.txt).
+A thread marked `(v)` has at least one designer or Stonemaier post; treat those as
+authoritative and the rest as player opinion. Rulings taken from here are cited by thread
+number in [FORMAL_RULES.txt](FORMAL_RULES.txt).
+
+## Index by civilization
+
+**ARTIFICERS**
+
+- Artificer - income buildings set aside `(v)` - [3049206](https://boardgamegeek.com/thread/3049206) (Rules)
+- Artificers: Does "leftward" = "leftmost"? `(v)` - [3035872](https://boardgamegeek.com/thread/3035872) (Rules)
+- Do "set aside" items score? `(v)` - [3092453](https://boardgamegeek.com/thread/3092453) (Rules)
+- February 20: The Origins of Fantasies & Futures, Civilizations, and Packaging `(v)` - [3032303](https://boardgamegeek.com/thread/3032303) (News)
+- Golem Minions and Citadel of power icons `(v)` - [3050511](https://boardgamegeek.com/thread/3050511) (Rules)
+- Expansion Lagniappe: Tapestry: Fantasies & Futures review - [3321594](https://boardgamegeek.com/thread/3321594) (Reviews)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+
+**CELESTIALS**
+
+- Celestials, and not having an outpost on the board.  `(v)` - [3150783](https://boardgamegeek.com/thread/3150783) (Rules)
+- How do Celestials and City in a Bottle interact? `(v)` - [3036298](https://boardgamegeek.com/thread/3036298) (Rules)
+- Celestials' player token interaction with other game elements - [3068279](https://boardgamegeek.com/thread/3068279) (Rules)
+- Expansion Lagniappe: Tapestry: Fantasies & Futures review - [3321594](https://boardgamegeek.com/thread/3321594) (Reviews)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+- Psionics seems like a very weak Civ - [3082746](https://boardgamegeek.com/thread/3082746) (General)
+
+**ELDER ONES**
+
+- A question on Elder Ones' After Income 5 actions `(v)` - [3057126](https://boardgamegeek.com/thread/3057126) (Rules)
+- Elder Ones - resources in final income turn?  `(v)` - [3208351](https://boardgamegeek.com/thread/3208351) (Rules)
+- Elder monuments after income 5 `(v)` - [3368650](https://boardgamegeek.com/thread/3368650) (Rules)
+- Merfolk + Elder Ones `(v)` - [3052380](https://boardgamegeek.com/thread/3052380) (Rules)
+- Elders after income 5, teaching M10  - [3576555](https://boardgamegeek.com/thread/3576555) (Rules)
+- F&F consolidated rulebook question (Elder Ones) - [3049881](https://boardgamegeek.com/thread/3049881) (General)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+- Psionics seems like a very weak Civ - [3082746](https://boardgamegeek.com/thread/3082746) (General)
+
+**FAEFOLK**
+
+- Couple of Faefolk Questions `(v)` - [3053736](https://boardgamegeek.com/thread/3053736) (Rules)
+- February 20: The Origins of Fantasies & Futures, Civilizations, and Packaging `(v)` - [3032303](https://boardgamegeek.com/thread/3032303) (News)
+- A question about the Faefolk civ abilities - [3048419](https://boardgamegeek.com/thread/3048419) (Rules)
+- City in a Bottle capital mat - at 2P - confirmation you can win with it! - [3065940](https://boardgamegeek.com/thread/3065940) (General)
+- Consolidated List of Misprints - [3054727](https://boardgamegeek.com/thread/3054727) (General)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+
+**GENIES**
+
+- Correction cards: what changed? `(v)` - [3086136](https://boardgamegeek.com/thread/3086136) (General)
+- Can the Genies civilization keep up with the others? - [3188117](https://boardgamegeek.com/thread/3188117) (General)
+- Consolidated List of Misprints - [3054727](https://boardgamegeek.com/thread/3054727) (General)
+- Expansion Lagniappe: Tapestry: Fantasies & Futures review - [3321594](https://boardgamegeek.com/thread/3321594) (Reviews)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+- Genies Civilization 2-Player Variant - [3425340](https://boardgamegeek.com/thread/3425340) (Variants)
+- New civ mats in solo - [3138530](https://boardgamegeek.com/thread/3138530) (Rules)
+- Solo - Cannot use some civs? - [3050895](https://boardgamegeek.com/thread/3050895) (General)
+
+**ILLUMINATI**
+
+- A question on Elder Ones' After Income 5 actions `(v)` - [3057126](https://boardgamegeek.com/thread/3057126) (Rules)
+- Correction cards: what changed? `(v)` - [3086136](https://boardgamegeek.com/thread/3086136) (General)
+- Illuminati - Chimera `(v)` - [3058558](https://boardgamegeek.com/thread/3058558) (Rules)
+- Questions about the Illuminati `(v)` - [3095955](https://boardgamegeek.com/thread/3095955) (Rules)
+- Consolidated List of Misprints - [3054727](https://boardgamegeek.com/thread/3054727) (General)
+- Expansion Lagniappe: Tapestry: Fantasies & Futures review - [3321594](https://boardgamegeek.com/thread/3321594) (Reviews)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+- New civ mats in solo - [3138530](https://boardgamegeek.com/thread/3138530) (Rules)
+- Solo - Cannot use some civs? - [3050895](https://boardgamegeek.com/thread/3050895) (General)
+- Treasure Hunters vs Illuminati.. how to resolve? - [3245586](https://boardgamegeek.com/thread/3245586) (Rules)
+
+**MERFOLK**
+
+- Merfolk + Elder Ones `(v)` - [3052380](https://boardgamegeek.com/thread/3052380) (Rules)
+- Expansion Lagniappe: Tapestry: Fantasies & Futures review - [3321594](https://boardgamegeek.com/thread/3321594) (Reviews)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+- Merfolk and gaining tapestry cards - [3053944](https://boardgamegeek.com/thread/3053944) (Rules)
+- Merfolk… - [3075507](https://boardgamegeek.com/thread/3075507) (General)
+
+**PSIONICS**
+
+- February 24: Comprehensive Rulebook, Core Features, What’s Next `(v)` - [3034878](https://boardgamegeek.com/thread/3034878) (News)
+- Expansion Lagniappe: Tapestry: Fantasies & Futures review - [3321594](https://boardgamegeek.com/thread/3321594) (Reviews)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+- Psionics seems like a very weak Civ - [3082746](https://boardgamegeek.com/thread/3082746) (General)
+
+**WEEFOLK**
+
+- Correction cards: what changed? `(v)` - [3086136](https://boardgamegeek.com/thread/3086136) (General)
+- February 20: The Origins of Fantasies & Futures, Civilizations, and Packaging `(v)` - [3032303](https://boardgamegeek.com/thread/3032303) (News)
+- Consolidated List of Misprints - [3054727](https://boardgamegeek.com/thread/3054727) (General)
+- Expansion Lagniappe: Tapestry: Fantasies & Futures review - [3321594](https://boardgamegeek.com/thread/3321594) (Reviews)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+- New civ mats in solo - [3138530](https://boardgamegeek.com/thread/3138530) (Rules)
+- Solo - Cannot use some civs? - [3050895](https://boardgamegeek.com/thread/3050895) (General)
+
+**WEREFOLK**
+
+- A question about the Faefolk civ abilities - [3048419](https://boardgamegeek.com/thread/3048419) (Rules)
+- Consolidated List of Misprints - [3054727](https://boardgamegeek.com/thread/3054727) (General)
+- Final expansion for Tapestry - [3069183](https://boardgamegeek.com/thread/3069183) (Reviews)
+- Werefolk question - [3115277](https://boardgamegeek.com/thread/3115277) (Rules)
 
 ---
 
 ## Elders after income 5, teaching M10 
-*2 posts - Rules forum - started by albieback on 2025-09-15* - [thread 3576555](https://boardgamegeek.com/thread/3576555)
+*2 posts - Rules - started by albieback on 2025-09-15* - [thread 3576555](https://boardgamegeek.com/thread/3576555)
+*Civs: ELDER ONES*
 
 OP<br>**#1** - `albieback` - 2025-09-15
 
@@ -39,8 +139,26 @@ OP<br>**#1** - `albieback` - 2025-09-15
 ---
 
 
-## Elder monuments after income 5 (v)
-*3 posts - Rules forum - started by rossoft on 2024-09-15* - [thread 3368650](https://boardgamegeek.com/thread/3368650)
+## Genies Civilization 2-Player Variant
+*1 posts - Variants - started by dwhizzle on 2024-12-20* - [thread 3425340](https://boardgamegeek.com/thread/3425340)
+*Civs: GENIES*
+
+OP<br>**#1** - `dwhizzle` - 2024-12-20
+
+> In response the this thread I came up with an idea to help balance the Genies when playing a 2-player game:
+>
+> In a 2-player game, on income turns 2-4 roll the black conquer die. Score the circled benefit that the die result points to (according to the 2P diagram), and gain a squared benefit adjacent to that circled benefit. If the die roll results in a "?" your opponent chooses and scores the circled benefit according to the normal rules.
+>
+> This method replicates a 4-player game in that on your income turns, each of your opponents has a 33% chance of being selected to choose (and receive) the Genie circled benefit.
+>
+> Let me know what you think, and if you want to print and paste the overlay you can find it here.
+
+---
+
+
+## Elder monuments after income 5 `(v)`
+*3 posts - Rules - started by rossoft on 2024-09-15* - [thread 3368650](https://boardgamegeek.com/thread/3368650)
+*Civs: ELDER ONES*
 
 OP<br>**#1** - `rossoft` - 2024-09-15
 
@@ -48,7 +166,7 @@ OP<br>**#1** - `rossoft` - 2024-09-15
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2024-09-16
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2024-09-16
 
 > *Replying to `rossoft`:* Do Elders get 10 points per monument they gain after 5 income, or they just get 10 points at most once?
 
@@ -74,8 +192,114 @@ OP<br>**#1** - `rossoft` - 2024-09-15
 ---
 
 
+## Expansion Lagniappe: Tapestry: Fantasies & Futures review
+*7 posts - Reviews - started by BoardGameGumbo on 2024-06-21* - [thread 3321594](https://boardgamegeek.com/thread/3321594)
+*Civs: ARTIFICERS, CELESTIALS, GENIES, ILLUMINATI, MERFOLK, PSIONICS, WEEFOLK*
+
+OP<br>**#1** - `BoardGameGumbo` - 2024-06-21
+
+> For the original blog post, including full color photos, click here.
+>
+> As Jerod and I were exploring two of the new civilizations in the latest expansion to Tapestry this week, I kept asking myself the same two questions, over and over. What do gamers want in an expansion? And what do they need in an expansion?
+>
+> By the end of tonight’s play, I was pretty sure I had the answers to both, at least as to my own experience. I am talking, of course, about Fantasies & Futures, an easy-to-add new expansion for Tapestry, one of Stonemaier Games’ best, if not the most divisive, games. In our game group here in Acadiana, the base game of Tapestry has long been a favorite of many of us, and we’ve been in on every expansion and upgrade that comes out.
+>
+> I’ve always felt that Tapestry is one of those rare ninety minute euros that delivers exactly what it is billed — a game that allows you to build out a civilization in your own way, using the four (or five) tracks at hand to modify and strengthen the civ along the way. The game board alone tells you what you will be doing for most of the game.
+>
+> But the topic at hand is the release of what may be its final expansion. Marketing emails dub it “the final expansion” and the last Stonemaier newsletter I have shows no expansions in the works. This is it. Done-do. So what does it bring to the table? Let’s start first with a quick reset.
+>
+> The premise behind Tapestry is that we are civilizations competing to advance on a planet and garner the most “storied history”. I’m not the first to joke that Tapestry is “track the track game”, and a defining feature, one pointed out in every rule book, is that players will earn progressively better benefits for their civilization by moving pawns up the various tracks in the game.
+>
+> The Fantasies & Futures expansion is designed by Chris Scaffidi and Mike Young, with art by Andrew Bosley. The first thing I noticed when I opened up the eco-friendly packaging (essentially a mailer with a large full color sticker depicting the expansion cover) is that it was packed full, just chock full of stuff.
+>
+> There is a ton of content in such a small package, and it started with a pleasant surprise. Fantasies & Futures comes with two new rulebooks: a complete Automa rulebook for solo play, and even more importantly for my purposes, a comprehensive rule book covering all of the content ever made for Tapestry to date, with all of the revisions and civilization tweaks currently in play. Plus, there’s even an extra sheet showing the rules for a two player variant called the Shadow Empire. The rulebooks are full color and have tons of photos for referencing the different cards and abilities in the game. It even comes with a couple of very handy dandy separate references for the civs and landmarks.
+>
+> Fans of the miniatures representing the landmarks that you can add to your city mat in the game may be disappointed to learn that there are no buildings in this flat package. But, that’s not really what this expansion is about. Instead, the designers promise a deep dive into “fantasy and sci-fi inspired civs, technology, tapestries, and cities.”
+>
+> And that’s probably my favorite part of this expansion. Some of my favorite tropes from sci-fi and fantasy novels abound in the civilizations that come with the package. Genies, merfolk and werewolves are here from the fantasy side. Civs that use the brain to its fullest (Psionics) and civs that invent ways to alter the future (Artificers) are here. There’s even an appearance by the ever-present but never seen Illuminati.
+>
+> All total, the expansion includes ten new civilizations to try, bringing the total number of civilizations to over thirty different to play. I hesitate to spoil some of the wacky new abilities on the civs, because part of the fun of Tapestry is discovering how they work during the play. Suffice it to say that they run the gamut from different ways to fill up your city mats, to player interactions, and even some that have pretty powerful income turns on the last turn of the game, if players have set up the income structure correctly. In fact, word of advice here — make sure you understand exactly what your civ does in turn 5 if you want to max out some of those sweet bonus points.
+>
+> We get some new city maps, too. Six new maps (Polar, Netherworld, Quagmire, Savanna, Veil, and City in a Bottle) represent some varied twists on the city set ups. I don’t recommend these for brand new players to Tapestry, though. Some of them are pretty complicated. When I looked at Polar for the first time, with its dots intersected by criss-crossing diagonal lines all over the map, I had to do a double take and re-read the instructions on the card a few times.
+>
+> I have actually played Polar as a city, and it’s an interesting map, where the ‘districts’ aren’t represented by boundaries like the previous maps. Instead, the map has “magnetic field lines” that go from left to right. Placing buildings that cover every available space represented by the line gets you one or two resources, but it’s more linear and flowing rather than geometrically shaped like in other maps.
+>
+> City in a Bottle is another one that intrigued me right from the start. First, it’s small, only six-by-six in grid size. But it’s larger than you think, because you cannot place landmarks on this map. Instead, you “set aside” any landmarks you earn, and gain a hefty six points every time you do it. So, filling up the districts is going to be a challenge, one at a time with the small buildings on your civ mat. Jerod played City in a Bottle, and he was a little underwhelmed, but it’s one I’d like to try.
+>
+> Now it just wouldn’t be a Tapestry expansion without some more cards, of course. The package comes with nearly forty new Tapestry cards. I like the humor that is present in the new cards. You’ll find everything from Doppelgängers to Zombies in this set. Again, the theme of sci-fi and fantasy is well represented in these cards. And there’s a little bit of lagniappe in these new cards, called Charm Bonuses.
+>
+> The conceit of the Charm Bonuses is that this expansion plays with our concept of parallel universes, which explains why ‘weefolk’ and ‘celestials’ might be hanging around the regular civs in the base game. Tapestry cards with charm bonuses have tags on them, either to the left or right of the card (or both) that triggered when played. Playing one of these tapestry cards to the right of an already played card (including the pre-printed Maker of Fire tapestry) will generate the benefit of the tags on the left. Playing a tapestry card for the first time to the right of a tapestry card with a charm bonus triggers any benefits of the tags on the right side of that original card. It’s pretty simple and it adds one more layer to the decision of what order to play the tapestry cards.
+>
+> One of the joys of the base game is the ability to rev up your civilization using tech cards, and this expansion comes with a dozen new techs (and a replacement for the Oil Paint tech previously issued). Unlike the original tech cards, these superpowered ones require players to pay charmed tapestry cards (cards with charm bonuses) before being allowed to upgrade to the top row of the tech tree. But the bonuses (like getting space tiles or double victory points) are pretty sweet, so those charmed cards will get played.
+>
+> As I hinted before, all of the new additions add subtleties and complications, ping-ponging off of other abilities, that mean I will probably not throw in the expansion with a new group of players. But, for anyone that has played Tapestry a time or two, the new civilizations, new tech cards, and the gargantuan collection of new tapestry cards make this an easy add to Tapestry when it is played.
+>
+> For so many of my favorite games, adding more stuff only bloats the game. Fantasies & Futures isn’t about bloat at all; it’s more about adding small twists and thematic settings that enhance the game, especially for those players that want to up the challenge level of the turns.
+>
+> So back to the original questions that popped in my head while we played. What do gamers want in an expansion? For me, I almost always want more of the good stuff that I like in the game. In Tapestry, that means more civs and cities, more techs, and more tapestry cards. Fantasies & Futures delivers in that regard.
+>
+> But the tougher question is what do gamers need in an expansion. Do we need wholesale changes to the gameplay? Not me. I’d much rather add something that is small and seamless, something that makes me look at my gaming partners after the game and say, “I see no reason why we shouldn’t play with those additions every game.”
+>
+> And that, fellow gamers, is the bottom line of Tapestry: Fantasies & Futures. Everything we have explored so far in the expansion is stuff we’d see no reason not to play again in the future. More choices when picking civs and cities? Of course. A bigger Tapestry card deck? No problem. More techs? Yes, please! Getting the additional charm cards mechanics is just lagniappe.
+>
+> Until next time, laissez les bon temps rouler!
+>
+> — BJ from Board Game Gumbo
+>
+> ** A complimentary copy of the expansion was provided by the publisher. **
+
+---
+
+**#2** - `Popularculture` - 2024-06-22
+
+> I have never had this game under 150 minutes, this with 3 players. At higher its been more than 180. 90 min would have to with gamers or those who know this game.
+
+---
+
+**#3** - `Lefty Writer` - 2024-06-22
+
+> Not only do we have the playmat and all the expansions, but now we have two, yes two sets of customized tokens. One set is from the BGG store, and the most recent is an Etsy purchase that includes the Arts track. Looking forward to some epic Tapestry action with you at BGG Con in November!
+
+---
+
+**#4** - `BoardGameGumbo` - 2024-06-22
+
+> *Replying to `Popularculture`:* I have never had this game under 150 minutes, this with 3 players. At higher its been more than 180. 90 min would have to with gamers or those who know this game.
+
+> I probably should clarify that at two players with experience. Jerod and I probably have twenty or thirty games of Tapestry together so there’s not much downtime on our turns. 
+>
+> Five players takes us about three hours it seems.
+
+---
+
+**#5** - `Molokov` - 2024-06-23
+
+> *Replying to `Popularculture`:* I have never had this game under 150 minutes, this with 3 players. At higher its been more than 180. 90 min would have to with gamers or those who know this game.
+
+> Agreed. Tapestry is a 3 hour game, no matter the player count. But it's a fun 3 hours!
+
+---
+
+**#6** - `Stealthmutant` - 2024-06-23
+
+> *Replying to `Popularculture`:* I have never had this game under 150 minutes, this with 3 players. At higher its been more than 180. 90 min would have to with gamers or those who know this game.
+
+> Except for the first play or two, I am not sure that we have ever played more than 120 minutes. There is a lot of AP, but with quick turns, you can easily get it under 2 hours.
+
+---
+
+**#7** - `Stealthmutant` - 2024-06-23
+
+> *Replying to `Molokov`:* I have never had this game under 150 minutes, this with 3 players. At higher its been more than 180. 90 min would have to with gamers or those who know this game. Agreed....
+
+> I think initial setup takes time in tapestry but for multiple plays, I have not seen anything close to 180 minutes in a game…..except possibly for new players and the first games.
+
+---
+
+
 ## Treasure Hunters vs Illuminati.. how to resolve?
-*4 posts - Rules forum - started by gmbalbee on 2024-02-12* - [thread 3245586](https://boardgamegeek.com/thread/3245586)
+*4 posts - Rules - started by gmbalbee on 2024-02-12* - [thread 3245586](https://boardgamegeek.com/thread/3245586)
+*Civs: ILLUMINATI*
 
 OP<br>**#1** - `gmbalbee` - 2024-02-12 *(edited)*
 
@@ -118,8 +342,9 @@ OP<br>**#1** - `gmbalbee` - 2024-02-12 *(edited)*
 ---
 
 
-## Elder Ones - resources in final income turn?  (v)
-*4 posts - Rules forum - started by saiganti on 2023-12-15* - [thread 3208351](https://boardgamegeek.com/thread/3208351)
+## Elder Ones - resources in final income turn?  `(v)`
+*4 posts - Rules - started by saiganti on 2023-12-15* - [thread 3208351](https://boardgamegeek.com/thread/3208351)
+*Civs: ELDER ONES*
 
 OP<br>**#1** - `saiganti` - 2023-12-15
 
@@ -137,7 +362,7 @@ OP<br>**#1** - `saiganti` - 2023-12-15
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#3** - `Buggy` - 2023-12-15
+**DESIGNER - Mike Young, co-designer**<br>**#3** - `Buggy` - 2023-12-15
 
 > If something like a masterpiece or tech card would give you a resource in income turn 5, you are welcome to collect that too if it helps
 
@@ -150,8 +375,8 @@ OP<br>**#1** - `saiganti` - 2023-12-15
 ---
 
 
-## In don't understand this new general rule (v)
-*6 posts - Rules forum - started by Hermjard on 2023-11-19* - [thread 3193257](https://boardgamegeek.com/thread/3193257)
+## In don't understand this new general rule `(v)`
+*6 posts - Rules - started by Hermjard on 2023-11-19* - [thread 3193257](https://boardgamegeek.com/thread/3193257)
 
 OP<br>**#1** - `Hermjard` - 2023-11-19 *(edited)*
 
@@ -173,7 +398,7 @@ OP<br>**#1** - `Hermjard` - 2023-11-19 *(edited)*
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#3** - `Buggy` - 2023-11-19
+**DESIGNER - Mike Young, co-designer**<br>**#3** - `Buggy` - 2023-11-19
 
 > The update was designed to replace the rule that you could not play a tapestry card on top of another after era 4, because there was no tapestry card for that era to play the card on top of. We did this because we wanted to create civs and other effects that might allow the player to play tapestry cards after era 4 (era 4 ends at the start of your 5th income turn).
 >
@@ -193,7 +418,7 @@ OP<br>**#1** - `Hermjard` - 2023-11-19 *(edited)*
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#5** - `Buggy` - 2023-11-19 *(edited)*
+**DESIGNER - Mike Young, co-designer**<br>**#5** - `Buggy` - 2023-11-19 *(edited)*
 
 > I can't speak to the iconography, but the reason we allowed you to cover the Tapestry card at the beginning of the 5th era was because the whole purpose of the change was to allow you to play Tapestries after the 4th era, which would include the start of your 5th income turn.
 >
@@ -203,7 +428,7 @@ OP<br>**#1** - `Hermjard` - 2023-11-19 *(edited)*
 
 **#6** - `Kordalia` - 2025-05-23 *(edited)*
 
-> *Replying to `Buggy`:* However the rule changes nothing about what you are allowed to do if you have the opportunity to play a tapestry card on top of one that does not exist yet, as in the example you g...
+> *Replying to `Buggy`:* However the rule changes nothing about what you are allowed to do if you have the opportunity to play a tapestry card on top of one that does not exist yet, as in the exa...
 
 > From the rulebook:
 
@@ -211,7 +436,8 @@ OP<br>**#1** - `Hermjard` - 2023-11-19 *(edited)*
 
 
 ## Can the Genies civilization keep up with the others?
-*7 posts - General forum - started by Rokapoke on 2023-11-10* - [thread 3188117](https://boardgamegeek.com/thread/3188117)
+*7 posts - General - started by Rokapoke on 2023-11-10* - [thread 3188117](https://boardgamegeek.com/thread/3188117)
+*Civs: GENIES*
 
 OP<br>**#1** - `Rokapoke` - 2023-11-10 *(edited)*
 
@@ -243,7 +469,7 @@ OP<br>**#1** - `Rokapoke` - 2023-11-10 *(edited)*
 
 **#4** - `Rokapoke` - 2023-11-10
 
-> *Replying to `Gregaria`:* I knew this was familiar! Your thread from back in September: Mike, the OP copied his whole thread in a poor move - do copy your entire response to that thread, and let's await the...
+> *Replying to `Gregaria`:* I knew this was familiar! Your thread from back in September: Mike, the OP copied his whole thread in a poor move - do copy your entire response to that thread, and let's...
 
 > Well, I had no engagement from that post. Nobody seemed to have tried the civilization. Thought maybe here people would have tried them and had thoughts.
 
@@ -257,7 +483,7 @@ OP<br>**#1** - `Rokapoke` - 2023-11-10 *(edited)*
 
 **#6** - `blazcowicz` - 2023-11-10
 
-> *Replying to `quartex`:* I played it once in a 2 player game, and it seemed a bit weak, but I suspect it’s probably better in 3-5 player games where you can alternate between different opponents. In a 2 pl...
+> *Replying to `quartex`:* I played it once in a 2 player game, and it seemed a bit weak, but I suspect it’s probably better in 3-5 player games where you can alternate between different opponents....
 
 > I haven't played them yet but that was my first guess reading their mat, it seems like a huge oversight to not have balanced them for 2p.
 
@@ -276,8 +502,9 @@ OP<br>**#1** - `Rokapoke` - 2023-11-10 *(edited)*
 ---
 
 
-## Celestials, and not having an outpost on the board.  (v)
-*8 posts - Rules forum - started by STALKERhun445 on 2023-09-09* - [thread 3150783](https://boardgamegeek.com/thread/3150783)
+## Celestials, and not having an outpost on the board.  `(v)`
+*8 posts - Rules - started by STALKERhun445 on 2023-09-09* - [thread 3150783](https://boardgamegeek.com/thread/3150783)
+*Civs: CELESTIALS*
 
 OP<br>**#1** - `STALKERhun445` - 2023-09-09
 
@@ -322,7 +549,7 @@ OP<br>**#1** - `STALKERhun445` - 2023-09-09
 
 ---
 
-**STONEMAIER - Joe Aubrey (Stonemaier)**<br>**#7** - `JoeAubrey` - 2023-11-06 *(edited)*
+**STONEMAIER - Joe Aubrey, Stonemaier Games**<br>**#7** - `JoeAubrey` - 2023-11-06 *(edited)*
 
 > *Replying to `Aschenvogel`:* "official" answer?
 
@@ -339,8 +566,8 @@ OP<br>**#1** - `STALKERhun445` - 2023-09-09
 ---
 
 
-## Reserved reminder tokens and covering tapestry cards (v)
-*2 posts - Rules forum - started by MauHistor on 2023-09-04* - [thread 3147487](https://boardgamegeek.com/thread/3147487)
+## Reserved reminder tokens and covering tapestry cards `(v)`
+*2 posts - Rules - started by MauHistor on 2023-09-04* - [thread 3147487](https://boardgamegeek.com/thread/3147487)
 
 OP<br>**#1** - `MauHistor` - 2023-09-04
 
@@ -348,9 +575,9 @@ OP<br>**#1** - `MauHistor` - 2023-09-04
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2023-09-04
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-09-04
 
-> *Replying to `MauHistor`:* My rulebook states that when a tapestry card has reserved income buildings you will still get these buildings even you coffer it with another tapestry card. Is the same thing true ...
+> *Replying to `MauHistor`:* My rulebook states that when a tapestry card has reserved income buildings you will still get these buildings even you coffer it with another tapestry card. Is the same t...
 
 > yes, yes it is. You always get what is on your turn 5 reminder card even if you cover the tapestry card that provided it with another card.
 
@@ -358,7 +585,8 @@ OP<br>**#1** - `MauHistor` - 2023-09-04
 
 
 ## New civ mats in solo
-*5 posts - Rules forum - started by MauHistor on 2023-08-19* - [thread 3138530](https://boardgamegeek.com/thread/3138530)
+*5 posts - Rules - started by MauHistor on 2023-08-19* - [thread 3138530](https://boardgamegeek.com/thread/3138530)
+*Civs: GENIES, ILLUMINATI, WEEFOLK*
 
 OP<br>**#1** - `MauHistor` - 2023-08-19
 
@@ -409,7 +637,8 @@ OP<br>**#1** - `MauHistor` - 2023-08-19
 
 
 ## Werefolk question
-*3 posts - Rules forum - started by Fl3shIntoG3ar on 2023-07-10* - [thread 3115277](https://boardgamegeek.com/thread/3115277)
+*3 posts - Rules - started by Fl3shIntoG3ar on 2023-07-10* - [thread 3115277](https://boardgamegeek.com/thread/3115277)
+*Civs: WEREFOLK*
 
 OP<br>**#1** - `Fl3shIntoG3ar` - 2023-07-10
 
@@ -431,8 +660,9 @@ OP<br>**#1** - `Fl3shIntoG3ar` - 2023-07-10
 ---
 
 
-## Questions about the Illuminati (v)
-*3 posts - Rules forum - started by Lancer1994 on 2023-06-06* - [thread 3095955](https://boardgamegeek.com/thread/3095955)
+## Questions about the Illuminati `(v)`
+*3 posts - Rules - started by Lancer1994 on 2023-06-06* - [thread 3095955](https://boardgamegeek.com/thread/3095955)
+*Civs: ILLUMINATI*
 
 OP<br>**#1** - `Lancer1994` - 2023-06-06
 
@@ -450,7 +680,7 @@ OP<br>**#1** - `Lancer1994` - 2023-06-06
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#3** - `Buggy` - 2023-06-06 *(edited)*
+**DESIGNER - Mike Young, co-designer**<br>**#3** - `Buggy` - 2023-06-06 *(edited)*
 
 > It is possible to get extra sets of dice, so that, instead of sharing one set, each player has their own set of dice. This makes a the Illuminati difficult to play with as designed, so we suggest discarding it and redrawing. (Technically, we mandate it, but if we were playing a friendly game, and you really wanted to play The Illuminati, we'd probably play with just one set of dice instead of discarding the Civ)
 >
@@ -459,8 +689,9 @@ OP<br>**#1** - `Lancer1994` - 2023-06-06
 ---
 
 
-## Do "set aside" items score? (v)
-*2 posts - Rules forum - started by Yenreb on 2023-05-30* - [thread 3092453](https://boardgamegeek.com/thread/3092453)
+## Do "set aside" items score? `(v)`
+*2 posts - Rules - started by Yenreb on 2023-05-30* - [thread 3092453](https://boardgamegeek.com/thread/3092453)
+*Civs: ARTIFICERS*
 
 OP<br>**#1** - `Yenreb` - 2023-05-30
 
@@ -468,15 +699,16 @@ OP<br>**#1** - `Yenreb` - 2023-05-30
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2023-05-30
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-05-30
 
 > yes they do
 
 ---
 
 
-## Correction cards: what changed? (v)
-*7 posts - General forum - started by Yenreb on 2023-05-19* - [thread 3086136](https://boardgamegeek.com/thread/3086136)
+## Correction cards: what changed? `(v)`
+*7 posts - General - started by Yenreb on 2023-05-19* - [thread 3086136](https://boardgamegeek.com/thread/3086136)
+*Civs: GENIES, ILLUMINATI, WEEFOLK*
 
 OP<br>**#1** - `Yenreb` - 2023-05-19
 
@@ -486,7 +718,7 @@ OP<br>**#1** - `Yenreb` - 2023-05-19
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2023-05-19
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-05-19
 
 > Oil Paint now has the correct square requirements.
 >
@@ -502,7 +734,7 @@ OP<br>**#1** - `Yenreb` - 2023-05-19
 
 **#4** - `Zooboo` - 2024-05-07
 
-> *Replying to `SepiaPenguin03`:* One of the new Automa personalities is missing an icon on its card. That’s the only error I’m aware of for the Automa cards. The Automa rulebook lists the civs that can’t be used s...
+> *Replying to `SepiaPenguin03`:* One of the new Automa personalities is missing an icon on its card. That’s the only error I’m aware of for the Automa cards. The Automa rulebook lists the civs that can’t...
 
 > Coil
 >
@@ -528,7 +760,7 @@ OP<br>**#1** - `Yenreb` - 2023-05-19
 
 **#6** - `Zooboo` - 2024-05-07
 
-> *Replying to `mortenmdk`:* What are the civilisations in FF that can't be played solo? This is the full list of civs that can't be used in solo (the parenthesis indicates which box the civ was in): Advisors ...
+> *Replying to `mortenmdk`:* What are the civilisations in FF that can't be played solo? This is the full list of civs that can't be used in solo (the parenthesis indicates which box the civ was in):...
 
 > Hi Morten, there's no mention of the Genies (F&F) being removed in the updated solo rulebook. But I understand from their description that they should be removed.
 
@@ -548,7 +780,8 @@ OP<br>**#1** - `Yenreb` - 2023-05-19
 
 
 ## Psionics seems like a very weak Civ
-*9 posts - General forum - started by BenjaminJake on 2023-05-13* - [thread 3082746](https://boardgamegeek.com/thread/3082746)
+*9 posts - General - started by BenjaminJake on 2023-05-13* - [thread 3082746](https://boardgamegeek.com/thread/3082746)
+*Civs: CELESTIALS, ELDER ONES, PSIONICS*
 
 OP<br>**#1** - `BenjaminJake` - 2023-05-13
 
@@ -564,7 +797,7 @@ OP<br>**#1** - `BenjaminJake` - 2023-05-13
 
 **#3** - `Gregaria` - 2023-05-13
 
-> *Replying to `quartex`:* Played with them and thought they were wonderful. I played a tapestry card that let me draw 3 space tiles and play 1 on income turn 5, the Psionics let me draw 6 tiles. The key is ...
+> *Replying to `quartex`:* Played with them and thought they were wonderful. I played a tapestry card that let me draw 3 space tiles and play 1 on income turn 5, the Psionics let me draw 6 tiles. T...
 
 > They would have drawn four I believe. It's one more, not double.
 
@@ -593,7 +826,7 @@ OP<br>**#1** - `BenjaminJake` - 2023-05-13
 
 **#7** - `giantmike` - 2023-05-14
 
-> *Replying to `Stealthmutant`:* We really like tapestry but I think there is no way to guarantee that you can get over 300 every game. It’s very dependent on card availability and choices by other players. But wh...
+> *Replying to `Stealthmutant`:* We really like tapestry but I think there is no way to guarantee that you can get over 300 every game. It’s very dependent on card availability and choices by other playe...
 
 > Are you going to Gen Con? Want to try to meet up and play? I have the “official” foam core insert, so you could see it for yourself to decide.
 
@@ -615,7 +848,8 @@ OP<br>**#1** - `BenjaminJake` - 2023-05-13
 
 
 ## Merfolk…
-*2 posts - General forum - started by hertztoomuch on 2023-04-30* - [thread 3075507](https://boardgamegeek.com/thread/3075507)
+*2 posts - General - started by hertztoomuch on 2023-04-30* - [thread 3075507](https://boardgamegeek.com/thread/3075507)
+*Civs: MERFOLK*
 
 OP<br>**#1** - `hertztoomuch` - 2023-04-30
 
@@ -634,8 +868,42 @@ OP<br>**#1** - `hertztoomuch` - 2023-04-30
 ---
 
 
+## Final expansion for Tapestry
+*3 posts - Reviews - started by Poins on 2023-04-20* - [thread 3069183](https://boardgamegeek.com/thread/3069183)
+*Civs: ARTIFICERS, CELESTIALS, ELDER ONES, FAEFOLK, GENIES, ILLUMINATI, MERFOLK, PSIONICS, WEEFOLK, WEREFOLK*
+
+OP<br>**#1** - `Poins` - 2023-04-20
+
+> We've previously featured Tapestry (Stonemaier Games) on Board's Eye View, as well as the Arts & Architecture expansion. Now, with Fantasies & Futures, Stonemaier have added what has been announced as the final expansion for Tapestry, along with a comprehensive revamped rulebook that covers the core game and all expansions, incorporating errata that were issued to address issues over imbalance between the various civilisations.
+>
+> Designed by Mike Young and Chris Scaffidi, with art by Andrew Bosley, the first thing you'll notice about Fantasies & Futures is that it comes packaged in a heavy-duty cardboard envelope rather than a traditional box. That will be particularly welcome news for environmentalists and those of us for whom board game space is at a premium. It was possible for Fantasies & Futures because this expansion doesn't come with any new buildings or 3D components. Instead it comprises 38 new Tapestry cards, a dozen new Tech cards, six new city maps and 10 intriguing new civilisations. In addition to these and the updated rulebook and automates rules, the expansion includes some replacement cards plus five map overlays that add a turn 5 position to your income mat.
+>
+> Obviously then, Fantasies & Futures isn't as major an expansion as Arts & Architecture, which inter alia added extra pre-painted buildings and a whole new track, but it's a welcome addition nonetheless. The theme is fantasy and science fiction, so it adds to the mix inventions from the magical fae world and from parallel universes. Most striking tho' are the new civs: Artificers, Celestials, Elder Ones, Fae Folk, Genies, Illuminati, Merfolk, Psionics, Weefolk and Werefolk. These all have interesting characteristics and mechanics that add to the fun of the game tho', just as we had with the original civs, there are bound to be further howls of protest that some are grossly overpowered and some comparatively underpowered. For example, the Genies look cool but, just as genies grant wishes, their power involves a randomly chosen player in turns 2, 3 and 4 getting their wish by picking their preferred benefit from those on offer. For sure, the Genies get to duplicate that benefit and a neighbouring one for themselves but this looks meagre in comparison, say, with the Illuminati who place the science and conquest dice on their mat and get 6 victory points for each dice on their mat at the start of their income turns plus an advancement or benefit every time an opponent rolls a die!
+>
+> Completionists won't hesitate to order a copy of Fantasies & Futures to add to their rich Tapestry, and even if you don't already have everything else, there's plenty here to give your core game a new lease of life. We especially welcomed the revamped rulebook, tho' we can't help but feel that more errata might yet be on the way to redress some of the imbalances introduced by the new content :-)
+
+---
+
+**#2** - `Straddllw` - 2023-07-23
+
+> I’ve received mine with Expeditions. Still haven’t had a chance to play it. However I am waiting for something that Jamie teased as an insert plus reprint of all the faction balance changes.
+
+---
+
+**#3** - `quartex` - 2023-07-23
+
+> *Replying to `Straddllw`:* I’ve received mine with Expeditions. Still haven’t had a chance to play it. However I am waiting for something that Jamie teased as an insert plus reprint of all the fact...
+
+> Here’s a preview of the “Rebalanced Civ pack” that your talking about: 
+>
+> https://stonemaiergames.com/games/tapestry/revised-adjusted-rebalanced-civilization-pack/
+
+---
+
+
 ## Celestials' player token interaction with other game elements
-*7 posts - Rules forum - started by Alexras on 2023-04-18* - [thread 3068279](https://boardgamegeek.com/thread/3068279)
+*7 posts - Rules - started by Alexras on 2023-04-18* - [thread 3068279](https://boardgamegeek.com/thread/3068279)
+*Civs: CELESTIALS*
 
 OP<br>**#1** - `Alexras` - 2023-04-18
 
@@ -665,7 +933,7 @@ OP<br>**#1** - `Alexras` - 2023-04-18
 
 **#3** - `QualityMojo` - 2023-05-02
 
-> *Replying to `Alexras`:* - How does this token interact with other opponent outposts/buildings/tokens? Can you move your token onto a territory that (a) is empty, (b) has one or more of your outposts/build...
+> *Replying to `Alexras`:* - How does this token interact with other opponent outposts/buildings/tokens? Can you move your token onto a territory that (a) is empty, (b) has one or more of your outp...
 
 > You can move to any adjacent territory. 
 >
@@ -676,7 +944,7 @@ OP<br>**#1** - `Alexras` - 2023-04-18
 
 **#4** - `Alexras` - 2023-05-02
 
-> *Replying to `QualityMojo`:* The only "difficult" point here is that you would need to differentiate the Celestials' token from any other token since it's the only one that doesn't give you control of the terr...
+> *Replying to `QualityMojo`:* The only "difficult" point here is that you would need to differentiate the Celestials' token from any other token since it's the only one that doesn't give you control o...
 
 > Since the Militants, Traders, and Treasure Hunters all place player tokens that give them control of territories, then this is more than just a Militants issue. The Infiltrators also place a token, actually, so this can become quite an overload.
 >
@@ -688,7 +956,7 @@ OP<br>**#1** - `Alexras` - 2023-04-18
 
 **#5** - `QualityMojo` - 2023-05-02
 
-> *Replying to `Alexras`:* The only "difficult" point here is that you would need to differentiate the Celestials' token from any other token since it's the only one that doesn't give you control of the terr...
+> *Replying to `Alexras`:* The only "difficult" point here is that you would need to differentiate the Celestials' token from any other token since it's the only one that doesn't give you control o...
 
 > Well Infiltrators only care about having tokens on an opponent's capital city, they don't care where they come from. For that reason, I would say yes, you do get another civ.
 
@@ -713,8 +981,8 @@ OP<br>**#1** - `Alexras` - 2023-04-18
 ---
 
 
-## Are advancements from charms optional? (v)
-*3 posts - Rules forum - started by eauxpsifourgott on 2023-04-15* - [thread 3066347](https://boardgamegeek.com/thread/3066347)
+## Are advancements from charms optional? `(v)`
+*3 posts - Rules - started by eauxpsifourgott on 2023-04-15* - [thread 3066347](https://boardgamegeek.com/thread/3066347)
 
 OP<br>**#1** - `eauxpsifourgott` - 2023-04-15
 
@@ -730,7 +998,7 @@ OP<br>**#1** - `eauxpsifourgott` - 2023-04-15
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#3** - `Buggy` - 2023-04-15
+**DESIGNER - Mike Young, co-designer**<br>**#3** - `Buggy` - 2023-04-15
 
 > Unfortunately they are not optional. It's something you'll want to consider when choosing which Tapestry card to play. The advancement without benefit on Tech cards are also not optional if you improve them.
 >
@@ -740,7 +1008,8 @@ OP<br>**#1** - `eauxpsifourgott` - 2023-04-15
 
 
 ## City in a Bottle capital mat - at 2P - confirmation you can win with it!
-*12 posts - General forum - started by drlmiles on 2023-04-14* - [thread 3065940](https://boardgamegeek.com/thread/3065940)
+*12 posts - General - started by drlmiles on 2023-04-14* - [thread 3065940](https://boardgamegeek.com/thread/3065940)
+*Civs: FAEFOLK*
 
 OP<br>**#1** - `drlmiles` - 2023-04-14
 
@@ -786,7 +1055,7 @@ OP<br>**#1** - `drlmiles` - 2023-04-14
 
 **#6** - `SepiaPenguin03` - 2023-04-15
 
-> *Replying to `drlmiles`:* I accept these points, and I suppose we hadn't exploited City in a Bottle this way. But what about the need to get 19 out of 20 income buildings to fill it? In general, we find it ...
+> *Replying to `drlmiles`:* I accept these points, and I suppose we hadn't exploited City in a Bottle this way. But what about the need to get 19 out of 20 income buildings to fill it? In general, w...
 
 > It’s also harder to start scoring lines on a regular city mat, since the rows and column are bigger. I rarely get many points for the city mat until the last two income turns, but city in a bottle starts netting you points for landmarks pretty quickly, and it’s a lot easier to start scoring some points on it earlier for columns and rows - since you don’t need to plan for landmarks, simply add what income builds you get to whichever row/column need the fewest to be filled. City in a bottle is more about getting all the landmarks you can get than it is about filling in the entire mat with income buildings, I think.
 
@@ -810,7 +1079,7 @@ OP<br>**#1** - `drlmiles` - 2023-04-14
 
 **#9** - `blazcowicz` - 2023-04-16
 
-> *Replying to `drlmiles`:* So here's our follow-up. My wife played with Merrymakers + the City in a Bottle map; I played with Heralds + the Cloud City map. All these were picked randomly, apart from the City...
+> *Replying to `drlmiles`:* So here's our follow-up. My wife played with Merrymakers + the City in a Bottle map; I played with Heralds + the Cloud City map. All these were picked randomly, apart fro...
 
 > Good to hear, but the fact that Cloud City is quite mediocre could have played a part too.
 
@@ -830,15 +1099,16 @@ OP<br>**#1** - `drlmiles` - 2023-04-14
 
 **#12** - `drlmiles` - 2023-04-17
 
-> *Replying to `quartex`:* I think if you used the landmark building for a tech card, or on a tapestry card, or for a Civ ability (like the Nomads), you would not get the 6 points. But maybe one of the desig...
+> *Replying to `quartex`:* I think if you used the landmark building for a tech card, or on a tapestry card, or for a Civ ability (like the Nomads), you would not get the 6 points. But maybe one of...
 
 > We assumed this was the case - the landmark has to be set aside to get 6 points, not used in any other way.
 
 ---
 
 
-## Illuminati - Chimera (v)
-*2 posts - Rules forum - started by jocose on 2023-04-02* - [thread 3058558](https://boardgamegeek.com/thread/3058558)
+## Illuminati - Chimera `(v)`
+*2 posts - Rules - started by jocose on 2023-04-02* - [thread 3058558](https://boardgamegeek.com/thread/3058558)
+*Civs: ILLUMINATI*
 
 OP<br>**#1** - `jocose` - 2023-04-02
 
@@ -846,68 +1116,16 @@ OP<br>**#1** - `jocose` - 2023-04-02
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2023-04-02
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-04-02
 
 > If the opponent took the science die from your mat to do so, then yes.
 
 ---
 
 
-## Do the werefolk (F&F) receive a space tile at the beginning of the game to place on their civilization board? (v)
-*4 posts - base game Rules forum - started by Treesmasha on 2023-03-31* - [thread 3057193](https://boardgamegeek.com/thread/3057193)
-
-OP<br>**#1** - `Treesmasha` - 2023-03-31
-
-> Do the werefolk (F&F) receive a space tile at the beginning of the game to place on their civilization board? If they do not, their perk would seem to be rather weak as they will be lucky to be able to use it once or twice a game.
-
----
-
-**STONEMAIER - Jamey Stegmaier (Stonemaier)**<br>**#2** - `jameystegmaier` - 2023-03-31
-
-> No, but here's what we say in the Tapestry FF FAQ:
->
-> How do I gain a space tile for the Werefolk civilization?
->
-> At the start of your second income turn, you will almost definitely not have a space tile on your civ mat (as the most common way to get one is near the end of the Exploration advancement track). So, per the second paragraph, you will then gain a space tile and flip it to see if you explore it or not (if you don’t explore it and you enter your third income turn without a space tile, you’ll repeat this process).
-
----
-
-**#3** - `Smartdrive` - 2023-04-22
-
-> I am still confused.
->
-> When I gain space tiles from Interstellar Travel do I place them on the Werefolk?
->
-> When I explore a space tile does it go onto the Werefolk and then gets discarded in following income turns?
-
----
-
-**#4** - `sinead2` - 2023-09-02
-
-> How I read this:
->
-> Answer to your first question is No (only space tiles from the Werefolk go onto the Werefolk mat).
->
-> Question two:
->
-> At the beginning of income round 2 you throw a space tile (from the reserve) in the air:
->
-> option 1: it's open (face up)
-> choice 1A: you go back one space on one track and explore the tile (this is: get the benefit on the tile and put it open on the Werefolk mat)
-> choice 1B: don't go back on a track and lay the space tile open next to your play area (you can explore it later in the game when you have the corresponding action)
->
-> option 2: it's closed (face down)
-> You get 4 points and lay the space tile open next to your play area (you can explore it later in the game when you have the corresponding action)
->
-> At the beginning of income round 3 if there's a space tile on your Werefolk mat, you discard it. Then follow everything above.
->
-> And so on for income rounds 4 and 5.
-
----
-
-
-## A question on Elder Ones' After Income 5 actions (v)
-*3 posts - Rules forum - started by Altimit03 on 2023-03-31* - [thread 3057126](https://boardgamegeek.com/thread/3057126)
+## A question on Elder Ones' After Income 5 actions `(v)`
+*3 posts - Rules - started by Altimit03 on 2023-03-31* - [thread 3057126](https://boardgamegeek.com/thread/3057126)
+*Civs: ELDER ONES, ILLUMINATI*
 
 OP<br>**#1** - `Altimit03` - 2023-03-31
 
@@ -923,7 +1141,7 @@ OP<br>**#1** - `Altimit03` - 2023-03-31
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#3** - `Buggy` - 2023-03-31
+**DESIGNER - Mike Young, co-designer**<br>**#3** - `Buggy` - 2023-03-31
 
 > The Elder ones may keep playing after their final income turn for as long as they are able to advance on tracks.
 
@@ -931,7 +1149,8 @@ OP<br>**#1** - `Altimit03` - 2023-03-31
 
 
 ## Consolidated List of Misprints
-*4 posts - General forum - started by giantmike on 2023-03-27* - [thread 3054727](https://boardgamegeek.com/thread/3054727)
+*4 posts - General - started by giantmike on 2023-03-27* - [thread 3054727](https://boardgamegeek.com/thread/3054727)
+*Civs: FAEFOLK, GENIES, ILLUMINATI, WEEFOLK, WEREFOLK*
 
 OP<br>**#1** - `giantmike` - 2023-03-27 *(edited)*
 
@@ -1000,7 +1219,8 @@ OP<br>**#1** - `giantmike` - 2023-03-27 *(edited)*
 
 
 ## Merfolk and gaining tapestry cards
-*2 posts - Rules forum - started by Phyrrdsay on 2023-03-26* - [thread 3053944](https://boardgamegeek.com/thread/3053944)
+*2 posts - Rules - started by Phyrrdsay on 2023-03-26* - [thread 3053944](https://boardgamegeek.com/thread/3053944)
+*Civs: MERFOLK*
 
 OP<br>**#1** - `Phyrrdsay` - 2023-03-26 *(edited)*
 
@@ -1014,7 +1234,7 @@ OP<br>**#1** - `Phyrrdsay` - 2023-03-26 *(edited)*
 
 **#2** - `Maanjak` - 2023-03-27 *(edited)*
 
-> *Replying to `Phyrrdsay`:* If the Merfolk manage to gain more tapestry cards from their endgame turns, are they allowed to use those as well? Decided to rule yes for this game just to see how fun it could ge...
+> *Replying to `Phyrrdsay`:* If the Merfolk manage to gain more tapestry cards from their endgame turns, are they allowed to use those as well? Decided to rule yes for this game just to see how fun i...
 
 > I played the Merfolk yesterday and they were a lot of fun indeed! Feels like you're spending the entire game planning for that huge post-income-turn-5 phase.
 >
@@ -1023,8 +1243,9 @@ OP<br>**#1** - `Phyrrdsay` - 2023-03-26 *(edited)*
 ---
 
 
-## Couple of Faefolk Questions (v)
-*5 posts - Rules forum - started by eauxpsifourgott on 2023-03-25* - [thread 3053736](https://boardgamegeek.com/thread/3053736)
+## Couple of Faefolk Questions `(v)`
+*5 posts - Rules - started by eauxpsifourgott on 2023-03-25* - [thread 3053736](https://boardgamegeek.com/thread/3053736)
+*Civs: FAEFOLK*
 
 OP<br>**#1** - `eauxpsifourgott` - 2023-03-25
 
@@ -1036,7 +1257,7 @@ OP<br>**#1** - `eauxpsifourgott` - 2023-03-25
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2023-03-25
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-03-25
 
 > The Faefolk only may gain the Tapestry and does the wheel thing on income turn turns 2-5. Tapestry cards covered with other tapestry cards no longer count as visible.
 
@@ -1067,8 +1288,36 @@ OP<br>**#1** - `eauxpsifourgott` - 2023-03-25
 ---
 
 
-## Masterpieces gained during final income? (v)
-*2 posts - Rules forum - started by eauxpsifourgott on 2023-03-25* - [thread 3053730](https://boardgamegeek.com/thread/3053730)
+## City in a Bottle and Tiebreakers `(v)`
+*3 posts - Rules - started by eauxpsifourgott on 2023-03-25* - [thread 3053734](https://boardgamegeek.com/thread/3053734)
+
+OP<br>**#1** - `eauxpsifourgott` - 2023-03-25
+
+> With the City in a Bottle not able to hold any landmarks, does this mean that they automatically lose the "tallest landmark" tiebreaker? Or is having earned the landmark enough for it to count for this tiebreaker?
+>
+> (My apologies for accidentally posting this under the wrong expansion at first!
+
+---
+
+**#2** - `Molokov` - 2023-03-25 *(edited)*
+
+> [-]If you've earned the landmark, it's yours, even if it's not able to be placed in your capital city. So it would count for the tiebreaker.[/-]
+>
+> I've been corrected by Mike Young (designer of A&A/F&F) so my answer is incorrect.
+
+---
+
+**DESIGNER - Mike Young, co-designer**<br>**#3** - `Buggy` - 2023-03-25 *(edited)*
+
+> Yup, it's tallest landmark in their capitol city, so City in a Bottle always loses tie games. Sorry.
+>
+> [q="the tapestry rulebook]When all players have taken their final income turn, the winner is the player with the most victory points. In case of a tie, the player with the tallest landmark in their capital city is the winner.[/q]
+
+---
+
+
+## Masterpieces gained during final income? `(v)`
+*2 posts - Rules - started by eauxpsifourgott on 2023-03-25* - [thread 3053730](https://boardgamegeek.com/thread/3053730)
 
 OP<br>**#1** - `eauxpsifourgott` - 2023-03-25
 
@@ -1076,15 +1325,16 @@ OP<br>**#1** - `eauxpsifourgott` - 2023-03-25
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2023-03-25
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-03-25
 
 > Alas, Masterpieces are activated before civ abilities, so he won't get to activate it until his next income turn (or if he takes an action that might activate his masterpiece otherwise)
 
 ---
 
 
-## Merfolk + Elder Ones (v)
-*3 posts - Rules forum - started by sportyengineer on 2023-03-23* - [thread 3052380](https://boardgamegeek.com/thread/3052380)
+## Merfolk + Elder Ones `(v)`
+*3 posts - Rules - started by sportyengineer on 2023-03-23* - [thread 3052380](https://boardgamegeek.com/thread/3052380)
+*Civs: ELDER ONES, MERFOLK*
 
 OP<br>**#1** - `sportyengineer` - 2023-03-23
 
@@ -1097,7 +1347,7 @@ OP<br>**#1** - `sportyengineer` - 2023-03-23
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2023-03-23
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-03-23
 
 > You may take either a merfork or elder one advancement turn each turn you play, pick and choose as desired
 
@@ -1111,8 +1361,8 @@ OP<br>**#1** - `sportyengineer` - 2023-03-23
 ---
 
 
-## How does this new expansion change the rules/process for Income Turn 5? (v)
-*6 posts - Rules forum - started by tommy5w on 2023-03-23* - [thread 3052331](https://boardgamegeek.com/thread/3052331)
+## How does this new expansion change the rules/process for Income Turn 5? `(v)`
+*6 posts - Rules - started by tommy5w on 2023-03-23* - [thread 3052331](https://boardgamegeek.com/thread/3052331)
 
 OP<br>**#1** - `tommy5w` - 2023-03-23
 
@@ -1120,7 +1370,7 @@ OP<br>**#1** - `tommy5w` - 2023-03-23
 
 ---
 
-**STONEMAIER - Jamey Stegmaier (Stonemaier)**<br>**#2** - `jameystegmaier` - 2023-03-23
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#2** - `jameystegmaier` - 2023-03-23
 
 > I appreciate your question, but I already answered this when you posted it a few minutes ago on our website. You only need to post once and you will get an answer from us. Here is the answer: "Income turn 5 is your final turn–this is the rule. The types of things reserved to gain during that turn (in Fantasies & Futures) are for scoring, not resources."
 
@@ -1128,7 +1378,7 @@ OP<br>**#1** - `tommy5w` - 2023-03-23
 
 **#3** - `Anarchosyn` - 2023-03-23
 
-> *Replying to `jameystegmaier`:* I appreciate your question, but I already answered this when you posted it a few minutes ago on our website. You only need to post once and you will get an answer from us. Here is ...
+> *Replying to `jameystegmaier`:* I appreciate your question, but I already answered this when you posted it a few minutes ago on our website. You only need to post once and you will get an answer from us...
 
 > To be fair, not every company is as top notch and responsive as Stonemaier (digression: remind me to one day ask why your company has that name given your surname is Stagmaier 😉 ). Cannot wait to see what you all do next.
 >
@@ -1136,7 +1386,7 @@ OP<br>**#1** - `tommy5w` - 2023-03-23
 
 ---
 
-**STONEMAIER - Jamey Stegmaier (Stonemaier)**<br>**#4** - `jameystegmaier` - 2023-03-23
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#4** - `jameystegmaier` - 2023-03-23
 
 > That's true, though I think any publisher deserves the chance to respond, and by posting in multiple places within the span of a few minutes means that the publisher then needs to reply and manage two conversations instead of one. This is actually point 18 of this article from a while ago: https://stonemaiergames.com/an-open-letter-to-kickstarter-backers-from-a-tiny-publishing-company/
 >
@@ -1159,8 +1409,8 @@ OP<br>**#1** - `tommy5w` - 2023-03-23
 ---
 
 
-## Left side Charm bonuses (v)
-*5 posts - Rules forum - started by Action Andy on 2023-03-21* - [thread 3051013](https://boardgamegeek.com/thread/3051013)
+## Left side Charm bonuses `(v)`
+*5 posts - Rules - started by Action Andy on 2023-03-21* - [thread 3051013](https://boardgamegeek.com/thread/3051013)
 
 OP<br>**#1** - `Action Andy` - 2023-03-21
 
@@ -1168,7 +1418,7 @@ OP<br>**#1** - `Action Andy` - 2023-03-21
 
 ---
 
-**STONEMAIER - Jamey Stegmaier (Stonemaier)**<br>**#2** - `jameystegmaier` - 2023-03-21
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#2** - `jameystegmaier` - 2023-03-21
 
 > The key is that you need to play such a card to the right of a card, and Maker of Fire isn't a card, so it doesn't trigger a charm. Sorry for the confusion!
 
@@ -1182,7 +1432,7 @@ OP<br>**#1** - `Action Andy` - 2023-03-21
 
 ---
 
-**STONEMAIER - Jamey Stegmaier (Stonemaier)**<br>**#4** - `jameystegmaier` - 2023-03-21
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#4** - `jameystegmaier` - 2023-03-21
 
 > It's rare, but yes, that can sometimes happen.
 
@@ -1196,7 +1446,8 @@ OP<br>**#1** - `Action Andy` - 2023-03-21
 
 
 ## Solo - Cannot use some civs?
-*6 posts - General forum - started by thegroove7 on 2023-03-21* - [thread 3050895](https://boardgamegeek.com/thread/3050895)
+*6 posts - General - started by thegroove7 on 2023-03-21* - [thread 3050895](https://boardgamegeek.com/thread/3050895)
+*Civs: GENIES, ILLUMINATI, WEEFOLK*
 
 OP<br>**#1** - `thegroove7` - 2023-03-21
 
@@ -1253,8 +1504,38 @@ OP<br>**#1** - `thegroove7` - 2023-03-21
 ---
 
 
+## Golem Minions and Citadel of power icons `(v)`
+*3 posts - Rules - started by Action Andy on 2023-03-20* - [thread 3050511](https://boardgamegeek.com/thread/3050511)
+*Civs: ARTIFICERS*
+
+OP<br>**#1** - `Action Andy` - 2023-03-20
+
+> Could anyone let me know if the icon on these cards means either: score 1 VP for each Landmark you own OR score 1 VP for each Landmark specifically on your Capital City Mat. (I believe some abilities allow you to place Landmarks elsewhere).
+
+---
+
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-03-20
+
+> Any Landmark you have anywhere, even if set aside or on a card.
+
+---
+
+**#3** - `Action Andy` - 2023-03-21 *(edited)*
+
+> *Replying to `Buggy`:* Any Landmark you have anywhere, even if set aside or on a card.
+
+> Thanks Mike, excellent expansion by the way.
+>
+> I assume this is the same for the income building scoring icons as well?
+>
+> And do the buildings set aside by the artificers score due to this icon?
+
+---
+
+
 ## F&F consolidated rulebook question (Elder Ones)
-*3 posts - General forum - started by 16244 on 2023-03-19* - [thread 3049881](https://boardgamegeek.com/thread/3049881)
+*3 posts - General - started by 16244 on 2023-03-19* - [thread 3049881](https://boardgamegeek.com/thread/3049881)
+*Civs: ELDER ONES*
 
 OP<br>**#1** - `blazcowicz` - 2023-03-19 *(edited)*
 
@@ -1270,7 +1551,7 @@ OP<br>**#1** - `blazcowicz` - 2023-03-19 *(edited)*
 
 **#3** - `Anarchosyn` - 2023-03-20
 
-> *Replying to `Slashdoctor`:* Unless I remember wrong, there will be one more release for Tapestry down the road that includes adjustments to various civilizations based on how F&F changes the meta of the game.
+> *Replying to `Slashdoctor`:* Unless I remember wrong, there will be one more release for Tapestry down the road that includes adjustments to various civilizations based on how F&F changes the meta of...
 
 > In another thread people have been claiming F&F will not be included in this upcoming rebalance, and I for one have only every argued they would be as a (natural) assumption. I haven’t been convinced they’re correct, but I must admit to having never seen an official commentary either way.
 >
@@ -1279,8 +1560,9 @@ OP<br>**#1** - `blazcowicz` - 2023-03-19 *(edited)*
 ---
 
 
-## Artificer - income buildings set aside (v)
-*2 posts - Rules forum - started by jasonbrooks on 2023-03-18* - [thread 3049206](https://boardgamegeek.com/thread/3049206)
+## Artificer - income buildings set aside `(v)`
+*2 posts - Rules - started by jasonbrooks on 2023-03-18* - [thread 3049206](https://boardgamegeek.com/thread/3049206)
+*Civs: ARTIFICERS*
 
 OP<br>**#1** - `jasonbrooks` - 2023-03-18
 
@@ -1288,7 +1570,7 @@ OP<br>**#1** - `jasonbrooks` - 2023-03-18
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2023-03-18
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-03-18
 
 > Unfortunately not. They just remain set aside for the rest of the game.
 
@@ -1296,7 +1578,8 @@ OP<br>**#1** - `jasonbrooks` - 2023-03-18
 
 
 ## A question about the Faefolk civ abilities
-*7 posts - Rules forum - started by quartex on 2023-03-17* - [thread 3048419](https://boardgamegeek.com/thread/3048419)
+*7 posts - Rules - started by quartex on 2023-03-17* - [thread 3048419](https://boardgamegeek.com/thread/3048419)
+*Civs: FAEFOLK, WEREFOLK*
 
 OP<br>**#1** - `quartex` - 2023-03-17 *(edited)*
 
@@ -1356,7 +1639,7 @@ OP<br>**#1** - `quartex` - 2023-03-17 *(edited)*
 
 **#5** - `Maanjak` - 2023-03-20
 
-> *Replying to `Aphexia31`:* Where are these adjustments found? I don't see any where in the rulebook about this. "Moreover quite a few civs do trigger their abilities on turn 1 thanks to adjustments (Futurist...
+> *Replying to `Aphexia31`:* Where are these adjustments found? I don't see any where in the rulebook about this. "Moreover quite a few civs do trigger their abilities on turn 1 thanks to adjustments...
 
 > The adjustments are not in the rule book because they are still a work in progress and haven't been released yet.
 > They're actively being discussed here: .
@@ -1367,7 +1650,7 @@ OP<br>**#1** - `quartex` - 2023-03-17 *(edited)*
 
 **#6** - `quartex` - 2023-03-21
 
-> *Replying to `Aphexia31`:* Where are these adjustments found? I don't see any where in the rulebook about this. "Moreover quite a few civs do trigger their abilities on turn 1 thanks to adjustments (Futurist...
+> *Replying to `Aphexia31`:* Where are these adjustments found? I don't see any where in the rulebook about this. "Moreover quite a few civs do trigger their abilities on turn 1 thanks to adjustments...
 
 > I believe the original poster was talking about civilizations that gave abilities that happen at the beginning of the game. For instance the Futurists advance all their tokens 4 spaces on each achievement track. Or the Islanders get 4 terrain tiles from the supply. Technically these don’t happen during income turn 1. 
 >
@@ -1388,8 +1671,9 @@ OP<br>**#1** - `quartex` - 2023-03-17 *(edited)*
 ---
 
 
-## How do Celestials and City in a Bottle interact? (v)
-*6 posts - Rules forum - started by dranawor on 2023-02-26* - [thread 3036298](https://boardgamegeek.com/thread/3036298)
+## How do Celestials and City in a Bottle interact? `(v)`
+*6 posts - Rules - started by dranawor on 2023-02-26* - [thread 3036298](https://boardgamegeek.com/thread/3036298)
+*Civs: CELESTIALS*
 
 OP<br>**#1** - `dranawor` - 2023-02-26
 
@@ -1397,7 +1681,7 @@ OP<br>**#1** - `dranawor` - 2023-02-26
 
 ---
 
-**DESIGNER - Mike Young (co-designer)**<br>**#2** - `Buggy` - 2023-02-26
+**DESIGNER - Mike Young, co-designer**<br>**#2** - `Buggy` - 2023-02-26
 
 > Please post a picture or the exact text of the cards or mats when posting a question here. Folks try to be helpful, but we don't have all the cards memorized, not even the co-designers.
 >
@@ -1419,7 +1703,7 @@ OP<br>**#1** - `dranawor` - 2023-02-26
 
 **#5** - `21tirules` - 2026-05-18
 
-> *Replying to `Buggy`:* Please post a picture or the exact text of the cards or mats when posting a question here. Folks try to be helpful, but we don't have all the cards memorized, not even the co-desig...
+> *Replying to `Buggy`:* Please post a picture or the exact text of the cards or mats when posting a question here. Folks try to be helpful, but we don't have all the cards memorized, not even th...
 
 > Except that City in a Bottle says "gain 5 points per landmark that doesn't hang off the edge of you city" it doesn't say fully enclosed within your citys borders. If not placed in your city at all it can't hang over the edge.
 
@@ -1427,15 +1711,16 @@ OP<br>**#1** - `dranawor` - 2023-02-26
 
 **#6** - `happypooya` - 2026-05-22
 
-> *Replying to `21tirules`:* Please post a picture or the exact text of the cards or mats when posting a question here. Folks try to be helpful, but we don't have all the cards memorized, not even the co-desig...
+> *Replying to `21tirules`:* Please post a picture or the exact text of the cards or mats when posting a question here. Folks try to be helpful, but we don't have all the cards memorized, not even th...
 
 > That's implied within the rules. There's only enough space to add new necessary relevant info on a mat. If it's not on your map, you don't get any points for them since they're not there to count. Basically that combo is not good and I usually substitute one of those if they come up together.
 
 ---
 
 
-## Artificers: Does "leftward" = "leftmost"? (v)
-*10 posts - Rules forum - started by Alexras on 2023-02-25* - [thread 3035872](https://boardgamegeek.com/thread/3035872)
+## Artificers: Does "leftward" = "leftmost"? `(v)`
+*10 posts - Rules - started by Alexras on 2023-02-25* - [thread 3035872](https://boardgamegeek.com/thread/3035872)
+*Civs: ARTIFICERS*
 
 OP<br>**#1** - `Alexras` - 2023-02-25
 
@@ -1457,15 +1742,15 @@ OP<br>**#1** - `Alexras` - 2023-02-25
 
 **#3** - `repnA` - 2023-02-26
 
-> *Replying to `Alexras`:* It's great to get a sneak peek at the components via The Mill! Lots of new fun stuff to look forward to 🙂 Looking at the Artificers, though, I had a question. Part the wording says...
+> *Replying to `Alexras`:* It's great to get a sneak peek at the components via The Mill! Lots of new fun stuff to look forward to 🙂 Looking at the Artificers, though, I had a question. Part the wo...
 
 > My first reading is that as long as there is an empty space to the left, then you may choose one of those empty spaces and then slide your leftmost income building to that space. It does not appear to me that you are restricted to only moving your income building one space unless there is only one space it can move to.
 
 ---
 
-**DESIGNER - Chris Scaffidi (co-designer)**<br>**#4** - `ferventworkshop` - 2023-02-28 *(edited)*
+**DESIGNER - Chris Scaffidi, co-designer**<br>**#4** - `ferventworkshop` - 2023-02-28 *(edited)*
 
-> *Replying to `Chaotic Ignorance`:* Well I think 'Leftmost' speaks to WHICH building, while moving that building 'Leftward' speaks to moving the building one space. So it's both, technically, but I'm not 100% sure.
+> *Replying to `Chaotic Ignorance`:* Well I think 'Leftmost' speaks to WHICH building, while moving that building 'Leftward' speaks to moving the building one space. So it's both, technically, but I'm not 10...
 
 > Yes, slide it 1 space to the left.
 >
@@ -1479,7 +1764,7 @@ OP<br>**#1** - `Alexras` - 2023-02-25
 
 **#5** - `repnA` - 2023-03-01
 
-> *Replying to `ferventworkshop`:* Well I think 'Leftmost' speaks to WHICH building, while moving that building 'Leftward' speaks to moving the building one space. So it's both, technically, but I'm not 100% sure. Y...
+> *Replying to `ferventworkshop`:* Well I think 'Leftmost' speaks to WHICH building, while moving that building 'Leftward' speaks to moving the building one space. So it's both, technically, but I'm not 10...
 
 > Obviously, as you are the designer, it would be silly to argue what the intention is. I do think the wording is ambiguous here. Given the phrasing earlier in the sentence about the existence of "at least one empty space to the left", there is really no reason "the leftward space" has to refer specifically to the space immediately to the left. Had it been phrased, "...or, if your leftmost building is not on the leftmost space, then slide that building one space to the left..." then I think it would be clearer (to me anyway).
 >
@@ -1487,9 +1772,9 @@ OP<br>**#1** - `Alexras` - 2023-02-25
 
 ---
 
-**DESIGNER - Chris Scaffidi (co-designer)**<br>**#6** - `ferventworkshop` - 2023-03-01
+**DESIGNER - Chris Scaffidi, co-designer**<br>**#6** - `ferventworkshop` - 2023-03-01
 
-> *Replying to `repnA`:* Well I think 'Leftmost' speaks to WHICH building, while moving that building 'Leftward' speaks to moving the building one space. So it's both, technically, but I'm not 100% sure. Y...
+> *Replying to `repnA`:* Well I think 'Leftmost' speaks to WHICH building, while moving that building 'Leftward' speaks to moving the building one space. So it's both, technically, but I'm not 10...
 
 > I can see why our wording wasn't entirely clear. Thanks for taking the time to ask! I hope you have fun playing it.
 
@@ -1501,7 +1786,7 @@ OP<br>**#1** - `Alexras` - 2023-02-25
 
 ---
 
-**DESIGNER - Chris Scaffidi (co-designer)**<br>**#8** - `ferventworkshop` - 2023-08-30
+**DESIGNER - Chris Scaffidi, co-designer**<br>**#8** - `ferventworkshop` - 2023-08-30
 
 > Yes, those are eligible to place a building by moving it leftward.
 >
@@ -1526,8 +1811,446 @@ OP<br>**#1** - `Alexras` - 2023-02-25
 ---
 
 
-## Income buildings off capital mat? (v)
-*24 posts - base game Rules forum - started by Zestrenocya on 2020-08-03* - [thread 2477374](https://boardgamegeek.com/thread/2477374)
+## February 24: Comprehensive Rulebook, Core Features, What’s Next `(v)`
+*25 posts - News - started by jameystegmaier on 2023-02-24* - [thread 3034878](https://boardgamegeek.com/thread/3034878)
+*Civs: PSIONICS*
+
+OP<br>**STONEMAIER - Jamey Stegmaier, publisher**<br>**#1** - `jameystegmaier` - 2023-02-24
+
+> With the Tapestry core game and 3 expansions, the rules are spread out over many different documents. That can be cumbersome for players, so I asked Chris if he might be willing to create a comprehensive version of the Tapestry rulebook that would cohesively feature all rules, references, FAQs, and cards in one place. Chris did a SUPERB job at this, and our proofreaders made it even better. 
+>
+> The comprehensive rulebook is included in every copy of Fantasies & Futures, as is the comprehensive Automa rulebook that Morten and his team created. You can see them here: https://bit.ly/3kp1g30
+>
+> As a recap to the various elements featured in Tapestry, here’s the core features infographic I created:
+>
+> Thank you for following along these design diary posts! I’m so grateful to Chris and Mike for their design, Morten for his Automa mode, Andrew Bosley for his art, Christine Santana for her graphic design, and Shannon Lentz for his project management at Panda, along with the playtesters, proofreaders, and team members who helped bring Tapestry: Fantasies & Futures to life.
+>
+> Here are a few key dates, and remember to sign up for the launch notification: http://eepurl.com/ihxtdX
+>
+> • February 25: Content creators with advance copies can feature what the expansion is on their platforms.
+> • February 27: Content creators with advance copies can start sharing their opinions about the expansion.
+> • March 1: Fantasies & Futures launches on our webstore! It’s in the $20-$30 range, and it will be available at a discount for at least the first few days. Available at the same time at a discount will be the new custom insert, the Tapestry core game, and the other two expansions.
+> • March 6-20: Initial orders ship to customers from fulfillment centers in the US, Canada, UK, and Australia.
+> • Late April: Worldwide English retail release date (localization partners Feuerland, Matagot, Maldito, and 999 Games will announce their release dates independently; if you want this expansion in another language, please contact the publisher of your language’s edition of the game to express your interest).
+>
+> I look forward to hearing about the alternate realities you create in March and beyond!
+
+---
+
+**#2** - `quartex` - 2023-02-24
+
+> The Fantasies & Futures expansion looks like fun, but I am very impressed with the comprehensive rulebook. It's really nice to have all the rules and reference material in one place. I appreciate the added examples and FAQ section. Thank you to Chris for writing this.
+
+---
+
+**#3** - `ConnellMiller` - 2023-02-24
+
+> This looks awesome! Excited to get this to the table.
+>
+> Out of curiosity, was there any thought about maybe just reprinting the Income Mats with the new "5" symbol on it rather than a card overlay? It would have been a chance to add the masterpiece symbol to the "Income Turn" iconography on the left-hand side as well.
+>
+> (If you ever offered that as a separate purchase, I'd definitely buy it!)
+
+---
+
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#4** - `jameystegmaier` - 2023-02-24
+
+> "Out of curiosity, was there any thought about maybe just reprinting the Income Mats with the new "5" symbol on it rather than a card overlay?"
+>
+> That's a neat idea, but no, we didn't consider it due to the increase in price required to reprint the entire mat versus a card.
+
+---
+
+**#5** - `Akwos` - 2023-02-24
+
+> The new rulebook says on Optional Variants: On income turn 1, draw 2 tapestries instead of 1. Keep 1 and discard the other. 
+>
+> I know a lot of people play with draw 2 discard 1 every time you gain a Tapestry card. How do the designers feel about using this (not just on turn 1)?
+
+---
+
+**DESIGNER - Mike Young, co-designer**<br>**#6** - `Buggy` - 2023-02-24
+
+> The new comprehensive rulebook is amazing! Chris did a great job!
+
+---
+
+**#7** - `ConnellMiller` - 2023-02-24
+
+> *Replying to `jameystegmaier`:* "Out of curiosity, was there any thought about maybe just reprinting the Income Mats with the new "5" symbol on it rather than a card overlay?" That's a neat idea, but no...
+
+> Fair enough! Just also wanted to mention it looks like the rulebook is about the same size as the Libertalia one. I never knew how much I appreciated rulebooks with small footprints until that game. Happy to see the same size for Tapestry!
+
+---
+
+**#8** - `Chaotic Ignorance` - 2023-02-24
+
+> Something I noticed while browsing the new rulebook is that surprisingly new territory tiles were never created in the expansions. I'm sure it was simply a matter of thinking 48 was plenty for the game already, but at the same time, was there ever consideration to add a few new ones that incorporated added mechanics? I could see some including icons from the A&A expansion, maybe one territory with a space tile, or another with a landmark that can be dug up for your city.
+
+---
+
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#9** - `jameystegmaier` - 2023-02-24
+
+> "I know a lot of people play with draw 2 discard 1 every time you gain a Tapestry card. How do the designers feel about using this (not just on turn 1)?"
+>
+> I don't feel good about it. It slows the game down, and it really just isn't the decision space. Tapestry gives you tapestry cards for free every income turn and ample opportunities to get more tapestry cards; the decision space is to choose which tapestry card to play and when to play it, not which card to draw.
+
+---
+
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#10** - `jameystegmaier` - 2023-02-24
+
+> "was there ever consideration to add a few new territory tiles that incorporated added mechanics?"
+>
+> You know, that isn't something I considered for expansions!
+
+---
+
+**#11** - `Nexus87` - 2023-02-24
+
+> This new rulebook looks great!!!
+
+---
+
+**#12** - `Nexus87` - 2023-02-24
+
+> *Replying to `jameystegmaier`:* the decision space is to choose which tapestry card to play and when to play it, not which card to draw.
+
+> I really love that aspect of the game
+
+---
+
+**#13** - `Akwos` - 2023-02-24
+
+> *Replying to `jameystegmaier`:* "I know a lot of people play with draw 2 discard 1 every time you gain a Tapestry card. How do the designers feel about using this (not just on turn 1)?" I don't feel goo...
+
+> Thanks for your comment Jamey! I like to stick to rules as intended or official variants, so will try with just turn 1 draw 2 keep 1!
+
+---
+
+**#14** - `alexdesouza` - 2023-02-24
+
+> I love the Optional Variants that have been included; we play with several of these variants already, and now we can now just point at the rulebook with newer players!
+
+---
+
+**#15** - `ath3ist` - 2023-02-24
+
+> Hey Jamie, any way you might add to that awesome all-encompassing post above the dates/details on when we might be able to buy the new rulebook separately from the expansion?
+
+---
+
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#16** - `jameystegmaier` - 2023-02-24
+
+> *Replying to `ath3ist`:* Hey Jamie, any way you might add to that awesome all-encompassing post above the dates/details on when we might be able to buy the new rulebook separately from the expans...
+
+> Roland, sorry for any confusion, but we don't sell rulebooks or other components ala carte. You're welcome to print it from our website, though.
+
+---
+
+**#17** - `foutss` - 2023-02-24
+
+> *Replying to `jameystegmaier`:* "Out of curiosity, was there any thought about maybe just reprinting the Income Mats with the new "5" symbol on it rather than a card overlay?" That's a neat idea, but no...
+
+> You could have just passed the increase in price along to the customer. I would have been fine with that.
+
+---
+
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#18** - `jameystegmaier` - 2023-02-24
+
+> That's true, we always have the option of increasing the price based on increased costs. I do that when necessary; I did not deem this necessary.
+
+---
+
+**#19** - `ath3ist` - 2023-02-24
+
+> *Replying to `jameystegmaier`:* Hey Jamie, any way you might add to that awesome all-encompassing post above the dates/details on when we might be able to buy the new rulebook separately from the expans...
+
+> Bummer... Ok thanks Jamey (sorry spelled it right this time, I have a "Jamie" at my work :p ). I'll have to pony up for the expansion to get the rulebook. Quality of my printer is not great.
+
+---
+
+**#20** - `eauxpsifourgott` - 2023-02-24
+
+> When looking at the new civ adjustments in the back of the rulebook, a couple of questions arise.
+>
+> -It's been mentioned elsewhere, but can it be confirmed that the Historians adjustment ought to apply to the Heralds instead?
+> -Assuming yes to the above, do the Heralds gain the benefit of this initial Tapestry card? As I recall the WIP adjustments said no (which is not very fun IMO) but the specific exception listed here suggests that here the answer is yes?
+> -Also assuming yes to #1, does that mean that there's no penalty for the Historians? I thought the data had showed them to be the most overpowered civ under the previous adjustments.
+> -As I recall, the Tinkerers as printed gave an invention to each opponent at the start of the game. Does the adjustment listed here include that (I'm guessing this), or is it an additional one, for a total of two extra inventions per opponent?
+
+---
+
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#21** - `jameystegmaier` - 2023-02-24
+
+> Right, the Historian adjustment is mislabeled--it's intended for the Heralds. They gain the benefit. When we print the full adjusted civ in the future, they will not gain the benefit (this was too powerful; they still have that benefit to choose to activate with their power during the game).
+>
+> There is currently no penalty for the Historians (there never has been, as far as I can tell).
+>
+> The original Tinkerers gave each opponent a tech card. With the adjustment, each opponent also gets a tapestry card (still just 1 tech card).
+
+---
+
+**#22** - `Popularculture` - 2023-02-25
+
+> I am just wanting to ask about cohesion of making an order when one would maybe want other items as well: ie the Wingspan box, Viticulture crate? Will these be orderable through the same order if one wants the expansion with these? As an ask.
+
+---
+
+**STONEMAIER - Joe Aubrey, Stonemaier Games**<br>**#23** - `JoeAubrey` - 2023-02-25 *(edited)*
+
+> *Replying to `Popularculture`:* I am just wanting to ask about cohesion of making an order when one would maybe want other items as well: ie the Wingspan box, Viticulture crate? Will these be orderable ...
+
+> You can order anything you'd like at the same time as Fantasies & Futures, with some caveats:
+> -if your order contains a preorder product, everything will be shipped when those items are ready to ship. (If you want two shipments, the way to make that happen is with two orders.)
+> -the Nesting Box is a preorder and because it is pre-packaged in its own shipping box, it must be ordered alone. The webstore won't let you add anything to a cart with a Nesting Box.
+> -the Wine Crate ships much faster, but it also must be ordered alone.
+> -Expeditions is a preorder, so if you combine an order of F&F with Expeditions, it won't ship until later in the year.
+>
+> With all that in mind, you can order anything else you'd like with F&F. We have many in-stock products that will be shipped with F&F immediately. Your cart will tell you if you have a preorder product in it, so nothing will be a surprise. F&F orders will begin shipping immediately, though it may take slightly longer to ship everyone's orders because of the number of orders we'll receive at one time. Our fulfillment center can only ship so many packages per day. :)
+
+---
+
+**#24** - `blazcowicz` - 2023-02-26
+
+> I finally took a look at the rulebook and I must say it's great! Everything is clear and concise with a lot of images and exemples, all the references we need, so great job.
+>
+> I also like the variants a lot, draw 2 keep 1 only at the start of the game was always my favorite one over doing it all game, and always drawing 2 civs will make M12 much more interesting, especially with the latest adjustments.
+>
+> I was just wondering about something since there's special mentions for the Psionics, do we agree that playing with that variant, the Infiltrators' passive ability becomes draw 4 keep 1, to keep an advantage? Or that the Heralds or other civs getting tapestry cards in a different way at the start get to draw one more?
+
+---
+
+**#25** - `odditie` - 2023-02-27
+
+> Thank you so much for the comprehensive rulebook. It’s going to make a big difference in usability for Tapestry.
+
+---
+
+
+## February 20: The Origins of Fantasies & Futures, Civilizations, and Packaging `(v)`
+*25 posts - News - started by jameystegmaier on 2023-02-20* - [thread 3032303](https://boardgamegeek.com/thread/3032303)
+*Civs: ARTIFICERS, FAEFOLK, WEEFOLK*
+
+OP<br>**STONEMAIER - Jamey Stegmaier, publisher**<br>**#1** - `jameystegmaier` - 2023-02-20 *(edited)*
+
+> Years ago when I was brainstorming ideas for Tapestry, the central theme was that I wanted to create a civilization game in which players could write their own histories from very beginning, with civilizations diverging greatly from real-world history based on the order of various advancements.
+>
+> However, there was one key idea that I ended up scrapping at the time: How would our world be different if something truly magical were discovered? What if we unearthed dragon eggs or if superpowers were real? Just like in Mistborn and the Legend of Korra, how would these discoveries impact a civilization?
+>
+> Of course, Tapestry delves slightly into those themes (aliens, time travel, etc), but the third expansion seemed like the right time to dive deep into fantasy and sci-fi themes while still grounding them in the many real-world advancements, tapestries, and technologies showcased in Tapestry, Plans & Ploys, and Arts & Architecture.
+>
+> After considering a game submission from designer Chris Scaffidi that was a little too close to Tapestry (but did a good job of exploring fictional themes), I asked Chris if he might consider working with Arts & Architecture lead designer Mike Young on the third Tapestry expansion. I took more of a development role in this expansion, and I think both Chris and Mike did a superb job bringing Fantasies & Futures to life, as did artist Andrew Bosley.
+>
+> Chris, Mike, and I had the opportunity to chat in person about the expansion at the 2021 Stonemaier Games Design Day. In that discussion and email conversations that followed, I steered them towards the core concept of a “more stuff” expansion, with more civs, capital cities, tapestry cards, and tech cards easily shuffled into the core game components. You can play Fantasies & Futures with any combination of Tapestry and the other expansions.
+>
+> Today I’d like to showcase a few of the 10 new civilizations in Fantasies & Futures, the Weefolk and Faefolk. Here’s a note from Chris and Mike about these two:
+>
+> “Chris’s game design company focuses on games about weefolk (e.g., gnomes, pixies and goblins), so it was important from a brand standpoint to include at least 1 or 2 related civilizations in the game. Folklore says the weefolk of many varieties secretly live in quiet spots among humans, such as in barns or woods, and they come out to help humans as long as they’re treated nicely.
+>
+> We reflected this in the expansion by letting the Weefolk place tokens on other players’ boards, achieving a mutual benefit. Folklore says the Faefolk–aka fairies–travel between some other “abode” and our normal universe. We reflected this in the game by letting the Faefolk cycle among different benefits, depending on how they manipulate their civilization’s development (in terms of Tapestry card count).”
+>
+> If you’ve followed Tapestry, you probably know that we’ve collected data for years to continue to balance slightly overpowered and slightly underpower civilizations. As usual, the last page of the Fantasies & Futures rulebook includes some basic starting adjustments to some civilizations. We are also working on a more comprehensive, heavy-handed civ adjustment process that takes into account a number of factors; it should be available in late 2023 (it wasn’t ready to include in this expansion).
+>
+> Given that all of the core components were flat and printed, I realized that we could release the expansion in the very eco-friendly format of a sturdy-yet-recyclable courier envelope. Every copy of the expansion (including retail copies) are packaged in these envelopes.
+>
+> If you order just the expansion by itself, the envelope is designed so our fulfillment centers can simply apply a label to the back of the envelope and drop it in the mail. Not only is this more environmentally friendly in terms of reducing packaging, but it also expedites the fulfillment process. We tested several versions of the envelope to ensure that it would properly protect the components within, and I’m really happy with the final result.
+>
+> Of course, if you want to add other items on our webstore to your order (like the new custom insert, which I’ll discuss soon), you’re welcome to do that. Consolidating multiple items into a single shipment is also eco-friendly.
+>
+> Of those revealed, which civilization are you the most excited to try first? I’ll be back tomorrow to talk about the tapestry cards. You can also follow even more detailed reveals from Chris on his designer blog: https://ferventworkshop.com/tapestry-fantasies-and-futures/
+>
+> Tapestry: Fantasies & Futures will launch on the Stonemaier Games webstore on March 1, along with a comprehensive custom insert and reprints of Plans & Ploys and Arts & Architecture. Shipping will follow through mid-March. The expansion will be available from retailers in a few months.
+
+---
+
+**#2** - `Dark_Mirror` - 2023-02-20
+
+> Hi Jamey, thanks for the infos 🙂 
+> I remembered that there were plans for a reprint of the old civs with the balancing updates? This is not part of this expansion, isnt it?
+
+---
+
+**#3** - `Stomski` - 2023-02-20
+
+> *Replying to `Dark_Mirror`:* Hi Jamey, thanks for the infos 🙂 I remembered that there were plans for a reprint of the old civs with the balancing updates? This is not part of this expansion, isnt it?
+
+> He addresses this in the post itself.
+
+---
+
+**#4** - `Popularculture` - 2023-02-20
+
+> Photo of the new box for all the bits?
+
+---
+
+**#5** - `quartex` - 2023-02-20
+
+> *Replying to `Popularculture`:* Photo of the new box for all the bits?
+
+> They aren’t releasing a new box, they’re releasing a custom insert made by Folded Space. I’m sure we’ll see photos of it soon.
+
+---
+
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#6** - `jameystegmaier` - 2023-02-20
+
+> *Replying to `Dark_Mirror`:* Hi Jamey, thanks for the infos 🙂 I remembered that there were plans for a reprint of the old civs with the balancing updates? This is not part of this expansion, isnt it?
+
+> Here's where I talk about this in the above article: "If you’ve followed Tapestry, you probably know that we’ve collected data for years to continue to balance slightly overpowered and slightly underpower civilizations. As usual, the last page of the Fantasies & Futures rulebook includes some basic starting adjustments to some civilizations. We are also working on a more comprehensive, heavy-handed civ adjustment process that takes into account a number of factors; it should be available in late 2023 (it wasn’t ready to include in this expansion)."
+
+---
+
+**#7** - `Spantasy` - 2023-02-20
+
+> I like how this expansion leans into one of the criticisms of Tapestry - a lot of folks say "but it's not a realistic Civ game because you can invent time travel before the paperclip" or things like that. To a lot of us, it not being a strict civ game is why we like Tapestry, and this expansion takes that complaint and owns it by adding more of what the playerbase loves in surprising new ways. Maybe this expansion will help define what Tapestry is meant to be rather than what some vocal players WANT it to be.
+
+---
+
+**#8** - `Reimius` - 2023-02-20
+
+> Hi Jamie. I became a Stonemeier Champion because I thought I'd be able to pre-order this stuff (set it and forget it), but I'm not finding anywhere to do this on the site. Did I misunderstand how it works?
+
+---
+
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#9** - `jameystegmaier` - 2023-02-20
+
+> Thanks Paul! Tapestry: Fantasies & Futures launches next Wednesday, March 1. As a Champion, we'll notify you then.
+
+---
+
+**#10** - `R3DSH1FT` - 2023-02-20
+
+> I like the subtle tie in of the Daoine Sidhe without resorting to them stealing and causing mayhem (save the wings, which is inescapable at this point).
+
+---
+
+**#11** - `SepiaPenguin03` - 2023-02-20
+
+> *Replying to `Spantasy`:* I like how this expansion leans into one of the criticisms of Tapestry - a lot of folks say "but it's not a realistic Civ game because you can invent time travel before t...
+
+> Civ games that let you move through a more or less accurate timeline are fine and fun. But I love civ-lite games like Tapestry because it’s so funny to see what you unlock and when and why. I have access to functionally unlimited information about how civilization has played out; it’s more interesting to see what could be, in my opinion. 
+>
+> I’m not a huge fantasy and folklore lover (though the Faefolk look like they have a really fun hook; can’t wait to try to game it to try to get a bunch of space tiles!) but I’m definitely looking forward to the science fiction half of the civs. Artificers might be both?!?
+
+---
+
+**#12** - `Anarchosyn` - 2023-02-20
+
+> Any chance the Scythe universe will stick its toe into the Tapestry world via this new expansion? Mecha post apocalyptic 1920s civ would make me grin.
+>
+> (More for the cheekiness than any love I have for Scythe).
+
+---
+
+**#13** - `Adric4` - 2023-02-20
+
+> One of the scythe mechs is already in the base game, you just have to look for it 😉
+
+---
+
+**#14** - `blazcowicz` - 2023-02-20
+
+> Looking good so far! I have to give an opinion about the first two civs we can see here, the Faefolk look quite good and fun to play, but I'm more skeptical about the Weefolk.
+>
+> Correct me if I'm mistaken, but they help the others players, while gaining only 3 income buildings and points at the very end of the game. At first sight, they look quite worse than the revised Traders to me.
+
+---
+
+**#15** - `Chaotic Ignorance` - 2023-02-20
+
+> *Replying to `blazcowicz`:* Looking good so far! I have to give an opinion about the first two civs we can see here, the Faefolk look quite good and fun to play, but I'm more skeptical about the Wee...
+
+> I was actually thinking the opposite. I love the sound of the Weefolk, but will have to give the Faefolk a try before I know what to think of them.
+
+---
+
+**#16** - `blazcowicz` - 2023-02-20
+
+> *Replying to `Chaotic Ignorance`:* Looking good so far! I have to give an opinion about the first two civs we can see here, the Faefolk look quite good and fun to play, but I'm more skeptical about the Wee...
+
+> So what makes you think they're powerful enough, I'm curious?
+
+---
+
+**#17** - `Chaotic Ignorance` - 2023-02-21
+
+> *Replying to `blazcowicz`:* Looking good so far! I have to give an opinion about the first two civs we can see here, the Faefolk look quite good and fun to play, but I'm more skeptical about the Wee...
+
+> I suppose I wouldn't say it's about being more powerful, but what seems the most intriguing to me personally. Generally I don't play Tapestry to min max a perfect game, but putting cubes on other players cities to score for myself seems neat.
+>
+> I do understand your hesitation with the Weefolk, and there's a few tactics that I can think of to not give their cubes too many points when you're their opponent, but I'll need to try them out before I have a deeper thought on them.
+
+---
+
+**#18** - `blazcowicz` - 2023-02-21 *(edited)*
+
+> *Replying to `Chaotic Ignorance`:* Looking good so far! I have to give an opinion about the first two civs we can see here, the Faefolk look quite good and fun to play, but I'm more skeptical about the Wee...
+
+> I understand too, it's true that their concept is quite creative. To be honest it wasn't only about min maxing, I was also wondering about balance at 2p for example. It seems to me like giving several cubes to the same opponent will be a huge help for them compared to what they gain.
+>
+> And I guess spending many hours working on the balance of the 31 first civs would also do that 😁
+
+---
+
+**#19** - `Catanomy` - 2023-02-21
+
+> *Replying to `jameystegmaier`:* Given that all of the core components were flat and printed, I realized that we could release the expansion in the very eco-friendly format of a sturdy-yet-recyclable cou...
+
+> Jamey, I don’t own Tapestry, but, I really applaud this decision (especially as someone who works in corporate Sustainability). I was really excited to get Wingspan Asia shipped within the nesting box and I really hope that you might consider this format (or at least, have it as an option in preorder), for future Wingspan expansions!
+
+---
+
+**#20** - `Nexus87` - 2023-02-21
+
+> *Replying to `blazcowicz`:* Looking good so far! I have to give an opinion about the first two civs we can see here, the Faefolk look quite good and fun to play, but I'm more skeptical about the Wee...
+
+> I am really curious about how many points they could get at the end of the game. I guess that 20 or more. For some reason, when I read them for first time, I assumed that they would also get a resource when another player completes a district with one of their clans. They look super fun and thematic! I cannot wait to try them!
+
+---
+
+**STONEMAIER - Jamey Stegmaier, publisher**<br>**#21** - `jameystegmaier` - 2023-02-21
+
+> Paul: Depending on the components, it's definitely something we'll consider for future expansions!
+
+---
+
+**#22** - `blazcowicz` - 2023-02-21
+
+> *Replying to `Nexus87`:* Looking good so far! I have to give an opinion about the first two civs we can see here, the Faefolk look quite good and fun to play, but I'm more skeptical about the Wee...
+
+> I also thought that about the resource, and at first sight that would have been justified.
+
+---
+
+**#23** - `SepiaPenguin03` - 2023-02-22 *(edited)*
+
+> *Replying to `Nexus87`:* Looking good so far! I have to give an opinion about the first two civs we can see here, the Faefolk look quite good and fun to play, but I'm more skeptical about the Wee...
+
+> They could score potentially up to 16 points per cube (so a maximum of 80 points), if I’m getting my math right. Likely less, and opponents could definitely work to deny you, but it would probably mean going out of their way and missing out on points/resources themselves.
+>
+>  Not to mention the Weefolk also get to pitch an exploration tile for any income building three times, which is pretty good too.
+
+---
+
+**#24** - `blazcowicz` - 2023-02-22
+
+> *Replying to `SepiaPenguin03`:* Looking good so far! I have to give an opinion about the first two civs we can see here, the Faefolk look quite good and fun to play, but I'm more skeptical about the Wee...
+
+> They only give 4 cubes, and I very much doubt you will ever get close to 16 points for one. I would place one of their cubes on a line/column with a lot of impassable plots and be careful to put landmarks rather than buildings, so I'd say they will gain around 30-40 points.
+>
+> I still think it would have been simpler to make the buildings income 2-5 also, especially since they have to pay a tile for it and they help their opponents a lot in 2-3p. I hope I'm wrong of course.
+
+---
+
+**#25** - `odditie` - 2023-02-22
+
+> If I understand correctly, the weefolk are not going to work for solo play, correct?
+
+---
+
+
+## Income buildings off capital mat? `(v)`
+*24 posts - base game Rules - started by Zestrenocya on 2020-08-03* - [thread 2477374](https://boardgamegeek.com/thread/2477374)
 
 OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
@@ -1573,7 +2296,7 @@ OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
 **#5** - `Zestrenocya` - 2020-08-03
 
-> *Replying to `rkonigsberg`:* I'll say no thanks to these two sections in the rulebook: 1. The rule about placing income buildings: ... and place it in your capital city. 2. The additional note about extending ...
+> *Replying to `rkonigsberg`:* I'll say no thanks to these two sections in the rulebook: 1. The rule about placing income buildings: ... and place it in your capital city. 2. The additional note about ...
 
 > It does and I was leaning in that direction for the reasons you state. That said, this was so strange a case that I thought it was worth asking about. As it didn't come up in an actual game with other people (I was just playing multiple civs for fun), it didn't precipitate any sort of discussion. In fact, I can't imagine reproducing it...it only came up because I usually completely ignore tech landmarks but decided to take the barn which led to this odd situation on the last turn where it was a case of "If red does this he earns 7 points, but if red can build this last building without putting it on the grid, red would score 10 extra points during the last income."
 >
@@ -1583,7 +2306,7 @@ OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
 ---
 
-**STONEMAIER - Joe Aubrey (Stonemaier)**<br>**#6** - `JoeAubrey` - 2020-08-03
+**STONEMAIER - Joe Aubrey, Stonemaier Games**<br>**#6** - `JoeAubrey` - 2020-08-03
 
 > It's a very rare occurrence, I would think. But yes, you can place an income building off your capitol mat.
 
@@ -1619,7 +2342,7 @@ OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
 **#10** - `SJS1971` - 2020-08-03 *(edited)*
 
-> *Replying to `rkonigsberg`:* It's a very rare occurrence, I would think. But yes, you can place an income building off your capitol mat. I dunno, Joe. I feel like the rules are clear here. I'd agree that the s...
+> *Replying to `rkonigsberg`:* It's a very rare occurrence, I would think. But yes, you can place an income building off your capitol mat. I dunno, Joe. I feel like the rules are clear here. I'd agree ...
 
 > Well the rule says you must place it "in your capital city", not "on your capital city grid". I'm not sure the rules define your capital city as consisting only of the 9x9 grid, do they? I presume the landmarks that are allowed to go outside the lines are completely "in the capital city", they are just not in the 9x9 grid.
 >
@@ -1629,7 +2352,7 @@ OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
 **#11** - `SJS1971` - 2020-08-03
 
-> *Replying to `SJS1971`:* It's a very rare occurrence, I would think. But yes, you can place an income building off your capitol mat. I dunno, Joe. I feel like the rules are clear here. I'd agree that the s...
+> *Replying to `SJS1971`:* It's a very rare occurrence, I would think. But yes, you can place an income building off your capitol mat. I dunno, Joe. I feel like the rules are clear here. I'd agree ...
 
 > In fact, I just played the Craftsmen today. They are a civ that allows you to place the income buildings on your civ mat if you want. The text of that civ says something like "these won't score for rows and columns, but they do still count as being in your capital city" for purposes of things like spaces on tracks that give you VP for houses built or armories built etc. This seems to be more evidence that the game considers your capital city to consist of more than just that portion represented by a 9x9 grid on the city mat.
 
@@ -1687,17 +2410,17 @@ OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
 ---
 
-**STONEMAIER - Joe Aubrey (Stonemaier)**<br>**#17** - `JoeAubrey` - 2020-08-03
+**STONEMAIER - Joe Aubrey, Stonemaier Games**<br>**#17** - `JoeAubrey` - 2020-08-03
 
-> *Replying to `Speusippus`:* Wasn't it already settled somewheres by someone at Stonemeier games that you can put _landmarks_ completely off the map if you want or need to for some reason? If that's true, then...
+> *Replying to `Speusippus`:* Wasn't it already settled somewheres by someone at Stonemeier games that you can put _landmarks_ completely off the map if you want or need to for some reason? If that's ...
 
 > This is true.
 
 ---
 
-**STONEMAIER - Joe Aubrey (Stonemaier)**<br>**#18** - `JoeAubrey` - 2020-08-03
+**STONEMAIER - Joe Aubrey, Stonemaier Games**<br>**#18** - `JoeAubrey` - 2020-08-03
 
-> *Replying to `Orbesteanu`:* It's a very rare occurrence, I would think. But yes, you can place an income building off your capitol mat. Funny, for me this happens always in games of 1-3 P. And somewhere aroun...
+> *Replying to `Orbesteanu`:* It's a very rare occurrence, I would think. But yes, you can place an income building off your capitol mat. Funny, for me this happens always in games of 1-3 P. And somew...
 
 > Hah, I guess this just goes to show how bad I am at Tapestry (and that y'all are way better), so I take back the "very rare occurrence" statement.
 >
@@ -1713,7 +2436,7 @@ OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
 **#20** - `rkonigsberg` - 2020-08-03
 
-> *Replying to `JoeAubrey`:* It was a very early ruling that if you can't physically place a landmark, you can still take it and place it next to your capital city mat. The same holds true for income buildings...
+> *Replying to `JoeAubrey`:* It was a very early ruling that if you can't physically place a landmark, you can still take it and place it next to your capital city mat. The same holds true for income...
 
 > Hi Joe. (Why were you working Sunday night, by the way?)
 >
@@ -1739,9 +2462,9 @@ OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
 ---
 
-**STONEMAIER - Joe Aubrey (Stonemaier)**<br>**#23** - `JoeAubrey` - 2020-08-03
+**STONEMAIER - Joe Aubrey, Stonemaier Games**<br>**#23** - `JoeAubrey` - 2020-08-03
 
-> *Replying to `rkonigsberg`:* It was a very early ruling that if you can't physically place a landmark, you can still take it and place it next to your capital city mat. The same holds true for income buildings...
+> *Replying to `rkonigsberg`:* It was a very early ruling that if you can't physically place a landmark, you can still take it and place it next to your capital city mat. The same holds true for income...
 
 > It's the last question on the Rules FAQ here: https://stonemaiergames.com/games/tapestry/rules-translations-faq/
 
@@ -1749,7 +2472,7 @@ OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
 **#24** - `rkonigsberg` - 2020-08-03 *(edited)*
 
-> *Replying to `JoeAubrey`:* It was a very early ruling that if you can't physically place a landmark, you can still take it and place it next to your capital city mat. The same holds true for income buildings...
+> *Replying to `JoeAubrey`:* It was a very early ruling that if you can't physically place a landmark, you can still take it and place it next to your capital city mat. The same holds true for income...
 
 > Thank you! Thank you! How did I miss it? (Rhetorical. No answer required.)
 
@@ -1757,7 +2480,7 @@ OP<br>**#1** - `Zestrenocya` - 2020-08-03
 
 
 ## Craftsmen civilization
-*11 posts - base game Rules forum - started by agoodspellr on 2019-10-20* - [thread 2296252](https://boardgamegeek.com/thread/2296252)
+*11 posts - base game Rules - started by agoodspellr on 2019-10-20* - [thread 2296252](https://boardgamegeek.com/thread/2296252)
 
 OP<br>**#1** - `agoodspellr` - 2019-10-20
 
@@ -1814,7 +2537,7 @@ OP<br>**#1** - `agoodspellr` - 2019-10-20
 
 **#8** - `Scion13` - 2019-11-23
 
-> *Replying to `Bluejangles`:* This is going to be a really stupid question, but when it says income building, does it mean any building on your mat (ie yellow, red, brown or grey) or does it refer only to the y...
+> *Replying to `Bluejangles`:* This is going to be a really stupid question, but when it says income building, does it mean any building on your mat (ie yellow, red, brown or grey) or does it refer onl...
 
 > An income building is any building that starts on your income mat.
 
@@ -1822,7 +2545,7 @@ OP<br>**#1** - `agoodspellr` - 2019-10-20
 
 **#9** - `Belarok` - 2020-02-17
 
-> *Replying to `plokoon7`:* You score the Craftsmen 5/10/15 benefits only once immediately when you cover them. Nutrition says "...gain 1 VP for each house in your capital city" meaning the number of houses y...
+> *Replying to `plokoon7`:* You score the Craftsmen 5/10/15 benefits only once immediately when you cover them. Nutrition says "...gain 1 VP for each house in your capital city" meaning the number o...
 
 > Sorry to necro this tread, but where did you found this text about getting 1VP for each house in your capital city ? Somehow, I cannot find it anywhere (I might be blind, which is perfectly possible)
 
@@ -1830,7 +2553,7 @@ OP<br>**#1** - `agoodspellr` - 2019-10-20
 
 **#10** - `Alexras` - 2020-02-17 *(edited)*
 
-> *Replying to `JagarKlato`:* Sorry to necro this tread, but where did you found this text about getting 1VP for each house in your capital city ? Somehow, I cannot find it anywhere (I might be blind, which is ...
+> *Replying to `JagarKlato`:* Sorry to necro this tread, but where did you found this text about getting 1VP for each house in your capital city ? Somehow, I cannot find it anywhere (I might be blind,...
 
 > He's talking about the Science track, space number 8. The Houses don't have to be in your capital city: with the Craftsmen they might be on your civ mat, and with the Nomads they might be on the map. Both explicitly stated that they still count for things like Nutrition
 
@@ -1838,7 +2561,7 @@ OP<br>**#1** - `agoodspellr` - 2019-10-20
 
 **#11** - `Belarok` - 2020-02-18
 
-> *Replying to `Alexras`:* Sorry to necro this tread, but where did you found this text about getting 1VP for each house in your capital city ? Somehow, I cannot find it anywhere (I might be blind, which is ...
+> *Replying to `Alexras`:* Sorry to necro this tread, but where did you found this text about getting 1VP for each house in your capital city ? Somehow, I cannot find it anywhere (I might be blind,...
 
 > Ah this one...well then the text on civ is quite confusing with that info. I tend to count open spots on the playing mat anyway (minus one, because the starting spot). 
 >

@@ -278,70 +278,47 @@ Cross civ regression matrix, all with a mutated mat (say farms uncovered at 1, 2
 
 ## Rulings
 
-Proposed FORMAL_RULES clauses, to be recorded under 5.40 (CIV_ARTIFICERS):
+Recorded in FORMAL_RULES as CIV.ARTIFICERS.1-7.
 
-- The mutation happens in the civ ability phase (`INCOME_CIV`, phase 10), which is queued by
-  `queueEraCivAbilities` before the tapestry, upgrade, VP and resource rows. So the new layout is the
-  one that turn's income is paid from, on every income turn including turn 5's VP income. This is
-  what makes the turn 5 "slide all left" option worth taking.
-- "Slide that building left to cover the leftward space" moves it exactly one space, onto the
-  uncovered space immediately to its left. It is not a "slide as far as you like". The turn 5 ability
-  is the only one that moves more than one space. Needs Victoria: the card's singular "the leftward
-  space" reads this way, but "if there is at least one empty space to the left" hints at a longer
-  move.
-- A set-aside building is out of the game. It is not in the capital, so it scores nothing for capital
-  row and column scoring, nothing for `BE_VP_FARM` and its siblings, nothing for the Artificers turn
-  5 VP option, and it is not a building the district or achievement counts see. It is also not on the
-  track, so it can never be claimed again.
-- Setting a building aside does uncover a space, so it advances the income track for every purpose
-  that reads the track position, including the tech card upgrade prerequisite. It does not count as a
-  building claimed for achievement category 5 or for the `game_building_income` statistic. These two
-  used to be the same number and now are not.
-- "1 VP per income building in your capital city" at income turn 5 counts buildings on capital cells
-  only. It is deliberately narrower than the existing `VPincomeStructure`, which also counts buildings
-  on the map (Traders) and on the Collectors mat.
+Implementation notes those clauses deliberately leave out:
+
+- CIV.ARTIFICERS.5 is `INCOME_CIV` (phase 10), queued by `queueEraCivAbilities` before the tapestry,
+  upgrade, VP and resource rows. Two income civs on one player resolve in benefit id order, so a
+  mutation resolved first means the other civ's row sees the new layout.
+- CIV.ARTIFICERS.6: the space uncovered advances the track for every purpose that reads the track
+  position, the tech card upgrade prerequisite included, but not the `game_building_income`
+  statistic nor achievement category 5. Those two used to be the same number and now are not.
+- The turn 5 VP option counts capital cells and set aside buildings (BUILDING.1, BUILDING.4). That is
+  narrower than the existing `VPincomeStructure`, which also counts buildings on the map (Traders)
+  and on the Collectors mat, so it needs its own count.
+- CIV.ARTIFICERS.7 falls out of `checkAliveForBenefit` dropping the civ row like every other income
+  row.
 - Undo: the layout is a global and the buildings are structure rows, both inside the undo savepoint,
   so undoing an income turn restores the mat exactly, the Illuminati precedent.
-- Interaction with civs that touch income order: none of Traders, Collectors, Militants, Nomads or
-  Urban Planners choose which space is uncovered, they only claim the leftmost building, so the only
-  thing they need from Artificers is "leftmost means leftmost", which stage 1 makes true for
-  everyone. The mutation is the owner's own mat only; no opponent's income is ever affected.
-- Two income civs on one player at the same income turn resolve in benefit id order, as they do
-  today; an Artificers mutation resolved before another civ's income row means that row sees the new
-  layout. Consistent with the Illuminati clause CIV.ILLUMINATI.6 rule that the mat is read when the row pops.
+- None of Traders, Collectors, Militants, Nomads or Urban Planners choose which space is uncovered,
+  they only claim the leftmost building, so all they need from Artificers is "leftmost means
+  leftmost", which stage 1 makes true for everyone.
 - Solo: `automa => true`. The ability needs no opponent, nothing on the Automa's side reads a human's
   income mat, and `effect_automaIncomeVP` does not go through `effect_IncomeBenefits`. Artificers is
   the first FF civ that is genuinely solo-safe among the engine band.
-- A finished or zombie owner mutates nothing: the civ row is dropped by `checkAliveForBenefit` like
-  every other income row.
 
 ## Open questions
 
 For Victoria:
 
-- Does the income turn 2-4 slide move exactly one space, or as many as the player likes? The plan
-  assumes one. If it is many, the turn 5 ability loses most of its point, which is the argument for
-  one.
-- Can the turn 2-4 slide move a building that is not the leftmost one? The card says "your leftmost
-  building on that track" for the set aside and then "slide that building", which reads as the same
-  building. Confirm.
-- Turn 5 "slide all buildings as far leftward as possible": does that mean pack them against spot 1
-  (so the uncovered spaces become the highest numbered ones), or pack them against the leftmost
-  uncovered space? The plan assumes against spot 1, which is the only reading that makes the option
-  compete with the VP option.
 - If the owner declines the turn 5 ability entirely, is that legal? The plan assumes yes ("you may
-  either ... or ...", and the default `decline` is true).
-- Setup creates six income buildings of each type
-  ([PGameXBody.php:581](../modules/PGameXBody.php#L581)) but the mat has five track positions and the
-  client's layout loop silently drops the sixth. Is the sixth a deliberate spare (some effect grants
-  a building from outside the track), or a long-standing off-by-one? The answer changes what "the
-  leftmost building" is allowed to assume and whether "set aside" can ever run the track dry in a way
-  no existing code expects. This is the one thing that could make stage 1 bigger than described.
+  either ... or ...", and the default `decline` is true). A: its always beneficial, so no point declining it
+- Each track has six slots and starts at income level 1, so slot 1 is uncovered and five buildings
+  are on the track. Setup creates six of each type
+  ([PGameXBody.php:583](../modules/PGameXBody.php#L583)), so the sixth row of each type is
+  unreachable: `dbGetIncomeBuildingOfType` refuses at income level 6 and the client layout loop has
+  no slot for it. Harmless, and not this plan's to fix. What matters here is that a track running dry
+  is already a handled state, so "set aside" needs no new guard.
 
 Unresolved technically, to settle in stage 1 rather than by guessing:
 
 - Whether `placeToken` will position a building inside a new `income_aside_*` div, or whether that
-  area needs the plain `dojo.place` path.
+  area needs the plain `dojo.place` path. A: set aside zone is same as out of city bounds, it places pieces o tableau/player home nothing specialis needed
 - Whether `notifqueue.setSynchronous("moveStructure", 300)` gives the slide animation enough room
   when four buildings move at once on the turn 5 ability, or whether the relayout should be one
-  notification with its own duration.
+  notification with its own duration. A: moveStructure moves one a time, no?

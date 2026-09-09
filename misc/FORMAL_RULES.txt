@@ -211,28 +211,30 @@ MANDATORY.7 An advance that grants no benefit (from a charm, or from a tech card
     Ref. Mike Young (co-designer), BGG thread 3066347 "Are advancements from charms optional?".
 
 BUILDING - where a building counts
-BUILDING.1 Default: a benefit that scores "per building of this type" counts only the buildings in
-    the player's capital city, as the benefits are worded ("gain 1 VP for each farm in your capital
-    city", RULES.md). A building somewhere else counts only where a rule says so. The two mats that
-    move buildings out of the city both say so in print, which is why the default reads this way:
-    - CRAFTSMEN: "this grid counts as part of your capital city for building related benefits, but
-      it does not score for completed rows and columns here".
-    - NOMADS: "you still gain VP for buildings whether they're on the map or in your capital city".
-    Ref. both mat texts; BGG thread 2296252 "Craftsmen civilization" reads them the same way.
+BUILDING.1 A benefit that scores "per building of this type" or "per landmark" counts every such
+    building the player has, wherever it sits: in the city grid, outside the grid beside the mat,
+    on a CRAFTSMEN slot, on the map (NOMADS) or set aside. The printed benefits are worded "gain 1
+    VP for each farm in your capital city" (RULES.md), and CRAFTSMEN and NOMADS each restate the
+    permission on their own mat, but the designer reads the icons as counting everything the player
+    owns.
+    Ref. Mike Young (co-designer), BGG thread 3050511 "Golem Minions and Citadel of power icons",
+    asked whether the landmark icon means every landmark owned or only those on the capital city
+    mat: "Any Landmark you have anywhere, even if set aside or on a card." Mat texts: CRAFTSMEN
+    "this grid counts as part of your capital city for building related benefits, but it does not
+    score for completed rows and columns here"; NOMADS "you still gain VP for buildings whether
+    they're on the map or in your capital city".
 BUILDING.2 Only the capital city grid gives rows, columns and districts. A CRAFTSMEN slot does not
     (its own mat text), nor does a plot outside the grid (CIV.CELESTIALS.7).
 BUILDING.3 A building or landmark that cannot be placed because the capital city is full is still
-    gained; it goes beside the capital city mat. Whether it then counts for BUILDING.1 is not ruled
-    anywhere - open question.
+    gained; it goes beside the capital city mat, and it counts there (BUILDING.1).
     Ref. Stonemaier Games Tapestry Rules FAQ: "If you don't have room on your capital city mat, can
     I still gain a landmark or income building? Yes! You would gain the building and place it next
     to your capital city mat."; Joe Aubrey (Stonemaier), BGG thread 2477374 "Income buildings off
-    capital mat?", who confirms the placement and says nothing about scoring.
-BUILDING.4 A set aside building or landmark still counts for BUILDING.1. This is a ruling against
-    the default and rests on a single line of designer answer.
-    Ref. Mike Young (co-designer), BGG thread 3092453 "Do set aside items score?", answering "do
-    income buildings set aside by the Artificers and landmarks set aside by City in a Bottle score
-    when you score for that type of building?" with "yes they do".
+    capital mat?".
+BUILDING.4 Set aside is covered by BUILDING.1: a set aside building or landmark still counts.
+    Ref. Mike Young (co-designer), BGG thread 3092453 "Do set aside items score?", asked whether
+    income buildings set aside by the ARTIFICERS and landmarks set aside by City in a Bottle score
+    when you score for that type of building: "yes they do". Same answer in thread 3050511.
 
 MAP - territories and items
 MAP.1 Every outpost or player token on a territory is an item. A territory holding 2 items may not
@@ -268,6 +270,16 @@ CIV.ARTIFICERS.2 The income spaces already uncovered at the start of the game ar
 CIV.ARTIFICERS.3 A building set aside this way never comes back: it cannot be placed in the capital
     city later, whatever offers the placement. It still counts for its type (BUILDING.4).
     Ref. Mike Young (co-designer), BGG thread 3049206 "Artificer - income buildings set aside".
+CIV.ARTIFICERS.4 The income turn 5 slide packs every building of the chosen track flush against the
+    left end of the track, so the spaces it uncovers are the highest numbered ones.
+    Ref. Chris Scaffidi (co-designer), the thread of CIV.ARTIFICERS.1: "On Income turn 5, IIRC, you
+    get to slam all of 1 track's remaining buildings flush left".
+CIV.ARTIFICERS.5 Both abilities resolve at the start of the income turn, so that turn's income is
+    paid from the new layout, the turn 5 VP income included.
+CIV.ARTIFICERS.6 Setting a building aside is not gaining a building: nothing is placed, so nothing
+    that triggers on gaining or placing a building fires. The space it uncovers pays from that turn
+    on, like any other uncovered space.
+CIV.ARTIFICERS.7 A finished or zombie owner changes nothing on their mat.
 
 CIV.CELESTIALS
 CIV.CELESTIALS.1 The floating capital is an inert item (MAP.2).
@@ -358,6 +370,8 @@ CIV.ILLUMINATI.5 A finished or zombie owner gains nothing from a taken die; thei
 CIV.ILLUMINATI.6 The income ability scores the dice on the mat at the start of the income turn. A
     civilization gained in the civilization step of income turns 2-5 fires that same turn with all
     three dice on the mat.
+CIV.ILLUMINATI.7 The owner rolling a die from their own mat, on any turn and for any effect, leaves
+    it on the mat: only an opponent takes a die.
 
 CIV.MERFOLK
 CIV.MERFOLK.1 Submerge: the player picks the 2 cards to keep; a hand of 2 or fewer submerges
@@ -371,6 +385,33 @@ CIV.MERFOLK.4 An extended turn is mandatory: discarding discards at least one ca
 CIV.MERFOLK.5 Any card can be played on an extended turn. "When played" applies; a "this era" card
     stays in effect for the rest of the game (CIV.ELDER_ONES.1). The game ends at the start of a
     turn with an empty hand: a trap card played in defence ends it on the next turn.
+
+CIV.PSIONICS
+CIV.PSIONICS.1 The extra option is one per die rolled and one per draw, however many options the
+    effect already offers: a draw 3 keep 1 becomes a draw 4 keep 1, not three draw 2 keep 1 in a
+    row. An effect rolling two dice gets an extra face on each even where only one of them will pay
+    (conquer); an effect that gains the result of every roll gets an extra face and its own choice
+    on each of those rolls.
+    Ref. BGG thread 3082746 "Psionics seems like a very weak Civ", players only and no designer
+    answer: they agree on one more, not double, and the draw 4 versus three draw 2 question is
+    asked there and left open. Ruled by Victoria from the card's own worked example.
+CIV.PSIONICS.2 A gain is random only where the deck or supply decides it. A card an effect names, or
+    takes from a discard, from an opponent's hand or from a set aside pile, is not a random gain.
+CIV.PSIONICS.3 The deal at setup is not a gain during play and no part of it is subject to PSIONICS,
+    the deal that hands out PSIONICS included. A civilization's own setup draw is subject to
+    PSIONICS when that civilization is gained during play.
+    Ref. ruled by Victoria.
+CIV.PSIONICS.4 A finished or zombie owner generates no extra option: the effect resolves as it does
+    without the civilization.
+CIV.PSIONICS.5 A condition on what is kept is answered over the enlarged set: a GAMBLERS draw that
+    must play a "when played" card if it can is answered against every card drawn.
+CIV.PSIONICS.6 A PSIONICS roll of a die from the ILLUMINATI mat is one roll: the ILLUMINATI owner is
+    paid for the first face only, whichever face the roller keeps, and the die leaves the mat
+    (CIV.ILLUMINATI.1, CIV.ILLUMINATI.4).
+CIV.PSIONICS.7 A coin flip is not a die roll and gains no extra option. A WEREFOLK space tile is a
+    random gain.
+CIV.PSIONICS.8 A gain another player's civilization copies (ADVISORS) is a separate gain for each of
+    them, each subject only to its own owner's civilization.
 
 CIV.WEEFOLK
 CIV.WEEFOLK.1 Scoring is per token, not per distinct line: two tokens in one row score it twice; a
