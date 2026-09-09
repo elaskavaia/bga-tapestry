@@ -65,6 +65,11 @@ CODE BUGS
       effect_placeOnCapitalMat happens to assert. Pre-existing, and it applies to income buildings and
       landmarks as much as to the Weefolk token; the token's own "only in a full city" rule is now
       enforced server-side, the general case is not.
+      The other half of it, seen in the studio 2026-09-08 placing a 2 by 2 landmark: the client
+      offers Confirm for a cell the server then refuses, and the refusal is invisible. The
+      "Invalid structure placement" userAssert (effect_placeOnCapitalMat, PGameXBody.php around
+      8740) reaches the console but no toast and no title change, so the state just sits there and
+      looks like the button did nothing. Anything that reports the rejection would do.
 
 - [ ] Coal baron reset when spies was using it
 
@@ -79,12 +84,26 @@ CODE BUGS
       It works today and is debug-only, but it relies on unspecified framework behavior. Consider moving
       it to a free id under 90; do not add more ids in 90-99.
 
+- [ ] Celestials: onCelestialTokenClick (tapestry.js around 851) opens with disconnectAllTemp,
+      which strips the handler and the active_slot class off every cube, so once a token is picked
+      there is no way to pick a different one short of Undo. Only bites with two or more inert
+      tokens on the map, which is Celestials plus an Infiltrators or Isolationists one. The target
+      hexes still work, they are connected permanently in setupLand, not as temp handlers. Fix:
+      disconnect only the target hexes' highlight, or re-connect the cubes after showing targets.
+
+- [ ] "generated notifications are larger than 128k" (seen at 331844 bytes) on a solo table while
+      the Automa and Shadow Empire ran their end of game turns, studio 2026-09-08. The move was
+      lost and the table sat in benefitManager with no active player; a page reload showed the game
+      had in fact ended normally, so nothing was corrupted. Not Celestials, the row was an Automa
+      research turn. Worth finding which notification is that big before the FF deploy, since a
+      real table cannot always be rescued by a reload.
+
 - [ ] Elder Ones: stPlayerTurn returns early when a civ has activated abilities or the player owns a
       playable lighthouse (PGameXBody.php around 11290), before the "no affordable advance" test, so an
       extended play player in that position is never auto-finished and has to press "End my game"
       themselves. That mirrors what happens to everyone else (no auto income either), but for an Elder
       Ones player the only other button ends their game for good. Confirm this is the wanted reading of
-      FORMAL_RULES 5.14, or move the extended play test above the two early returns.
+      FORMAL_RULES CIV.ELDER_ONES.2, or move the extended play test above the two early returns.
 
 TEST GAPS
 
@@ -101,10 +120,31 @@ TEST GAPS
       green. GameUT::civTokenAdvance is the harness the FF civs now use, so a test file per civ is all
       it takes.
 
-- [ ] Weefolk: interaction with Celestials is still open - the civ is only a constant in
-      material.inc.php, there is nothing to test against yet.
+- [x] Weefolk: interaction with Celestials. Ruled in FORMAL_RULES CIV.CELESTIALS.7 and pinned by
+      testLandmarkHangingOffTheMatStillCountsInTheLinesItTouches: a landmark hanging off the side
+      still counts once per line it touches, and the lines outside the mat are never a token's row
+      or column.
 
 STUDIO CHECKS
+
+- [x] Celestials: played a solo studio table end to end (table 956979, 2026-09-08). Setup logs both
+      lines and leaves outpost plus cube on the start hex; era 1 says "not applicable"; income turns
+      2 and 3 highlight the explored neighbours, the hex click sends the move and both conquer dice
+      are rolled and awarded (including a move onto a territory that already held an outpost);
+      income turn 4 declines with "does not move their floating capital"; income turn 5 scored
+      "gains 3 VP" for one landmark on the mat and one hanging off. Still unseen: the dice
+      animation itself (only the log lines were read) and a negative income turn 5 total.
+
+- [ ] Celestials: moveStructure no longer gates a cube on a land slot behind Infiltrators ownership,
+      so any cube on a territory now sits on the hex itself rather than in an outpost slot. Check
+      the three other cubes that reach a territory: an Infiltrators token, an Isolationists token
+      (now placed inert, so its topple visual changed too) and a MILITANTS cube under variant 4.
+      The overlap this caused is dealt with: the token used to be 28px at right 50% / top 20px,
+      which is wider than an outpost and covered slot 1 whole (measured 100% of its width and 59%
+      of its height, roof included). The hex is 91 by 79 and the two slots span 20% to 80% of it,
+      so no 28px position clears them; the token is now 20px at right 60% / top 46%, which sits on
+      the outpost's lower body and leaves the roof read, and the second token moved to right 38% to
+      match. Both were only checked against the hex geometry, never seen rendered - eyeball them.
 
 - [ ] Elder Ones: the whole client half is unverified, there are no JS tests. Four things to see on a
       real table: the two generic slots_choice buttons on income turns 2-4, the bonus state on income
@@ -195,7 +235,7 @@ DONE
 - [x] Infiltrators, ANSWERED: the third token counts every cube of the player on that capital
       territory, whatever civilization put it there - player tokens are indistinguishable in the
       physical game, so it is threaded in the player's favor. Ruled by Victoria, recorded in
-      FORMAL_RULES 5.12. Test: testATokenLeftByAnotherCivilizationCountsTowardTheThird.
+      FORMAL_RULES CIV.INFILTRATORS.1. Test: testATokenLeftByAnotherCivilizationCountsTowardTheThird.
 
 - [x] Infiltrators, DONE: tests/InfiltratorsTest.php covers both slots through action_civTokenAdvance,
       the third token civilization bonus, midgame entry, the adjustment pack 8 setup tokens and the
@@ -222,7 +262,7 @@ DONE
       testInfiltratorsCubesOnTheStartHexDoNotScore.
 
 - [x] Werefolk, ANSWERED: if no space tile can be gained (deck and discard both empty) there is nothing
-      to flip, so the whole ability is skipped - ruled by Victoria, recorded in FORMAL_RULES 5.3. flip()
+      to flip, so the whole ability is skipped - ruled by Victoria, recorded in FORMAL_RULES CIV.WEREFOLK.1. flip()
       now early-outs with a "cannot gain a space tile" message when drawTile gains nothing. Test:
       testEmptyDeckAndDiscardSkipsTheFlip.
 
@@ -232,7 +272,7 @@ DONE
 - [x] Genies, DONE: a drawn opponent who quits at the wish prompt no longer swallows the ability.
       zombieTurn now goes through effect_zombieBenefits, which hands every row the quitter holds for
       another player's civ to that civ (AbsCivilization::zombieBenefit) before the delete; Genies
-      answers with a random circle (FORMAL_RULES 5.6). Test: testOpponentQuittingAtThePromptGetsARandomCircle.
+      answers with a random circle (FORMAL_RULES CIV.GENIES.1). Test: testOpponentQuittingAtThePromptGetsARandomCircle.
 
 RULES
 
