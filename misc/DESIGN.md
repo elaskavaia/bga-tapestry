@@ -189,7 +189,7 @@ Income:
 - `isExtendedPlay` - era 5, such a civilization, and income turn 5 over. "Over" is read off the
   `current_player_turn` and `income_turn` globals below, since an income turn only ever happens
   inside the player's own turn. `getTapestryEra` returns 4 instead of 5 while it holds, so the
-  era 4 tapestry stays in force (FORMAL_RULES 5.13).
+  era 4 tapestry stays in force (FORMAL_RULES CIV.ELDER_ONES.1).
 - `isPlayerFinished` - era > 5, or a zombie real player. `getPlayersInGame` filters on it,
   `stTransition` skips finished players and calls `endOfGame` when nobody is left.
 - The client greys a player out on the `income` notification with `turn_number` >= 6.

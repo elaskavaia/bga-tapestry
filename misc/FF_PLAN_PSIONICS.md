@@ -204,7 +204,7 @@ afterwards at a table with no Psionics:
 - `effect_onQueueBenefit` returns true and queues the ordinary row for every card gain when nobody
   has Psionics, and the Advisors and Infiltrators arms still fire.
 - An Illuminati table with no Psionics still sees `dieRolled` exactly once per roll with the same
-  face, which is the guard that seam A did not disturb clause 5.24.
+  face, which is the guard that seam A did not disturb clause CIV.ILLUMINATI.1.
 
 ## Stage 2 - the civilization
 
@@ -311,7 +311,7 @@ Edge:
 
 ## Rulings
 
-Proposed, to be recorded in FORMAL_RULES as clauses following 5.29.
+Proposed, to be recorded in FORMAL_RULES as clauses under 5.47 (CIV_PSIONICS).
 
 - PSIONICS gives one extra option, never a doubled one. Where an effect already offers the player a
   choice among N randomly generated options, PSIONICS makes it N+1: EMPIRICISM plus PSIONICS is
@@ -362,7 +362,7 @@ For Victoria.
    doubled, which is up to six rolls per pass and a per-die choice before the keep choice;
    (b) ALCHEMISTS' keep choice is itself the option set, so PSIONICS adds exactly one extra die roll
    to each pass and the owner picks one from the enlarged set; (c) PSIONICS does not apply, because
-   ALCHEMISTS' rerolls are rerolls in the sense clause 5.24 already uses. Reading (b) is the one that
+   ALCHEMISTS' rerolls are rerolls in the sense clause CIV.ILLUMINATI.1 already uses. Reading (b) is the one that
    fits the additive rule best and is the cheapest to build.
 2. Which row is income turn 4's [TECHNOLOGY]? `BE_TECH_CARD` (26), which routes to the `invent`
    state and lets the player choose face-up or face-down, or `BE_INVENT` (20) with `FLAG_FACE_BOTH`,

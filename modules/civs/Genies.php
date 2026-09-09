@@ -88,7 +88,7 @@ class Genies extends AbsCivilization {
     /**
      * The draw is with replacement: every token goes back in the pile first, which also clears a
      * token left on the ring by a wish that was undone. An opponent past income turn 5 cannot answer, so
-     * their token is skipped; a zombie answers with a random circle (FORMAL_RULES 5.6).
+     * their token is skipped; a zombie answers with a random circle (FORMAL_RULES CIV.GENIES.1).
      */
     function drawOpponent(int $player_id): bool {
         $game = $this->game;
@@ -147,7 +147,7 @@ class Genies extends AbsCivilization {
 
     /**
      * Both score the circle; the owner also gains one of its neighbouring squares, in either order.
-     * A zombie opponent does not score, so the engine never has to make them active (FORMAL_RULES 5.6).
+     * A zombie opponent does not score, so the engine never has to make them active (FORMAL_RULES CIV.GENIES.1).
      */
     function grantWish(int $opponent_id, int $spot): void {
         $game = $this->game;

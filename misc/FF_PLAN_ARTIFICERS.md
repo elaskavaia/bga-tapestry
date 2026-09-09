@@ -278,7 +278,7 @@ Cross civ regression matrix, all with a mutated mat (say farms uncovered at 1, 2
 
 ## Rulings
 
-Proposed FORMAL_RULES clauses, continuing from 5.29:
+Proposed FORMAL_RULES clauses, to be recorded under 5.40 (CIV_ARTIFICERS):
 
 - The mutation happens in the civ ability phase (`INCOME_CIV`, phase 10), which is queued by
   `queueEraCivAbilities` before the tapestry, upgrade, VP and resource rows. So the new layout is the
@@ -308,7 +308,7 @@ Proposed FORMAL_RULES clauses, continuing from 5.29:
   everyone. The mutation is the owner's own mat only; no opponent's income is ever affected.
 - Two income civs on one player at the same income turn resolve in benefit id order, as they do
   today; an Artificers mutation resolved before another civ's income row means that row sees the new
-  layout. Consistent with the Illuminati clause 5.29 rule that the mat is read when the row pops.
+  layout. Consistent with the Illuminati clause CIV.ILLUMINATI.6 rule that the mat is read when the row pops.
 - Solo: `automa => true`. The ability needs no opponent, nothing on the Automa's side reads a human's
   income mat, and `effect_automaIncomeVP` does not go through `effect_IncomeBenefits`. Artificers is
   the first FF civ that is genuinely solo-safe among the engine band.

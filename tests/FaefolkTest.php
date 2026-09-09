@@ -206,7 +206,7 @@ final class FaefolkTest extends TestCase {
     }
 
     /**
-     * FORMAL_RULES 5.2: your hand counts as well as your income mat, a covered card does not, and
+     * FORMAL_RULES CIV.FAEFOLK.2: your hand counts as well as your income mat, a covered card does not, and
      * nothing that belongs to anyone else or to the deck does.
      */
     function testHandCardsCountAndCoveredOnesDoNot() {

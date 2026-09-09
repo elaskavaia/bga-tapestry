@@ -196,7 +196,7 @@ final class GeniesTest extends TestCase {
         }
     }
 
-    /** An opponent past income turn 5 cannot answer, so their token is skipped (FORMAL_RULES 5.6). */
+    /** An opponent past income turn 5 cannot answer, so their token is skipped (FORMAL_RULES CIV.GENIES.1). */
     function testFinishedOpponentIsNotDrawn() {
         $game = $this->newGame(3);
         $game->eras[GeniesUT::OPPONENT] = 6;
@@ -211,7 +211,7 @@ final class GeniesTest extends TestCase {
         $this->assertContains('${player_name} has nobody left to grant a wish, the ability is skipped', $this->game->notificationTexts());
     }
 
-    /** A zombie stays in the pile, answers with a random circle and scores nothing (FORMAL_RULES 5.6). */
+    /** A zombie stays in the pile, answers with a random circle and scores nothing (FORMAL_RULES CIV.GENIES.1). */
     function testZombieOpponentDrawnAnswersWithARandomCircle() {
         $this->game->makeZombie(GeniesUT::OPPONENT);
         $this->summon([0, 1]); // draw the only token, then the second circle
@@ -333,7 +333,7 @@ final class GeniesTest extends TestCase {
 
     /**
      * zombieTurn drops every row of the quitter, and the wish row is theirs. The civ answers for
-     * them first, so the owner still gets the mirror (FORMAL_RULES 5.6).
+     * them first, so the owner still gets the mirror (FORMAL_RULES CIV.GENIES.1).
      */
     function testOpponentQuittingAtThePromptGetsARandomCircle() {
         $this->summon();

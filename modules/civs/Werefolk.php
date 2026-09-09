@@ -83,7 +83,7 @@ class Werefolk extends AbsCivilization {
         $game = $this->game;
         $this->discardTileOnMat($player_id);
         if (!$this->drawTile($player_id, $reason)) {
-            // no tile gained means nothing to flip, the whole ability is skipped (FORMAL_RULES 5.3)
+            // no tile gained means nothing to flip, the whole ability is skipped (FORMAL_RULES CIV.WEREFOLK.1)
             $game->notifyWithName(
                 "message",
                 clienttranslate('${player_name} cannot gain a space tile, the ability is skipped'),

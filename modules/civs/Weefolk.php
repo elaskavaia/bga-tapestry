@@ -68,7 +68,7 @@ class Weefolk extends AbsCivilization {
         $game->benefitCivEntry($this->civ, $player_id, reason_civ($this->civ, self::PHASE_BUILD));
     }
 
-    /** Opponents who can still be given a token: real players who have not finished (FORMAL_RULES 5.10). */
+    /** Opponents who can still be given a token: real players who have not finished (FORMAL_RULES CIV.WEEFOLK.4). */
     function getEligibleOpponents(int $player_id): array {
         $game = $this->game;
         $opponents = [];
@@ -157,7 +157,7 @@ class Weefolk extends AbsCivilization {
             ->notifyAll(clienttranslate('${player_name} gives a player token to ${player_name2}'));
         if ($game->isZombiePlayer($opponent_id)) {
             // a zombie counts as finished, so their benefit row would be dropped before it reaches
-            // the civ; the token is planted for them here instead (FORMAL_RULES 5.10)
+            // the civ; the token is planted for them here instead (FORMAL_RULES CIV.WEEFOLK.4)
             $this->plantForZombie($opponent_id);
             // nobody else becomes active, so the roll needs its own savepoint or undo re-rolls it
             $game->prepareUndoSavepoint();
@@ -203,7 +203,7 @@ class Weefolk extends AbsCivilization {
 
     /**
      * Every planted token scores its row and its column, so a building in two tokens' rows scores
-     * twice, and so does one in a token's row that is also in its column (FORMAL_RULES 5.7).
+     * twice, and so does one in a token's row that is also in its column (FORMAL_RULES CIV.WEEFOLK.1).
      */
     function scoreTokens(int $player_id, int $count, string $reason): bool {
         $game = $this->game;
@@ -211,7 +211,7 @@ class Weefolk extends AbsCivilization {
         foreach ($game->getStructuresSearch(BUILDING_CUBE, null, "capital\\_cell\\_%", $player_id) as $token) {
             $capital_owner = (int) getPart($token["card_location"], 2);
             if ($capital_owner == $player_id) {
-                continue; // a cube of their own is not a planted token (FORMAL_RULES 5.11)
+                continue; // a cube of their own is not a planted token (FORMAL_RULES CIV.WEEFOLK.5)
             }
             $vp += $this->countInLine($capital_owner, true, (int) getPart($token["card_location"], 3));
             $vp += $this->countInLine($capital_owner, false, (int) getPart($token["card_location"], 4));
@@ -248,7 +248,7 @@ class Weefolk extends AbsCivilization {
         return $count;
     }
 
-    /** A quitter cannot be asked where the token goes, so it lands on a random plot (FORMAL_RULES 5.10). */
+    /** A quitter cannot be asked where the token goes, so it lands on a random plot (FORMAL_RULES CIV.WEEFOLK.4). */
     function zombieBenefit(array $benefit): void {
         if ((int) $benefit["benefit_type"] == BE_WEEFOLK_PLOT) {
             $this->plantForZombie((int) $benefit["benefit_player_id"]);

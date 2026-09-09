@@ -167,7 +167,7 @@ final class WerefolkTest extends TestCase {
     /**
      * Nothing consumes the marker on the face-down branch, so a plain explore later the same turn
      * (INTERSTELLAR TRAVEL or WARPGATES, both reachable from the face-down advance) must treat
-     * every hand tile as ordinary per FORMAL_RULES 5.3. TODO.md "Werefolk BUG" entry.
+     * every hand tile as ordinary per FORMAL_RULES CIV.WEREFOLK.1. TODO.md "Werefolk BUG" entry.
      */
     function testPlainExploreAfterFaceDownIsNotRestricted() {
         $this->game->addCard(CARD_SPACE, "hand");
@@ -190,7 +190,7 @@ final class WerefolkTest extends TestCase {
         $this->assertNull($this->game->argSpaceExploration()["selected_space_tile"]);
     }
 
-    /** No tile gained means nothing to flip: the whole ability is skipped (FORMAL_RULES 5.3). */
+    /** No tile gained means nothing to flip: the whole ability is skipped (FORMAL_RULES CIV.WEREFOLK.1). */
     function testEmptyDeckAndDiscardSkipsTheFlip() {
         $this->game->seedRand(Werefolk::FACE_DOWN);
         $this->game->queueEraCivAbility(CIV_WEREFOLK, 1, 2);

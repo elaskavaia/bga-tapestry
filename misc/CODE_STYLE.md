@@ -61,7 +61,7 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
   nothing.
 - Check the civ against [FORMAL_RULES.txt](FORMAL_RULES.txt); it is the tie-breaker on effect
   ordering and void/mandatory/optional semantics. A new rules interpretation belongs there as a
-  numbered clause.
+  coded clause (MOVE.2, CIV.WEEFOLK.3).
 
 ## Game state globals (the label array in `PGameXBody::__construct`)
 
@@ -141,7 +141,8 @@ This is an old game; do not flag existing code for these, but hold new and rewri
 
 - Open bugs and open rules questions go in [TODO.md](TODO.md) as `- [ ]` items; finished ones
   become `- [x]`.
-- A new rules interpretation goes in [FORMAL_RULES.txt](FORMAL_RULES.txt) as a numbered clause.
+- A new rules interpretation goes in [FORMAL_RULES.txt](FORMAL_RULES.txt) as a coded clause
+  (MOVE.2, CIV.WEEFOLK.3).
 - Check whether [DESIGN.md](DESIGN.md) needs updating for new schema semantics or location-string
   conventions.
 

@@ -150,7 +150,7 @@ final class InfiltratorsTest extends TestCase {
 
     /**
      * Player tokens are indistinguishable on the table, so one of yours that another civilization
-     * left on that territory counts toward the third as well (FORMAL_RULES 5.12). An ISOLATIONISTS
+     * left on that territory counts toward the third as well (FORMAL_RULES CIV.INFILTRATORS.1). An ISOLATIONISTS
      * token is a CUBE_CIV of yours sitting on a territory you conquered.
      */
     function testATokenLeftByAnotherCivilizationCountsTowardTheThird() {

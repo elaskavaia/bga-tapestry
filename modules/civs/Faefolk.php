@@ -66,7 +66,7 @@ class Faefolk extends AbsCivilization {
 
     /**
      * Visible tapestry cards are the ones in hand plus the ones played on the income mat
-     * (FORMAL_RULES 5.2). A card on era_6 is covered by the one played over it. The HERALDS clone
+     * (FORMAL_RULES CIV.FAEFOLK.2). A card on era_6 is covered by the one played over it. The HERALDS clone
      * on civilization_6 and the ESPIONAGE clones on tapestry_NN are copies whose originals are
      * already counted in era%, and neither location is searched here.
      */

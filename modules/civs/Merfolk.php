@@ -71,7 +71,7 @@ class Merfolk extends AbsCivilization {
         return true;
     }
 
-    /** The drawn card is a real gain, so ACADEMIA style triggers fire on it (FORMAL_RULES 5.19). */
+    /** The drawn card is a real gain, so ACADEMIA style triggers fire on it (FORMAL_RULES CIV.MERFOLK.2). */
     function dive(int $player_id, string $reason): bool {
         $game = $this->game;
         $game->awardCard($player_id, 1, CARD_TAPESTRY, false, $reason);
@@ -104,7 +104,7 @@ class Merfolk extends AbsCivilization {
 
     /**
      * An empty hand is what ends the game, judged when the turn starts rather than when the last
-     * card leaves (FORMAL_RULES 5.22).
+     * card leaves (FORMAL_RULES CIV.MERFOLK.5).
      */
     function startExtendedTurn(int $player_id): bool {
         $game = $this->game;
@@ -245,14 +245,14 @@ class Merfolk extends AbsCivilization {
         );
     }
 
-    /** "Keep up to 5" is answered as exactly 5, every extra card is worth VP later (FORMAL_RULES 5.20). */
+    /** "Keep up to 5" is answered as exactly 5, every extra card is worth VP later (FORMAL_RULES CIV.MERFOLK.3). */
     function discardRest(int $player_id, array $keep): void {
         $game = $this->game;
         $discard = array_diff_key($this->getHand($player_id), $keep);
         $game->effect_discardCard($discard, $player_id, "discard", true);
     }
 
-    /** An extended turn is mandatory, so at least one card goes (FORMAL_RULES 5.21). */
+    /** An extended turn is mandatory, so at least one card goes (FORMAL_RULES CIV.MERFOLK.4). */
     function discardForVP(int $player_id, array $discard): void {
         $game = $this->game;
         $game->userAssertTrue(clienttranslate("You must select at least one tapestry card to discard"), count($discard) > 0);

@@ -262,7 +262,7 @@ final class MerfolkTest extends TestCase {
         $this->assertEquals([], $game->submergedIds(MerfolkUT::OWNER));
     }
 
-    /** Returning is not gaining, so only the single drawn card announces a gain (FORMAL_RULES 5.19). */
+    /** Returning is not gaining, so only the single drawn card announces a gain (FORMAL_RULES CIV.MERFOLK.2). */
     function testReturningTheSubmergedCardsIsNotAGain() {
         $game = $this->game;
         $game->fillDeck(1);
@@ -498,7 +498,7 @@ final class MerfolkTest extends TestCase {
 
     // -------------------------------------------------------- response cards
 
-    /** The card says the defender keeps their response cards (FORMAL_RULES 5.23). */
+    /** The card says the defender keeps their response cards (FORMAL_RULES CIV.MERFOLK.6). */
     function testTrapRowIsStillOfferedInExtendedPlay() {
         $game = $this->game;
         $this->enterExtendedPlay();

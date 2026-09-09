@@ -150,7 +150,7 @@ Found by the blind review and fixed here rather than in stage 1, where they belo
 - `notif_conquer_roll` guarded its `gamedatas.dice` writes with `if (die_red)`, dropping face 0,
   which is a real face. Harmless until `updateDieTooltip` started reading that value back.
 
-Rulings are recorded as FORMAL_RULES clauses 5.24-5.29. `getTileBenefit` warning on a missing hex
+Rulings are recorded as FORMAL_RULES clauses CIV.ILLUMINATI.1-6. `getTileBenefit` warning on a missing hex
 when black face 1 comes up outside a conquer is logged in [TODO.md](TODO.md).
 
 ## Studio run, 2 players, FF only
