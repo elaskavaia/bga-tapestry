@@ -91,22 +91,13 @@ class Tapestry extends PGameXBody {
      *
      */
     function upgradeTableDb($from_version) {
-        // $from_version is the current version of this game database, in numerical form.
-        // For example, if the game was running with a release of your game named "140430-1345",
-        // $from_version is equal to 1404301345
-        // Example:
-        //        if( $from_version <= 1404301345 )
-        //        {
-        //            $sql = "ALTER TABLE xxxxxxx ....";
-        //            self::DbQuery( $sql );
-        //        }
-        //        if( $from_version <= 1405061421 )
-        //        {
-        //            $sql = "CREATE TABLE xxxxxxx ....";
-        //            self::DbQuery( $sql );
-        //        }
-        //        // Please add your future database scheme changes here
-        //
-        //
+        // income buildings started carrying their spot in card_location_arg2; the sixth building
+        // of each type never had a spot to sit on and goes
+        if ($from_version <= 2609091200) {
+            foreach ($this->getObjectListFromDB("SELECT player_id FROM playerextra", true) as $player_id) {
+                $this->dbAssignIncomeSpots((int) $player_id);
+            }
+            $this->DbQuery("DELETE FROM structure WHERE card_location='income' AND card_location_arg2='0'");
+        }
     }
 }

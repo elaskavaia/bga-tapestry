@@ -82,7 +82,11 @@ The table contains outposts, cubes, landmarks and income buildings.
 
 - `card_location` - `capital_cell_${player_id}_${x}_${y}` when in the capital (e.g.
   `capital_cell_2300663_11_9`); `income` when on the income track; `land_${x}_${y}` when on the
-  map
+  map; `hand` when beside the capital mat (an out of bounds placement, row 144, or a set aside
+  building)
+- `card_location_arg2` - the spot 1..6 the building covers while the location is `income`, `0`
+  otherwise. The uncovered spots of a track are 1..6 minus these, and `player_income_<field>` in
+  `playerextra` is always their count. Setup creates five buildings per type on spots 2..6.
 
 #### Landmarks
 

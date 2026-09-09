@@ -580,9 +580,10 @@ abstract class PGameXBody extends tapcommon {
                 // income buildings
                 $structures = [];
                 for ($a = 1; $a < 5; $a++) {
-                    $structures[] = ["type" => $a, "type_arg" => 0, "nbr" => 6];
+                    $structures[] = ["type" => $a, "type_arg" => 0, "nbr" => 5];
                 }
                 $this->structures->createCards($structures, "income", $player_id);
+                $this->dbAssignIncomeSpots($player_id);
                 $this->DbQuery("UPDATE player SET player_no='$capital' WHERE player_id='$player_id'");
             }
             $structures = [];
@@ -2389,10 +2390,9 @@ abstract class PGameXBody extends tapcommon {
         return $rows_cols;
     }
 
+    /** Per building that left the track: in the city, beside it, on a civ mat, on the map or set aside all count (BUILDING.1). */
     function VPincomeStructure($player_id, $type, $value, $reason = "", $place = null, $ben = null) {
-        $count = $this->getUniqueValueFromDB(
-            "SELECT COUNT(*) FROM structure WHERE card_location_arg='$player_id' AND (card_type='$type') AND ((card_location LIKE 'capital_cell%') OR (card_location LIKE 'civ_3\\_%') OR (card_location LIKE 'land_%'))"
-        );
+        $count = 5 - count($this->getStructuresSearch($type, null, "income", $player_id));
         $this->awardVP($player_id, $value * $count, $reason, $place, $ben);
     }
 
@@ -2891,15 +2891,58 @@ abstract class PGameXBody extends tapcommon {
         return $field;
     }
 
+    function dbIncIncomeTrackLevel(int $player_id, int $track): void {
+        $field = $this->getIncomeTrackDbColumn($track);
+        $this->DbQuery("UPDATE playerextra SET $field=$field+1 WHERE player_id='$player_id'");
+    }
+
+    /** The buildings still on one income track, leftmost first. */
+    function getIncomeBuildingsOnTrack(int $player_id, int $track): array {
+        $rows = $this->getStructuresSearch($track, null, "income", $player_id);
+        uasort($rows, fn($a, $b) => (int) $a["card_location_arg2"] <=> (int) $b["card_location_arg2"]);
+        return $rows;
+    }
+
+    /**
+     * The spots a track pays income for: 1..6 minus the spots its buildings cover. The level
+     * column is the count of these, which every consumer of the scalar relies on.
+     */
+    function getIncomeUncoveredSpots(int $player_id, int $track): array {
+        $covered = array_column($this->getIncomeBuildingsOnTrack($player_id, $track), "card_location_arg2");
+        $spots = array_values(array_diff(range(1, 6), $covered));
+        $level = $this->dbGetIncomeTrackLevel($track, $player_id);
+        $this->systemAssertTrue(
+            "ERR:game:04 track $track of $player_id uncovers " . count($spots) . " spots at level $level",
+            count($spots) == $level
+        );
+        return $spots;
+    }
+
+    /** Spots for the buildings on a track that carry none yet, in id order: setup, and the migration of older tables. */
+    function dbAssignIncomeSpots(int $player_id): void {
+        for ($track = 1; $track <= 4; $track++) {
+            $spot = $this->dbGetIncomeTrackLevel($track, $player_id) + 1;
+            $rows = $this->getStructuresSearch($track, null, "income", $player_id);
+            ksort($rows);
+            foreach ($rows as $row) {
+                if ($spot > 6) {
+                    break;
+                }
+                $this->dbSetStructureArg2($row["card_id"], $spot++);
+            }
+        }
+    }
+
+    function dbSetStructureArg2($structure_id, $arg2): void {
+        $this->DbQuery("UPDATE structure SET card_location_arg2='$arg2' WHERE card_id='$structure_id'");
+    }
+
     function dbGetIncomeBuildingOfType($type, $throw = false, $notify = true, $player_id = null) {
         if (!$player_id) {
             $player_id = $this->getActivePlayerId();
         }
-        $income_level = $this->dbGetIncomeTrackLevel($type, $player_id);
-        $sid = $this->getUniqueValueFromDB(
-            "SELECT card_id FROM structure WHERE card_location='income' AND card_location_arg='$player_id' AND (card_type='$type') LIMIT 1"
-        );
-        if ($income_level >= 6 || $sid == null) {
+        $rows = $this->getIncomeBuildingsOnTrack((int) $player_id, (int) $type);
+        if (!$rows) {
             if ($throw) {
                 $this->userAssertTrue(totranslate("No more income buildings of this type"));
                 return null;
@@ -2912,12 +2955,11 @@ abstract class PGameXBody extends tapcommon {
             }
             return null;
         }
-        return $sid;
+        return (int) array_key_first($rows);
     }
 
     function claimIncomeStructure($type, $transition = "structure") {
         $player_id = $this->getActivePlayerId();
-        $field = $this->getIncomeTrackDbColumn($type);
         $sid = $this->dbGetIncomeBuildingOfType($type);
         if ($sid == null) {
             return true;
@@ -2928,9 +2970,14 @@ abstract class PGameXBody extends tapcommon {
             $this->error("Claiming income building while another building is not resolved " . $curr["card_type_arg"]);
             $this->DbQuery("UPDATE structure SET card_location='hand' WHERE card_location='capital_structure'");
         }
-        $this->DbQuery("UPDATE structure SET card_location='capital_structure' WHERE card_id='$sid'");
-        $this->DbQuery("UPDATE playerextra SET " . $field . "=" . $field . "+1 WHERE player_id='$player_id'");
-        $this->notifyMoveStructure(clienttranslate('${player_name} claims one ${structure_name}'), $sid, [], $player_id);
+        $this->dbSetStructureLocation(
+            $sid,
+            "capital_structure",
+            0,
+            clienttranslate('${player_name} claims one ${structure_name}'),
+            $player_id
+        );
+        $this->dbIncIncomeTrackLevel((int) $player_id, (int) $type);
         if ($type == BUILDING_MARKET && $this->isTapestryActive($player_id, 8)) {
             // CAPITALISM
             $this->awardBaseResource($player_id, RES_COIN, 1, $this->getTokenName("tapestry", 8));
@@ -11889,7 +11936,6 @@ abstract class PGameXBody extends tapcommon {
         if (!$player_id) {
             $player_id = $this->getActivePlayerId();
         }
-        $player_income_data = $this->getPlayerIncomeData($player_id);
         $total_benefits = [];
         $allowed_action = "zzz";
         if (is_string($allowed_benefits)) {
@@ -11897,9 +11943,7 @@ abstract class PGameXBody extends tapcommon {
             $allowed_benefits = [];
         }
         for ($track = 1; $track <= 4; $track++) {
-            $field = $this->income_tracks[$track]["field"];
-            $limit = $player_income_data[$field];
-            for ($slot = 1; $slot <= $limit; $slot++) {
+            foreach ($this->getIncomeUncoveredSpots((int) $player_id, $track) as $slot) {
                 $benefits = [];
                 foreach ($this->income_tracks[$track][$slot]["benefit"] as $b) {
                     $action = $this->getRulesBenefit($b, "r", "x");

@@ -70,9 +70,9 @@ class Traders extends AbsCivilization {
             $message = clienttranslate('${player_name} places an icome building at ${coord_text}');
             $trader = $game->dbGetIncomeBuildingOfType($building_type, true);
             $game->systemAssertTrue("no income building of game type left", $trader);
+            $revealed_spot = (int) $game->getStructureInfoById($trader)["card_location_arg2"];
             $game->claimIncomeStructure($building_type, null);
-            $income_level = $game->dbGetIncomeTrackLevel($building_type, $player_id);
-            $building_benefits = $game->income_tracks[$building_type][$income_level]["benefit"];
+            $building_benefits = $game->income_tracks[$building_type][$revealed_spot]["benefit"];
             $game->effect_placeOnMap($player_id, $trader, $land_coords, $message, false);
             $other_building = array_shift($tile_structs);
             $game->userAssertTrue(

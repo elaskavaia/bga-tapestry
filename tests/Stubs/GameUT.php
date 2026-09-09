@@ -361,6 +361,45 @@ class GameUT extends Tapestry {
         return $this->structures->getCard((int) $structure_id)["location"];
     }
 
+    /** The real one writes the row with raw SQL, which the in memory structure model never sees. */
+    function dbSetStructureArg2($structure_id, $arg2): void {
+        $this->structures->setLocationArg2($structure_id, $arg2);
+    }
+
+    // -------------------------------------------------------- income tracks
+
+    /** player_income_<field> per player and track, playerextra is not modelled; a track starts at level 1. */
+    public array $income = [];
+
+    function dbGetIncomeTrackLevel($track, $player_id = null) {
+        if (!$player_id) {
+            $player_id = $this->getActivePlayerId();
+        }
+        return $this->income[(int) $player_id][(int) $track] ?? 1;
+    }
+
+    function dbIncIncomeTrackLevel(int $player_id, int $track): void {
+        $this->income[$player_id][$track] = $this->dbGetIncomeTrackLevel($track, $player_id) + 1;
+    }
+
+    function getPlayerIncomeData($player_id) {
+        $data = [];
+        for ($track = 1; $track <= 4; $track++) {
+            $data[$this->income_tracks[$track]["field"]] = $this->dbGetIncomeTrackLevel($track, $player_id);
+        }
+        return $data;
+    }
+
+    /** A track with buildings on exactly these spots and the level to match; the row ids keyed by spot. */
+    function layoutTrack(int $player_id, int $type, array $spots): array {
+        $ids = [];
+        foreach ($spots as $spot) {
+            $ids[$spot] = $this->dbAddStructure($player_id, $type, 0, "income", $spot);
+        }
+        $this->income[$player_id][$type] = 6 - count($spots);
+        return $ids;
+    }
+
     // --------------------------------------------------------- benefit table
 
     function benefitSingleEntry($cat, $type, $player_id, $quantity = 1, $data = "") {

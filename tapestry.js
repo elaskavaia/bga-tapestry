@@ -6348,29 +6348,20 @@ define([
         case 3:
         case 4:
           if (location == "income") {
-            // Income buildings on income track
-            const incomefield = "income" + type;
-            const income = parseInt(this.gamedatas.players[player_id]["basic"][incomefield]);
-            for (var b = income + 1; b <= 6; b++) {
-              location = "income_track_" + player_id + "_" + type + "_" + b;
-              if ($(location).children.length > 0) continue;
-              var div = dojo.place(this.format_block("jstpl_building", { type: type, bid: token_id }), location);
-              this.connect(div, "onmouseover", "onRaiseBuilding");
-              dojo.addClass(div, "income_building");
-              break;
-            }
-          } else {
-            var div = $("building_" + token_id);
-            if (div == null) {
-              div = dojo.place(this.format_block("jstpl_building", { type: type, bid: token_id }), location);
-              dojo.addClass(div, "income_building");
-            } else {
-              this.stripPosition(div);
-            }
-
-            this.placeToken(div, location);
-            this.setTopple(div, type_arg);
+            // the row carries the spot it covers, the mat is never a prefix layout
+            location = "income_track_" + player_id + "_" + type + "_" + card_location_arg2;
           }
+          var div = $("building_" + token_id);
+          if (div == null) {
+            div = dojo.place(this.format_block("jstpl_building", { type: type, bid: token_id }), location);
+            dojo.addClass(div, "income_building");
+            if (card.card_location == "income") this.connect(div, "onmouseover", "onRaiseBuilding");
+          } else {
+            this.stripPosition(div);
+          }
+
+          this.placeToken(div, location);
+          this.setTopple(div, type_arg);
           break;
         case 5: // Outpost:
           var id = "outpost_" + token_id;
