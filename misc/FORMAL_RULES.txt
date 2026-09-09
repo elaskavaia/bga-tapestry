@@ -1,193 +1,329 @@
-This is my interpretation not actuall formal rules
+This is my rules interpretation, not the printed rules. The printed rules are RULES.md; this file
+uses its words and the glossary below defines them, plus the few extra terms this file needs. Where
+the two disagree, RULES.md is what the rulebook says and this file is what is implemented.
+Clauses are cited by code, e.g. MOVE.2 or CIV.WEEFOLK.3; a CIV code is the material constant.
 
-1. Tapestry effects
-1.1 When you play tapestry during income does "when played" effect considered:
-* mandatory if possible (current choice - only can decline effects if not possible to resolve)
-* optional (player can decline effect)
-* mandatory (if not possible to resolve effect player cannot play this tapestry at all) - not used in this game
-1.2 When playing tapestry as a benefit, same rules as 1.1
-1.3 Tapestry with This Era effects - effect cease (ends) either a) when player starts new income turn before he plays tapestry b) if player overplays current era tapestry as soon as it is covered and before its effects are resolved
-1.4 Benefit: Play Tapestry - if player has no tapestry cards in hand effect is "void", existing tapestry remains
+Glossary
 
-2. Moving effects
-2.1 Advance - move or intent to position the cube up the track (one or more spots), exception: Futurists (I am calling futurists move a Jump). Regress - move or intent to position the cube down the track. 
-2.2 If player "must" advance the following will make it "void": player finished game or all cubes at the end of the track (and advance does not provide max-out bonus) or track advance is blocked by previous effect (note: it cannot be effect of the tapestry card which is being covered because of 1.3)
-2.3 If player "must" regress the following will make it "void" : player finished game or all cubes at beggining of the track (position 0). Currently there are no effects that block regress.
-2.4 Landmark can only be gained if played Advanced on the spot following rule 2.1 (or Advancing through the spot, i.e. using Socialism)
-2.5 When player is asked to advance or regress using any effects and they have more then one cube on the track - player must choose the cube to move unless the second choice will result in void effect. I.e. if user must regress and one of two cubes cannot regress because its at 0, player must chose cube that can regress
-2.6 Advance is not considered "void" if it is results of max-out bonus, although cube is not moved up
-2.7 Effects such as "if you advance" triggered after advance is complete and not void (same for regress)
-2.8 "If you reach" rule should be read as "If you advance or regress" 
-2.9 "Repeating" of the benefit is not considered moving, i.e. it is neither advance or regress
+Turns and players
+- Income turn - the turn that begins a new era: civilization abilities, tapestry card, upgrade and
+  VP, then income. Income turns are numbered 1-5; income turn 5 is the player's final one.
+- Advance turn - the turn that pays the cost and advances one player token one space on an
+  advancement track.
+- Era - the period from one of a player's income turns to the next; era N begins with income turn N.
+- Finished player - a player whose game has ended (income turn 5 is complete, or extended play is
+  over). A finished player gains only VP from passive civilization abilities.
+- Extended play - the advance turns an ELDER ONES or MERFOLK player takes after income turn 5.
+- Zombie - a player who left the game; BGA plays for them with random or minimal choices.
+- Opponent - any other player. Neighbors - the players to the immediate left and right.
 
-3. Effect resolution order 
-3.1 Advance resolution order: 
-    a) while advancing player picks and plays all landmarks in between current spot +1 and final destination and resolves placement
-    b) effects related to advancing into spots and tears resolve for each spot OR maxout effect is resolved if player cannot move up (if applicable)
-    c) effects related to general advance resolve
-    d) effects of benefit (if applicable) resolve 
-    e) effects of bonus (if applicable) resolve
-3.2 Regress resolution order is same except there is no landmarks gaining (a) and currently there is no effects that are triggered on regress (b-c) but may be possible with expansions
-3.3 Explore resolution order
-   a) triggered effects of "when exploring" resolve
-   b) check applicability - effect is void when either  player has no tiles OR player has no valid target placement
-   c) player places tile 
-   d) some effects  "if explored" resolve
-   e) player scores placement vp
-   f) player gains tile benefit
-   g) more effects of "if explored" resolved
-   
-3.4 Conquer resolution order
-    a) triggered effects of "when conquering" resolve
-    b) effect is void when either player has no more outposts OR player has no valid target placement (target validity may be affected by other effects)
-    c) player picks outposts and selects the tile (target must be valid)
-    d) triggered effects of "whenever you conquer a territory" resolve
-    e) if conquering opponent territory they may play trap, trap effects are resolved
-    f) toppling happens if applicable, toppling effects are resolved
-    g) territory control changes, territory control effects are resolved
-    h) player rolls the die
-    i) player gains an benefit of one or both dice (depending of previous effects)
-    j) effect of die rolling are resolved (i.e. opponent with trader may pick remaining die)
-    
-3.5 Tech Upgrade
-    a) During income upgrade can be denied, in this case it does not happen
-    b) Triggered effects of when upgrading resolved
-    c) If there is no valid targets, benefit is void
-    d) Player selects and upgrades valid target
-    e) The upgrade card benefit goes on the top stack
-    f) Triggered effects of "if upgraded" go on stack after     
+Tracks and moving
+- Advancement track (track) - the exploration, science, technology and military tracks.
+- Track space (space) - one of the 12 spaces of a track after the starting space. Each holds a
+  benefit and may hold a bonus.
+- Starting space - the far-left circle of a track, position 0.
+- Tier - a group of track spaces, I to IV. The first player to advance into tier II, III or IV gains
+  that tier's landmark.
+- Player token (cube) - one of the tokens in a player's colour. Used on the tracks, the VP track and
+  the achievements, and by some civilizations on a territory or in a capital city. Also called cube.
+- Advance - move a player token up a track, one or more spaces (MOVE.1).
+- Regress - move a player token down a track (MOVE.1).
+- Jump - the FUTURISTS setup move of 4 spaces on each track that gains no benefit, bonus or
+  landmark; the exception to MOVE.1 and MOVE.4.
+- Max-out bonus - the 5 VP some effects grant when an advance would push the player token beyond
+  the 12th space. Reported in game as "end of the track bonus".
+- Blocked track - a track on which an earlier effect forbids advancing (THEOCRACY, DICTATORSHIP,
+  BROKER OF PEACE).
+- Science die - the green 12-sided die rolled by research. Conquer dice - the red and black 6-sided
+  dice rolled by conquer.
 
-3.6 Items on a territory
-    Every structure on a territory is an item, and a territory holding 2 items may not be conquered
-    by anyone. An item either stands, and controls the territory, or is inert, and controls nothing.
-    An outpost stands until it is toppled. A token placed as an outpost (MILITANTS out of outposts,
-    adjustment variant 4) is an outpost in every respect; a player token placed as a token
-    (INFILTRATORS, ISOLATIONISTS) is inert.
-    An inert item is invisible to everything that reads control: conquer targeting and adjacency,
+Rewards and resolution
+- Benefit - the mandatory reward of a track space, tile, die face, tech card or card text.
+- Bonus - the optional, paid reward printed after the benefit of a track space ("You may then...").
+- Ability - the printed text of a tapestry card ("when played", "this era") or a civilization mat.
+- Effect - what a benefit, bonus or ability does when it resolves; the unit that is mandatory,
+  optional or void. A benefit may hold several effects (MANDATORY.5).
+- Triggered effect - an effect that fires on a condition: "when exploring", "whenever you conquer",
+  "if you advance".
+- Resolve - carry out an effect. Resolution order - the order the effects of one action happen in
+  (ORDER).
+- Mandatory if possible - must be resolved when it can be; when it cannot, it is void and play goes
+  on. The default for benefits and landmarks.
+- Mandatory - must be resolved; when it cannot be, the action carrying it cannot be taken at all.
+  Payments are mandatory.
+- Optional - the player may decline. All bonuses are optional.
+- Void - an effect that cannot be resolved. A void effect did not happen, so no "if you ..." trigger
+  fires on it.
+- Gain - receive a card, tile, building, resource, landmark, VP or benefit. A card returned to hand
+  is not gained (CIV.MERFOLK.2).
+- Score - gain VP.
+- Resource - coins, workers, food and culture, at most 8 of each.
+
+Cards
+- Tapestry card - played on income turns 1-4 onto the income mat; may carry a "when played" or a
+  "this era" ability. Trap cards and other response cards are tapestry cards played from hand in
+  response to an opponent's action.
+- Tapestry space (era N) - the slot on the income mat the tapestry card of income turn N is played
+  on. Not a track space.
+- Active tapestry card - the top card on the most recent tapestry space. Only it is in effect.
+- Overplay - play a tapestry card on top of the current one (military space 10, tech card 21). The
+  covered card is no longer active.
+- Hand - the tapestry cards a player holds.
+- Tech card - gained by invent into the bottom row right of the capital city mat. Upgrade moves it
+  to the middle row (circle benefit) or the top row (square benefit, prerequisite required).
+- Explore, research, invent, upgrade, conquer - the core actions, as in RULES.md.
+
+Map
+- Territory - a hex of the map. Explored - holding a territory tile or printed terrain; unexplored -
+  no tile yet.
+- Territory tile, space tile - the tiles in a player's supply. An explored space tile sits next to
+  the income mat.
+- Supply - a player's unplaced outposts and tiles, off to the side of the income mat.
+- Outpost - the hexagonal token placed by conquer. Upright - standing; toppled - tipped on its side.
+- Control - a territory on which your outpost is the only upright outpost.
+- Item - anything on a territory: an outpost or a player token. A territory holding 2 items may not
+  be conquered (MAP.1). Full territory - one holding 2 items.
+- Inert - an item that controls nothing: a player token placed as a token (MAP.2).
+- Starting territory - the territory matching the number of the capital city, where the 2 starting
+  outposts go.
+- Floating capital - the CELESTIALS player token that replaces a starting outpost (CIV.CELESTIALS).
+
+Capital city
+- Capital city - the 9 by 9 grid on the capital city mat. Plot - one cell of the grid. Open plot -
+  an empty, buildable plot. Impassable plot - printed as unbuildable; counts as filled.
+- District - one of the nine 3x3 areas; filling it gains any 1 resource.
+- Row, column - a full line of the grid; each complete one scores 1 VP when the city is scored.
+- Building - an income building (farm, house, market, armory) or a landmark.
+- Landmark - a unique building miniature: a track landmark (first into tier II-IV) or a tech card
+  landmark (Bakery, Barn, Com Tower, Library, Stock Market, Treasury).
+- Footprint - the plots a landmark covers where it is placed.
+- Hanging off the side - a landmark whose footprint extends outside the city grid (RULES.md allows
+  placing buildings that extend outside the grid).
+- Set aside - removed from play: it neither scores nor produces and does not return to the income
+  mat.
+- Planted token - a WEEFOLK player token placed in an opponent's capital city (CIV.WEEFOLK).
+
+TAPESTRY - tapestry card effects
+TAPESTRY.1 When a tapestry card is played on an income turn, its "when played" ability is:
+    * mandatory if possible (current choice - the effect can be declined only if it cannot be
+      resolved)
+    * optional (the player can decline the effect)
+    * mandatory (if the effect cannot be resolved the card cannot be played at all) - not used in
+      this game
+TAPESTRY.2 When a tapestry card is played as a benefit, TAPESTRY.1 applies as well.
+TAPESTRY.3 A "this era" ability ends either a) at the beginning of the player's next income turn,
+    before the tapestry card of that turn is played, or b) when the card is covered by an overplay,
+    as soon as it is covered and before the effects of the new card resolve.
+TAPESTRY.4 Benefit "play a tapestry card" (an overplay) - if the player has no tapestry card in hand
+    the effect is void and the active tapestry card remains.
+
+MOVE - advancing and regressing
+MOVE.1 Advance - moving, or intending to move, the player token up the track (one or more spaces).
+    Exception: the FUTURISTS jump. Regress - moving, or intending to move, the player token down
+    the track.
+MOVE.2 If a player "must" advance, the advance is void when: the player is finished, or all their
+    player tokens on that track are at the 12th space (and the advance carries no max-out bonus),
+    or the track is blocked by an earlier effect (not by the tapestry card being covered, per
+    TAPESTRY.3).
+MOVE.3 If a player "must" regress, the regress is void when: the player is finished, or all their
+    player tokens on that track are at the starting space. Currently no effect blocks a regress.
+MOVE.4 A track landmark is gained only by advancing into its space per MOVE.1, or by advancing
+    through it (SOCIALISM).
+MOVE.5 When any effect asks a player to advance or regress and they have more than one player token
+    on the track (AI SINGULARITY), the player chooses the token to move, unless one choice would
+    make the effect void: if one of two tokens cannot regress because it is at the starting space,
+    the token that can regress must be chosen.
+MOVE.6 An advance that yields only the max-out bonus is not void, although the player token does not
+    move.
+MOVE.7 Effects such as "if you advance" trigger after the advance is complete and not void (same for
+    regress).
+MOVE.8 "If you reach" reads as "if you advance or regress".
+MOVE.9 Repeating a benefit is not a move: it is neither an advance nor a regress.
+
+ORDER - effect resolution order
+ORDER.1 Advance resolution order:
+    a) while advancing, the player gains and places every landmark between the current space + 1
+       and the destination, resolving each placement
+    b) effects tied to advancing into spaces and tiers resolve for each space, OR the max-out
+       effect resolves if the player token cannot move up (if applicable)
+    c) effects tied to advancing in general resolve
+    d) the benefit of the destination space resolves (if applicable)
+    e) the bonus of the destination space resolves (if applicable)
+ORDER.2 Regress resolution order is the same, except no landmark is gained (a) and currently no
+    effect triggers on a regress (b-c), which an expansion may change.
+ORDER.3 Explore resolution order:
+    a) triggered "when exploring" effects resolve
+    b) applicability check - the effect is void when the player has no territory tile in supply OR
+       no valid target hex
+    c) the player places the tile
+    d) some "if explored" effects resolve
+    e) the player scores 1 VP per aligned side
+    f) the player gains the benefit of the tile
+    g) the remaining "if explored" effects resolve
+ORDER.4 Conquer resolution order:
+    a) triggered "when conquering" effects resolve
+    b) the effect is void when the player has no outpost in supply OR no valid target territory
+       (target validity may be affected by other effects)
+    c) the player takes an outpost and selects the territory (the target must be valid)
+    d) triggered "whenever you conquer a territory" effects resolve
+    e) if the territory is controlled by an opponent they may play a trap card; its effects resolve
+    f) toppling happens if applicable; toppling effects resolve
+    g) control of the territory changes; control effects resolve
+    h) the player rolls the 2 conquer dice
+    i) the player gains the benefit of one or both dice (depending on earlier effects)
+    j) effects of the die roll resolve (an opponent with TRADERS may pick the remaining die)
+ORDER.5 Upgrade resolution order:
+    a) on an income turn the upgrade may be declined, in which case nothing happens
+    b) triggered "when upgrading" effects resolve
+    c) if there is no valid target tech card, the benefit is void
+    d) the player selects and upgrades a valid tech card
+    e) the circle or square benefit of the upgraded card resolves
+    f) triggered "if upgraded" effects resolve after it
+
+MANDATORY - optional vs mandatory
+MANDATORY.1 When gaining X cards or tiles: if the deck is empty, reshuffle the discards. If still
+    not enough, gain as many as possible.
+MANDATORY.2 Track space benefit - mandatory if possible; if not possible it is void.
+MANDATORY.3 Track space bonus - the player may decline to pay; once paid in full, or free, the
+    effect is mandatory if possible.
+MANDATORY.4 The bonus of a space is offered independently of its benefit (even when the benefit was
+    void, the bonus is offered if applicable).
+MANDATORY.5 If a benefit holds several effects (A + B), the player chooses the order unless a rule
+    states otherwise or the order is irrelevant.
+MANDATORY.6 Upgrade is mandatory if possible (except on an income turn, where it is optional). If
+    the upgrade moved a card up, the player is considered to have gained the benefit even if that
+    benefit is void.
+
+MAP - territories and items
+MAP.1 Every outpost or player token on a territory is an item. A territory holding 2 items may not
+    be conquered by anyone.
+MAP.2 An item is either upright, and controls the territory, or inert, and controls nothing. An
+    outpost is upright until it is toppled. A player token placed as an outpost (MILITANTS out of
+    outposts, adjustment variant 4) is an outpost in every respect; a player token placed as a
+    token (INFILTRATORS, ISOLATIONISTS, the CELESTIALS floating capital) is inert.
+MAP.3 An inert item is invisible to everything that reads control: conquer targeting and adjacency,
     the controlled territory counts, the ISOLATIONISTS landmass, the central island achievement and
-    the MYSTICS controlled territory prediction. It is never toppled, never stood up and never
-    counts toward the topple achievement, and it stays on the territory when the territory changes
-    hands.
+    the MYSTICS controlled territory prediction. It is never toppled, never made upright and never
+    counts toward the topple achievement, and it stays on the territory when control of the
+    territory changes.
+MAP.4 Player tokens on the map are indistinguishable once placed, as in the physical game: a token
+    is its owner's for every count and every move, whatever civilization put it there.
+MAP.5 A token stays where it is, and keeps blocking, when its owner is finished, quits or is
+    eliminated.
 
-4. Imperativeness
-4.1 When drawing X cards or tiles: if no more available can reshuffle deck. If not enough left - draw as much as possible.
-4.3 Track spot benefit - mandatory if possible, is not possible is void
-4.4 Track spot bonus - user can decline payment, if paid in full or free - effect is mandatory if possible.
-4.5 Bonus for the spot is available  independent of benefit resolution (i.e. even benefit was void - bonus will be offered if applicable)
-4.6 If Benefit contains multiple effects (i.e. A B)  player can select order, unless stated otherwise by rule or irrelevant
-4.7 Upgrade benefit is mandatory if possible (except during income where it is optional). If upgrade resolved in moving card up player is considered gained the benefit even if benefit is void.
+CIV - civilization specific
 
-5. Civilization specific
-5.1 Faefolk "score any building" - player picks one building type and scores it (choose one of
-    farms, armories, houses, markets), not the sum of all building types.
-5.2 Faefolk "visible tapestry" - cards in your hand count as well as the ones played on your
-    income mat (BGA forum ruling). A tapestry covered by one played over it does not count. So the
-    optional card gained at the start of the ability is always counted and always moves the token
-    one extra spot, and a card that leaves your hand onto the mat during the same resolution is
-    still counted exactly once.
-5.3 Werefolk coin flip - the tile is gained before it is flipped, and it is gained on every income
-    turn 2-5 whether or not it ends up explored. The tile drawn this turn is the one that must be
-    explored with, not any tile in the supply, the same reading COAL BARON uses for its territory.
-    An unexplored tile stays in the supply as an ordinary space tile. If no tile can be gained
-    (space deck and discard both empty), there is nothing to flip and the whole ability is skipped.
-5.4 Werefolk "you may regress" - a player with no track that can move back did not regress, so
-    they gain the 4 VP. The regress and the 4 VP are therefore one choice, and the tracks that
-    cannot regress are not offered.
-5.5 Werefolk face-down advance is mandatory and grants the spot benefit plus the bonus for free,
-    which is a flag combination (benefit + free bonus) no printed effect used before.
-5.6 Genies token bag - an opponent who has finished (past income turn 5) cannot answer the prompt,
-    so their token is treated as out of the bag for that draw rather than the wish being swallowed.
-    A zombie opponent stays in the bag and picks a random circled benefit when drawn, so the GENIES
-    player is never blocked by a quitter; the zombie's own score is skipped, only the GENIES player
-    scores. If no opponent can answer at all, the whole ability is skipped and the GENIES player
-    scores nothing, not even the circled benefit. Ruled by Victoria.
-5.7 Weefolk row and column scoring is per token, not per distinct line. Two tokens in the same row
-    score that row twice, and a building in a token's row that is also in that token's column
-    scores once for each. A landmark counts once per line its footprint touches, however many
-    cells of that line it covers. The income turn 5 token is planted before the scoring row is
-    reached, so it counts.
-5.8 A Weefolk plot is an empty cell only. Impassable cells are not plots even for an opponent with
-    TERRAFORMING or RIVERFOLK, because the token is not a building of theirs and does not claim
-    their terrain. The same reason means no TERRAFORMING VP is ever awarded for a planted token.
-5.9 A full city has no plot, so the token replaces an income building of the opponent's choosing
-    and that building is set aside. Landmarks are never offered: replacing one would leave holes
-    in its footprint and undo district completions. The set aside building goes where a structure
-    placed outside the capital mat goes, so it neither scores nor produces and does not return to
-    the income track. The cell stays occupied, now by the token, so districts and rows keep their
-    state and no district is completed a second time.
-5.10 Weefolk token gift - an opponent past income turn 5 can no longer place, so they are not
-    offered a token. A zombie opponent is still offered one and the token is planted on a random
-    empty plot, or kept if their city is full, so the WEEFOLK player is never blocked by a quitter.
-    If no opponent can take a token at all the gift is skipped for that income turn, while the
-    turn 2-4 territory trade and the turn 5 scoring still happen.
-5.11 A planted token is nothing to the WEEFOLK player's own counts: not a structure of theirs on
-    any capital, not an outpost, not an income building. A cube of theirs in their own capital
-    (ARCHITECTS) is not a planted token and scores no rows or columns.
-5.12 INFILTRATORS third token - every player token of yours on that opponent's capital city
-    territory counts, whatever put it there. Player tokens are indistinguishable in the physical
-    game, so one left by another civilization (an ISOLATIONISTS token on a territory you conquered)
-    counts toward the third, in the player's favor.
-5.13 ELDER ONES extended play begins when income turn 5 is over, not when it starts. During income
-    turn 5 itself the player is treated as everyone else is: the era 4 tapestry is inactive (1.3),
-    and a landmark gained then scores no bonus VP. From the end of income turn 5 until their game
-    ends, a THIS ERA card on top of era 4 is in effect again and a tapestry played over it (an
-    overplay benefit) lands on era 4 and covers the old card into era_6 as usual.
-5.14 "No longer able to take an advance turn" is judged at the start of the player's turn by the
-    same affordability test that auto-triggers an income turn for everyone else. Effects that block
-    a track (THEOCRACY, DICTATORSHIP, BROKER OF PEACE) are not consulted, as they are not today.
-    Ending is also voluntary: "may take advance turns" reads as optional, so a player who would
-    rather stop than spend down their tie-break resources gets a button. Ending is final, the way
-    income turn 5 is final after its confirm row, and a further income turn is refused.
-5.15 Every landmark gained after income turn 5 scores the 10 VP, whatever granted it and whoever's
-    turn it is - a SOCIALISM push counts - and track landmarks, district landmarks and landmark
-    cards alike.
-5.16 A player in extended play is still in the game for opponent-facing prompts: they can answer a
-    GENIES wish and receive a WEEFOLK token. They cannot play trap or other response cards, so the
-    row a topple queues for them is dropped.
-5.17 Income turn 5 of an ELDER ONES player is unchanged: VP income, achievement VP and the confirm
-    row all happen. Only final scoring and the era 6 write are deferred to the end, so a second civ
-    with final scoring (ISLANDERS, RIVERFOLK) scores when the player actually stops.
-5.18 MERFOLK submerge - the player picks the 2 tapestry cards to keep and the rest go under the mat,
-    so a hand of 2 or fewer has nothing to submerge and gets no prompt. Submerged cards are not in
-    hand for anything: hand counts, payments, reveal-hand effects, an opponent's effect that reads
-    a hand, and a FAEFOLK visible count on the same player.
-5.19 Returning the submerged cards at income turn 5 is not gaining them, so no "whenever you gain a
-    tapestry" trigger fires on them. The single card drawn on each of income turns 2-5 is a gain
-    and does trigger.
-5.20 MERFOLK "keep up to 5" is answered as exactly 5. Discarding more gains nothing in extended
-    play, where every card is worth at least 5 VP, so the prompt asks for the 5 to keep and is
-    skipped at 5 cards or fewer.
-5.21 A MERFOLK extended turn is mandatory: at least one card is discarded when discarding, and
-    there is no pass. A free pass would let a player stall the table indefinitely.
-5.22 Any card can be played on a MERFOLK extended turn. A WHEN PLAYED effect applies, and a THIS
-    ERA card played there is in effect for the rest of the player's game, since era 4 stays the
-    active tapestry slot (5.13). The game ends at the start of a turn with an empty hand, not the
-    moment the last card leaves, so a trap played in defence ends the game on the next turn.
-5.23 MERFOLK keeps trap and other response cards in extended play; the card says so explicitly,
-    which is the exception to 5.16. Income turn 5 is otherwise unchanged as in 5.17.
-5.24 ILLUMINATI conquer dice - the card's sentence is read as this amended text, from the
-    publisher's answer (Joe of Stonemaier Games on their Discord, relayed by Alex S in BGG thread
-    3245586 "Treasure Hunters vs Illuminati"): "When an opponent takes any of the three dice from
-    your mat, you gain the benefit rolled on that die (ignoring any rerolls). If multiple dice are
-    taken at the same time, you get the benefit of each die." Dice are taken one at a time, so an
-    opponent rolling only the black die takes only the black die and a conquer takes both. A die
-    leaves the mat on its first roll: every later roll of it, EMPIRICISM's second roll included, is
-    an ordinary roll that pays nothing until the owner's next income turn returns the die.
-5.25 The ILLUMINATI science die is taken by any science roll from the mat, including one a tapestry
-    card triggers (Mike Young, designer, BGG thread 3058558 "Illuminati - Chimera"): research, AGE
-    OF DISCOVERY, the tech card research benefit and row 302 all count.
-5.26 The ILLUMINATI conquer die pays what the roller would gain from that face, so black face 1 is
-    the benefit of the territory the roller is conquering and a face with no benefit pays nothing.
-    The science die pays an optional single advance on the track rolled with no spot benefit and no
-    bonus; a track landmark reached that way is still gained, as on every other no-benefit advance.
-5.27 The ILLUMINATI owner resolves their gain from a taken die before the roller does anything with
-    the roll, on every roll: before the die pick on a conquer, before the research decision, before
-    the roller's advance on AGE OF DISCOVERY and the tech card research, and before a keep-or-
-    reroll choice. From the card's "immediately after they take the die". A race to the same track
-    landmark between owner and roller therefore goes to the owner.
-5.28 The ILLUMINATI owner rolling a die from their own mat, on any turn and for any effect, leaves
-    it on the mat. A finished or zombie owner gains nothing from a taken die, and their dice never
-    return.
-5.29 The ILLUMINATI income ability scores the dice on the mat at the start of the income turn. A civ
-    gained in the civ phase of an income turn 2-5 fires in that same turn with all three dice on the
-    mat, the engine's rule for every income civ gained there.
+CIV.INFILTRATORS
+CIV.INFILTRATORS.1 The third token counts every player token of yours on that territory, whatever
+    placed it (MAP.4).
+
+CIV.CELESTIALS
+CIV.CELESTIALS.1 The floating capital is an inert item (MAP.2).
+CIV.CELESTIALS.2 The move is to an explored adjacent territory. With no explored adjacent territory
+    the ability is void for that turn. A skipped move is not caught up.
+CIV.CELESTIALS.3 The move may float any inert token of the owner (MAP.4). A zombie owner never moves
+    it (MAP.5).
+CIV.CELESTIALS.4 The move is not a conquer: no "whenever you conquer" trigger, die pick, trap card,
+    TRADERS leftover die, UTILITARIENS barracks or explore. Both dice pay, red then black; black
+    face 1 pays the benefit of the territory moved into; a face with no benefit pays nothing.
+CIV.CELESTIALS.5 The dice are rolled from the ILLUMINATI mat: the ILLUMINATI owner is paid first
+    (CIV.ILLUMINATI.1, CIV.ILLUMINATI.4).
+CIV.CELESTIALS.6 A landmark hangs off the side when any plot of its footprint is outside the grid.
+    Judged at the start of income turn 5; a landmark placed later scores neither way. A landmark
+    not in the capital city (set aside per CIV.WEEFOLK.3, on a CRAFTSMEN slot) is neither.
+CIV.CELESTIALS.7 Hanging off changes nothing else: the plots outside the grid count for no row,
+    column, district or building count and are never a WEEFOLK token's line; CIV.WEEFOLK.1 still
+    counts a hanging landmark once per line it touches inside the grid.
+
+CIV.ELDER_ONES
+CIV.ELDER_ONES.1 Extended play begins after income turn 5. During income turn 5 the era 4 tapestry
+    card is inactive (TAPESTRY.3) and a landmark gained scores no 10 VP. In extended play the era 4
+    tapestry space is the active one; an overplay lands there and the covered card goes to DB
+    location era_6.
+CIV.ELDER_ONES.2 "No longer able to take an advance turn" is judged at the start of the player's
+    turn by the affordability test that auto-triggers an income turn; blocked tracks are not
+    consulted. Ending is also voluntary ("may take advance turns") and final: no further income
+    turn.
+CIV.ELDER_ONES.3 Every landmark gained after income turn 5 scores the 10 VP, whatever granted it
+    and on whoever's turn (SOCIALISM included), track and tech card landmarks alike.
+CIV.ELDER_ONES.4 In extended play the player still answers prompts aimed at opponents (GENIES wish,
+    WEEFOLK token). The trap response on a conquer of their territory is skipped.
+CIV.ELDER_ONES.5 Income turn 5 is unchanged: VP income, achievement VP, confirmation. Only final
+    scoring (and the DB era 6 write) is deferred to the end of extended play, a second
+    civilization's final scoring included (ISLANDERS, RIVERFOLK).
+
+CIV.FAEFOLK
+CIV.FAEFOLK.1 "Score any building": the player picks one income building type and scores it, not
+    the sum of all types.
+CIV.FAEFOLK.2 "Visible tapestry" counts the hand and the income mat; a card covered by an overplay
+    does not count. The card gained at the start of the ability counts; a card moved from hand to
+    mat during the same resolution counts once.
+    Ref. BGA forum ruling.
+
+CIV.GENIES
+CIV.GENIES.1 A finished opponent is out of the bag for the draw. A zombie opponent stays in and
+    picks a random circled benefit; only the GENIES player scores. With no opponent able to answer
+    the ability is skipped and the GENIES player scores nothing.
+    Ref. ruled by Victoria.
+
+CIV.ILLUMINATI
+CIV.ILLUMINATI.1 Read as: "When an opponent takes any of the three dice from your mat, you gain the
+    benefit rolled on that die (ignoring any rerolls). If multiple dice are taken at the same time,
+    you get the benefit of each die." A roll of the black die alone takes only the black die; a
+    conquer takes both. A die leaves the mat on its first roll; later rolls of it (EMPIRICISM's
+    second roll included) pay nothing until the owner's next income turn returns it.
+    Ref. Joe (Stonemaier Games) on their Discord, relayed by Alex S in BGG thread 3245586
+    "Treasure Hunters vs Illuminati".
+CIV.ILLUMINATI.2 Any science roll from the mat takes the science die, a tapestry card trigger
+    included: research, AGE OF DISCOVERY, the tech card research benefit, benefit type 302.
+    Ref. Mike Young (designer), BGG thread 3058558 "Illuminati - Chimera".
+CIV.ILLUMINATI.3 A taken conquer die pays what the roller would gain from that face: black face 1
+    is the benefit of the territory being conquered; a face with no benefit pays nothing. The
+    science die pays an optional advance with no benefit and no bonus; a track landmark reached is
+    gained (MOVE.4).
+CIV.ILLUMINATI.4 The owner's gain from a taken die resolves before the roller uses the roll: before
+    the die pick, the research decision, the roller's advance, a keep-or-reroll choice. A race to
+    a track landmark goes to the owner.
+CIV.ILLUMINATI.5 A finished or zombie owner gains nothing from a taken die; their dice never return.
+CIV.ILLUMINATI.6 The income ability scores the dice on the mat at the start of the income turn. A
+    civilization gained in the civilization step of income turns 2-5 fires that same turn with all
+    three dice on the mat.
+
+CIV.MERFOLK
+CIV.MERFOLK.1 Submerge: the player picks the 2 cards to keep; a hand of 2 or fewer submerges
+    nothing. Submerged cards are not in hand for any purpose: hand counts, payments, reveal-hand
+    effects, opponents' effects, the FAEFOLK visible count.
+CIV.MERFOLK.2 Returning the submerged cards on income turn 5 is not a gain; the card drawn on
+    income turns 2-5 is.
+CIV.MERFOLK.3 "Keep up to 5" is answered as exactly 5 (discarding more gains nothing); no prompt at
+    5 cards or fewer.
+CIV.MERFOLK.4 An extended turn is mandatory: discarding discards at least one card; there is no
+    pass.
+CIV.MERFOLK.5 Any card can be played on an extended turn. "When played" applies; a "this era" card
+    stays in effect for the rest of the game (CIV.ELDER_ONES.1). The game ends at the start of a
+    turn with an empty hand: a trap card played in defence ends it on the next turn.
+CIV.MERFOLK.6 CIV.ELDER_ONES.4 does not apply; CIV.ELDER_ONES.5 does.
+
+CIV.WEEFOLK
+CIV.WEEFOLK.1 Scoring is per token, not per distinct line: two tokens in one row score it twice; a
+    building in both a token's row and column scores twice. A landmark counts once per line its
+    footprint touches. The income turn 5 token is planted before the scoring.
+CIV.WEEFOLK.2 A plot is an open plot: impassable plots are not offered, even to an opponent with
+    TERRAFORMING or RIVERFOLK. No TERRAFORMING VP for a planted token.
+CIV.WEEFOLK.3 A city with no open plot: the opponent chooses the income building to replace;
+    landmarks are never offered. The set aside building is treated as one placed outside the grid.
+    The plot stays filled: districts and rows keep their state, no district completes twice.
+CIV.WEEFOLK.4 A finished opponent is not offered a token. A zombie opponent is: the token is
+    planted on a random open plot, or kept if the city has none. With no opponent able to take a
+    token the gift is skipped for that income turn; the territory trade (turns 2-4) and the scoring
+    (turn 5) still happen.
+CIV.WEEFOLK.5 A planted token is not a building, outpost or income building of the WEEFOLK player.
+    An ARCHITECTS cube in the player's own capital city is not a planted token.
+
+CIV.WEREFOLK
+CIV.WEREFOLK.1 The tile is gained before the flip, on each income turn 2-5. Only the tile drawn this
+    turn may be explored with (as COAL BARON reads its territory). With the space tile stack and
+    discards both empty the ability is skipped.
+CIV.WEREFOLK.2 With no track that can regress the player did not regress and gains the 4 VP. The
+    regress and the 4 VP are one choice; tracks that cannot regress are not offered.
+CIV.WEREFOLK.3 The face-down advance is mandatory: benefit plus free bonus.
