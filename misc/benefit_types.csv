@@ -246,6 +246,8 @@ id|-con|name|r|t|php
 353|BE_MERFOLK_CULL|MERFOLK keep up to 5 tapestry cards|||'civ'=>CIV_MERFOLK
 354|BE_ILLUMINATI_DRAW|ILLUMINATI draw 3 tapestry cards and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>3,'keep'=>1
 355|BE_ILLUMINATI_INCOME|ILLUMINATI score 6 VP per die still on this mat|||'civ'=>CIV_ILLUMINATI
+356|BE_CELESTIALS_MOVE|CELESTIALS move the floating capital to an adjacent territory|||'icon' => 'no','state'=>'celestialMove'
+357|BE_CELESTIALS_SCORE|CELESTIALS score the landmarks hanging off the side of your capital|||'civ'=>CIV_CELESTIALS
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

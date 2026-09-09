@@ -166,6 +166,7 @@ $machinestates = [
             "loopback" => 18,
             "moveStructureOnto" => 38,
             "keepCard" => 39,
+            "celestialMove" => 40,
             "playTapestryCard" => 15,
         ],
     ],
@@ -360,6 +361,15 @@ $machinestates = [
         "type" => "activeplayer",
         "args" => "arg_keepCard",
         "possibleactions" => ["keepCard"],
+        "transitions" => ["next" => 18, "benefit" => 18],
+    ],
+    40 => [
+        "name" => "celestialMove",
+        "description" => clienttranslate('${actplayer} may move their floating capital'),
+        "descriptionmyturn" => clienttranslate('${you} may move your floating capital to an adjacent territory'),
+        "type" => "activeplayer",
+        "args" => "argCelestialMove",
+        "possibleactions" => ["celestialMove", "decline"],
         "transitions" => ["next" => 18, "benefit" => 18],
     ],
 ];

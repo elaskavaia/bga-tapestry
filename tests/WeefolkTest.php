@@ -169,7 +169,7 @@ final class WeefolkTest extends TestCase {
         $this->assertEquals([WeefolkUT::OPPONENT, WeefolkUT::OPPONENT + 1], array_column($args["slots_choice"], "player_id"));
     }
 
-    /** An opponent past income turn 5 can no longer place, so they are not offered (FORMAL_RULES 5.10). */
+    /** An opponent past income turn 5 can no longer place, so they are not offered (FORMAL_RULES CIV.WEEFOLK.4). */
     function testFinishedOpponentIsNotOffered() {
         $game = $this->newGame(3);
         $game->eras[WeefolkUT::OPPONENT] = 6;
@@ -231,7 +231,7 @@ final class WeefolkTest extends TestCase {
         $this->assertEquals([(string) BE_WEEFOLK_PLOT, (string) BE_WEEFOLK_SCORE], $this->game->benefitLabels());
     }
 
-    /** The fifth token is planted before the scoring row is reached, so it counts (FORMAL_RULES 5.7). */
+    /** The fifth token is planted before the scoring row is reached, so it counts (FORMAL_RULES CIV.WEEFOLK.1). */
     function testIncomeTurn5ScoresBehindTheLastPlot() {
         $this->giveToken(5);
         $this->assertEquals(
@@ -292,7 +292,7 @@ final class WeefolkTest extends TestCase {
         $this->assertContains('${player_name} completes district #${dn}', $this->game->notificationTexts());
     }
 
-    /** Impassable cells are not plots, the token is not a building (FORMAL_RULES 5.8). */
+    /** Impassable cells are not plots, the token is not a building (FORMAL_RULES CIV.WEEFOLK.2). */
     function testImpassableCellsAreNotOffered() {
         $this->game->setCapitalMat(WeefolkUT::OPPONENT, 1);
         $this->giveToken();
@@ -302,7 +302,7 @@ final class WeefolkTest extends TestCase {
         $this->assertContains("3_3", $this->game->plotOptions());
     }
 
-    /** Even TERRAFORMING does not open an impassable cell to someone else's token (FORMAL_RULES 5.8). */
+    /** Even TERRAFORMING does not open an impassable cell to someone else's token (FORMAL_RULES CIV.WEEFOLK.2). */
     function testTerraformingDoesNotOpenImpassableCellsToAForeignToken() {
         $this->game->setCapitalMat(WeefolkUT::OPPONENT, 1);
         $this->game->tapestries[WeefolkUT::OPPONENT] = [39];
@@ -312,7 +312,7 @@ final class WeefolkTest extends TestCase {
         $this->assertNotContains("4_3", $this->game->plotOptions());
     }
 
-    /** A full city offers the income building cells instead, landmarks are never offered (FORMAL_RULES 5.9). */
+    /** A full city offers the income building cells instead, landmarks are never offered (FORMAL_RULES CIV.WEEFOLK.3). */
     function testFullCityOffersIncomeBuildingCellsOnly() {
         $this->game->fillCity(WeefolkUT::OPPONENT);
         $this->game->putStructure(WeefolkUT::OPPONENT, BUILDING_MARKET, 6, 8);
@@ -338,7 +338,7 @@ final class WeefolkTest extends TestCase {
         );
     }
 
-    /** With a plot still free the token has no business evicting anyone (FORMAL_RULES 5.9). */
+    /** With a plot still free the token has no business evicting anyone (FORMAL_RULES CIV.WEEFOLK.3). */
     function testReplacementIsRefusedWhileTheCityHasAnEmptyPlot() {
         $this->game->putStructure(WeefolkUT::OPPONENT, BUILDING_MARKET, 6, 8);
         $this->giveToken();
@@ -461,7 +461,7 @@ final class WeefolkTest extends TestCase {
         );
     }
 
-    /** A building in two tokens' rows is scored twice (FORMAL_RULES 5.7). */
+    /** A building in two tokens' rows is scored twice (FORMAL_RULES CIV.WEEFOLK.1). */
     function testABuildingInTwoTokenRowsScoresTwice() {
         $game = $this->game;
         $game->putStructure(WeefolkUT::OPPONENT, BUILDING_MARKET, 5, 5);
@@ -473,7 +473,7 @@ final class WeefolkTest extends TestCase {
         $this->assertEquals(2, $this->scoredVP());
     }
 
-    /** In a token's row and also in its column, so it scores once for each (FORMAL_RULES 5.7). */
+    /** In a token's row and also in its column, so it scores once for each (FORMAL_RULES CIV.WEEFOLK.1). */
     function testABuildingInBothTheRowAndTheColumnScoresTwice() {
         $game = $this->game;
         $game->putStructure(WeefolkUT::OPPONENT, BUILDING_MARKET, 5, 9);
@@ -497,6 +497,17 @@ final class WeefolkTest extends TestCase {
         $this->assertEquals(0, $game->weefolk()->countInLine(WeefolkUT::OPPONENT, false, 9), "column 9 does not touch it");
     }
 
+    /** A Celestials owner hangs landmarks off the side on purpose; the lines still count them (FORMAL_RULES CIV.CELESTIALS.7). */
+    function testLandmarkHangingOffTheMatStillCountsInTheLinesItTouches() {
+        $game = $this->game;
+        $id = $game->putStructure(WeefolkUT::OPPONENT, BUILDING_LANDMARK, 11, 6, 2); // Apothecary over 11-12 by 6-7
+
+        $this->assertTrue($game->isLandmarkOverhanging($game->getStructureInfoById($id)));
+        $this->assertEquals(1, $game->weefolk()->countInLine(WeefolkUT::OPPONENT, true, 11), "the half on the mat");
+        $this->assertEquals(1, $game->weefolk()->countInLine(WeefolkUT::OPPONENT, false, 7));
+        $this->assertEquals(1, $game->weefolk()->countInLine(WeefolkUT::OPPONENT, true, 12), "a row no token can sit in");
+    }
+
     /** A landmark in the token's row and its column is two separate lines, so it scores twice. */
     function testLandmarkInTheRowAndTheColumnScoresTwice() {
         $game = $this->game;
@@ -508,7 +519,7 @@ final class WeefolkTest extends TestCase {
         $this->assertEquals(2, $this->scoredVP());
     }
 
-    /** A cube of the owner in their own capital is not a planted token (FORMAL_RULES 5.11). */
+    /** A cube of the owner in their own capital is not a planted token (FORMAL_RULES CIV.WEEFOLK.5). */
     function testOwnCubeInOwnCapitalDoesNotScore() {
         $game = $this->game;
         $game->putStructure(WeefolkUT::OWNER, BUILDING_MARKET, 5, 5);
@@ -530,7 +541,7 @@ final class WeefolkTest extends TestCase {
     /**
      * INFILTRATORS is the other civ that puts a cube of its owner into someone else's space, on the
      * opponent's start hex rather than in their capital. Only what sits in a capital cell is a
-     * planted token, so the two cube stacks are scored apart (FORMAL_RULES 5.11).
+     * planted token, so the two cube stacks are scored apart (FORMAL_RULES CIV.WEEFOLK.5).
      */
     function testInfiltratorsCubesOnTheStartHexDoNotScore() {
         $game = $this->game;
@@ -577,7 +588,7 @@ final class WeefolkTest extends TestCase {
 
     /**
      * An opponent who is already a zombie counts as finished, so a benefit row of theirs would be
-     * dropped before the civ ever saw it. The token is planted for them instead (FORMAL_RULES 5.10).
+     * dropped before the civ ever saw it. The token is planted for them instead (FORMAL_RULES CIV.WEEFOLK.4).
      */
     function testZombieOpponentIsPlantedForRatherThanQueued() {
         $this->game->makeZombie(WeefolkUT::OPPONENT);

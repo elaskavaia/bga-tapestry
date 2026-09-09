@@ -186,6 +186,8 @@ if (!defined("TAPESTRY")) {
     define("BE_MERFOLK_CULL", 353);
     define("BE_ILLUMINATI_DRAW", 354);
     define("BE_ILLUMINATI_INCOME", 355);
+    define("BE_CELESTIALS_MOVE", 356);
+    define("BE_CELESTIALS_SCORE", 357);
     define("BE_CIV_END", 604);
     define("BE_OP_UNIQUE", 600);
 
@@ -2443,6 +2445,17 @@ $this->benefit_types = [
         // BE_ILLUMINATI_INCOME
         "name" => clienttranslate("ILLUMINATI score 6 VP per die still on this mat"),
         "civ" => CIV_ILLUMINATI,
+    ],
+    356 => [
+        // BE_CELESTIALS_MOVE
+        "name" => clienttranslate("CELESTIALS move the floating capital to an adjacent territory"),
+        "icon" => "no",
+        "state" => "celestialMove",
+    ],
+    357 => [
+        // BE_CELESTIALS_SCORE
+        "name" => clienttranslate("CELESTIALS score the landmarks hanging off the side of your capital"),
+        "civ" => CIV_CELESTIALS,
     ],
     502 => [
         //
@@ -5665,6 +5678,28 @@ $this->civilizations = [
         "al" => 8,
     ],
     // FF
+    CIV_CELESTIALS => [
+        "name" => clienttranslate("CELESTIALS"),
+        "description" => [
+            clienttranslate("<i>The Celestials float above the land, their capital untethered from the ground below.</i>"),
+            clienttranslate(
+                "At the start of the game, or if you gain the Celestials mid-game, replace 1 of your [OUTPOST] on your starting territory with a player token, your floating capital, and return that [OUTPOST] to your supply."
+            ),
+            clienttranslate(
+                "At the start of your income turns (2-4), you may move your floating capital to an adjacent territory, even a territory that is full. If you do, roll both conquer dice and gain both benefits."
+            ),
+            clienttranslate(
+                "The floating capital never conquers and never controls a territory, but it is an item on it: a territory holding your floating capital and anything else may not be conquered."
+            ),
+            clienttranslate(
+                "At the start of your income turn 5, lose [2] [VP] per [LANDMARK] hanging off the side of your capital city, and gain [5] [VP] per [LANDMARK] that is not."
+            ),
+        ],
+        "exp" => "FF",
+        "automa" => true,
+        "income_trigger" => ["from" => 2, "to" => 5],
+        "midgame_ben" => ["or" => [174, 173]],
+    ],
     CIV_ELDER_ONES => [
         "name" => clienttranslate("ELDER ONES"),
         "description" => [

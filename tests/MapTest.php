@@ -183,6 +183,23 @@ final class MapTest extends TestCase {
         $this->assertEquals(-1, $this->game->benefitPosition("standard", 140, MapUT::OPPONENT), "no trap offered");
     }
 
+    /** The token secures the territory as a second item; the outpost is what controls it. */
+    function testAnIsolationistConquestPlacesAnInertToken() {
+        $game = $this->game;
+        $game->addOutpostAt(MapUT::OWNER, "2_0");
+        $token = $game->addCubeAt(MapUT::OWNER, "civ_" . CIV_ISOLATIONISTS . "_1", CUBE_CIV);
+
+        $game->giveOutposts(MapUT::OWNER, 1);
+        $game->seedRand(0, 0);
+        $game->effect_conquer(MapUT::OWNER, "3_0", ["3_0"], true, null, "");
+
+        $this->assertEquals("land_3_0", $game->structureLocation($token));
+        $this->assertEquals(1, $game->toppleFlag($token), "a player token never carries ownership");
+        $this->assertFalse($game->isControllingStructure($game->getStructureInfoById($token)));
+        $this->assertEquals([MapUT::OWNER], $game->hexOwners("3_0"));
+        $this->assertEquals(2, $game->hexOccupancy("3_0"), "secured at two items");
+    }
+
     // -------------------------------------------------- effect_endOfConquer
 
     /** Two of the owner's territories hold a toppled opponent outpost, so the award is due. */

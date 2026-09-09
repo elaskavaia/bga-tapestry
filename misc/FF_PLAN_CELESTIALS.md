@@ -3,7 +3,7 @@
 Part of the Fantasies & Futures pack, see [FF_PLAN.md](FF_PLAN.md) for the pack wide plan,
 classification and sequencing. Rules arbitration is against [FORMAL_RULES.txt](FORMAL_RULES.txt).
 
-Status: stage 1 done (the engine seams, see below), stage 2 not started.
+Status: done. Stage 1 is the engine seams below, stage 2 is the civilization itself.
 
 Three effects on one civ. Setup replaces one of the two starting outposts with a player token, the
 floating capital, so the start hex holds one outpost and one token. At the start of income turns
@@ -41,7 +41,7 @@ The work is making the map testable and fixing two places that mishandle a cube 
   `BUILDING_CUBE`, `card_location` `land_${x}_${y}`, `card_location_arg` the owner, and
   `card_type_arg` 1, placed through `effect_placeOnMap(..., $ownership = false)` exactly as an
   Infiltrators cube is (Infiltrators.php:138). Nothing marks it as the Celestials token: player
-  tokens are indistinguishable once placed (5.12), so no civ reason in `card_location_arg2` and no
+  tokens are indistinguishable once placed (MAP.4), so no civ reason in `card_location_arg2` and no
   civ-specific read anywhere. The only thing the DB records is the role every structure on land
   already carries in `card_type_arg`: 0 stands and controls (an outpost, or a MILITANTS cube used as
   one under adjustment variant 4, `getOutpostId` PGameXBody.php:7508), 1 is an inert item.
@@ -186,7 +186,7 @@ cases that pass before and after the seams:
 - The whole set run with no Celestials in play is the "the seams change nothing" proof; the same
   file gains the with-token cases in stage 2.
 
-## Stage 2 - the civilization
+## Stage 2 - the civilization - DONE
 
 - Two CSV rows above, `npm run genmat`, `npx prettier --write material.inc.php`.
 - `CIV_CELESTIALS` material entry with the description split one `clienttranslate` per rules
@@ -356,7 +356,7 @@ rest are Celestials rulings for 5.30 and following.
   landmass, the central island achievement, and the Mystics controlled territory prediction. It is
   never toppled, never stood up, and never counts toward the topple achievement. A token placed as
   an outpost (MILITANTS out of outposts, adjustment variant 4) is an outpost in every respect.
-  Once placed, tokens are indistinguishable (5.12): the Celestials move may float any inert token
+  Once placed, tokens are indistinguishable (MAP.4): the Celestials move may float any inert token
   of the owner, an INFILTRATORS or ISOLATIONISTS one included.
 - Against each conquest path: an opponent may conquer a territory holding only the token, and the
   token stays on the territory afterwards, sharing it with the conqueror's outpost, which then
@@ -374,7 +374,7 @@ rest are Celestials rulings for 5.30 and following.
   conquer dice with both benefits gained, and the black die's face 1 pays the benefit of the
   territory moved into.
 - Rolling those dice is rolling them from the table, so an Illuminati opponent's dice are taken and
-  paid exactly as on any other roll (5.24).
+  paid exactly as on any other roll (CIV.ILLUMINATI.1).
 - The move is optional and one hex per income turn 2-4; declining costs nothing and there is no
   catching up on a skipped turn. If the token has no adjacent territory with a tile, the ability is
   void for that turn.
@@ -382,10 +382,10 @@ rest are Celestials rulings for 5.30 and following.
   Partly off is off; there is no proportion. This is judged at the start of income turn 5 from the
   footprint as placed, and landmarks placed after that turn score nothing either way.
 - A landmark that is not in the capital city at all is neither: one set aside outside the mat by a
-  Weefolk token (5.9) and one on a Craftsmen civ slot score no 5 and no -2. Only landmarks in
+  Weefolk token (CIV.WEEFOLK.3) and one on a Craftsmen civ slot score no 5 and no -2. Only landmarks in
   `capital_cell` cells count.
 - Weefolk interaction: a planted Weefolk token can never be replaced by a landmark and never moves
-  one, so it cannot change whether a landmark hangs off. The Weefolk row and column count (5.7)
+  one, so it cannot change whether a landmark hangs off. The Weefolk row and column count (CIV.WEEFOLK.1)
   keeps counting a hanging landmark once per line it touches, and the lines outside the mat are
   never a token's row or column.
 - The overhanging cells contribute nothing to capital row and column scoring, districts, or
@@ -404,22 +404,24 @@ rest are Celestials rulings for 5.30 and following.
   Empire's toppled outpost placement. If any of them turns out to need bot changes, ship
   `automa => false` rather than churning bot code, the Illuminati precedent.
 
-## Open questions
+## Open questions - ANSWERED
 
-For Victoria:
+Victoria's answers, 2026-09-08:
 
-- Mid game gain when the owner's starting territory holds no outpost of theirs. Place the token
-  there anyway (proposed), place it on any territory they control, or skip the token?
-- May the token move onto a territory with no tile explored yet? The card says "adjacent
-  territory", and an unexplored hex is arguably not a territory; the plan assumes tiled hexes only.
-- Does the token block *exploration* of the hex it sits on? It cannot happen with the tiled-hex
-  reading above, but confirm the intent.
-- Setup outpost: back to the supply (proposed, so it can be used for a later conquest), or out of
-  the game? This is a real power difference.
-- Income turn 5: is the landmark scoring affected by anything gained during the same income turn's
-  earlier phases, i.e. is it start-of-turn as the card says, or after the income phase? The plan
-  reads it as the start, alongside the other income civ abilities.
-- `automa => true` or `false`, pending the three Automa checks above.
-- A toppled MILITANTS cube (variant 4) carries the same flag as an inert token, and `action_standup`
-  already refuses it. Treat it as an inert token from then on (proposed, and what the table shows),
-  or make it stand-up-able? Not Celestials' problem, but the ruling above decides it either way.
+- Mid game gain when the owner's starting territory holds no outpost of theirs: not possible, so no
+  branch of its own. `setupCiv` returns an outpost to the supply only when there is one to return,
+  and places the token either way.
+- The token moves onto explored territories only, which also settles the exploration question: it
+  can never sit on an unexplored hex, so it can never block one.
+- The replaced outpost goes back to the player mat, where `getOutpostsInHand` finds it for a later
+  conquest.
+- Income turn 5 scoring is judged at the start of the income turn, alongside the other income civ
+  abilities.
+- `automa => true`. The three Automa paths were checked against the token first:
+  `effect_automaConquer` reads `getConquerTargets` and `getMidIslandClosest`,
+  `effect_automaToppleShadow` scans for `occupancy == 1`, and `effect_addToppledShadowOutpost` only
+  ever gets a coord from that scan. All three read the map through `isHexOwner` and
+  `isHexBlockedForConquer`, so an inert token blocks the bot exactly as any other item does and no
+  bot code changes.
+- A toppled MILITANTS cube under adjustment variant 4 stays an inert token, which is what
+  `action_standup` already does after S5.

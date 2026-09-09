@@ -822,6 +822,37 @@ define([
       else if (args.targets.length == 0) this.addActionButton("button_decline", _("No valid target"), () => this.axcallwrapper("decline"));
     },
 
+    onUpdateActionButtons_celestialMove: function (args) {
+      const tokens = Object.keys(args.targets);
+      this.clientStateArgs.token = tokens.length == 1 ? tokens[0] : 0;
+      if (this.clientStateArgs.token) {
+        this.showCelestialTargets(args.targets[this.clientStateArgs.token]);
+      } else {
+        for (const token_id of tokens) {
+          const cube = $("cube_" + token_id);
+          if (cube)
+            this.connectClickTemp(cube, (event) => {
+              dojo.stopEvent(event); // the cube sits inside the hex div, which is not a target itself
+              this.onCelestialTokenClick(token_id);
+            });
+        }
+      }
+      const label = tokens.length ? _("Decline") : _("No valid target");
+      this.addActionButton("button_decline", label, () => this.axcallwrapper("decline"));
+    },
+
+    showCelestialTargets: function (coords) {
+      for (const coord of coords) {
+        dojo.addClass("land_" + coord, "active_slot");
+      }
+    },
+
+    onCelestialTokenClick: function (token_id) {
+      this.disconnectAllTemp();
+      this.clientStateArgs.token = token_id;
+      this.showCelestialTargets(this.gamedatas.gamestate.args.targets[token_id]);
+    },
+
     onUpdateActionButtons_civAbility: function (args) {
       var benefits = args.benefits;
       var decline = true;
@@ -5062,6 +5093,15 @@ define([
             id: outpost_id
           });
           break;
+        case "celestialMove":
+          if (!this.checkActiveSlot(land_id)) return;
+          var coords = land_id.split("_");
+          this.axcallwrapper("celestialMove", {
+            token: this.clientStateArgs.token,
+            U: coords[1],
+            V: coords[2]
+          });
+          break;
         case "client_threasureHunterChoice":
           if (!this.checkActiveSlot(land_id)) return;
           this.clientStateArgs.extra = land_id;
@@ -6382,7 +6422,8 @@ define([
           break;
         case 7: // CUBE
           var div = dojo.byId("cube_" + token_id);
-          if (location.startsWith("land") && this.ownsCiv(this.CON.CIV_INFILTRATORS, player_id)) {
+          if (location.startsWith("land")) {
+            // a player token on a territory sits on the hex itself, not in an outpost slot
             location = card.card_location;
           }
           if (location.startsWith("tapestry") && !$(location)) {

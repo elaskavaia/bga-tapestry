@@ -1889,13 +1889,17 @@ div[data-income="0"] #subtitle_bar {
 .land_wrapper .outpost ~ .outpost {
   top: 10px;
 }
+/* A token shares the hex with up to two outposts and the slots already span 20% to 80% of it, so it
+   cannot avoid them at 28px. Sit it low over slot 1 instead, which leaves the outpost roof read. */
 .land > .cube {
-  right: 50%;
-  top: 20px;
+  right: 60%;
+  top: 46%;
+  width: 20px;
+  height: 20px;
   z-index: 30;
 }
 .land_wrapper .cube ~ .cube {
-  right: 60%;
+  right: 38%;
 }
 
 .land_inner {

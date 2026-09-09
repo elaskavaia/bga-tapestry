@@ -261,5 +261,5 @@ complexity order are called out below.
 
 - [Illuminati](FF_PLAN_ILLUMINATI.md) - done.
 - [Psionics](FF_PLAN_PSIONICS.md) - planned.
-- [Celestials](FF_PLAN_CELESTIALS.md) - stage 1 (engine seams) done, stage 2 planned.
+- [Celestials](FF_PLAN_CELESTIALS.md) - done.
 - [Artificers](FF_PLAN_ARTIFICERS.md) - planned.

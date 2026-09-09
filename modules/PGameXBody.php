@@ -1345,6 +1345,12 @@ abstract class PGameXBody extends tapcommon {
         return $this->getCollectionFromDB($sql);
     }
 
+    /** The next ISOLATIONISTS token still on the civ mat, which a conquer may spend to secure a territory. */
+    function getIsolationistTokenDb($player_id) {
+        $token = $this->getStructureInfoSearch(BUILDING_CUBE, null, "civ\\_" . CIV_ISOLATIONISTS . "\\_%", $player_id);
+        return $token ? (int) $token["card_id"] : 0;
+    }
+
     /** Every structure on a territory, or on the one territory a coord names; toppled and inert ones included. */
     function getStructuresOnMapDb($xcoords = null) {
         return $this->getStructuresSearch(null, null, $xcoords === null ? "land\\_%" : "land_$xcoords");
@@ -3267,7 +3273,7 @@ abstract class PGameXBody extends tapcommon {
      * The civilization running the player's turns right now, null unless they are past their income
      * turn 5 and still playing. An income turn only ever happens inside the player's own turn, so
      * era 5 outside their turn, or their turn without the income global, is the period after it
-     * (FORMAL_RULES 5.13).
+     * (FORMAL_RULES CIV.ELDER_ONES.1).
      */
     function getCivInExtendedPlay($player_id): ?AbsCivilization {
         if ($this->getCurrentEra($player_id) != 5) {
@@ -7309,7 +7315,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function argSpaceExploration() {
-        // the marker binds only the werefolk explore (FORMAL_RULES 5.3); any other explore treats hand tiles as ordinary
+        // the marker binds only the werefolk explore (FORMAL_RULES CIV.WEREFOLK.1); any other explore treats hand tiles as ordinary
         $selected = $this->getCurrentBenefitType() == BE_WEREFOLK_EXPLORE ? $this->getGameStateValue("selected_space_tile") : 0;
         return ["selected_space_tile" => $selected ? $this->getCardInfoById($selected) : null];
     }
@@ -7646,6 +7652,43 @@ abstract class PGameXBody extends tapcommon {
         $this->gamestate->nextState("next");
     }
 
+    /**
+     * The CELESTIALS floating capital drifts to an adjacent territory and both conquer dice are
+     * rolled for it. This is not a conquer: no "whenever you conquer" trigger, no die pick, no
+     * trap, no leftover die and no ownership change (FORMAL_RULES CIV.CELESTIALS.4).
+     */
+    function action_celestialMove($token_id, $u, $v) {
+        $this->checkAction("celestialMove");
+        $player_id = $this->getActivePlayerId();
+        $args = $this->argCelestialMove($player_id);
+        $coord = "{$u}_{$v}";
+        $this->userAssertTrue(
+            clienttranslate("Invalid floating capital move"),
+            in_array($coord, array_get($args["targets"], $token_id, []))
+        );
+        $this->clearCurrentBenefit();
+        $this->effect_placeOnMap(
+            $player_id,
+            $token_id,
+            "land_$coord",
+            clienttranslate('${player_name} moves their floating capital to ${coord_text}'),
+            false
+        );
+        $this->setSelectedMapHex($coord);
+        // ahead of the roll, so an ILLUMINATI owner is still paid before the mover (FORMAL_RULES CIV.ILLUMINATI.4)
+        $this->interruptBenefit();
+        $this->rollConquerDice($player_id);
+        foreach (["red", "black"] as $die_color) {
+            $benefit = $this->getConquerDieBenefit($die_color);
+            if (!$benefit) {
+                $this->notifyWithName("message", clienttranslate('${player_name} gains nothing, that die face has no benefit'));
+                continue;
+            }
+            $this->queueBenefitNormal($benefit, $player_id, reason_civ(CIV_CELESTIALS));
+        }
+        $this->gamestate->nextState("next");
+    }
+
     function effect_placeOnMap($player_id, $structure_id, $location, $notif = "*", $ownership = true) {
         $map = getPart($location, 0);
         $coord = getPart($location, 1) . "_" . getPart($location, 2);
@@ -7668,9 +7711,7 @@ abstract class PGameXBody extends tapcommon {
         $this->interruptBenefit();
         if ($isol) {
             // Check player owns ISOLATIONISTS and has available tokens.
-            $isol_token = $this->getUniqueValueFromDB(
-                "SELECT card_id FROM structure WHERE card_type='7' AND (card_location LIKE 'civ_9_%') AND card_location_arg='$player_id' LIMIT 1"
-            );
+            $isol_token = $this->getIsolationistTokenDb($player_id);
             $this->systemAssertTrue("Isolation tokens not available", $isol_token);
         }
         if (!in_array($coord, $valid_locations)) {
@@ -7687,12 +7728,14 @@ abstract class PGameXBody extends tapcommon {
         $this->effect_placeOnMap($player_id, $outpost_id, $location);
         // ISOLATIONISTS MAY SECURE TERRITORY WITH A TOKEN
         if ($isol) {
+            // a player token on a territory never carries ownership: the outpost placed above is
+            // what controls, the token only secures it as a second item (FORMAL_RULES MAP.1)
             $this->effect_placeOnMap(
                 $player_id,
                 $isol_token,
                 $location,
                 clienttranslate('${player_name} places an isolationist token at ${coord_text}'),
-                true
+                false
             );
             $this->queueBenefitNormal(RES_ANY, $player_id, reason_civ(CIV_ISOLATIONISTS));
         }
@@ -8568,7 +8611,7 @@ abstract class PGameXBody extends tapcommon {
     /**
      * A cube in a capital that belongs to someone else is a WEEFOLK plot token: it is not a
      * building of the capital's owner, so it neither claims their impassable cells nor is turned
-     * away by a full city (FORMAL_RULES 5.8, 5.9).
+     * away by a full city (FORMAL_RULES CIV.WEEFOLK.2, CIV.WEEFOLK.3).
      */
     function isForeignToken($structure_data, $player_id) {
         return $structure_data["card_type"] == BUILDING_CUBE && $structure_data["card_location_arg"] != $player_id;
@@ -8628,7 +8671,7 @@ abstract class PGameXBody extends tapcommon {
     /**
      * The city is full, so the plot token takes an income building's cell and that building is set
      * aside in `hand`, where a structure placed outside the mat also goes: no count reads it there,
-     * so it neither scores nor produces (FORMAL_RULES 5.9).
+     * so it neither scores nor produces (FORMAL_RULES CIV.WEEFOLK.3).
      */
     function effect_setAsideCapitalBuilding($player_id, $x, $y) {
         $cell = "capital_cell_{$player_id}_{$x}_{$y}";
@@ -8868,6 +8911,10 @@ abstract class PGameXBody extends tapcommon {
             case "upgradeTechnology":
                 $this->clearCurrentBenefit();
                 $this->notifyWithName("message", clienttranslate('${player_name} declines a technology upgrade'));
+                break;
+            case "celestialMove":
+                $this->clearCurrentBenefit();
+                $this->notifyWithName("message", clienttranslate('${player_name} does not move their floating capital'));
                 break;
             case "resourceChoice":
             default:
@@ -9626,6 +9673,17 @@ abstract class PGameXBody extends tapcommon {
             $decline = true;
         }
         return $res + ["targets" => $targets, "decline" => $decline, "anywhere" => $anywhere];
+    }
+
+    /** Targets keyed by the token they belong to; the move is always optional, so decline stands. */
+    function argCelestialMove($player_id = -1) {
+        if ($player_id == -1) {
+            $player_id = $this->getActivePlayerId();
+        }
+        $res = $this->notifArgsAddBen();
+        /** @var Celestials */
+        $inst = $this->getCivilizationInstance(CIV_CELESTIALS, true);
+        return $res + ["targets" => $inst->getMoveTargets((int) $player_id), "decline" => true];
     }
 
     function getOutpostsInHand($player_id) {
@@ -10515,7 +10573,7 @@ abstract class PGameXBody extends tapcommon {
     /**
      * Cells a foreign plot token may take over when the city has no empty plot left: income
      * buildings only, since replacing a landmark would leave holes in its footprint
-     * (FORMAL_RULES 5.9).
+     * (FORMAL_RULES CIV.WEEFOLK.3).
      */
     function getCapitalReplacementCells($player_id) {
         $cells = [];

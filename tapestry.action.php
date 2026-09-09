@@ -171,6 +171,17 @@ class action_tapestry extends APP_GameAction
         $this->ajaxResponse();
     }
 
+    public function celestialMove()
+    {
+        $this->setAjaxMode();
+        $token_id = $this->getArg("token", AT_posint, true);
+        $u = $this->getArg("U", AT_int, true);
+        $v = $this->getArg("V", AT_int, true);
+
+        $this->game->action_celestialMove($token_id, $u, $v);
+        $this->ajaxResponse();
+    }
+
     public function colonialism()
     {
         $this->setAjaxMode();
