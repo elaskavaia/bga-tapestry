@@ -297,8 +297,7 @@ CIV.CELESTIALS.7 Hanging off changes nothing else: the plots outside the grid be
 CIV.ELDER_ONES
 CIV.ELDER_ONES.1 Extended play begins after income turn 5. During income turn 5 the era 4 tapestry
     card is inactive (TAPESTRY.3) and a landmark gained scores no 10 VP. In extended play the era 4
-    tapestry space is the active one; an overplay lands there and the covered card goes to DB
-    location era_6.
+    tapestry space is the active one; an overplay lands there.
     Ref. Mike Young (co-designer), BGG thread 3193257: past era 4 an overplay is played on top of
     the era 4 card and takes effect immediately, or for the current era, as the card says.
 CIV.ELDER_ONES.2 "No longer able to take an advance turn" is judged at the start of the player's
@@ -314,7 +313,7 @@ CIV.ELDER_ONES.3 Every landmark gained after income turn 5 scores the 10 VP, wha
 CIV.ELDER_ONES.4 In extended play the player still answers prompts aimed at opponents (GENIES wish,
     WEEFOLK token). The trap response on a conquer of their territory is skipped.
 CIV.ELDER_ONES.5 Income turn 5 is unchanged: VP income, achievement VP, confirmation. Only final
-    scoring (and the DB era 6 write) is deferred to the end of extended play, a second
+    scoring is deferred to the end of extended play, a second
     civilization's final scoring included (ISLANDERS, RIVERFOLK).
 
 CIV.FAEFOLK
@@ -346,7 +345,7 @@ CIV.ILLUMINATI.1 Read as: "When an opponent takes any of the three dice from you
     Ref. Joe (Stonemaier Games) on their Discord, relayed by Alex S in BGG thread 3245586
     "Treasure Hunters vs Illuminati".
 CIV.ILLUMINATI.2 Any science roll from the mat takes the science die, a tapestry card trigger
-    included: research, AGE OF DISCOVERY, the tech card research benefit, benefit type 302.
+    included: research, AGE OF DISCOVERY, the tech card research benefit
     Ref. Mike Young (designer), BGG thread 3058558 "Illuminati - Chimera".
 CIV.ILLUMINATI.3 A taken conquer die pays what the roller would gain from that face: black face 1
     is the benefit of the territory being conquered; a face with no benefit pays nothing. The
@@ -366,14 +365,12 @@ CIV.MERFOLK.1 Submerge: the player picks the 2 cards to keep; a hand of 2 or few
     effects, opponents' effects, the FAEFOLK visible count.
 CIV.MERFOLK.2 Returning the submerged cards on income turn 5 is not a gain; the card drawn on
     income turns 2-5 is.
-CIV.MERFOLK.3 "Keep up to 5" is answered as exactly 5 (discarding more gains nothing); no prompt at
-    5 cards or fewer.
+CIV.MERFOLK.3 "Keep up to 5" is answered as exactly 5 (discarding more gains nothing)
 CIV.MERFOLK.4 An extended turn is mandatory: discarding discards at least one card; there is no
     pass.
 CIV.MERFOLK.5 Any card can be played on an extended turn. "When played" applies; a "this era" card
     stays in effect for the rest of the game (CIV.ELDER_ONES.1). The game ends at the start of a
     turn with an empty hand: a trap card played in defence ends it on the next turn.
-CIV.MERFOLK.6 CIV.ELDER_ONES.4 does not apply; CIV.ELDER_ONES.5 does.
 
 CIV.WEEFOLK
 CIV.WEEFOLK.1 Scoring is per token, not per distinct line: two tokens in one row score it twice; a
@@ -394,7 +391,7 @@ CIV.WEEFOLK.5 A planted token is not a building, outpost or income building of t
 
 CIV.WEREFOLK
 CIV.WEREFOLK.1 The tile is gained before the flip, on each income turn 2-5. Only the tile drawn this
-    turn may be explored with (as COAL BARON reads its territory). With the space tile stack and
+    turn may be explored with. With the space tile stack and
     discards both empty the ability is skipped.
     Ref. Jamey Stegmaier quoting the official Fantasies & Futures FAQ, BGG thread 3057193 "Do
     Werefolk (FF) receive a space tile at the beginning of the game?": no tile is granted at setup,
