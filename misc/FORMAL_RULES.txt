@@ -99,8 +99,8 @@ Capital city
 - Footprint - the plots a landmark covers where it is placed.
 - Hanging off the side - a landmark whose footprint extends outside the city grid (RULES.md allows
   placing buildings that extend outside the grid).
-- Set aside - removed from play: it neither scores nor produces and does not return to the income
-  mat.
+- Set aside - taken off the income mat or out of the capital city and out of play: it does not
+  produce, it never returns and it fills no plot. It still counts for its type (BUILDING.4).
 - Planted token - a WEEFOLK player token placed in an opponent's capital city (CIV.WEEFOLK).
 
 TAPESTRY - tapestry card effects
@@ -116,6 +116,14 @@ TAPESTRY.3 A "this era" ability ends either a) at the beginning of the player's 
     as soon as it is covered and before the effects of the new card resolve.
 TAPESTRY.4 Benefit "play a tapestry card" (an overplay) - if the player has no tapestry card in hand
     the effect is void and the active tapestry card remains.
+TAPESTRY.5 An overplay needs a card to cover: when the tapestry space of the current era is still
+    empty the effect is void, and it does not turn into a play onto that empty space. Past era 4
+    the era 4 space is the one covered (CIV.ELDER_ONES.1, CIV.MERFOLK.5).
+    Ref. Mike Young (co-designer), BGG thread 3193257 "In don't understand this new general rule".
+TAPESTRY.6 An income turn 5 reminder placed by a tapestry card still pays out when that card is
+    later covered by an overplay.
+    Ref. Mike Young (co-designer), BGG thread 3147487 "Reserved reminder tokens and covering
+    tapestry cards".
 
 MOVE - advancing and regressing
 MOVE.1 Advance - moving, or intending to move, the player token up the track (one or more spaces).
@@ -179,6 +187,9 @@ ORDER.5 Upgrade resolution order:
     d) the player selects and upgrades a valid tech card
     e) the circle or square benefit of the upgraded card resolves
     f) triggered "if upgraded" effects resolve after it
+ORDER.6 On an income turn masterpieces resolve before civilization abilities, so a masterpiece
+    gained during the civilization step is too late to be activated that turn.
+    Ref. Mike Young (co-designer), BGG thread 3053730 "Masterpieces gained during final income?".
 
 MANDATORY - optional vs mandatory
 MANDATORY.1 When gaining X cards or tiles: if the deck is empty, reshuffle the discards. If still
@@ -193,6 +204,35 @@ MANDATORY.5 If a benefit holds several effects (A + B), the player chooses the o
 MANDATORY.6 Upgrade is mandatory if possible (except on an income turn, where it is optional). If
     the upgrade moved a card up, the player is considered to have gained the benefit even if that
     benefit is void.
+MANDATORY.7 An advance that grants no benefit (from a charm, or from a tech card square) is
+    mandatory: the player may not decline it to avoid moving off a space. The science die advance
+    is the exception, because there the benefit is rolling the die, not using the result
+    (CIV.ILLUMINATI.3).
+    Ref. Mike Young (co-designer), BGG thread 3066347 "Are advancements from charms optional?".
+
+BUILDING - where a building counts
+BUILDING.1 Default: a benefit that scores "per building of this type" counts only the buildings in
+    the player's capital city, as the benefits are worded ("gain 1 VP for each farm in your capital
+    city", RULES.md). A building somewhere else counts only where a rule says so. The two mats that
+    move buildings out of the city both say so in print, which is why the default reads this way:
+    - CRAFTSMEN: "this grid counts as part of your capital city for building related benefits, but
+      it does not score for completed rows and columns here".
+    - NOMADS: "you still gain VP for buildings whether they're on the map or in your capital city".
+    Ref. both mat texts; BGG thread 2296252 "Craftsmen civilization" reads them the same way.
+BUILDING.2 Only the capital city grid gives rows, columns and districts. A CRAFTSMEN slot does not
+    (its own mat text), nor does a plot outside the grid (CIV.CELESTIALS.7).
+BUILDING.3 A building or landmark that cannot be placed because the capital city is full is still
+    gained; it goes beside the capital city mat. Whether it then counts for BUILDING.1 is not ruled
+    anywhere - open question.
+    Ref. Stonemaier Games Tapestry Rules FAQ: "If you don't have room on your capital city mat, can
+    I still gain a landmark or income building? Yes! You would gain the building and place it next
+    to your capital city mat."; Joe Aubrey (Stonemaier), BGG thread 2477374 "Income buildings off
+    capital mat?", who confirms the placement and says nothing about scoring.
+BUILDING.4 A set aside building or landmark still counts for BUILDING.1. This is a ruling against
+    the default and rests on a single line of designer answer.
+    Ref. Mike Young (co-designer), BGG thread 3092453 "Do set aside items score?", answering "do
+    income buildings set aside by the Artificers and landmarks set aside by City in a Bottle score
+    when you score for that type of building?" with "yes they do".
 
 MAP - territories and items
 MAP.1 Every outpost or player token on a territory is an item. A territory holding 2 items may not
@@ -217,8 +257,23 @@ CIV.INFILTRATORS
 CIV.INFILTRATORS.1 The third token counts every player token of yours on that territory, whatever
     placed it (MAP.4).
 
+CIV.ARTIFICERS
+CIV.ARTIFICERS.1 The slide moves the leftmost building of the chosen track exactly one space to the
+    left, onto the space next to it. It is not a move to the leftmost empty space.
+    Ref. Chris Scaffidi (co-designer), BGG thread 3035872 "Artificers: Does leftward = leftmost?".
+CIV.ARTIFICERS.2 The income spaces already uncovered at the start of the game are valid slide
+    targets. A slid building occupies its new space, so once no empty space is left of the leftmost
+    building that track can no longer be slid.
+    Ref. Chris Scaffidi (co-designer), same thread.
+CIV.ARTIFICERS.3 A building set aside this way never comes back: it cannot be placed in the capital
+    city later, whatever offers the placement. It still counts for its type (BUILDING.4).
+    Ref. Mike Young (co-designer), BGG thread 3049206 "Artificer - income buildings set aside".
+
 CIV.CELESTIALS
 CIV.CELESTIALS.1 The floating capital is an inert item (MAP.2).
+    Ref. Joe Aubrey (Stonemaier Games), BGG thread 3150783 "Celestials, and not having an outpost
+    on the board.": the floating capital alone grants no control, so a player whose only upright
+    outpost is gone can neither conquer nor explore from it.
 CIV.CELESTIALS.2 The move is to an explored adjacent territory. With no explored adjacent territory
     the ability is void for that turn. A skipped move is not caught up.
 CIV.CELESTIALS.3 The move may float any inert token of the owner (MAP.4). A zombie owner never moves
@@ -231,21 +286,31 @@ CIV.CELESTIALS.5 The dice are rolled from the ILLUMINATI mat: the ILLUMINATI own
 CIV.CELESTIALS.6 A landmark hangs off the side when any plot of its footprint is outside the grid.
     Judged at the start of income turn 5; a landmark placed later scores neither way. A landmark
     not in the capital city (set aside per CIV.WEEFOLK.3, on a CRAFTSMEN slot) is neither.
-CIV.CELESTIALS.7 Hanging off changes nothing else: the plots outside the grid count for no row,
-    column, district or building count and are never a WEEFOLK token's line; CIV.WEEFOLK.1 still
-    counts a hanging landmark once per line it touches inside the grid.
+    Ref. Mike Young (co-designer), BGG thread 3036298 "How do Celestials and City in a Bottle
+    interact?": with no landmark in the city nothing hangs off and nothing does not, so the player
+    neither loses nor gains.
+CIV.CELESTIALS.7 Hanging off changes nothing else: the plots outside the grid belong to no row,
+    column or district and are never a WEEFOLK token's line; CIV.WEEFOLK.1 still counts a hanging
+    landmark once per line it touches inside the grid. The landmark itself still counts for
+    per-landmark scoring (BUILDING.1).
 
 CIV.ELDER_ONES
 CIV.ELDER_ONES.1 Extended play begins after income turn 5. During income turn 5 the era 4 tapestry
     card is inactive (TAPESTRY.3) and a landmark gained scores no 10 VP. In extended play the era 4
     tapestry space is the active one; an overplay lands there and the covered card goes to DB
     location era_6.
+    Ref. Mike Young (co-designer), BGG thread 3193257: past era 4 an overplay is played on top of
+    the era 4 card and takes effect immediately, or for the current era, as the card says.
 CIV.ELDER_ONES.2 "No longer able to take an advance turn" is judged at the start of the player's
     turn by the affordability test that auto-triggers an income turn; blocked tracks are not
     consulted. Ending is also voluntary ("may take advance turns") and final: no further income
     turn.
+    Ref. Mike Young (co-designer), BGG thread 3057126 "A question on Elder Ones' After Income 5
+    actions": they keep playing for as long as they are able to advance on tracks.
 CIV.ELDER_ONES.3 Every landmark gained after income turn 5 scores the 10 VP, whatever granted it
     and on whoever's turn (SOCIALISM included), track and tech card landmarks alike.
+    Ref. Mike Young (co-designer), BGG thread 3368650 "Elder monuments after income 5": the 10 VP
+    is per landmark gained, not once.
 CIV.ELDER_ONES.4 In extended play the player still answers prompts aimed at opponents (GENIES wish,
     WEEFOLK token). The trap response on a conquer of their territory is skipped.
 CIV.ELDER_ONES.5 Income turn 5 is unchanged: VP income, achievement VP, confirmation. Only final
@@ -258,7 +323,13 @@ CIV.FAEFOLK.1 "Score any building": the player picks one income building type an
 CIV.FAEFOLK.2 "Visible tapestry" counts the hand and the income mat; a card covered by an overplay
     does not count. The card gained at the start of the ability counts; a card moved from hand to
     mat during the same resolution counts once.
-    Ref. BGA forum ruling.
+    Ref. BGA forum ruling; confirmed by Chris Scaffidi (co-designer) in the Tapestry Facebook
+    group, relayed by Asa Swain in BGG thread 3048419 "A question about the Faefolk civ abilities",
+    and by Mike Young (co-designer), BGG thread 3053736 "Couple of Faefolk Questions".
+CIV.FAEFOLK.3 The ability triggers on income turns 2-5 only, never on income turn 1. The first
+    printing of the mat omits the turn range; the r4 mat and the errata state it.
+    Ref. Chris Scaffidi (co-designer), relayed by Asa Swain in BGG thread 3048419; errata list in
+    BGG thread 3054727 "Consolidated List of Misprints".
 
 CIV.GENIES
 CIV.GENIES.1 A finished opponent is out of the bag for the draw. A zombie opponent stays in and
@@ -311,7 +382,8 @@ CIV.WEEFOLK.1 Scoring is per token, not per distinct line: two tokens in one row
 CIV.WEEFOLK.2 A plot is an open plot: impassable plots are not offered, even to an opponent with
     TERRAFORMING or RIVERFOLK. No TERRAFORMING VP for a planted token.
 CIV.WEEFOLK.3 A city with no open plot: the opponent chooses the income building to replace;
-    landmarks are never offered. The set aside building is treated as one placed outside the grid.
+    landmarks are never offered. The set aside building is treated as one placed outside the grid
+    (BUILDING.2, BUILDING.4).
     The plot stays filled: districts and rows keep their state, no district completes twice.
 CIV.WEEFOLK.4 A finished opponent is not offered a token. A zombie opponent is: the token is
     planted on a random open plot, or kept if the city has none. With no opponent able to take a
@@ -324,6 +396,9 @@ CIV.WEREFOLK
 CIV.WEREFOLK.1 The tile is gained before the flip, on each income turn 2-5. Only the tile drawn this
     turn may be explored with (as COAL BARON reads its territory). With the space tile stack and
     discards both empty the ability is skipped.
+    Ref. Jamey Stegmaier quoting the official Fantasies & Futures FAQ, BGG thread 3057193 "Do
+    Werefolk (FF) receive a space tile at the beginning of the game?": no tile is granted at setup,
+    the tile is gained and flipped on each income turn, repeating every turn it is not explored.
 CIV.WEREFOLK.2 With no track that can regress the player did not regress and gains the 4 VP. The
     regress and the 4 VP are one choice; tracks that cannot regress are not offered.
 CIV.WEREFOLK.3 The face-down advance is mandatory: benefit plus free bonus.
