@@ -3,9 +3,10 @@
 Part of the Fantasies & Futures pack, see [FF_PLAN.md](FF_PLAN.md) for the pack wide plan,
 classification and sequencing. Rules arbitration is against [FORMAL_RULES.txt](FORMAL_RULES.txt).
 
-Status: stage 1 done (engine seams, migration, client layout, IncomeMatTest); stage 2 not started.
-The migration guard in `upgradeTableDb` is a placeholder date and must become the real stage 1
-deploy version.
+Status: done. Stage 1 shipped the engine seams, the migration, the client layout and
+IncomeMatTest; stage 2 shipped the material entry, `modules/civs/Artificers.php` and
+ArtificersTest. The migration guard in `upgradeTableDb` is a placeholder date and must become the
+real deploy version. The studio checks are listed in [TODO.md](TODO.md).
 
 Two effects on one civ. At the start of income turns 2-4 the owner picks one of the four income
 tracks and either sets its leftmost building aside (off the mat, never into the capital), or slides

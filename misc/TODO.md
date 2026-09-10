@@ -96,7 +96,12 @@ CODE BUGS
       lost and the table sat in benefitManager with no active player; a page reload showed the game
       had in fact ended normally, so nothing was corrupted. Not Celestials, the row was an Automa
       research turn. Worth finding which notification is that big before the FF deploy, since a
-      real table cannot always be rescued by a reload.
+      real table cannot always be rescued by a reload. Seen again at 339182 bytes on the Artificers
+      solo table 962350 (2026-09-09), this time on "Automa conquers an empty territory" during
+      Automa turn 9, right after the human's income turn 5 confirm: the log lost the final scoring
+      lines and only the reload showed the end screen. Two sightings at roughly the same size on
+      different Automa rows points at the request that runs every remaining Automa turn in one go
+      once the human is finished, not at one fat notification.
 
 - [ ] Elder Ones: stPlayerTurn returns early when a civ has activated abilities or the player owns a
       playable lighthouse (PGameXBody.php around 11290), before the "no affordable advance" test, so an
@@ -126,6 +131,21 @@ TEST GAPS
       or column.
 
 STUDIO CHECKS
+
+- [x] Artificers: played a solo studio table end to end (table 962350, 2026-09-09). Income turn 1
+      says "not applicable in era 1"; turns 2-4 show all eight track-named buttons ("Set aside:
+      Farms", "Slide left: Markets") with their tooltips plus Decline; set aside moved the farm to
+      the extras area beside the capital and that same turn paid Farming (spot 2); slide left put
+      the market on Barter and the same turn paid Currency instead of Barter, and the Markets slide
+      entry disappeared once its building sat on spot 1; a second farm slide left a 1,2,3,5 layout
+      that paid Fertilization and skipped Preservation. Turn 5 offered Score plus one "Slide all
+      left" per unpacked track: Score paid 3 VP (one set aside, two in the city), the pack put both
+      farms on spots 1 and 2 and the VP income paid Breeding, Fertilization and Food Printing;
+      whole-turn Undo restored the mat and let both options be tried. Rows 10, 110 and 144 all
+      took the leftmost building of the mutated track (spots 3, 4 and then 4 again after the undo),
+      and Score counted the row 144 out-of-bounds farm for 4 VP. Still unseen: the OLYMPIC HOST
+      building gain (needs an opponent with buildings, not a solo table), the slide animation
+      itself (only the DOM after it was read) and the "no building left on any track" skip.
 
 - [x] Celestials: played a solo studio table end to end (table 956979, 2026-09-08). Setup logs both
       lines and leaves outpost plus cube on the start hex; era 1 says "not applicable"; income turns
@@ -176,6 +196,16 @@ STUDIO CHECKS
       name in the queued row's reason (game-review-diff, 2026-09-07, deferred).
 
 CLEANUP
+
+- [ ] BEFORE THE FF DEPLOY: the income mat migration guard in upgradeTableDb is a placeholder
+      timestamp (`$from_version <= 2609091200`, written 2026-09-09) and must become the real deploy
+      version. Too low and in-flight tables never get spots on their income building rows, so their
+      next income turn dies on the ERR:game:04 invariant. Too high is worse than it looks:
+      dbAssignIncomeSpots overwrites arg2 on every income row it finds, not only the ones still at
+      0, so a re-run over an already migrated table flattens the mat back to a prefix layout - which
+      is a no-op everywhere except an Artificers table, where it silently undoes every slide the
+      owner paid an income turn for. Also finish that function's comment, it stops mid-sentence at
+      "and goes".
 
 - [ ] Elder Ones engine methods added to PGameXBody (hasExtendedPlayCiv, isExtendedPlay, getTapestryEra,
       finishPlayer, endExtendedPlay, dbSetPlayerIncomeTurns, dbSetTapestryEraSlot, queueTrapResponse,
