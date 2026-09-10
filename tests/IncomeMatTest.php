@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . "/Stubs/MapUT.php";
+require_once __DIR__ . "/Stubs/IncomeMatUT.php";
 
 /**
  * The income mat: a building row carries the spot it covers, income pays the uncovered spots, a
@@ -13,53 +13,6 @@ require_once __DIR__ . "/Stubs/MapUT.php";
  *
  * Player ids start at 11 so they stay clear of PLAYER_AUTOMA (1) and PLAYER_SHADOW (2).
  */
-class IncomeMatUT extends MapUT {
-    /** [player_id, benefit, count, reason] per awardBenefits call: the fingerprint of an income phase. */
-    public array $awarded = [];
-
-    function awardBenefits($player_id, $ben, $count = 1, $reason = "") {
-        $this->awarded[] = [(int) $player_id, (int) $ben, (int) $count, $reason];
-        return true;
-    }
-
-    /** isTapestryActive() reads the card table with raw SQL, which the in memory model never sees. */
-    public array $tapestries = [];
-
-    function isTapestryActive($player_id, $tapestry_id, $throw = false) {
-        return in_array($tapestry_id, $this->tapestries[$player_id] ?? []);
-    }
-
-    /** A track as today's tables lay it out: spots 1..level uncovered, a building on every spot after. */
-    function layoutPrefix(int $player_id, int $type, int $level): array {
-        return $this->layoutTrack($player_id, $type, $level < 6 ? range($level + 1, 6) : []);
-    }
-
-    function layoutPrefixMat(int $player_id, int $markets = 1, int $houses = 1, int $farms = 1, int $armories = 1): void {
-        $this->layoutPrefix($player_id, BUILDING_MARKET, $markets);
-        $this->layoutPrefix($player_id, BUILDING_HOUSE, $houses);
-        $this->layoutPrefix($player_id, BUILDING_FARM, $farms);
-        $this->layoutPrefix($player_id, BUILDING_ARMORY, $armories);
-    }
-
-    /** An old table: six buildings per type were created and none carries a spot. */
-    function layoutUnmigrated(int $player_id, int $type, int $level): array {
-        $ids = [];
-        for ($i = 0; $i < 7 - $level; $i++) {
-            $ids[] = $this->dbAddStructure($player_id, $type, 0, "income", 0);
-        }
-        $this->income[$player_id][$type] = $level;
-        return $ids;
-    }
-
-    function spotOf(int $structure_id): int {
-        return (int) $this->getStructureInfoById($structure_id)["card_location_arg2"];
-    }
-
-    function traders(): Traders {
-        return $this->getCivilizationInstance(CIV_TRADERS, true);
-    }
-}
-
 final class IncomeMatTest extends TestCase {
     private IncomeMatUT $game;
 
@@ -254,6 +207,25 @@ final class IncomeMatTest extends TestCase {
             $this->assertEquals([IncomeMatUT::OPPONENT], array_unique(array_column($game->benefitQueue(), "benefit_player_id")));
             $this->assertEquals($level + 1, $game->dbGetIncomeTrackLevel(BUILDING_ARMORY, IncomeMatUT::OWNER), "level $level");
         }
+    }
+
+    /**
+     * The spot the building sat on, not the level: on a mutated track the two differ, which is why
+     * Traders reads it off the row. Armories at 3, 5 and 6 sit at level 3, so paying the level
+     * would pay Tabletop Games (spot 4, culture) instead of Team Sports (spot 3, VP per territory).
+     */
+    function testTradersPaysTheRevealedSpotOfAMutatedTrack() {
+        $this->game->setGameStateValue("variant_adjustments", 4);
+        $this->game->giveCiv(IncomeMatUT::OWNER, CIV_TRADERS);
+        $this->game->layoutTrack(IncomeMatUT::OWNER, BUILDING_ARMORY, [3, 5, 6]);
+        $this->game->setTile("2_0");
+        $this->game->addOutpostAt(IncomeMatUT::OPPONENT, "2_0");
+
+        $this->game->traders()->sendTrader(IncomeMatUT::OWNER, ["coords" => "land_2_0", "bt" => BUILDING_ARMORY]);
+
+        $this->assertEquals([(string) BE_VP_TERRITORY], $this->game->benefitLabels());
+        $this->assertEquals([IncomeMatUT::OPPONENT], array_unique(array_column($this->game->benefitQueue(), "benefit_player_id")));
+        $this->assertEquals([1, 2, 3, 4], $this->game->getIncomeUncoveredSpots(IncomeMatUT::OWNER, BUILDING_ARMORY));
     }
 
     // --------------------------------------------------------- assign spots
