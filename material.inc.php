@@ -5678,6 +5678,28 @@ $this->civilizations = [
         "al" => 8,
     ],
     // FF
+    CIV_ARTIFICERS => [
+        "name" => clienttranslate("ARTIFICERS"),
+        "description" => [
+            clienttranslate("<i>Artificers pull innovations from a future into the present.</i>"),
+            clienttranslate(
+                "At the start of your income turns (2-4), you may select 1 income track and either set its leftmost building aside (not in your capital city), or, if the space to its left is empty, slide that building one space left."
+            ),
+            clienttranslate(
+                "This changes the benefits that the income track provides to you. Buildings are still used from left to right."
+            ),
+            clienttranslate(
+                "At the start of your income turn 5, you may either score [1] [VP] per income building in your capital city, or select 1 income track and slide all of its buildings as far left as possible."
+            ),
+            clienttranslate(
+                "<li>Every income building that left your income mat scores, wherever it went: your capital city, beside it, a territory or a civilization mat.</li>"
+            ),
+            clienttranslate("<li>A building set aside never comes back, but it still counts as a building of its type.</li>"),
+        ],
+        "exp" => "FF",
+        "automa" => true,
+        "income_trigger" => ["from" => 2, "to" => 5],
+    ],
     CIV_CELESTIALS => [
         "name" => clienttranslate("CELESTIALS"),
         "description" => [

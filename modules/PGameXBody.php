@@ -2390,10 +2390,13 @@ abstract class PGameXBody extends tapcommon {
         return $rows_cols;
     }
 
-    /** Per building that left the track: in the city, beside it, on a civ mat, on the map or set aside all count (BUILDING.1). */
+    /** Buildings of this type that left the track: in the city, beside it, on a civ mat, on the map or set aside all count (BUILDING.1). */
+    function countIncomeStructuresOffTrack(int $player_id, int $type): int {
+        return 5 - count($this->getStructuresSearch($type, null, "income", $player_id));
+    }
+
     function VPincomeStructure($player_id, $type, $value, $reason = "", $place = null, $ben = null) {
-        $count = 5 - count($this->getStructuresSearch($type, null, "income", $player_id));
-        $this->awardVP($player_id, $value * $count, $reason, $place, $ben);
+        $this->awardVP($player_id, $value * $this->countIncomeStructuresOffTrack($player_id, $type), $reason, $place, $ben);
     }
 
     function VPTapestryCards($player_id = 0, $value = 1, $reason = null, $place = null, $ben = null) {
@@ -4959,6 +4962,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_ALCHEMISTS:
             case CIV_MYSTICS:
             case CIV_ADVISORS:
+            case CIV_ARTIFICERS:
             case CIV_ELDER_ONES:
             case CIV_FAEFOLK:
             case CIV_GENIES:
@@ -10122,6 +10126,7 @@ abstract class PGameXBody extends tapcommon {
             case CIV_TRADERS:
             case CIV_ALCHEMISTS:
             case CIV_ADVISORS:
+            case CIV_ARTIFICERS:
             case CIV_ELDER_ONES:
             case CIV_FAEFOLK:
             case CIV_GENIES:
