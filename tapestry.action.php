@@ -216,7 +216,8 @@ class action_tapestry extends APP_GameAction
     {
         $this->setAjaxMode();
         $die = $this->getArg("die", AT_posint, true);
-        $this->game->action_choose_die($die);
+        $face = $this->getArg("face", AT_int, false, -1);
+        $this->game->action_choose_die($die, $face);
         $this->ajaxResponse();
     }
 

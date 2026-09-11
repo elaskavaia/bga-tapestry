@@ -228,17 +228,21 @@ class Alchemists extends AbsCivilization {
         return $count;
     }
 
+    /**
+     * Plain rolls: this mat keeps a die per pass through its own slot choice UI, so offering a
+     * sampled face here needs that UI to carry two faces per die. Stage 2 of the PSIONICS plan.
+     */
     function rollAllDice(int $player_id, array $remaining) {
         $civ = $this->civ;
         $game = $this->game;
         if (array_get($remaining, 1)) {
-            $game->rollBlackConquerDie($player_id, false);
+            $game->rollBlackConquerDie($player_id, false, false);
         }
         if (array_get($remaining, 2)) {
-            $game->rollRedConquerDie($player_id, false);
+            $game->rollRedConquerDie($player_id, false, false);
         }
         if (array_get($remaining, 3)) {
-            $game->rollScienceDie(reason_civ($civ), "science_die", $player_id, false);
+            $game->rollScienceDie(reason_civ($civ), "science_die", $player_id, false, false);
         }
 
         $game->prepareUndoSavepoint();
@@ -250,7 +254,8 @@ class Alchemists extends AbsCivilization {
 
         // interrupt before the roll, so a civilization reacting to it is ahead of the bust benefit
         $game->interruptBenefit();
-        $die_roll = $game->rollScienceDie(reason_civ($civ));
+        // plain roll, see rollAllDice for why a sampled face waits for stage 2
+        $die_roll = $game->rollScienceDie(reason_civ($civ), "science_die", -1, true, false)[0];
         $token_data = $this->getAllCubesOnCiv();
         $bust = false;
         foreach ($token_data as $tid => $token) {

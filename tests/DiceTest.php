@@ -55,7 +55,7 @@ final class DiceTest extends TestCase {
 
     function testScienceDieWritesTheNamedGlobal() {
         $this->game->seedRand(3);
-        $this->assertEquals(3, $this->game->rollScienceDie("", "science_die_empiricism", DiceUT::ROLLER, false));
+        $this->assertEquals([3], $this->game->rollScienceDie("", "science_die_empiricism", DiceUT::ROLLER, false));
         $this->assertEquals(3, $this->game->getGameStateValue("science_die_empiricism"));
         $this->assertEquals(0, $this->game->getGameStateValue("science_die"));
     }

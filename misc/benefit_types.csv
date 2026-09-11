@@ -248,6 +248,12 @@ id|-con|name|r|t|php
 355|BE_ILLUMINATI_INCOME|ILLUMINATI score 6 VP per die still on this mat|||'civ'=>CIV_ILLUMINATI
 356|BE_CELESTIALS_MOVE|CELESTIALS move the floating capital to an adjacent territory|||'icon' => 'no','state'=>'celestialMove'
 357|BE_CELESTIALS_SCORE|CELESTIALS score the landmarks hanging off the side of your capital|||'civ'=>CIV_CELESTIALS
+358|BE_PSIONICS_TERRITORY|PSIONICS draw 2 territory tiles and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TERRITORY,'draw'=>2,'keep'=>1,'sampled'=>1
+359|BE_PSIONICS_TAPESTRY|PSIONICS draw 2 tapestry cards and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>2,'keep'=>1,'sampled'=>1
+360|BE_PSIONICS_TECH|PSIONICS draw 2 technology cards and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TECHNOLOGY,'draw'=>2,'keep'=>1,'sampled'=>1
+361|BE_PSIONICS_SPACE|PSIONICS draw 2 space tiles and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_SPACE,'draw'=>2,'keep'=>1,'sampled'=>1
+362|BE_PSIONICS_CIV|PSIONICS draw 2 civilizations and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_CIVILIZATION,'draw'=>2,'keep'=>1,'sampled'=>1
+363|BE_PSIONICS_TECH_UPGRADE|PSIONICS draw 2 technology cards, keep 1 and instantly upgrade it|||'icon' => 'no','tt'=>'card','ct'=>CARD_TECHNOLOGY,'draw'=>2,'keep'=>1,'sampled'=>1,'flags'=>FLAG_UPGRADE
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

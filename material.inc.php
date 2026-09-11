@@ -188,6 +188,12 @@ if (!defined("TAPESTRY")) {
     define("BE_ILLUMINATI_INCOME", 355);
     define("BE_CELESTIALS_MOVE", 356);
     define("BE_CELESTIALS_SCORE", 357);
+    define("BE_PSIONICS_TERRITORY", 358);
+    define("BE_PSIONICS_TAPESTRY", 359);
+    define("BE_PSIONICS_TECH", 360);
+    define("BE_PSIONICS_SPACE", 361);
+    define("BE_PSIONICS_CIV", 362);
+    define("BE_PSIONICS_TECH_UPGRADE", 363);
     define("BE_CIV_END", 604);
     define("BE_OP_UNIQUE", 600);
 
@@ -2456,6 +2462,67 @@ $this->benefit_types = [
         // BE_CELESTIALS_SCORE
         "name" => clienttranslate("CELESTIALS score the landmarks hanging off the side of your capital"),
         "civ" => CIV_CELESTIALS,
+    ],
+    358 => [
+        // BE_PSIONICS_TERRITORY
+        "name" => clienttranslate("PSIONICS draw 2 territory tiles and keep 1"),
+        "icon" => "no",
+        "tt" => "card",
+        "ct" => CARD_TERRITORY,
+        "draw" => 2,
+        "keep" => 1,
+        "sampled" => 1,
+    ],
+    359 => [
+        // BE_PSIONICS_TAPESTRY
+        "name" => clienttranslate("PSIONICS draw 2 tapestry cards and keep 1"),
+        "icon" => "no",
+        "tt" => "card",
+        "ct" => CARD_TAPESTRY,
+        "draw" => 2,
+        "keep" => 1,
+        "sampled" => 1,
+    ],
+    360 => [
+        // BE_PSIONICS_TECH
+        "name" => clienttranslate("PSIONICS draw 2 technology cards and keep 1"),
+        "icon" => "no",
+        "tt" => "card",
+        "ct" => CARD_TECHNOLOGY,
+        "draw" => 2,
+        "keep" => 1,
+        "sampled" => 1,
+    ],
+    361 => [
+        // BE_PSIONICS_SPACE
+        "name" => clienttranslate("PSIONICS draw 2 space tiles and keep 1"),
+        "icon" => "no",
+        "tt" => "card",
+        "ct" => CARD_SPACE,
+        "draw" => 2,
+        "keep" => 1,
+        "sampled" => 1,
+    ],
+    362 => [
+        // BE_PSIONICS_CIV
+        "name" => clienttranslate("PSIONICS draw 2 civilizations and keep 1"),
+        "icon" => "no",
+        "tt" => "card",
+        "ct" => CARD_CIVILIZATION,
+        "draw" => 2,
+        "keep" => 1,
+        "sampled" => 1,
+    ],
+    363 => [
+        // BE_PSIONICS_TECH_UPGRADE
+        "name" => clienttranslate("PSIONICS draw 2 technology cards, keep 1 and instantly upgrade it"),
+        "icon" => "no",
+        "tt" => "card",
+        "ct" => CARD_TECHNOLOGY,
+        "draw" => 2,
+        "keep" => 1,
+        "sampled" => 1,
+        "flags" => FLAG_UPGRADE,
     ],
     502 => [
         //

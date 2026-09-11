@@ -16,19 +16,19 @@ class AlchemistsUT extends GameUT {
     public $reentry = 0;
     public $rolls = ["black" => 0, "red" => 0, "science" => 1];
 
-    function rollBlackConquerDie($player_id, bool $undosave) {
-        $this->setGameStateValue("conquer_die_black", $this->rolls["black"]);
+    function rollBlackConquerDie($player_id, bool $undosave, bool $extra = true) {
+        $this->setConquerDieFaces("black", [$this->rolls["black"]]);
         return $this->rolls["black"];
     }
 
-    function rollRedConquerDie(int $player_id, bool $undosave) {
-        $this->setGameStateValue("conquer_die_red", $this->rolls["red"]);
+    function rollRedConquerDie(int $player_id, bool $undosave, bool $extra = true) {
+        $this->setConquerDieFaces("red", [$this->rolls["red"]]);
         return $this->rolls["red"];
     }
 
-    function rollScienceDie($data, $dievar = "science_die", $player_id = -1, $undosave = true) {
+    function rollScienceDie($data, $dievar = "science_die", $player_id = -1, $undosave = true, bool $extra = true): array {
         $this->setGameStateValue($dievar, $this->rolls["science"]);
-        return $this->rolls["science"];
+        return [$this->rolls["science"]];
     }
 
     function queueBenefitNormal($benefit, $player_id = null, $reason = "", $count = 1) {

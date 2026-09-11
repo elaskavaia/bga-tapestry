@@ -30,8 +30,9 @@ Needs engine changes beyond the civ hooks:
 - Elder Ones and Merfolk - both keep taking turns after income turn 5 while everyone else is
   finished. This is the end of game state machine, not a civilization. Built once, shared by both.
   Merfolk additionally needs a hidden "submerged" card zone.
-- Psionics - hooks every random draw in the game (die, tech, tapestry, landmark, territory, space
-  tile, civilization) with draw two keep one, and must add rather than multiply with Empiricism.
+- Psionics - hooks every random draw in the game (die, tech, tapestry, territory, space tile,
+  civilization; the card's landmark bullet belongs to an expansion not in this game) with draw two
+  keep one, and must add rather than multiply with Empiricism.
 - Illuminati - hooks every die roll globally with "whose mat did this die come from", plus the rule
   that an opponent's roll leaves the die off the mat until your next income turn.
 - Artificers - mutates the income track building layout mid game (set aside, slide left). Touches
@@ -157,8 +158,11 @@ civ depends on them.
 - Post income 5 alternate turn loop. One player continues taking turns after everyone else is
   finished. Affects the end of game state machine, scoring trigger and turn order display. Used by
   Elder Ones and Merfolk.
-- Random draw interception. A single seam every random draw goes through, so Psionics can turn it
-  into draw two keep one, and so it composes additively with Empiricism.
+- Random draw interception. Two seams: `rollDieFaces` for every die face and `awardRandomCard`
+  for every deck draw resolved in `awardBenefits`, so Psionics can turn a roll or draw into two
+  options keep one, composing additively with Empiricism. Draw sites that use the drawn card inline
+  (draw-until, explore-the-drawn-tile, the civ decks) are converted one by one, not by the seam.
+  Details in [FF_PLAN_PSIONICS.md](FF_PLAN_PSIONICS.md).
 - Die roll provenance. Every roll carries which player's mat it came from, and a die rolled by an
   opponent stays off the mat until the owner's next income turn.
 - Income mat mutation. Buildings can be set aside and the remaining ones slide left, mid game, with
@@ -260,6 +264,6 @@ complexity order are called out below.
 ## Per civilization plans
 
 - [Illuminati](FF_PLAN_ILLUMINATI.md) - done.
-- [Psionics](FF_PLAN_PSIONICS.md) - planned.
+- [Psionics](FF_PLAN_PSIONICS.md) - stage 1, the engine seam, landed; the civilization is next.
 - [Celestials](FF_PLAN_CELESTIALS.md) - done.
 - [Artificers](FF_PLAN_ARTIFICERS.md) - done.

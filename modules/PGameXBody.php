@@ -92,6 +92,9 @@ abstract class PGameXBody extends tapcommon {
             "starting_player" => 37,
             "selected_space_tile" => 38, // card_id an effect drew that must be the one explored with
             "illuminati_dice" => 39, // bitmask of the dice on the ILLUMINATI mat: black 1, red 2, science 4
+            "science_die_psionics" => 40, // third science track option, PSIONICS, 0 for none
+            "conquer_die_red_2" => 41, // second red face plus one, 0 for none, see setConquerDieFaces
+            "conquer_die_black_2" => 42, // second black face plus one, 0 for none, see setConquerDieFaces
             // debug
             "soft_block" => 99,
             // variants
@@ -898,6 +901,9 @@ abstract class PGameXBody extends tapcommon {
         $result["dice"]["black"] = $this->getGameStateValue("conquer_die_black");
         $result["dice"]["science"] = $this->getGameStateValue("science_die");
         $result["dice"]["empiricism"] = $this->getGameStateValue("science_die_empiricism");
+        $result["dice"]["psionics"] = $this->getGameStateValue("science_die_psionics");
+        $result["dice"]["red2"] = $this->getGameStateValue("conquer_die_red_2");
+        $result["dice"]["black2"] = $this->getGameStateValue("conquer_die_black_2");
         $result["dice"]["on_mat"] = $this->getGameStateValue("illuminati_dice");
         $result["dice"]["mat_owner"] = $this->getCivOwner(CIV_ILLUMINATI);
         $this->addConstants($result);
@@ -1497,10 +1503,10 @@ abstract class PGameXBody extends tapcommon {
                 $this->awardBaseResource($player_id, $ben, $count, $reason);
                 return true;
             case BE_TERRITORY:
-                $this->awardCard($player_id, $count, CARD_TERRITORY, false, $reason);
+                $this->awardRandomCard($player_id, $count, CARD_TERRITORY, $reason);
                 return true;
             case BE_TAPESTRY:
-                $this->awardCard($player_id, $count, CARD_TAPESTRY, false, $reason);
+                $this->awardRandomCard($player_id, $count, CARD_TAPESTRY, $reason);
 
                 return true;
             case 8:
@@ -1618,7 +1624,7 @@ abstract class PGameXBody extends tapcommon {
                 $this->VPtrack($player_id, $ben - 46, 1, $reason, $ben);
                 return true;
             case 51:
-                $this->awardCard($player_id, $count, CARD_SPACE, false, $reason); // GAIN SPACE TILE
+                $this->awardRandomCard($player_id, $count, CARD_SPACE, $reason); // GAIN SPACE TILE
                 return true;
             case 54:
                 $this->VPincomeStructure($player_id, 1, $count, $reason, null, $ben);
@@ -1663,7 +1669,7 @@ abstract class PGameXBody extends tapcommon {
                     $this->queueBenefitInterrupt(172, $player_id, reason_civ(CIV_INFILTRATORS));
                     return true;
                 }
-                $this->awardCard($player_id, $count, CARD_CIVILIZATION, false, $reason); // CIVILIZATION
+                $this->awardRandomCard($player_id, $count, CARD_CIVILIZATION, $reason); // CIVILIZATION
                 return true;
             case 66:
                 // VPterritoryTileCount($player_id, $value, $reason)
@@ -1860,7 +1866,7 @@ abstract class PGameXBody extends tapcommon {
                 $this->olympicHostEnd($player_id, $ben, $reason);
                 return true;
             case 126: // invent from top of the deck, no need for 'invent' user state
-                $this->awardCard($player_id, $count, CARD_TECHNOLOGY, false, $reason);
+                $this->awardRandomCard($player_id, $count, CARD_TECHNOLOGY, $reason);
                 return true;
             case 130:
                 $this->effect_transferTech();
@@ -1904,8 +1910,14 @@ abstract class PGameXBody extends tapcommon {
             case 172:
             case 175:
             case BE_ILLUMINATI_DRAW:
+            case BE_PSIONICS_TERRITORY:
+            case BE_PSIONICS_TAPESTRY:
+            case BE_PSIONICS_TECH:
+            case BE_PSIONICS_SPACE:
+            case BE_PSIONICS_CIV:
+            case BE_PSIONICS_TECH_UPGRADE:
                 $card_type = $this->getRulesBenefit($ben, "ct", 0);
-                $draw = $this->getRulesBenefit($ben, "draw", 1);
+                $draw = $this->getDrawCount($ben, $player_id);
                 $type_info = $this->card_types[$card_type];
                 $cards = $this->dbPickCardsForLocation($count * $draw, $card_type, "draw", $player_id);
                 if (count($cards) == 0) {
@@ -1932,7 +1944,7 @@ abstract class PGameXBody extends tapcommon {
                 $draw = $this->getRulesBenefit($ben, "draw", 1);
                 $bene = $this->getCurrentBenefitWithInfo();
                 $this->effect_keepCard([], $player_id, $bene);
-                $this->awardCard($player_id, $draw, $card_type);
+                $this->awardRandomCard($player_id, $draw, $card_type);
                 return true;
             case 174:
                 //Keep all
@@ -1945,7 +1957,7 @@ abstract class PGameXBody extends tapcommon {
             case 199: // opponents gain tech card
                 $next_player_list = $this->getOpponentsStartingFromLeft($player_id);
                 foreach ($next_player_list as $other_id) {
-                    $this->awardCard($other_id, $count, CARD_TECHNOLOGY, false, $reason);
+                    $this->awardRandomCard($other_id, $count, CARD_TECHNOLOGY, $reason);
                 }
                 return true;
             case 200:
@@ -1969,45 +1981,51 @@ abstract class PGameXBody extends tapcommon {
                 return false;
             case 301:
                 //                 301||Roll the black conquer die twice and gain one benefit of your choice
+                // already an extra option effect, so a sampled reality adds one more roll, not one per roll
                 $this->clearCurrentBenefit($ben);
-                $this->rollBlackConquerDie($player_id, false);
-                $b1 = $this->getConquerDieBenefit("black", $player_id);
-                if (!$b1) {
-                    $this->notifyAllPlayers("message", clienttranslate("this die roll results in no benefit"), []);
+                $faces = [];
+                $rolls = $this->hasExtraOption($player_id) ? 3 : 2;
+                for ($i = 0; $i < $rolls; $i++) {
+                    $this->rollBlackConquerDie($player_id, false, false);
+                    $face = $this->getConquerDieFaces("black")[0];
+                    if (!$this->getConquerDieBenefitOfFace("black", $face)) {
+                        $this->notifyAllPlayers("message", clienttranslate("this die roll results in no benefit"), []);
+                        continue;
+                    }
+                    $faces[] = $face;
                 }
-                $this->rollBlackConquerDie($player_id, false);
-                $b2 = $this->getConquerDieBenefit("black", $player_id);
-                if (!$b2) {
-                    $this->notifyAllPlayers("message", clienttranslate("this die roll results in no benefit"), []);
-                }
-                if ($b1 && $b2) {
-                    // XXX there could be 2 tiles
-                    $this->queueBenefitNormal(["or" => [$b1[0], $b2[0]]], $player_id, reason("die", clienttranslate("Conquer die")));
-                } elseif ($b1) {
-                    $this->queueBenefitNormal($b1, $player_id, reason("die", clienttranslate("Conquer die")));
-                } elseif ($b2) {
-                    $this->queueBenefitNormal($b2, $player_id, reason("die", clienttranslate("Conquer die")));
-                }
+                $this->queueConquerDieChoice(
+                    "black",
+                    array_values(array_unique($faces)),
+                    $player_id,
+                    reason("die", clienttranslate("Conquer die"))
+                );
                 $this->prepareUndoSavepoint();
                 $this->gamestate->nextState("loopback");
                 break;
             case 302:
                 //302||Roll the research die twice and gain one benefit of your choice
+                // already an extra option effect, so a sampled reality adds one more roll, not one per roll
                 $this->clearCurrentBenefit($ben);
-                $b1 = $this->rollScienceDie($reason, "science_die", $player_id, false);
-                $b2 = $this->rollScienceDie($reason, "science_die", $player_id, false);
-                $this->queueBenefitNormal(["or" => [21 + $b1, 21 + $b2]], $player_id, $reason);
+                $tracks = [];
+                $rolls = $this->hasExtraOption($player_id) ? 3 : 2;
+                for ($i = 0; $i < $rolls; $i++) {
+                    $faces = $this->rollScienceDie($reason, "science_die", $player_id, false, false);
+                    $tracks[] = 21 + $faces[0];
+                }
+                $this->queueBenefitNormal(["or" => $tracks], $player_id, $reason);
                 $this->prepareUndoSavepoint();
                 $this->gamestate->nextState("loopback");
                 break;
             //
             case 303:
                 //                 303||Roll the conquer dice and gain both benefits
+                // two independent gains, so each roll offers its own sampled face
                 $this->clearCurrentBenefit($ben);
                 $this->rollRedConquerDie($player_id, false);
-                $this->conquerDieBenefit("red", $player_id);
+                $this->queueConquerDieGain("red", $player_id);
                 $this->rollBlackConquerDie($player_id, false);
-                $this->conquerDieBenefit("black", $player_id);
+                $this->queueConquerDieGain("black", $player_id);
                 $this->prepareUndoSavepoint();
                 $this->gamestate->nextState("loopback");
                 return false;
@@ -2015,9 +2033,9 @@ abstract class PGameXBody extends tapcommon {
                 //                 304||Roll the red conquer die twice and gain both benefits
                 $this->clearCurrentBenefit($ben);
                 $this->rollRedConquerDie($player_id, false);
-                $this->conquerDieBenefit("red", $player_id);
+                $this->queueConquerDieGain("red", $player_id);
                 $this->rollRedConquerDie($player_id, false);
-                $this->conquerDieBenefit("red", $player_id);
+                $this->queueConquerDieGain("red", $player_id);
                 $this->prepareUndoSavepoint();
                 $this->gamestate->nextState("loopback");
                 return false;
@@ -2058,24 +2076,40 @@ abstract class PGameXBody extends tapcommon {
             case 324:
                 $this->interruptBenefit();
                 $this->rollBlackConquerDie($player_id, true);
-
+                // a reroll replaces the result rather than adding to it, so every roll of the loop
+                // samples its own second face; rows 330 and 332 only know the one global, so a roll
+                // that offered two faces queues the choice here instead
+                if (count($this->getConquerDieFaces("black")) > 1) {
+                    $choices = $this->getConquerDieChoiceRows("black", $this->getConquerDieFacesWithBenefit("black"));
+                    if (count($choices) == 0) {
+                        $this->notifyAllPlayers("message", clienttranslate("this die roll results in no benefit"), []);
+                    }
+                } else {
+                    $choices = [330];
+                }
                 if ($count > 1) {
-                    $this->queueBenefitNormal(["or" => [330, 202]], $player_id, $reason);
+                    $choices[] = 202;
+                    $this->queueBenefitNormal(["or" => $choices], $player_id, $reason);
                     $this->queueBenefitNormal(603, $player_id, $reason, 1);
                     $this->queueBenefitNormal($ben, $player_id, $reason, $count - 1);
-                } else {
-                    $this->queueBenefitNormal(330, $player_id, $reason);
+                } elseif (count($choices) > 1) {
+                    $this->queueBenefitNormal(["or" => $choices], $player_id, $reason);
+                } elseif (count($choices) == 1) {
+                    $this->queueBenefitNormal($choices[0], $player_id, $reason);
                 }
                 return true;
 
             case 325:
                 $this->interruptBenefit();
-                $this->rollScienceDie($reason, "science_die", $player_id, true);
-
+                $faces = $this->rollScienceDie($reason, "science_die", $player_id, true);
+                $choices = count($faces) > 1 ? array_map(fn(int $face): int => 21 + $face, $faces) : [332];
                 if ($count > 1) {
-                    $this->queueBenefitNormal(["or" => [332, 202]], $player_id, $reason);
+                    $choices[] = 202;
+                    $this->queueBenefitNormal(["or" => $choices], $player_id, $reason);
                     $this->queueBenefitNormal(603, $player_id, $reason, 1);
                     $this->queueBenefitNormal($ben, $player_id, $reason, $count - 1);
+                } elseif (count($choices) > 1) {
+                    $this->queueBenefitNormal(["or" => $choices], $player_id, $reason);
                 } else {
                     $this->queueBenefitNormal(332, $player_id, $reason);
                 }
@@ -2104,6 +2138,13 @@ abstract class PGameXBody extends tapcommon {
                     $this->queueBenefitInterrupt(["or" => $bens], $player_id, $reason);
                 }
 
+                return true;
+            case BE_TERRITORY_BE_BLACKDIE:
+                // the territory face picked out of a die choice, the whole tile benefit
+                $benefit = $this->getTileBenefit();
+                if ($benefit) {
+                    $this->queueBenefitNormal($benefit, $player_id, $reason);
+                }
                 return true;
             case 330: //
                 $b1 = $this->getConquerDieBenefit("black", $player_id);
@@ -2188,7 +2229,7 @@ abstract class PGameXBody extends tapcommon {
             if ($opponent_id == PLAYER_SHADOW) {
                 continue;
             }
-            $game->awardCard($opponent_id, 1, CARD_TERRITORY, false, $reason);
+            $game->awardRandomCard($opponent_id, 1, CARD_TERRITORY, $reason);
             //$game->effect_moveCard($card_id, $player_id, 'hand', $opponent_id, null, '*');
         }
     }
@@ -2444,12 +2485,25 @@ abstract class PGameXBody extends tapcommon {
         );
     }
 
+    /**
+     * The deck and discard a player draws this card type from. A MYSTICS owner under adjustment 8
+     * keeps their tapestry cards in a private pair, and every draw of theirs has to use it, not
+     * only the ones that go through awardCard.
+     */
+    function getDeckFor($player_id, int $card_type): array {
+        if ($card_type == CARD_TAPESTRY && $this->isAdjustments8() && $this->hasCiv($player_id, CIV_MYSTICS)) {
+            return ["deck_13", "discard_13"];
+        }
+        return [$this->card_types[$card_type]["deck"], "discard"];
+    }
+
     function dbPickCardsForLocation($count, $card_type, $to_location, $location_arg = 0, $deck = null, $discard = null) {
+        [$player_deck, $player_discard] = $this->getDeckFor($location_arg, $card_type);
         if ($deck === null) {
-            $deck = $this->card_types[$card_type]["deck"];
+            $deck = $player_deck;
         }
         if ($discard === null) {
-            $discard = "discard";
+            $discard = $player_discard;
         }
 
         $cards = $this->cards->pickCardsForLocation($count, $deck, $to_location, $location_arg, true);
@@ -2476,25 +2530,58 @@ abstract class PGameXBody extends tapcommon {
         return $cards;
     }
 
+    /**
+     * A card gained at random from a deck. A player who samples a second reality draws one extra
+     * per card gained and keeps one (FORMAL_RULES CIV.PSIONICS.1); for everyone else this is
+     * awardCard. Use it wherever the drawn cards themselves are not needed, since a keep is
+     * interactive and cannot hand a card back.
+     */
+    function awardRandomCard($player_id, int $count, int $card_type, string $reason = ""): void {
+        $keep_rows = [
+            CARD_TERRITORY => BE_PSIONICS_TERRITORY,
+            CARD_TAPESTRY => BE_PSIONICS_TAPESTRY,
+            CARD_TECHNOLOGY => BE_PSIONICS_TECH,
+            CARD_SPACE => BE_PSIONICS_SPACE,
+            CARD_CIVILIZATION => BE_PSIONICS_CIV,
+        ];
+        if (!$player_id) {
+            $player_id = $this->getActivePlayerId();
+        }
+        if (!$this->hasExtraOption($player_id) || !isset($keep_rows[$card_type])) {
+            $this->awardCard($player_id, $count, $card_type, false, $reason);
+            return;
+        }
+        for ($i = 0; $i < $count; $i++) {
+            // one draw and keep per card gained, so a gain of two is two separate choices
+            $this->queueBenefitInterrupt($keep_rows[$card_type], $player_id, $reason);
+        }
+    }
+
+    /**
+     * How many cards a draw and keep row puts in front of its owner: one more for a player who
+     * samples a second reality, so draw 3 keep 1 becomes draw 4 keep 1 rather than two draws of 3.
+     * A row marked 'sampled' is the sample itself, awardRandomCard queued it, and it is not
+     * enlarged a second time.
+     */
+    function getDrawCount(int $ben, $player_id): int {
+        $draw = (int) $this->getRulesBenefit($ben, "draw", 1);
+        if ($this->getRulesBenefit($ben, "sampled", 0)) {
+            return $draw;
+        }
+        return $this->hasExtraOption($player_id) ? $draw + 1 : $draw;
+    }
+
     function awardCard($player_id, $count, $card_type, $face_down = false, $reason = "", $deck = null, $discard = null) {
         if (!$player_id) {
             $player_id = $this->getActivePlayerId();
         }
 
-        if ($card_type == CARD_TAPESTRY && $this->isAdjustments8() && $this->hasCiv($player_id, CIV_MYSTICS)) {
-            if ($deck === null) {
-                $deck = "deck_13";
-            }
-            if ($discard === null) {
-                $discard = "discard_13";
-            }
-        }
-
+        [$player_deck, $player_discard] = $this->getDeckFor($player_id, $card_type);
         if ($deck === null) {
-            $deck = $this->card_types[$card_type]["deck"];
+            $deck = $player_deck;
         }
         if ($discard === null) {
-            $discard = "discard";
+            $discard = $player_discard;
         }
 
         $type_name = $this->card_types[$card_type]["name"];
@@ -2703,20 +2790,20 @@ abstract class PGameXBody extends tapcommon {
         $this->queueBenefitNormal(17, $player_id, $reason);
         $neighbours = $this->getPlayerNeighbours($player_id, false);
         foreach ($neighbours as $neighbour) {
-            $this->awardCard($neighbour, 1, CARD_TERRITORY, false, $reason);
+            $this->awardRandomCard($neighbour, 1, CARD_TERRITORY, $reason);
         }
     }
 
     function democracy() {
         $player_id = $this->getActivePlayerId();
-        $this->awardCard($player_id, 3, CARD_TAPESTRY, false, reason_tapestry(12)); // DEMOCRACY - draw 3 tapestry
+        $this->awardRandomCard($player_id, 3, CARD_TAPESTRY, reason_tapestry(12)); // DEMOCRACY - draw 3 tapestry
         $this->queueBonus(7, -1 /* unlimited*/, "15,15", 0, $player_id); // then discard any tapestry to gain 2 vp each
     }
 
     function ageOfSailCheck($player_id) {
         if ($this->isTapestryActive($player_id, TAP_AGE_OF_SAIL)) {
             // AGE OF SAIL
-            $this->awardCard($player_id, 3, CARD_TERRITORY, false, reason_tapestry(TAP_AGE_OF_SAIL));
+            $this->awardRandomCard($player_id, 3, CARD_TERRITORY, reason_tapestry(TAP_AGE_OF_SAIL));
         }
     }
 
@@ -3505,20 +3592,35 @@ abstract class PGameXBody extends tapcommon {
         return true;
     }
 
+    /**
+     * The three science track options one research decision offers, each its own plain roll: the
+     * die, EMPIRICISM's second and the sampled third. One extra roll per decision, not per physical
+     * roll, is what makes the two effects add rather than multiply (FORMAL_RULES CIV.PSIONICS.1).
+     */
     function rollScienceDie2($reason) {
         $player_id = $this->getActivePlayerId();
         $this->setGameStateValue("science_die_empiricism", 0);
-        $roll1 = $this->rollScienceDie($reason, "science_die", $player_id, false);
+        $this->setGameStateValue("science_die_psionics", 0);
+        $roll1 = $this->rollScienceDie($reason, "science_die", $player_id, false, false);
         if ($this->isTapestryActive($player_id, TAP_EMPIRICISM)) {
             // EMPIRICISM
-            $this->rollScienceDie(reason_tapestry(TAP_EMPIRICISM), "science_die_empiricism", $player_id, false);
+            $this->rollScienceDie(reason_tapestry(TAP_EMPIRICISM), "science_die_empiricism", $player_id, false, false);
+        }
+        if ($this->hasExtraOption($player_id)) {
+            $this->rollScienceDie(reason_civ(CIV_PSIONICS), "science_die_psionics", $player_id, false, false);
         }
         $this->prepareUndoSavepoint();
-        return $roll1;
+        return $roll1[0];
     }
 
-    function rollScienceDie($data, $dievar = "science_die", $player_id = -1, $undosave = true) {
-        $die_roll = $this->rollDieFace("science");
+    /**
+     * Returns every face the roll offers, the first of which is the one written to $dievar and the
+     * one the reacting civilizations are told about.
+     */
+    function rollScienceDie($data, $dievar = "science_die", $player_id = -1, $undosave = true, bool $extra = true): array {
+        $roller_id = $player_id == -1 ? $this->getActivePlayerId() : $player_id;
+        $faces = $this->rollDieFaces("science", $roller_id, $extra);
+        $die_roll = $faces[0];
         $this->setGameStateValue($dievar, $die_roll);
         $this->notifyWithTrack(
             "science_roll",
@@ -3530,11 +3632,23 @@ abstract class PGameXBody extends tapcommon {
             ],
             $player_id
         );
-        $this->dieRolled("science", $die_roll, $player_id == -1 ? $this->getActivePlayerId() : $player_id);
+        if (count($faces) > 1) {
+            $this->notifyWithTrack(
+                "science_roll",
+                clienttranslate('${player_name} also rolls ${track_name} and may take either track ${reason}'),
+                [
+                    "die" => $faces[1],
+                    "track" => $faces[1],
+                    "reason" => $this->getReasonFullRec(reason_civ(CIV_PSIONICS)),
+                ],
+                $player_id
+            );
+        }
+        $this->dieRolled("science", $die_roll, $roller_id);
         if ($undosave) {
             $this->prepareUndoSavepoint();
         }
-        return $die_roll;
+        return $faces;
     }
 
     function getTrackLocationLike($track = null, $spot = null) {
@@ -5770,7 +5884,7 @@ abstract class PGameXBody extends tapcommon {
                     ],
                     $player_id
                 );
-                $track = $this->rollScienceDie($reason, "science_die", $player_id);
+                $track = $this->rollScienceDie($reason, "science_die", $player_id)[0];
                 $spot = $this->spotChoiceForTrack($track, $player_id, +1, SPOT_SELECT);
                 $flags = (int) $this->getRulesBenefit($ben, "flags", 0);
                 $this->trackMovementProper($track, $spot, +1, $flags, false, $player_id);
@@ -6689,6 +6803,7 @@ abstract class PGameXBody extends tapcommon {
         $current_benefit = $this->getCurrentBenefit();
         $this->systemAssertTrue("Cannot find benefit on stack", $current_benefit);
         $card_id = 0;
+        $sampled = 0;
         $this->clearCurrentBenefit();
         $ben = $current_benefit["benefit_type"];
         $i = $this->getRulesBenefit($ben, "r");
@@ -6715,7 +6830,12 @@ abstract class PGameXBody extends tapcommon {
             }
         } else {
             $this->userAssertTrue(totranslate("You may only invent a face up card at this time"), $flags & FLAG_FACE_DOWN);
-            $cards = $this->dbPickCardsForLocation(1, CARD_TECHNOLOGY, "hand", $player_id);
+            if ($this->hasExtraOption($player_id)) {
+                // the top of the deck is a random gain, so the sample is a keep and the kept card
+                // comes into play from effect_keepCard rather than here
+                $sampled = $flags & FLAG_UPGRADE ? BE_PSIONICS_TECH_UPGRADE : BE_PSIONICS_TECH;
+            }
+            $cards = $sampled ? [] : $this->dbPickCardsForLocation(1, CARD_TECHNOLOGY, "hand", $player_id);
             if (count($cards) > 0) {
                 $new_card = array_shift($cards);
                 $card_id = $new_card["id"];
@@ -6732,6 +6852,9 @@ abstract class PGameXBody extends tapcommon {
             }
             $cards = $this->getCardsSearch(CARD_TECHNOLOGY, null, "discard");
             $this->notifyWithName("moveCard", "", ["cards" => $cards, "_private" => true], $player_id);
+        }
+        if ($sampled) {
+            $this->queueBenefitInterrupt($sampled, $player_id, $current_benefit["benefit_data"]);
         }
         if ($card_id) {
             if ($flags & FLAG_UPGRADE) {
@@ -7730,12 +7853,11 @@ abstract class PGameXBody extends tapcommon {
         $this->interruptBenefit();
         $this->rollConquerDice($player_id);
         foreach (["red", "black"] as $die_color) {
-            $benefit = $this->getConquerDieBenefit($die_color);
-            if (!$benefit) {
+            if (count($this->getConquerDieFacesWithBenefit($die_color)) == 0) {
                 $this->notifyWithName("message", clienttranslate('${player_name} gains nothing, that die face has no benefit'));
                 continue;
             }
-            $this->queueBenefitNormal($benefit, $player_id, reason_civ(CIV_CELESTIALS));
+            $this->queueConquerDieGain($die_color, $player_id, reason_civ(CIV_CELESTIALS));
         }
         $this->gamestate->nextState("next");
     }
@@ -7823,10 +7945,11 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-    function action_choose_die($die) {
+    function action_choose_die($die, $face = -1) {
         $this->checkAction("choose_die");
         $player_id = $this->getActivePlayerId();
         $color = $die ? "black" : "red";
+        $this->keepConquerDieFace($color, (int) $face);
         $this->interruptBenefit();
         $this->conquerDieBenefit($color, $player_id, true);
         // Did you conquer trader token? If so, they can claim the unclaimed die!
@@ -7839,7 +7962,7 @@ abstract class PGameXBody extends tapcommon {
             if ($trader && $trader != $player_id && $this->hasCiv($trader, CIV_TRADERS)) {
                 // if player has trader civ - it is trader
                 $other_color = $color == "red" ? "black" : "red";
-                $this->conquerDieBenefit($other_color, $trader);
+                $this->queueUnclaimedDieBenefit($other_color, $trader);
             }
         }
         if ($this->isTapestryActive($player_id, 31)) {
@@ -7855,6 +7978,7 @@ abstract class PGameXBody extends tapcommon {
         return $this->getRulesCard(CARD_TERRITORY, $tile_id, "benefit", []);
     }
 
+    /** The gain from a die whose face is already settled: the one the primary global holds. */
     function conquerDieBenefit($die_color, $player_id, $throw = false) {
         $benefit = $this->getConquerDieBenefit($die_color);
         if ($benefit != null) {
@@ -7864,16 +7988,73 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-    function getConquerDieBenefit($die_color) {
-        $roll = $this->getGameStateValue("conquer_die_$die_color");
-        $benefit = null;
-        if ($roll == 1 && $die_color == "black") {
-            $tile_ben = $this->getTileBenefit();
-            $benefit = $tile_ben;
-        } else {
-            $benefit = $this->dice[$die_color][$roll];
+    /**
+     * The gain from a die the roller keeps outright, with no die pick state to collapse the faces:
+     * a choose-one over the faces the roll offered.
+     */
+    function queueConquerDieGain(string $die_color, $player_id, $reason = null): void {
+        $reason = $reason ?: reason("die", clienttranslate("Conquer die"));
+        $this->queueConquerDieChoice($die_color, $this->getConquerDieFacesWithBenefit($die_color), $player_id, $reason);
+    }
+
+    /** One face pays its benefit outright; several are a choose-one with each face offered as its own row. */
+    function queueConquerDieChoice(string $die_color, array $faces, $player_id, string $reason): void {
+        if (count($faces) == 1) {
+            $this->queueBenefitNormal($this->getConquerDieBenefitOfFace($die_color, $faces[0]), $player_id, $reason);
+        } elseif (count($faces) > 1) {
+            $this->queueBenefitNormal(["or" => $this->getConquerDieChoiceRows($die_color, $faces)], $player_id, $reason);
         }
-        return $benefit;
+    }
+
+    /** The distinct faces of the last roll of this die that carry a benefit. */
+    function getConquerDieFacesWithBenefit(string $die_color): array {
+        $faces = array_unique($this->getConquerDieFaces($die_color));
+        return array_values(array_filter($faces, fn(int $face): bool => (bool) $this->getConquerDieBenefitOfFace($die_color, $face)));
+    }
+
+    /**
+     * A choice row holds one id, so each face is offered as the row printed on it: the black
+     * territory face as BE_TERRITORY_BE_BLACKDIE, which then pays the whole tile benefit.
+     */
+    function getConquerDieChoiceRows(string $die_color, array $faces): array {
+        return array_map(fn(int $face): int => $this->dice[$die_color][$face][0], $faces);
+    }
+
+    /**
+     * The gain a TRADERS owner takes from the die the roller did not claim. The roller rerolled
+     * that die, so what is left showing is the sampled face (FORMAL_RULES CIV.PSIONICS.9), and the
+     * owner is never offered a pick: they are not the active player.
+     */
+    function queueUnclaimedDieBenefit(string $die_color, $player_id): void {
+        $faces = $this->getConquerDieFaces($die_color);
+        $benefit = $this->getConquerDieBenefitOfFace($die_color, (int) end($faces));
+        if ($benefit) {
+            $this->queueBenefitNormal($benefit, $player_id, reason("die", clienttranslate("Conquer die")));
+        }
+    }
+
+    /**
+     * The roller keeps one of the faces their die offered, and everything downstream reads the one
+     * global as it always has.
+     */
+    function keepConquerDieFace(string $die_color, int $face): void {
+        $faces = $this->getConquerDieFaces($die_color);
+        if (count($faces) < 2) {
+            return;
+        }
+        $this->userAssertTrue(self::_("This die was not rolled with that face"), in_array($face, $faces));
+        $this->setConquerDieFaces($die_color, [$face]);
+    }
+
+    function getConquerDieBenefit($die_color) {
+        return $this->getConquerDieBenefitOfFace($die_color, (int) $this->getGameStateValue("conquer_die_$die_color"));
+    }
+
+    function getConquerDieBenefitOfFace(string $die_color, int $face) {
+        if ($face == 1 && $die_color == "black") {
+            return $this->getTileBenefit();
+        }
+        return $this->dice[$die_color][$face];
     }
 
     function action_research_decision($track, $spot) {
@@ -7883,9 +8064,14 @@ abstract class PGameXBody extends tapcommon {
             // Only need to do anything if accepting advancement.
             $op1 = $this->getGameStateValue("science_die");
             $op2 = $this->getGameStateValue("science_die_empiricism");
-            if ($op1 != $track && $op2 != $track) {
+            $op3 = $this->getGameStateValue("science_die_psionics");
+            $options = array_values(array_unique(array_filter([$op1, $op2, $op3])));
+            if (!in_array($track, $options)) {
                 $message = "";
-                if ($op2 > 0) {
+                if ($op3 > 0) {
+                    $names = array_map(fn(int $option): string => $this->tech_track_types[$option]["description"], $options);
+                    $message = sprintf(self::_("You can only select one of these tracks: %s, or Decline"), implode(", ", $names));
+                } elseif ($op2 > 0) {
                     $message = sprintf(
                         self::_("You can only select %s track or %s track (EMPIRICISM) or Decline"),
                         $this->tech_track_types[$op1]["description"], //
@@ -7898,6 +8084,7 @@ abstract class PGameXBody extends tapcommon {
             }
             $this->setGameStateValue("science_die", $track);
             $this->setGameStateValue("science_die_empiricism", 0);
+            $this->setGameStateValue("science_die_psionics", 0);
             if ($spot == 0) {
                 $spot = 13;
             }
@@ -9221,13 +9408,21 @@ abstract class PGameXBody extends tapcommon {
             }
         }
         foreach ($ids as $card_id) {
-            if ($ben != 172) {
-                // keep civ card in draw area
+            if (!in_array($ben, [172, BE_PSIONICS_CIV])) {
+                // a drawn civilization stays in the draw area, row 174 moves it in later
                 $extra = 0;
                 //if ($ben==175) $extra=4; // recyclers tech card cannot be upgraded on first income turn
                 $this->effect_moveCard($card_id, $player_id, "hand", $player_id, $extra);
             }
-            $this->effect_cardComesInPlay($card_id, $player_id, reason("be", $ben));
+            // the row's own reason, so the log names what caused the gain and not the keep row
+            $keep_reason = $bene["benefit_data"] ?: reason("be", $ben);
+            if ($this->getRulesBenefit($ben, "flags", 0) & FLAG_UPGRADE) {
+                // invent and upgrade, the action_invent tail: no delayed resolve
+                $this->effect_cardComesInPlayTriggerResolve($card_id, $player_id, $keep_reason);
+                $this->upgradeTechCard($card_id);
+            } else {
+                $this->effect_cardComesInPlay($card_id, $player_id, $keep_reason);
+            }
             unset($cards[$card_id]);
         }
         foreach (array_keys($cards) as $card_id) {
@@ -9746,7 +9941,13 @@ abstract class PGameXBody extends tapcommon {
     function argConquerRoll() {
         $die_red = $this->getGameStateValue("conquer_die_red");
         $die_black = $this->getGameStateValue("conquer_die_black");
-        return ["bid" => $this->getCurrentBenefitType(), "die_red" => $die_red, "die_black" => $die_black];
+        return [
+            "bid" => $this->getCurrentBenefitType(),
+            "die_red" => $die_red,
+            "die_black" => $die_black,
+            "die_red_2" => $this->getGameStateValue("conquer_die_red_2"),
+            "die_black_2" => $this->getGameStateValue("conquer_die_black_2"),
+        ];
     }
 
     function argPlayerTurn() {
@@ -9856,11 +10057,14 @@ abstract class PGameXBody extends tapcommon {
         $res = [
             "science" => $this->getGameStateValue("science_die"),
             "empiricism" => $this->getGameStateValue("science_die_empiricism"),
+            "psionics" => $this->getGameStateValue("science_die_psionics"),
         ];
         $res["cubes"] = [];
         $res["all_advances"] = $this->getPossibleTrackChoices($res["science"], 1, $res["cubes"]);
-        if ($res["empiricism"] != 0 && $res["empiricism"] != $res["science"]) {
-            $res["all_advances"] += $this->getPossibleTrackChoices($res["empiricism"], 1, $res["cubes"]);
+        foreach (["empiricism", "psionics"] as $extra) {
+            if ($res[$extra] != 0 && $res[$extra] != $res["science"]) {
+                $res["all_advances"] += $this->getPossibleTrackChoices($res[$extra], 1, $res["cubes"]);
+            }
         }
         $this->addBenefitData($res);
         return $res;
@@ -11121,7 +11325,7 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_drawFromBenefit($player_id, $ben, $count = 1, $reason = null) {
         $card_type = $this->getRulesBenefit($ben, "ct", 0);
-        $draw = $this->getRulesBenefit($ben, "draw", 1);
+        $draw = $this->getDrawCount($ben, $player_id);
         $type_info = $this->card_types[$card_type];
         $cards = $this->dbPickCardsForLocation($count * $draw, $card_type, "draw", $player_id);
         if (count($cards) == 0) {
@@ -12410,8 +12614,8 @@ abstract class PGameXBody extends tapcommon {
         } // PILLAGE AND PLUNDER
         if ($both) {
             $this->notifyWithName("message", clienttranslate('${player_name} gains benefits from both dice'));
-            $this->conquerDieBenefit("black", $player_id);
-            $this->conquerDieBenefit("red", $player_id);
+            $this->queueConquerDieGain("black", $player_id);
+            $this->queueConquerDieGain("red", $player_id);
             if ($this->isTapestryActive($player_id, 31)) {
                 // PIRATE RULE
                 $this->queueBenefitNormal($this->getTileBenefit(), $player_id, reason_tapestry(31));
@@ -12445,8 +12649,70 @@ abstract class PGameXBody extends tapcommon {
     }
 
     /**
+     * PSIONICS samples a second reality for every random thing its owner gains (FORMAL_RULES
+     * CIV.PSIONICS.1). Asked at the moment the option is created and never stored, so a civ gained
+     * mid game applies from its next roll or draw on.
+     */
+    function hasExtraOption(int $player_id): bool {
+        return $this->isRealPlayer($player_id) && $this->hasCiv($player_id, CIV_PSIONICS);
+    }
+
+    /**
+     * The faces one roll offers: today's one, or two for a roller who samples a second reality.
+     * A caller that already rolls twice for a single choice passes $extra false and adds its own
+     * single extra roll, because the extra option is one per decision, not one per physical roll.
+     */
+    function rollDieFaces(string $die, int $player_id, bool $extra = true): array {
+        $faces = [$this->rollDieFace($die)];
+        if ($extra && $this->hasExtraOption($player_id)) {
+            $faces[] = $this->rollDieFace($die);
+        }
+        return $faces;
+    }
+
+    /**
+     * Face 0 is a real conquer die face, so the second face global holds the face plus one and the
+     * framework default 0 means "this roll offered one face". Both are written by the roll that
+     * produced them, so a roll with no second face clears the one left by the roll before it.
+     */
+    function setConquerDieFaces(string $die_color, array $faces): void {
+        $this->setGameStateValue("conquer_die_$die_color", $faces[0]);
+        $this->setGameStateValue("conquer_die_{$die_color}_2", count($faces) > 1 ? $faces[1] + 1 : 0);
+    }
+
+    function getConquerDieFaces(string $die_color): array {
+        $faces = [(int) $this->getGameStateValue("conquer_die_$die_color")];
+        $second = (int) $this->getGameStateValue("conquer_die_{$die_color}_2");
+        if ($second > 0) {
+            $faces[] = $second - 1;
+        }
+        return $faces;
+    }
+
+    /**
+     * One extra log line for the sampled face, so the roll message a table without PSIONICS sees is
+     * the one it has always seen.
+     */
+    function notifyExtraDieFace(string $die_color, array $faces, $player_id): void {
+        if (count($faces) < 2) {
+            return;
+        }
+        $this->notifyWithName(
+            "conquer_roll",
+            clienttranslate('${player_name} also rolls ${die_name} and may take either face'),
+            [
+                "die_name" => $this->dice_names[$die_color][$faces[1]]["name"],
+                "i18n" => ["die_name"],
+            ],
+            $player_id
+        );
+    }
+
+    /**
      * Runs after every die roll and its notification, before the roller acts on the result, so a
-     * civilization that reacts to the roll gets its rows on the stack first.
+     * civilization that reacts to the roll gets its rows on the stack first. It fires once per roll
+     * with the first face; the sampled face is a reroll from the reacting civ's point of view
+     * (FORMAL_RULES CIV.PSIONICS.6).
      */
     function dieRolled(string $die, int $face, int $roller_id): void {
         foreach ($this->getAllCivs(null) as $info) {
@@ -12456,47 +12722,57 @@ abstract class PGameXBody extends tapcommon {
 
     function rollConquerDice($player_id) {
         // Roll conquer dice
-        $die_red = $this->rollDieFace("red");
-        $die_black = $this->rollDieFace("black");
-        $this->setGameStateValue("conquer_die_red", $die_red);
-        $this->setGameStateValue("conquer_die_black", $die_black);
+        $red = $this->rollDieFaces("red", $player_id);
+        $black = $this->rollDieFaces("black", $player_id);
+        $this->setConquerDieFaces("red", $red);
+        $this->setConquerDieFaces("black", $black);
         $this->notifyAllPlayers("conquer_roll", clienttranslate('${player_name} rolls the conquer dice ${black_name}/${red_name}'), [
             "player_id" => $player_id,
             "player_name" => $this->customGetPlayerNameById($player_id),
-            "die_red" => $die_red,
-            "die_black" => $die_black,
-            "black_name" => $this->dice_names["black"][$die_black]["name"],
-            "red_name" => $this->dice_names["red"][$die_red]["name"],
+            "die_red" => $red[0],
+            "die_black" => $black[0],
+            "die_red_2" => $this->getGameStateValue("conquer_die_red_2"),
+            "die_black_2" => $this->getGameStateValue("conquer_die_black_2"),
+            "black_name" => $this->dice_names["black"][$black[0]]["name"],
+            "red_name" => $this->dice_names["red"][$red[0]]["name"],
             "i18n" => ["black_name", "red_name"],
-            "preserve" => ["die_red", "die_black"],
+            "preserve" => ["die_red", "die_black", "die_red_2", "die_black_2"],
         ]);
-        $this->dieRolled("red", $die_red, $player_id);
-        $this->dieRolled("black", $die_black, $player_id);
+        $this->notifyExtraDieFace("red", $red, $player_id);
+        $this->notifyExtraDieFace("black", $black, $player_id);
+        $this->dieRolled("red", $red[0], $player_id);
+        $this->dieRolled("black", $black[0], $player_id);
         $this->prepareUndoSavepoint();
     }
 
-    function rollRedConquerDie(int $player_id, bool $undosave) {
+    function rollRedConquerDie(int $player_id, bool $undosave, bool $extra = true) {
         // Roll conquer dice
-        $die_red = $this->rollDieFace("red");
-        $this->setGameStateValue("conquer_die_red", $die_red);
+        $red = $this->rollDieFaces("red", $player_id, $extra);
+        $this->setConquerDieFaces("red", $red);
         $this->notif("conquer_roll")
             ->withPlayer($player_id)
-            ->withArg("red_name", $this->dice_names["red"][$die_red]["name"])
-            ->withPreserveArg("die_red", $die_red)
+            ->withArg("red_name", $this->dice_names["red"][$red[0]]["name"])
+            ->withPreserveArg("die_red", $red[0])
+            ->withPreserveArg("die_red_2", $this->getGameStateValue("conquer_die_red_2"))
             ->notifyAll(clienttranslate('${player_name} rolls red conquer dice ${red_name}'));
-        $this->dieRolled("red", $die_red, $player_id);
+        $this->notifyExtraDieFace("red", $red, $player_id);
+        $this->dieRolled("red", $red[0], $player_id);
         if ($undosave) {
             $this->prepareUndoSavepoint();
         }
-        return $die_red;
+        return $red[0];
     }
 
-    function rollBlackConquerDie($player_id, bool $undosave) {
+    function rollBlackConquerDie($player_id, bool $undosave, bool $extra = true) {
         // Roll conquer dice
-        $die_black = $this->rollDieFace("black");
-        $this->setGameStateValue("conquer_die_black", $die_black);
+        $black = $this->rollDieFaces("black", $player_id, $extra);
+        $this->setConquerDieFaces("black", $black);
+        $die_black = $black[0];
         $ben_name = $this->dice_names["black"][$die_black]["name"];
-        $notif = $this->notif("conquer_roll", $player_id)->withArg("black_name", $ben_name)->withPreserveArg("die_black", $die_black);
+        $notif = $this->notif("conquer_roll", $player_id)
+            ->withArg("black_name", $ben_name)
+            ->withPreserveArg("die_black", $die_black)
+            ->withPreserveArg("die_black_2", $this->getGameStateValue("conquer_die_black_2"));
         if ($die_black == 1) {
             // territory benefit
             $tileben = $this->getTileBenefit();
@@ -12513,6 +12789,7 @@ abstract class PGameXBody extends tapcommon {
         } else {
             $notif->notifyAll(clienttranslate('${player_name} rolls black conquer die ${black_name}'));
         }
+        $this->notifyExtraDieFace("black", $black, $player_id);
         $this->dieRolled("black", $die_black, $player_id);
 
         if ($undosave) {

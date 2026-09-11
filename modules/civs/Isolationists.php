@@ -16,7 +16,7 @@ class Isolationists extends AbsCivilization {
             if ($this->game->getPlayersNumber() >= 4) {
                 $tokens[] = $this->game->addCivToken($player_id, 5, $civ);
             }
-            $this->game->awardCard($player_id, 2, CARD_TERRITORY, false, $reason);
+            $this->game->awardRandomCard($player_id, 2, CARD_TERRITORY, $reason);
         }
 
         return ["tokens" => $tokens, "outposts" => []];
