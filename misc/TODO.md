@@ -47,6 +47,13 @@ CODE BUGS
       Faefolk did, which is how it surfaced. Faefolk now uses BE_INVENT instead; row 26 is still a trap
       for the next caller.
 
+- [ ] getDeckFor inside dbPickCardsForLocation (PGameXBody around 2489) silently changed MYSTICS under
+      adjustment 8: their draw-and-keep tapestry rows (BE_ILLUMINATI_DRAW, GAMBLERS 311 and 319, anything
+      through effect_drawFromBenefit) now draw from the private deck_13 instead of the public deck. It is
+      coherent with effect_discardCard already sending their rejects to discard_13 (the old code leaked
+      public cards into the private discard), but it is an untested rules change: confirm it against the
+      MYSTICS mat text and add a MysticsTest case for a draw-and-keep row either way.
+
 - [ ] Werefolk: onSpaceTileClick has no checkActiveSlot guard, unlike onTerritoryTileClick and the track
       handlers, so a space tile the new spaceExploration filter dimmed is still clickable and fires
       explore_space just to earn a server rejection toast. Add "if (!this.checkActiveSlot(id)) return;"
@@ -59,6 +66,13 @@ CODE BUGS
       "case this.CON.CIV_GENIES: return;" beside "case 15: return;" in that handler, or restore the
       guard for every civ.
       Holder-click bug: reproduced. Clicking a ring holder during the ability state produced the "Internal Error ... [ERR:Genies:13]" toast in the log. The state survived and the button still worked afterwards. The fix in the TODO (early return for CIV_GENIES in onCubeHolderClick, or restoring the guard) is the right shape.
+
+- [ ] Merfolk + Elder Ones on one player: FORMAL_RULES CIV.MERFOLK.6 (Mike Young, BGG 3052380) lets
+      the player pick a Merfolk turn or an Elder Ones advance turn each turn. getExtendedPlayCiv
+      (PGameXBody around 3386) takes the first civ found and warns ERR:game:03, so the second civ's
+      turn type is never offered and the end condition (neither kind of turn possible) is not
+      checked. Needs the per-turn choice, the combined end test and a test that gains the second civ
+      via military 12 or tech card 23 before income turn 5.
 
 - [ ] place_structure never validates the requested x_y against the options argPlaceStructure computed,
       so the only thing stopping an illegal cell is the client "possible" class plus whatever
