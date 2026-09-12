@@ -7,7 +7,8 @@ Icons are images in the PDF, so `pdftotext` leaves gaps where they appear. Each 
 back as a `[NAME]` tag. The Faefolk ellipse, the Genies ring and the Psionics income table are
 diagrams with no text at all; they are transcribed as lists under their civilization.
 
-The stray backtick in Werefolk ("face-up, `You may regress") is in the source PDF.
+The source PDF has a stray backtick and capital in Werefolk ("face-up, `You may regress"); it is
+folded to "face-up, you may regress" here.
 
 ## ARTIFICERS
 
@@ -151,7 +152,7 @@ Inspired by the stars (not by the moon as rumored), the Werefolk occasionally re
 
 At the start of income turns 2-5, if there is a space tile ( [SPACE TILE] ) on this civilization mat, discard it. Then gain a random space tile, and flip it (like a coin) onto a clear area of the table or floor.
 
-If the tile lands face-up, `You may regress on 1 track; do not gain the benefit or the bonus.
+If the tile lands face-up, you may regress on 1 track; do not gain the benefit or the bonus.
 
 - If you regressed, explore with the space tile by placing it onto this civilization mat.
 - If you did not regress, gain 4 [VP].

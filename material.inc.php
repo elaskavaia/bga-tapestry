@@ -3998,6 +3998,7 @@ $this->civilizations = [
             //
         ],
         "al" => 8,
+        "incompatible" => CIV_PSIONICS, // FORMAL_RULES CIV.PSIONICS.12: a player never owns both
     ],
     CIV_ARCHITECTS => [
         //2
@@ -5750,18 +5751,14 @@ $this->civilizations = [
         "description" => [
             clienttranslate("<i>Artificers pull innovations from a future into the present.</i>"),
             clienttranslate(
-                "At the start of your income turns (2-4), you may select 1 income track and either set its leftmost building aside (not in your capital city), or, if the space to its left is empty, slide that building one space left."
+                "<b>At the start of income turns 2-4</b>, select 1 income track (e.g., farms). You may set your leftmost building on that track aside (not in your capital city); or, if there is at least one empty space to the left, you may slide that building left to cover the leftward space and reveal a different space to the right."
             ),
             clienttranslate(
-                "This changes the benefits that the income track provides to you. Buildings are still used from left to right."
+                "This changes the benefits that the income track provides to you. Continue to use buildings from left to right during gameplay."
             ),
             clienttranslate(
-                "At the start of your income turn 5, you may either score [1] [VP] per income building in your capital city, or select 1 income track and slide all of its buildings as far left as possible."
+                "<b>At the start of income turn 5</b>, you may either score 1 [VP] per income building in your capital city or you may select 1 income track and slide all buildings on that track as far leftward as possible."
             ),
-            clienttranslate(
-                "<li>Every income building that left your income mat scores, wherever it went: your capital city, beside it, a territory or a civilization mat.</li>"
-            ),
-            clienttranslate("<li>A building set aside never comes back, but it still counts as a building of its type.</li>"),
         ],
         "exp" => "FF",
         "automa" => true,
@@ -5770,19 +5767,17 @@ $this->civilizations = [
     CIV_CELESTIALS => [
         "name" => clienttranslate("CELESTIALS"),
         "description" => [
-            clienttranslate("<i>The Celestials float above the land, their capital untethered from the ground below.</i>"),
+            clienttranslate("<i>The Celestials' capital is a plot of acreage suspended in the sky.</i>"),
             clienttranslate(
-                "At the start of the game, or if you gain the Celestials mid-game, replace 1 of your [OUTPOST] on your starting territory with a player token, your floating capital, and return that [OUTPOST] to your supply."
+                "<b>At the start of the game</b>, instead of placing 2 outposts on your starting territory, place 1 upright outpost and a player token, which represents your floating capital. If you gain this civilization mid-game, replace one outpost of your starting territory with a player token."
             ),
             clienttranslate(
-                "At the start of your income turns (2-4), you may move your floating capital to an adjacent territory, even a territory that is full. If you do, roll both conquer dice and gain both benefits."
+                "<b>At the start of income turns 2-4</b>, you may move your player token to an adjacent territory (even a territory that already has 2 outposts). If you do, roll and gain [RED DIE] + [BLACK DIE]. This is not a conquer, nor does moving your token into a territory take control of that territory. As always, a territory with 2 items (such as your token) may not be conquered."
             ),
             clienttranslate(
-                "The floating capital never conquers and never controls a territory, but it is an item on it: a territory holding your floating capital and anything else may not be conquered."
+                "<b>At the start of income turn 5</b>, lose 2 [VP] per landmark that hangs off the side of your capital city and gain 5 [VP] per landmark that does not hang off the side of your capital city."
             ),
-            clienttranslate(
-                "At the start of your income turn 5, lose [2] [VP] per [LANDMARK] hanging off the side of your capital city, and gain [5] [VP] per [LANDMARK] that is not."
-            ),
+            clienttranslate("If you gain this civilization mid-game, you may discard it to draw another."),
         ],
         "exp" => "FF",
         "automa" => true,
@@ -5793,15 +5788,15 @@ $this->civilizations = [
         "name" => clienttranslate("ELDER ONES"),
         "description" => [
             clienttranslate("<i>The Elder Ones keep the secrets of extraordinary longevity.</i>"),
-            clienttranslate("On your income turns (2-4), either gain [ANY RESOURCE] or gain [TAPESTRY] [TAPESTRY]."),
+            clienttranslate("<b>On your income turns 2-4</b>, either gain [ANY RESOURCE] or gain [TAPESTRY] [TAPESTRY]."),
             clienttranslate(
-                "On your income turn 5, discard up to 6 [TAPESTRY] from your hand and gain [ANY RESOURCE] [ANY RESOURCE] per [TAPESTRY] discarded."
+                "<b>On your income turn 5</b>, discard up to 6 [TAPESTRY] from your hand and gain [ANY RESOURCE] [ANY RESOURCE] per [TAPESTRY] discarded."
             ),
             clienttranslate(
-                "After income turn 5, you may subsequently take advance turns as usual (but not play trap or other response cards, nor take additional income turns)."
+                "<b>After income turn 5</b>, you may subsequently take advance turns as usual (but not play trap or other response cards, nor take additional income turns). During this period after your income turn 5:"
             ),
             clienttranslate(
-                "<li>Any THIS ERA [TAPESTRY] on top of era 4 persists in its effect through the remainder of your game, unless you cover it by playing another tapestry.</li>"
+                "<li>Any THIS ERA [TAPESTRY] on top of era 4 persists in its effect through the remainder of your game, unless you cover it by playing another tapestry (due to a [OVERPLAY TAPESTRY] benefit).</li>"
             ),
             clienttranslate("<li>When you gain a landmark after income turn 5, score 10 [VP].</li>"),
             clienttranslate("<li>The game ends for you when you are no longer able to take an advance turn.</li>"),
@@ -5815,12 +5810,11 @@ $this->civilizations = [
         "description" => [
             clienttranslate("<i>The Faefolk cyclically flicker among adjacent realities.</i>"),
             clienttranslate(
-                "When you start the game (or gain Faefolk mid-game), place a player token on the [SCORE TAPESTRY] at the top of the ellipse shown here."
+                "<b>When you start the game (or gain Faefolk mid-game)</b>, place a player token on the [SCORE TAPESTRY] at the top of the ellipse shown to the right."
             ),
             clienttranslate(
-                "At the beginning of your income turns (2-5), you may gain 1 [TAPESTRY]. Next, count your visible [TAPESTRY] (including those on your income mat) and move your token clockwise that number of spots around the ellipse. Finally, gain the benefit shown on your token's new spot."
+                "<b>At the start of income turns 2-5</b>, you may gain 1 [TAPESTRY]. Next, count your visible [TAPESTRY] (including those on your income mat) and move your token clockwise that number of spots around the ellipse. Finally, gain the benefit shown on your token's new spot. On income turn 5, gain the indicated benefit twice instead of just once."
             ),
-            clienttranslate("On income turn 5, gain the indicated benefit twice instead of just once."),
         ],
         "exp" => "FF",
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
@@ -5848,25 +5842,24 @@ $this->civilizations = [
         "description" => [
             clienttranslate("<i>Genies grant wishes, though not altruistically.</i>"),
             clienttranslate(
-                "At the start of your income turns (2-4), a randomly drawn opponent chooses and scores 1 circled benefit on the ring shown here."
+                "<b>At the start of the game, or when you gain Genies mid-game</b>, collect a player token from each opponent."
             ),
             clienttranslate(
-                "You score that same circled benefit and gain a squared benefit adjacent to the chosen circled benefit. You may use your 2 benefits in either order."
+                "<b>On income turns 2-4</b>, randomly draw one of these player tokens to choose an opponent. (Return the token to your collection for possible future selection again.) That opponent chooses and scores 1 circled benefit. You score that same circled benefit and gain a squared benefit adjacent to the chosen circled benefit. You may use your 2 benefits in either order."
             ),
-            clienttranslate("At the start of your income turn 5, gain 2 different circled benefits of your choice."),
+            clienttranslate("<b>At the start of your income turn 5</b>, gain 2 different circled benefits of your choice."),
         ],
         "exp" => "FF",
         "automa" => false,
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
         "slots_description" => clienttranslate("clockwise"),
         "slots" => [
-            // the pile of the opponents' player tokens, in the middle of the ring
+            // the pile of the opponents' player tokens, in the middle of the ring; no title so the card tooltip skips it
             0 => [
                 "top" => 77.2,
                 "left" => 61.5,
                 "w" => 22,
                 "h" => 4.9,
-                "title" => clienttranslate("Player tokens of the opponents"),
                 "tooltip" => clienttranslate("Player tokens of the opponents, one is drawn at random on income turns 2-4"),
             ],
             1 => ["top" => 67.6, "left" => 68.9, "w" => 7.6, "h" => 4.9, "benefit" => [BE_RESEARCH_NB]],
@@ -5884,7 +5877,7 @@ $this->civilizations = [
         "description" => [
             clienttranslate("<i>The Illuminati profit from the lowest and highest urges of humanity.</i>"),
             clienttranslate(
-                "At the start of the game, or if you gain the Illuminati mid-game, draw 3 [TAPESTRY], keep 1, and discard the other 2. Then, place all 3 dice on this mat."
+                "<b>At the start of the game, or if you gain the Illuminati mid-game</b>, draw 3 [TAPESTRY], keep 1, and discard the other 2. Then, place all 3 dice on this mat. (If your player group owns and uses a set of dice for each player, discard this civilization and draw another.)"
             ),
             clienttranslate("When an opponent takes the conquest dice from your mat, you gain both of the benefits rolled."),
             clienttranslate(
@@ -5894,7 +5887,7 @@ $this->civilizations = [
                 "If you take a die from your mat to roll it, put it back onto your mat after you roll. But if an opponent rolls a die, leave it off your mat until your next income turn. If an opponent rerolls a die, you may gain only from the first roll immediately after they take the die."
             ),
             clienttranslate(
-                "At the start of your income turns 2-5, gain 6 [VP] per die still on this mat. Then place all 3 dice on this mat."
+                "<b>At the start of your income turns 2-5</b>, gain 6 [VP] per die still on this mat. Then place all 3 dice on this mat."
             ),
         ],
         "exp" => "FF",
@@ -5906,17 +5899,17 @@ $this->civilizations = [
         "description" => [
             clienttranslate("<i>Merfolk build a hidden world underwater, beside an earthly domain.</i>"),
             clienttranslate(
-                "At the start of income turns (2-4), gain a [TAPESTRY]. Then, place all but 2 of the [TAPESTRY] from your hand under this mat. During eras 2-4, you may look at these \"submerged\" [TAPESTRY] but may not play, spend, or score them. You may continue to use [TAPESTRY] in your hand (and gain [TAPESTRY] into your hand) as usual."
+                "<b>At the start of income turns 2-4</b>, gain a [TAPESTRY]. Then, place all but 2 of the [TAPESTRY] from your hand under this mat. During eras 2-4, you may look at these \"submerged\" [TAPESTRY] but may not play, spend, or score them. You may continue to use [TAPESTRY] in your hand (and gain [TAPESTRY] into your hand) as usual."
             ),
             clienttranslate(
-                "At the start of income turn 5, gain a [TAPESTRY] and return all submerged [TAPESTRY] to your hand. At the end of income turn 5, you may keep up to 5 [TAPESTRY]; discard the rest of your [TAPESTRY]."
+                "<b>At the start of income turn 5</b>, gain a [TAPESTRY] and return all submerged [TAPESTRY] to your hand. At the end of income turn 5, you may keep up to 5 [TAPESTRY]; discard the rest of your [TAPESTRY]."
             ),
             clienttranslate(
-                "After income turn 5, you will only use [TAPESTRY] (not take income or advance turns). Each time it is your turn:"
+                "<b>After income turn 5</b>, you will only use [TAPESTRY] (not take income or advance turns). Each time it is your turn:"
             ),
-            clienttranslate("<li>Discard any number of [TAPESTRY] from your hand for 5 [VP] each, or</li>"),
+            clienttranslate("(a) Discard any number of [TAPESTRY] from your hand for 5 [VP] each, or"),
             clienttranslate(
-                "<li>Play a [TAPESTRY] as a tapestry onto the era 4 stack for its WHEN PLAYED ability. Any ERA 5 effect triggered occurs immediately. Gain any left-hand charm bonuses as usual.</li>"
+                "(b) Play a [TAPESTRY] as a tapestry onto the era 4 stack for its WHEN PLAYED ability. Any [ERA 5] effect triggered occurs immediately. Gain any left-hand charm bonuses as usual."
             ),
             clienttranslate(
                 "If attacked, you may play response cards from your hand. Your game ends when you have expended your [TAPESTRY]."
@@ -5926,6 +5919,33 @@ $this->civilizations = [
         "automa" => false,
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
     ],
+    CIV_PSIONICS => [
+        "name" => clienttranslate("PSIONICS"),
+        "description" => [
+            clienttranslate("<i>Psionics sample nearby realities and choose the one they prefer.</i>"),
+            clienttranslate("When you gain something random, generate an extra option and pick 1 (discarding the other). Specifically:"),
+            clienttranslate("Whenever you roll a die, roll it twice and choose 1 of the 2 values that you rolled."),
+            clienttranslate(
+                "Whenever you gain a random [TECHNOLOGY] / [TAPESTRY] / [LANDMARK CARD] / [TERRITORY] / [SPACE TILE] / [CIVILIZATION] from the respective deck or supply, draw two and keep one. Shuffle the other back into the supply. (This applies only when gaining a random option, not a face-up option, nor when just revealing.)"
+            ),
+            clienttranslate(
+                "This effect adds (not multiplies) with other effects that give an extra option. For example, when combined with Empiricism, you might roll a total of 3 times (not 4)."
+            ),
+            clienttranslate("<b>At the start of income turns 2-5</b>, gain the benefit shown to the right."),
+        ],
+        "exp" => "FF",
+        "automa" => true,
+        "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
+        "incompatible" => CIV_ALCHEMISTS, // FORMAL_RULES CIV.PSIONICS.12: a player never owns both
+        // the income turn table, display only: the server reads Psionics::INCOME_ROWS
+        "slots_description" => clienttranslate("income turn"),
+        "slots" => [
+            2 => ["top" => 89.5, "left" => 58.9, "w" => 7, "h" => 5.2, "benefit" => [BE_TERRITORY]],
+            3 => ["top" => 89.5, "left" => 65.8, "w" => 7, "h" => 5.2, "benefit" => [BE_TAPESTRY]],
+            4 => ["top" => 89.5, "left" => 72.8, "w" => 7, "h" => 5.2, "benefit" => [BE_INVENT]],
+            5 => ["top" => 89.5, "left" => 80, "w" => 7, "h" => 5.2, "benefit" => [BE_RESEARCH]], //
+        ],
+    ],
     CIV_WEEFOLK => [
         "name" => clienttranslate("WEEFOLK"),
         "description" => [
@@ -5933,14 +5953,13 @@ $this->civilizations = [
                 "<i>Weefolk live unnoticed in woods and towns, giving blessings to nearby inhabitants - as long as they are not disturbed!</i>"
             ),
             clienttranslate(
-                "At the start of your income turns (2-5), or if you gain Weefolk mid-game, give a player token to an opponent. They choose a plot to place your token in their capital city. If their city is full, they replace an income building with your token; that building is set aside."
+                "<b>At the start of income turns 2-5, or if you gain Weefolk mid-game</b>, give a player token to an opponent. They choose a plot to place your token in their capital city. (If their city is full, they replace a building with your token; that building is set aside.) That plot, occupied by a clan of your people, is now considered filled, contributing to the resources and score of your opponent according to the rules of your opponent's capital city."
             ),
             clienttranslate(
-                "That plot, occupied by a clan of your people, is now considered filled, contributing to the resources and score of your opponent according to the rules of your opponent's capital city."
+                "<b>On income turns 2-4</b>, you may spend [TERRITORY]. If you do so, then gain [ANY INCOME BUILDING]. This can be done once per income turn 2-4."
             ),
-            clienttranslate("On income turns (2-4), you may spend 1 [TERRITORY]. If you do so, then gain 1 [ANY INCOME BUILDING]."),
             clienttranslate(
-                "On your income turn 5, look at each row and column where your opponents placed your tokens. Score 1 [VP] per income building or landmark located anywhere in any of those rows or columns, once per token's row and once per token's column."
+                "<b>On your income turn 5</b>, look at each row and column where your opponents placed your tokens. Score 1 [VP] per income building or landmark located anywhere in any of those rows or columns. Score a building more than once if appropriate, such as when it's in more than one token's row, or in a token's row and also its column."
             ),
         ],
         "exp" => "FF",
@@ -5955,7 +5974,7 @@ $this->civilizations = [
                 "<i>Inspired by the stars (not by the moon as rumored), the Werefolk occasionally regress in a feral pursuit of their goals.</i>"
             ),
             clienttranslate(
-                "At the start of your income turns (2-5), if there is a space tile on this civilization mat, discard it. Then gain a random space tile, and flip it (like a coin)."
+                "<b>At the start of income turns 2-5</b>, if there is a space tile ( [SPACE TILE] ) on this civilization mat, discard it. Then gain a random space tile, and flip it (like a coin) onto a clear area of the table or floor."
             ),
             clienttranslate("If the tile lands face-up, you may regress on 1 track; do not gain the benefit or the bonus."),
             clienttranslate("<li>If you regressed, explore with the space tile by placing it onto this civilization mat.</li>"),
