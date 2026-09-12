@@ -43,7 +43,6 @@ $game_options = [
             ],
             8 => [
                 "name" => totranslate("Adjustment Civilization Pack (Default)"),
-                "beta" => true,
                 "description" => totranslate("official expansion"),
             ],
             9 => [
@@ -76,7 +75,6 @@ $game_options = [
             0 => ["name" => totranslate("Keep"), "description" => totranslate("original rules")],
             1 => [
                 "name" => totranslate("Remove"),
-                "beta" => true,
                 "tmdisplay" => totranslate("without Marriage of State"),
                 "description" => totranslate("house rules"),
             ],
@@ -90,7 +88,6 @@ $game_options = [
             0 => ["name" => totranslate("Keep"), "description" => totranslate("original rules")],
             1 => [
                 "name" => totranslate("Remove"),
-                "beta" => true,
                 "tmdisplay" => totranslate("without Renaissance"),
                 "description" => totranslate("house rules"),
             ],
@@ -101,9 +98,9 @@ $game_options = [
     140 => [
         "name" => totranslate("Civilization Set"),
         "values" => [
-            0b111 => ["name" => totranslate("All (Original + PP + AA)"), "tmdisplay" => totranslate("Civilation Set: All"), "beta" => true],
+            0b111 => ["name" => totranslate("All (Original + PP + AA)"), "tmdisplay" => totranslate("Civilation Set: All")],
             0b001 => ["name" => totranslate("Original Only")],
-            0b011 => ["name" => totranslate("Original + Plans & Ploys"), "tmdisplay" => totranslate("Plans & Ploys"), "beta" => true],
+            0b011 => ["name" => totranslate("Original + Plans & Ploys"), "tmdisplay" => totranslate("Plans & Ploys")],
             // 0b101 => ['name' => totranslate('Original + Arts & Architecture'), ],
             // 0b010 => [
             //     "name" => totranslate("Plans & Ploys Only - Do not use"),
