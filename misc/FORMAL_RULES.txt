@@ -2,6 +2,8 @@ This is my rules interpretation, not the printed rules. The printed rules are RU
 uses its words and the glossary below defines them, plus the few extra terms this file needs. Where
 the two disagree, RULES.md is what the rulebook says and this file is what is implemented.
 Clauses are cited by code, e.g. MOVE.2 or CIV.WEEFOLK.3; a CIV code is the material constant.
+A CIV clause is shown to players in the civilization tooltip up to its first Ref., Ruled by or
+Impl. line; Impl. lines hold implementation notes, and a clause that starts with Impl. is not shown.
 
 Glossary
 
@@ -274,6 +276,9 @@ CIV.INFILTRATORS
 CIV.INFILTRATORS.1 The third token counts every player token of yours on that territory, whatever
     placed it (MAP.4).
 
+CIV.ALCHEMISTS
+CIV.ALCHEMISTS.1 BGA rule: Is not compatible with PSIONICS (CIV.PSIONICS.12).
+
 CIV.ARTIFICERS
 CIV.ARTIFICERS.1 The slide moves the leftmost building of the chosen track exactly one space to the
     left, onto the space next to it. It is not a move to the leftmost empty space.
@@ -294,17 +299,17 @@ CIV.ARTIFICERS.5 Both abilities resolve at the start of the income turn, so that
 CIV.ARTIFICERS.6 Setting a building aside is not gaining a building: nothing is placed, so nothing
     that triggers on gaining or placing a building fires. The space it uncovers pays from that turn
     on, like any other uncovered space.
-CIV.ARTIFICERS.7 A finished or zombie owner changes nothing on their mat.
+CIV.ARTIFICERS.7 Impl. A finished or zombie owner changes nothing on their mat.
 
 CIV.CELESTIALS
-CIV.CELESTIALS.1 The floating capital is an inert item (MAP.2).
+CIV.CELESTIALS.1 The floating capital is an inert item (MAP.2). It grants no control: a player
+    whose only upright outpost is gone can neither conquer nor explore from it.
     Ref. Joe Aubrey (Stonemaier Games), BGG thread 3150783 "Celestials, and not having an outpost
-    on the board.": the floating capital alone grants no control, so a player whose only upright
-    outpost is gone can neither conquer nor explore from it.
+    on the board.".
 CIV.CELESTIALS.2 The move is to an explored adjacent territory. With no explored adjacent territory
     the ability is void for that turn. A skipped move is not caught up.
-CIV.CELESTIALS.3 The move may float any inert token of the owner (MAP.4). A zombie owner never moves
-    it (MAP.5).
+CIV.CELESTIALS.3 The move may float any inert token of the owner (MAP.4).
+    Impl. A zombie owner never moves it (MAP.5).
 CIV.CELESTIALS.4 The move is not a conquer: no "whenever you conquer" trigger, die pick, trap card,
     TRADERS leftover die, UTILITARIENS barracks or explore. Both dice pay, red then black; black
     face 1 pays the benefit of the territory moved into; a face with no benefit pays nothing.
@@ -312,13 +317,14 @@ CIV.CELESTIALS.5 The dice are rolled from the ILLUMINATI mat: the ILLUMINATI own
     (CIV.ILLUMINATI.1, CIV.ILLUMINATI.4).
 CIV.CELESTIALS.6 A landmark hangs off the side when any plot of its footprint is outside the grid.
     Judged at the start of income turn 5; a landmark placed later scores neither way. A landmark
-    not in the capital city (set aside per CIV.WEEFOLK.3, on a CRAFTSMEN slot) is neither.
+    not in the capital city (set aside by a WEEFOLK token or on a CRAFTSMEN slot, CIV.WEEFOLK.3) is
+    neither.
     Ref. Mike Young (co-designer), BGG thread 3036298 "How do Celestials and City in a Bottle
     interact?": with no landmark in the city nothing hangs off and nothing does not, so the player
     neither loses nor gains.
 CIV.CELESTIALS.7 Hanging off changes nothing else: the plots outside the grid belong to no row,
-    column or district and are never a WEEFOLK token's line; CIV.WEEFOLK.1 still counts a hanging
-    landmark once per line it touches inside the grid. The landmark itself still counts for
+    column or district and are never a WEEFOLK token's line; the WEEFOLK scoring (CIV.WEEFOLK.1)
+    still counts a hanging landmark once per line it touches inside the grid. The landmark itself still counts for
     per-landmark scoring (BUILDING.5).
 CIV.CELESTIALS.8 Gained mid-game, the floating capital always goes onto the starting territory. An
     outpost of the owner there, upright or toppled, returns to the supply; with none there the
@@ -361,86 +367,103 @@ CIV.FAEFOLK.3 The ability triggers on income turns 2-5 only, never on income tur
     BGG thread 3054727 "Consolidated List of Misprints".
 
 CIV.GENIES
-CIV.GENIES.1 A finished opponent is out of the bag for the draw. A zombie opponent stays in and
-    picks a random circled benefit; only the GENIES player scores. With no opponent able to answer
-    the ability is skipped and the GENIES player scores nothing.
+CIV.GENIES.1 A finished opponent is out of the bag for the draw. With no opponent able to answer the
+    ability is skipped and the GENIES player scores nothing.
+    Impl. A zombie opponent stays in and picks a random circled benefit; only the GENIES player
+    scores.
 
 CIV.ILLUMINATI
-CIV.ILLUMINATI.1 Read as: "When an opponent takes any of the three dice from your mat, you gain the
-    benefit rolled on that die (ignoring any rerolls). If multiple dice are taken at the same time,
-    you get the benefit of each die." A roll of the black die alone takes only the black die; a
-    conquer takes both. A die leaves the mat on its first roll; later rolls of it (EMPIRICISM's
-    second roll included) pay nothing until the owner's next income turn returns it.
+CIV.ILLUMINATI.1 Each die taken pays its own benefit: a roll of the black die alone takes only the
+    black die; a conquer takes both.
+    Impl. A die off the mat pays nothing until the owner's next income turn returns it.
+    Impl. Official reading: "When an opponent takes any of the three dice from your mat, you gain
+    the benefit rolled on that die (ignoring any rerolls). If multiple dice are taken at the same
+    time, you get the benefit of each die." A die leaves the mat on its first roll; EMPIRICISM's
+    second roll is a later roll of it.
     Ref. Joe (Stonemaier Games) on their Discord, relayed by Alex S in BGG thread 3245586
     "Treasure Hunters vs Illuminati".
-CIV.ILLUMINATI.2 Any science roll from the mat takes the science die, a tapestry card trigger
-    included: research, AGE OF DISCOVERY, the tech card research benefit
+CIV.ILLUMINATI.2 Impl. Any opponent's science roll takes the science die, whatever effect rolls it.
+    Impl. Research, AGE OF DISCOVERY, the tech card research benefit.
     Ref. Mike Young (designer), BGG thread 3058558 "Illuminati - Chimera".
-CIV.ILLUMINATI.3 A taken conquer die pays what the roller would gain from that face: black face 1
-    is the benefit of the territory being conquered; a face with no benefit pays nothing. The
-    science die pays an optional advance with no benefit and no bonus; a track landmark reached is
-    gained (MOVE.4).
-CIV.ILLUMINATI.4 The owner's gain from a taken die resolves before the roller uses the roll: before
-    the die pick, the research decision, the roller's advance, a keep-or-reroll choice. A race to
-    a track landmark goes to the owner.
-CIV.ILLUMINATI.5 A finished or zombie owner gains nothing from a taken die; their dice never return.
-CIV.ILLUMINATI.6 The income ability scores the dice on the mat at the start of the income turn. A
-    civilization gained in the civilization step of income turns 2-5 fires that same turn with all
-    three dice on the mat.
-CIV.ILLUMINATI.7 The owner rolling a die from their own mat, on any turn and for any effect, leaves
-    it on the mat: only an opponent takes a die.
+CIV.ILLUMINATI.3 Conquer roll: the black die's territory benefit face pays the benefit of the
+    territory being conquered, nothing when that territory has none.
+    Impl. A track landmark reached by the science advance is gained (MOVE.4).
+    Impl. The science die pays an optional advance with no benefit and no bonus.
+CIV.ILLUMINATI.4 The owner's gain from a taken die resolves before the roller uses the roll; a
+    race to a track landmark goes to the owner.
+    Impl. Before the die pick, the research decision, the roller's advance, a keep-or-reroll
+    choice.
+CIV.ILLUMINATI.5 Impl. A finished or zombie owner gains nothing from a taken die; their dice never
+    return.
+CIV.ILLUMINATI.6 A civilization gained in the civilization step of income turns 2-5 scores that
+    same turn with all three dice on the mat.
+    Impl. The income ability scores the dice on the mat at the start of the income turn.
+CIV.ILLUMINATI.7 Impl. The owner rolling a die from their own mat, on any turn and for any effect,
+    leaves it on the mat: only an opponent takes a die.
 
 CIV.MERFOLK
-CIV.MERFOLK.1 Submerge: the player picks the 2 cards to keep; a hand of 2 or fewer submerges
-    nothing. Submerged cards are not in hand for any purpose: hand counts, payments, reveal-hand
-    effects, opponents' effects, the FAEFOLK visible count.
-CIV.MERFOLK.2 Returning the submerged cards on income turn 5 is not a gain; the card drawn on
-    income turns 2-5 is.
-CIV.MERFOLK.3 "Keep up to 5" is answered as exactly 5 (discarding more gains nothing)
+CIV.MERFOLK.1 Submerged cards are not in hand for any purpose.
+    Impl. Hand counts, payments, reveal-hand effects, opponents' effects, the FAEFOLK visible count.
+    Impl. The player picks the 2 cards to keep; a hand of 2 or fewer submerges nothing.
+CIV.MERFOLK.2 Returning the submerged cards on income turn 5 is not a gain.
+    Impl. The card drawn on income turns 2-5 is a gain.
+CIV.MERFOLK.3 Impl. "Keep up to 5" is answered as exactly 5 (discarding more gains nothing).
 CIV.MERFOLK.4 An extended turn is mandatory: discarding discards at least one card; there is no
     pass.
-CIV.MERFOLK.5 Any card can be played on an extended turn. "When played" applies; a "this era" card
-    stays in effect for the rest of the game (CIV.ELDER_ONES.1). The game ends at the start of a
-    turn with an empty hand: a trap card played in defence ends it on the next turn.
+CIV.MERFOLK.5 Any card can be played on an extended turn; a "this era" card stays in effect for the
+    rest of the game unless overplayed.
+    Impl. The game ends at the start of a turn with an empty hand.
+    Impl. A trap card played in defence empties the hand between turns, so the game ends on the next
+    turn.
 CIV.MERFOLK.6 A player holding both MERFOLK and ELDER ONES chooses on each turn after income turn 5
-    whether it is a MERFOLK turn (discard or play) or an ELDER ONES advance turn, and may switch
-    between them freely. The game ends for them when neither kind of turn is possible.
+    whether it is a MERFOLK turn or an ELDER ONES advance turn. The game ends for them when neither
+    kind of turn is possible.
     Ref. Mike Young (co-designer), BGG thread 3052380 "Merfolk + Elder Ones": "You may take either
     a merfolk or elder one advancement turn each turn you play, pick and choose as desired".
 
 CIV.PSIONICS
-CIV.PSIONICS.1 The extra option is one per die rolled and one per draw, however many options the
-    effect already offers: a draw 3 keep 1 becomes a draw 4 keep 1, not three draw 2 keep 1 in a
-    row. An effect rolling two dice gets an extra face on each even where only one of them will pay
+CIV.PSIONICS.1 Impl. "This effect adds (not multiplies) with other effects that give an extra
+    option": one extra face per die rolled and one extra card per draw, however many the effect
+    already offers. A draw 3 keep 1 becomes a draw 4 keep 1, not three draw 2 keep 1 in a row; an
+    effect rolling two dice gets an extra face on each even where only one of them will pay
     (conquer); an effect that gains the result of every roll gets an extra face and its own choice
     on each of those rolls.
     Ref. BGG thread 3082746 "Psionics seems like a very weak Civ", players only and no designer
     answer: they agree on one more, not double, and the draw 4 versus three draw 2 question is
     asked there and left open. Ruled by Victoria from the card's own worked example.
-CIV.PSIONICS.2 A gain is random only where the deck or supply decides it. A card an effect names, or
-    takes from a discard, from an opponent's hand or from a set aside pile, is not a random gain.
-CIV.PSIONICS.3 The deal at setup is not a gain during play and no part of it is subject to PSIONICS,
-    the deal that hands out PSIONICS included. A civilization's own setup draw is subject to
-    PSIONICS when that civilization is gained during play.
-CIV.PSIONICS.4 A finished or zombie owner generates no extra option: the effect resolves as it does
-    without the civilization.
-CIV.PSIONICS.5 A condition on what is kept is answered over the enlarged set: a GAMBLERS draw that
-    must play a "when played" card if it can is answered against every card drawn.
-CIV.PSIONICS.6 A PSIONICS roll of a die from the ILLUMINATI mat is one roll: the ILLUMINATI owner is
-    paid for the first face only, whichever face the roller keeps, and the die leaves the mat
-    (CIV.ILLUMINATI.1, CIV.ILLUMINATI.4).
-CIV.PSIONICS.7 A coin flip is not a die roll and gains no extra option. A WEREFOLK space tile is a
-    random gain.
-CIV.PSIONICS.8 A gain another player's civilization copies (ADVISORS) is a separate gain for each of
-    them, each subject only to its own owner's civilization.
-CIV.PSIONICS.9 On a conquer the roller keeps one face per die. The die they do not claim goes to a
-    TRADERS owner on its second face: the roller rerolled the same die, so that is the face left
-    showing.
-CIV.PSIONICS.10 The face the roller keeps is the result of that die for every effect that reads it
-    (UTILITARIANS Barracks, a TRADERS owner reading the claimed die, ILLUMINATI excepted per
-    CIV.PSIONICS.6). Only the die the roller does not claim shows its second face (CIV.PSIONICS.9).
-CIV.PSIONICS.11 The face-down card placed on the income mat when the player has no tapestry card in
-    hand is a placeholder, not a random gain: nothing is chosen, so no extra option.
+CIV.PSIONICS.2 Impl. A gain is random only where the deck or supply decides it. A card an effect
+    names, or takes from a discard, an opponent's hand or a set aside pile, is not a random gain.
+CIV.PSIONICS.3 Impl. The ability applies only after game setup; the civilization pick is not a
+    gain. A civilization gained during play runs its setup draw with the extra option: ILLUMINATI's
+    draw 3 keep 1 becomes draw 4 keep 1.
+CIV.PSIONICS.4 Impl. A finished or zombie owner generates no extra option: the effect resolves as it
+    does without the civilization.
+CIV.PSIONICS.5 Impl. With GAMBLERS the player picks from 4 revealed cards instead of 3.
+CIV.PSIONICS.6 Impl. A PSIONICS roll of a die from the ILLUMINATI mat is one roll: the ILLUMINATI owner is
+    paid for the first face only, whichever face the roller keeps.
+CIV.PSIONICS.7 A coin flip is not a die roll and gains no extra option.
+CIV.PSIONICS.8 Impl. A gain another player's civilization copies (ADVISORS) is a separate gain for
+    each of them, each subject only to its own owner's civilization.
+CIV.PSIONICS.9 On a conquer you choose a face for each die (2 red + 2 black); the die you do not claim stays at second roll.
+    Impl. The roller rerolled the same die, so that is the face left showing.
+CIV.PSIONICS.10 The face you choose is the result of that die for every effect that reads it
+    (UTILITARIANS Barracks, a TRADERS owner reading the claimed die; ILLUMINATI excepted,
+    CIV.PSIONICS.6).
+    Impl. Only the die the roller does not claim shows its second face (CIV.PSIONICS.9).
+CIV.PSIONICS.11 Impl. The face-down tapestry card placed on the income mat when your hand is empty is not a random
+    gain.
+    Impl. It is a placeholder: nothing is chosen, so no extra option.
+CIV.PSIONICS.12 BGA rule: Is not compatible with ALCHEMISTS
+    Impl. a choice draw never offers the
+    other, a random gain of it is discarded and redrawn.
+    Impl. A player who owns one can never gain the other. On a choice draw (draw N keep 1,
+    discard-and-gain) the partner is never among the candidates; on a random single gain the drawn
+    partner is discarded and a replacement drawn. Civilizations are unique, so at most one
+    replacement is needed; when the only card left is the partner the gain resolves with nothing
+    rather than looping.
+    Ruled by Victoria; the two abilities do not combine cleanly and the pack keeps them apart. This
+    replaces the dropped PSIONICS-on-ALCHEMISTS-dice sampling: the two never sit at one mat, so it
+    cannot arise.
 
 CIV.WEEFOLK
 CIV.WEEFOLK.1 Scoring is per token, not per distinct line: two tokens in one row score it twice; a
@@ -452,10 +475,11 @@ CIV.WEEFOLK.3 A city with no open plot: the opponent chooses the income building
     landmarks are never offered. The set aside building is treated as one placed outside the grid
     (BUILDING.2, BUILDING.4).
     The plot stays filled: districts and rows keep their state, no district completes twice.
-CIV.WEEFOLK.4 A finished opponent is not offered a token. A zombie opponent is: the token is
-    planted on a random open plot, or kept if the city has none. With no opponent able to take a
-    token the gift is skipped for that income turn; the territory trade (turns 2-4) and the scoring
-    (turn 5) still happen.
+CIV.WEEFOLK.4 A finished opponent is not offered a token. With no opponent able to take a token the
+    gift is skipped for that income turn; the territory trade (turns 2-4) and the scoring (turn 5)
+    still happen.
+    Impl. A zombie opponent is offered one: the token is planted on a random open plot, or kept if
+    the city has none.
 CIV.WEEFOLK.5 A planted token is not a building, outpost or income building of the WEEFOLK player.
     An ARCHITECTS cube in the player's own capital city is not a planted token.
 

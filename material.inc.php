@@ -3999,6 +3999,7 @@ $this->civilizations = [
         ],
         "al" => 8,
         "incompatible" => CIV_PSIONICS, // FORMAL_RULES CIV.PSIONICS.12: a player never owns both
+        "rulings" => [clienttranslate("BGA rule: Is not compatible with PSIONICS.")],
     ],
     CIV_ARCHITECTS => [
         //2
@@ -5377,6 +5378,7 @@ $this->civilizations = [
         "slots" => [["benefit" => [170]], ["benefit" => [171]]], //
         "income_trigger" => ["from" => 2, "to" => 5], //
         "al" => 8,
+        "rulings" => [clienttranslate("The third token counts every player token of yours on that territory, whatever placed it.")],
     ],
     CIV_ISLANDERS => [
         "name" => clienttranslate("ISLANDERS"),
@@ -5763,6 +5765,26 @@ $this->civilizations = [
         "exp" => "FF",
         "automa" => true,
         "income_trigger" => ["from" => 2, "to" => 5],
+        "rulings" => [
+            clienttranslate(
+                "The slide moves the leftmost building of the chosen track exactly one space to the left, onto the space next to it. It is not a move to the leftmost empty space."
+            ),
+            clienttranslate(
+                "The income spaces already uncovered at the start of the game are valid slide targets. A slid building occupies its new space, so once no empty space is left of the leftmost building that track can no longer be slid."
+            ),
+            clienttranslate(
+                "A building set aside this way never comes back: it cannot be placed in the capital city later, whatever offers the placement. It still counts for its type."
+            ),
+            clienttranslate(
+                "The income turn 5 slide packs every building of the chosen track flush against the left end of the track, so the spaces it uncovers are the highest numbered ones."
+            ),
+            clienttranslate(
+                "Both abilities resolve at the start of the income turn, so that turn's income is paid from the new layout, the turn 5 VP income included."
+            ),
+            clienttranslate(
+                "Setting a building aside is not gaining a building: nothing is placed, so nothing that triggers on gaining or placing a building fires. The space it uncovers pays from that turn on, like any other uncovered space."
+            ),
+        ],
     ],
     CIV_CELESTIALS => [
         "name" => clienttranslate("CELESTIALS"),
@@ -5783,6 +5805,28 @@ $this->civilizations = [
         "automa" => true,
         "income_trigger" => ["from" => 2, "to" => 5],
         "midgame_ben" => ["or" => [174, 173]],
+        "rulings" => [
+            clienttranslate(
+                "The floating capital is an inert item. It grants no control: a player whose only upright outpost is gone can neither conquer nor explore from it."
+            ),
+            clienttranslate(
+                "The move is to an explored adjacent territory. With no explored adjacent territory the ability is void for that turn. A skipped move is not caught up."
+            ),
+            clienttranslate("The move may float any inert token of the owner."),
+            clienttranslate(
+                "The move is not a conquer: no \"whenever you conquer\" trigger, die pick, trap card, TRADERS leftover die, UTILITARIENS barracks or explore. Both dice pay, red then black; black face 1 pays the benefit of the territory moved into; a face with no benefit pays nothing."
+            ),
+            clienttranslate("The dice are rolled from the ILLUMINATI mat: the ILLUMINATI owner is paid first."),
+            clienttranslate(
+                "A landmark hangs off the side when any plot of its footprint is outside the grid. Judged at the start of income turn 5; a landmark placed later scores neither way. A landmark not in the capital city (set aside by a WEEFOLK token or on a CRAFTSMEN slot) is neither."
+            ),
+            clienttranslate(
+                "Hanging off changes nothing else: the plots outside the grid belong to no row, column or district and are never a WEEFOLK token's line; the WEEFOLK scoring still counts a hanging landmark once per line it touches inside the grid. The landmark itself still counts for per-landmark scoring."
+            ),
+            clienttranslate(
+                "Gained mid-game, the floating capital always goes onto the starting territory. An outpost of the owner there, upright or toppled, returns to the supply; with none there the token is placed alone."
+            ),
+        ],
     ],
     CIV_ELDER_ONES => [
         "name" => clienttranslate("ELDER ONES"),
@@ -5804,6 +5848,23 @@ $this->civilizations = [
         "exp" => "FF",
         "automa" => false,
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
+        "rulings" => [
+            clienttranslate(
+                "Extended play begins after income turn 5. During income turn 5 the era 4 tapestry card is inactive and a landmark gained scores no 10 VP. In extended play the era 4 tapestry space is the active one; an overplay lands there."
+            ),
+            clienttranslate(
+                "\"No longer able to take an advance turn\" is judged at the start of the player's turn by the affordability test that auto-triggers an income turn; blocked tracks are not consulted. Ending is also voluntary (\"may take advance turns\") and final: no further income turn."
+            ),
+            clienttranslate(
+                "Every landmark gained after income turn 5 scores the 10 VP, whatever granted it and on whoever's turn (SOCIALISM included), track and tech card landmarks alike."
+            ),
+            clienttranslate(
+                "In extended play the player still answers prompts aimed at opponents (GENIES wish, WEEFOLK token). The trap response on a conquer of their territory is skipped."
+            ),
+            clienttranslate(
+                "Income turn 5 is unchanged: VP income, achievement VP, confirmation. Only final scoring is deferred to the end of extended play, a second civilization's final scoring included (ISLANDERS, RIVERFOLK)."
+            ),
+        ],
     ],
     CIV_FAEFOLK => [
         "name" => clienttranslate("FAEFOLK"),
@@ -5835,6 +5896,15 @@ $this->civilizations = [
             5 => ["top" => 85.2, "left" => 61.9, "w" => 11.6, "h" => 7.4, "benefit" => [BE_GAIN_CULTURE, BE_VP_TERRITORY]],
             6 => ["top" => 76.7, "left" => 57.5, "w" => 11.6, "h" => 7.5, "benefit" => [BE_GAIN_WORKER, BE_VP_CAPITAL]],
             7 => ["top" => 68.2, "left" => 57.5, "w" => 11.6, "h" => 7.5, "benefit" => [BE_SPACE, BE_EXPLORE_SPACE]], //
+        ],
+        "rulings" => [
+            clienttranslate("\"Score any building\": the player picks one income building type and scores it, not the sum of all types."),
+            clienttranslate(
+                "\"Visible tapestry\" counts the hand and the income mat; a card covered by an overplay does not count. The card gained at the start of the ability counts; a card moved from hand to mat during the same resolution counts once."
+            ),
+            clienttranslate(
+                "The ability triggers on income turns 2-5 only, never on income turn 1. The first printing of the mat omits the turn range; the r4 mat and the errata state it."
+            ),
         ],
     ],
     CIV_GENIES => [
@@ -5871,6 +5941,11 @@ $this->civilizations = [
             7 => ["top" => 77.3, "left" => 53.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_EXPLORE]],
             8 => ["top" => 70.5, "left" => 58.5, "w" => 7.6, "h" => 4.9, "benefit" => [BE_VP_TECH]], //
         ],
+        "rulings" => [
+            clienttranslate(
+                "A finished opponent is out of the bag for the draw. With no opponent able to answer the ability is skipped and the GENIES player scores nothing."
+            ),
+        ],
     ],
     CIV_ILLUMINATI => [
         "name" => clienttranslate("ILLUMINATI"),
@@ -5893,6 +5968,20 @@ $this->civilizations = [
         "exp" => "FF",
         "automa" => false,
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
+        "rulings" => [
+            clienttranslate(
+                "Each die taken pays its own benefit: a roll of the black die alone takes only the black die; a conquer takes both."
+            ),
+            clienttranslate(
+                "Conquer roll: the black die's territory benefit face pays the benefit of the territory being conquered, nothing when that territory has none."
+            ),
+            clienttranslate(
+                "The owner's gain from a taken die resolves before the roller uses the roll; a race to a track landmark goes to the owner."
+            ),
+            clienttranslate(
+                "A civilization gained in the civilization step of income turns 2-5 scores that same turn with all three dice on the mat."
+            ),
+        ],
     ],
     CIV_MERFOLK => [
         "name" => clienttranslate("MERFOLK"),
@@ -5918,6 +6007,17 @@ $this->civilizations = [
         "exp" => "FF",
         "automa" => false,
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
+        "rulings" => [
+            clienttranslate("Submerged cards are not in hand for any purpose."),
+            clienttranslate("Returning the submerged cards on income turn 5 is not a gain."),
+            clienttranslate("An extended turn is mandatory: discarding discards at least one card; there is no pass."),
+            clienttranslate(
+                "Any card can be played on an extended turn; a \"this era\" card stays in effect for the rest of the game unless overplayed."
+            ),
+            clienttranslate(
+                "A player holding both MERFOLK and ELDER ONES chooses on each turn after income turn 5 whether it is a MERFOLK turn or an ELDER ONES advance turn. The game ends for them when neither kind of turn is possible."
+            ),
+        ],
     ],
     CIV_PSIONICS => [
         "name" => clienttranslate("PSIONICS"),
@@ -5945,6 +6045,16 @@ $this->civilizations = [
             4 => ["top" => 89.5, "left" => 72.8, "w" => 7, "h" => 5.2, "benefit" => [BE_INVENT]],
             5 => ["top" => 89.5, "left" => 80, "w" => 7, "h" => 5.2, "benefit" => [BE_RESEARCH]], //
         ],
+        "rulings" => [
+            clienttranslate("A coin flip is not a die roll and gains no extra option."),
+            clienttranslate(
+                "On a conquer you choose a face for each die (2 red + 2 black); the die you do not claim stays at second roll."
+            ),
+            clienttranslate(
+                "The face you choose is the result of that die for every effect that reads it (UTILITARIANS Barracks, a TRADERS owner reading the claimed die; ILLUMINATI excepted)."
+            ),
+            clienttranslate("BGA rule: Is not compatible with ALCHEMISTS"),
+        ],
     ],
     CIV_WEEFOLK => [
         "name" => clienttranslate("WEEFOLK"),
@@ -5966,6 +6076,23 @@ $this->civilizations = [
         "automa" => false,
         "midgame_setup" => true,
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
+        "rulings" => [
+            clienttranslate(
+                "Scoring is per token, not per distinct line: two tokens in one row score it twice; a building in both a token's row and column scores twice. A landmark counts once per line its footprint touches. The income turn 5 token is planted before the scoring."
+            ),
+            clienttranslate(
+                "A plot is an open plot: impassable plots are not offered, even to an opponent with TERRAFORMING or RIVERFOLK. No TERRAFORMING VP for a planted token."
+            ),
+            clienttranslate(
+                "A city with no open plot: the opponent chooses the income building to replace; landmarks are never offered. The set aside building is treated as one placed outside the grid. The plot stays filled: districts and rows keep their state, no district completes twice."
+            ),
+            clienttranslate(
+                "A finished opponent is not offered a token. With no opponent able to take a token the gift is skipped for that income turn; the territory trade (turns 2-4) and the scoring (turn 5) still happen."
+            ),
+            clienttranslate(
+                "A planted token is not a building, outpost or income building of the WEEFOLK player. An ARCHITECTS cube in the player's own capital city is not a planted token."
+            ),
+        ],
     ],
     CIV_WEREFOLK => [
         "name" => clienttranslate("WEREFOLK"),
@@ -5988,6 +6115,15 @@ $this->civilizations = [
         ],
         "exp" => "FF",
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
+        "rulings" => [
+            clienttranslate(
+                "The tile is gained before the flip, on each income turn 2-5. Only the tile drawn this turn may be explored with. With the space tile stack and discards both empty the ability is skipped."
+            ),
+            clienttranslate(
+                "With no track that can regress the player did not regress and gains the 4 VP. The regress and the 4 VP are one choice; tracks that cannot regress are not offered."
+            ),
+            clienttranslate("The face-down advance is mandatory: benefit plus free bonus."),
+        ],
     ],
 ];
 $this->capitals = [
