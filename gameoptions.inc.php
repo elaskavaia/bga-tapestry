@@ -43,7 +43,6 @@ $game_options = [
             ],
             8 => [
                 "name" => totranslate("Adjustment Civilization Pack (Default)"),
-                "beta" => true,
                 "description" => totranslate("official expansion"),
             ],
             9 => [
@@ -76,7 +75,6 @@ $game_options = [
             0 => ["name" => totranslate("Keep"), "description" => totranslate("original rules")],
             1 => [
                 "name" => totranslate("Remove"),
-                "beta" => true,
                 "tmdisplay" => totranslate("without Marriage of State"),
                 "description" => totranslate("house rules"),
             ],
@@ -90,7 +88,6 @@ $game_options = [
             0 => ["name" => totranslate("Keep"), "description" => totranslate("original rules")],
             1 => [
                 "name" => totranslate("Remove"),
-                "beta" => true,
                 "tmdisplay" => totranslate("without Renaissance"),
                 "description" => totranslate("house rules"),
             ],
@@ -108,18 +105,22 @@ $game_options = [
             ],
             0b111 => [
                 "name" => totranslate("Original + PP + AA"),
-                "tmdisplay" => totranslate("Civilation Set: Basic, Plans & Ploys, Arts & Architecture"),
+                "tmdisplay" => totranslate("Civilation Set: Original, Plans & Ploys, Arts & Architecture"),
             ],
             0b001 => ["name" => totranslate("Original Only")],
-            0b011 => ["name" => totranslate("Original + Plans & Ploys"), "tmdisplay" => totranslate("Plans & Ploys")],
+            0b011 => [
+                "name" => totranslate("Original + Plans & Ploys"),
+                "tmdisplay" => totranslate("Civilation Set: Original, Plans & Ploys"),
+                "beta" => true,
+            ],
             // 0b1001 => [
             //     "name" => totranslate("Original + Fantasies & Futures"),
             //     "tmdisplay" => totranslate("Fantasies & Futures"),
             //     "beta" => true,
             // ],
             0b1000 => [
-                "name" => totranslate("Fantasies & Futures Only - For Testing"),
-                "tmdisplay" => totranslate("Civilation Set: Fantasies & Futures Only"),
+                "name" => totranslate("Fantasies & Futures - For Testing"),
+                "tmdisplay" => totranslate("Civilation Set: Fantasies & Futures"),
                 "beta" => true,
             ],
             // 0b101 => ['name' => totranslate('Original + Arts & Architecture'), ],
