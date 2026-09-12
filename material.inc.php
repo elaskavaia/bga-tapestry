@@ -3676,7 +3676,7 @@ $this->tapestry_card_data = [
         "type" => "now",
         "benefit" => [106],
         "description" => clienttranslate(
-            "WHEN PLAYED: Regress once on 3 difference advancement tracks if possible, then advance three times on the remaining track. Do not gain any benefits or bonuses.<br><b>Rulings: If you are on the beginning of a track, you can still use that as regressing without actually moving the token.</b"
+            "WHEN PLAYED: Regress once on 3 difference advancement tracks if possible, then advance three times on the remaining track. Do not gain any benefits or bonuses.<br><b>Rulings: If you are on the beginning of a track, you can still use that as regressing without actually moving the token.</b>"
         ),
     ],
     12 => [

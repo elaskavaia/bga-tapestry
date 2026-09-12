@@ -42,6 +42,25 @@ regression found. Behavior changes and risks first, worst first:
 
 CODE BUGS
 
+- [-] keepCard leaks hidden tapestry information to the whole table. arg_keepCard (PGameXBody around 10222) is a plain public state arg, so every opponent gets the full candidate list and the
+  client renders the cards face up; then effect_keepCard moves the kept card with effect_moveCard,
+  which logs '${player_name} gains ${card_name}' (PGameXBody 4958), and drops the rejects through
+      effect_discardCard, which logs '${player_name} discards ${card_type_name} ${card_name}' (4904).
+  Seen live on table 965881: as laskava1 the two PSIONICS candidates arrived in gamestate.args
+  and the log read "laskava0 gains PLEA FOR AID" / "laskava0 discards Tapestry TRAP". The normal
+  draw path does not do this - awardCard sends CARD_TAPESTRY with \_private and send_cards null.
+  Hits ILLUMINATI's setup draw 3 keep 1, every PSIONICS tapestry sample and GAMBLERS. Leaking a
+  discarded TRAP is the worst case: the opponent now knows the conquer is safe.
+  Fix needs both halves: private state args for the tapestry case, and a private (or name-less)
+  notification for the keep and the discard when card_type is CARD_TAPESTRY.
+
+- [ ] A territory tile gained through effect_moveCard logs without its type: "laskava0 gains 27",
+      while the discard of the same tile reads "laskava0 discards Territory 30". The gain message
+      (PGameXBody 4958) uses ${card_name} alone where the discard (4904) uses
+      ${card_type_name} ${card_name}. Territory tiles have no name, only a number, so the gain line
+      is a bare integer. Same message serves every card type, so adding the type word fixes all of
+      them at once.
+
 - [ ] BE_TECH_CARD (26) is broken as a queued benefit: awardBenefits case 26 sends it to the invent
       state, but stInvent asserts the benefit's r rule is "i" and row 26 has "g". Nothing used it until
       Faefolk did, which is how it surfaced. Faefolk now uses BE_INVENT instead; row 26 is still a trap
@@ -81,8 +100,7 @@ CODE BUGS
       enforced server-side, the general case is not.
       The other half of it, seen in the studio 2026-09-08 placing a 2 by 2 landmark: the client
       offers Confirm for a cell the server then refuses, and the refusal is invisible. The
-      "Invalid structure placement" userAssert (effect_placeOnCapitalMat, PGameXBody.php around
-      8740) reaches the console but no toast and no title change, so the state just sits there and
+      "Invalid structure placement" userAssert (effect_placeOnCapitalMat, PGameXBody.php around 8740) reaches the console but no toast and no title change, so the state just sits there and
       looks like the button did nothing. Anything that reports the rejection would do.
 
 - [ ] Coal baron reset when spies was using it
@@ -145,6 +163,24 @@ TEST GAPS
       or column.
 
 STUDIO CHECKS
+
+- [x] PSIONICS vs ILLUMINATI: played a 2 player studio table through income turn 3 (table 965881,
+      2026-09-11). Both civs behaved. PSIONICS: era 1 says "not applicable"; the income rows fired
+      as turn 2 territory and turn 3 tapestry; a random deck draw of territory, tapestry and
+      technology each became draw 2 keep 1, one choice per card gained, while a face-up tech pick
+      invented straight through with no sample (CIV.PSIONICS.2); the science advance rolled twice
+      and the research state offered both rolled tracks, and taking the second one advanced there.
+      Conquer offered four buttons (black, black_alt, red, red_alt) and the alt face paid.
+      ILLUMINATI: rolling its own dice left both wrappers on_civ_mat and paid nothing (CIV.ILLUMINATI.7);
+      an opponent conquer took both dice off the mat and paid the owner the two first faces before the
+      roller picked (CIV.ILLUMINATI.4, CIV.PSIONICS.6); the science die taken by the opponent paid a
+      free no-benefit advance on the first rolled track; a black Territory Benefit face over a
+      territory with none logged "gains nothing, that die face has no benefit" (CIV.ILLUMINATI.3);
+      income turn 2 scored 0 with an empty mat and turn 3 scored 6 VP for the one die left, then
+      returned all 3. The on_civ_mat eye badge shows in the owner's colour on all three dice,
+      science included. Undo at conquer_roll does not rewind past the roll, so there is no re-roll
+      exploit. Still unseen: a PSIONICS civilization sample (and with it the ALCHEMISTS exclusion),
+      space tiles, and a PSIONICS income turn 4 or 5.
 
 - [x] Artificers: played a solo studio table end to end (table 962350, 2026-09-09). Income turn 1
       says "not applicable in era 1"; turns 2-4 show all eight track-named buttons ("Set aside:
@@ -320,6 +356,14 @@ DONE
 
 RULES
 
+- [ ] conquerDieBenefit (PGameXBody around 8066) refuses a die whose face pays nothing at all -
+      "This die has net effect of zero. Want to try another one?" - and it is a hard server assert,
+      not a warning. Harmless for a plain player, but PSIONICS makes it a real choice: the die the
+      roller does not claim stays showing its second roll (CIV.PSIONICS.9) and that face is what
+      other effects read (CIV.PSIONICS.10, UTILITARIANS Barracks, a TRADERS owner). Claiming the
+      worthless face to control what the other die shows is currently impossible. Decide whether to
+      allow it when the player has more than two faces on offer.
+
 VISUAL EFFECTS
 
 - [ ] Show color of player who owns Nomads buildings?s TODO
@@ -352,6 +396,10 @@ LOGS
 
 TRANSLATION
 
+- [ ] DARK AGES description (material.inc.php around 3679) reads "Regress once on 3 difference
+      advancement tracks" - should be "different" - and its rulings sentence ends with an unclosed
+      "</b" so the bold tag never closes.
+
 -
 
 JAMEY
@@ -382,6 +430,7 @@ id=86694803
 Bug: cap mats
 
 ILLUMINATI:
+
 - Black face 1 outside a conquer (rows 324/330) reads whatever hex `getSelectedMapHex` still holds.
   Before any conquer that is coords 0_0, `getMapHexData` answers null and `getTileBenefit` raises a
   PHP warning before falling through to "no benefit". The roller already hits this today through
