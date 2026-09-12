@@ -5,10 +5,9 @@ declare(strict_types=1);
 require_once __DIR__ . "/DiceUT.php";
 
 /**
- * The die and card seams a civilization that samples a second reality hooks into. The civilization
- * itself lands in stage 2 of the PSIONICS plan, so there is no class and no material entry yet: the
- * harness carries the one material field the log lines and the civ walk read, and hands out a real
- * civ card so the seam's own predicate is what the cases exercise.
+ * The die and card seams a civilization that samples a second reality hooks into, and the mat's own
+ * income table (stage 2). It hands out a real civ card so the seam's own predicate is what the cases
+ * exercise, and reads the real CIV_PSIONICS material entry rather than stubbing it.
  */
 class PsionicsUT extends DiceUT {
     /** A seat outside the player roster, which is what isRealPlayer separates a bot out by. */
@@ -21,14 +20,15 @@ class PsionicsUT extends DiceUT {
         $this->upgraded[] = (int) $card_id;
     }
 
-    function init() {
-        parent::init();
-        // stage 2 adds the real entry; getCivilizationInstance falls back to BasicCivilization
-        $this->civilizations[CIV_PSIONICS] = ["name" => "Psionics"];
-    }
-
     function sample(int $player_id = self::ROLLER): void {
         $this->giveCiv($player_id, CIV_PSIONICS);
+    }
+
+    /** The income row for the turn and the benefit manager resolving it, the way a real income turn reaches it. */
+    function useIncomeAbility(int $turn, int $player_id = self::ROLLER): void {
+        $this->startIncomeTurn($player_id, $turn);
+        $this->queueEraCivAbility(CIV_PSIONICS, $player_id, $turn);
+        $this->runManager();
     }
 
     /** Take the civ away again, for the cases that pin what a later plain roll leaves behind. */

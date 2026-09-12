@@ -2137,6 +2137,7 @@ div[data-income="0"] #subtitle_bar {
   justify-content: center;
   position: relative;
   flex-wrap: wrap;
+  margin: 10px;
 }
 .draw > * {
   margin-right: 2em;
@@ -3607,6 +3608,13 @@ div[data-income="0"] #subtitle_bar {
 .disabled.config-control {
   cursor: not-allowed;
   opacity: 0.3;
+}
+
+/* a sampled die whose two faces matched: the duplicate face button is shown greyed and inert */
+.bgaimagebutton.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 
 /* PANEL */

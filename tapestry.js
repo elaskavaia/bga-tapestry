@@ -498,7 +498,9 @@ define([
 
         // DICE
         this.updateConquerDice(this.gamedatas.dice.red, this.gamedatas.dice.black);
-        this.updateScienceDie(this.gamedatas.dice.science);
+        // a live sampled roll paints the second science face, so a reload agrees when one is pending
+        // parseInt: the die globals arrive as strings, and "0" is truthy, so guard on the number
+        this.updateScienceDie(parseInt(this.gamedatas.dice.psionics) || this.gamedatas.dice.science);
         this.updateIlluminatiDice(this.gamedatas.dice.on_mat, this.gamedatas.dice.mat_owner);
 
         // CONNECTIONS
@@ -734,6 +736,14 @@ define([
         case "trackSelect":
           dojo.query(".tech_spot .cube").style("pointer-events", "none");
           dojo.query(".tech_spot .cube").style("cursor", "auto");
+          break;
+        case "research":
+          // the sample is resolved, so drop the "Sampled:" the science die tooltip advertised
+          if (parseInt(this.gamedatas.dice.psionics)) {
+            this.gamedatas.dice.psionics = 0;
+            var science_die = $("science_die");
+            if (science_die) this.updateDieTooltip("science", parseInt(science_die.getAttribute("data-num")) || 0);
+          }
           break;
         case "invent":
           const args = this.gamedatas.gamestate.args;
@@ -1429,19 +1439,29 @@ define([
           break;
         case "conquer_roll":
           dojo.query("die_wrapper").addClass("active_slot");
-          var x = { black: args.die_black, red: args.die_red };
-          for (const color in x) {
-            if (Object.hasOwnProperty.call(x, color)) {
-              const r = x[color];
-              dojo.setAttr($(color + "_die"), "data-num", r);
-
+          var faces = { black: [args.die_black, args.die_black_2], red: [args.die_red, args.die_red_2] };
+          for (const color in faces) {
+            if (!Object.hasOwnProperty.call(faces, color)) continue;
+            var first = parseInt(faces[color][0]);
+            var second = parseInt(faces[color][1]); // encoded face + 1, 0 for none
+            dojo.setAttr($(color + "_die"), "data-num", first);
+            var sampled = second > 0;
+            // a sampler keeps one face per die; show a button per rolled face. Two equal faces are
+            // the same choice, so the duplicate is shown greyed rather than hidden, to make it
+            // obvious the die was rolled twice and landed on the same side.
+            var options = sampled ? [first, second - 1] : [first];
+            for (var i = 0; i < options.length; i++) {
+              var face = options[i];
+              var button = "button_" + color + (i ? "_alt" : "");
               this.addImageActionButton(
-                "button_" + color,
-                this.getConqDieDiv(color, r),
+                button,
+                this.getConqDieDiv(color, face),
                 "onDieClick",
                 undefined,
-                this.getTr(this.gamedatas.dice_names[color][r].name)
+                this.getTr(this.gamedatas.dice_names[color][face].name)
               );
+              if (sampled) dojo.setAttr(button, "data-face", face);
+              if (i && face == first) dojo.addClass(button, "disabled");
             }
           }
 
@@ -1469,7 +1489,11 @@ define([
           var roll = roll1;
           if (args.empiricism && parseInt(args.empiricism)) {
             var roll2 = this.format_string(rolltemp, { verb: _("Empiricism"), roll: this.divTrackSlot(args.empiricism) });
-            var roll = this.format_string(_("${roll1} / ${roll2}"), { roll1: roll1, roll2: roll2 });
+            roll = this.format_string(_("${roll1} / ${roll2}"), { roll1: roll, roll2: roll2 });
+          }
+          if (args.psionics && parseInt(args.psionics)) {
+            var roll3 = this.format_string(rolltemp, { verb: _("Psionics"), roll: this.divTrackSlot(args.psionics) });
+            roll = this.format_string(_("${roll1} / ${roll2}"), { roll1: roll, roll2: roll3 });
           }
 
           var sub = $("subtitle_bar");
@@ -3594,9 +3618,10 @@ define([
     /** Rebuilds the tooltip of one die and answers the name of the face shown. */
     updateDieTooltip: function (color, r) {
       var onmat = this.isDieOnCivMat(color) ? this.getTooltipMessage(_("On the ILLUMINATI mat")) : "";
+      var alt = this.getAltDieFaceName(color, r);
       if (color != "science") {
         var tooltip = this.getTr(this.gamedatas.dice_names[color][r].name);
-        var tooltipx = this.getTooltipTitle(_("Conquer die")) + this.getTooltipMessage(_("Roll:") + " " + tooltip) + onmat;
+        var tooltipx = this.getTooltipTitle(_("Conquer die")) + this.getTooltipMessage(_("Roll:") + " " + tooltip) + alt + onmat;
         var image = this.getConqDieDiv(color, r);
 
         tooltipx += this.getTooltipMessage(_("Side Distribution:"));
@@ -3608,9 +3633,28 @@ define([
       }
       if (!this.gamedatas.tech_track_types[r + 1]) return "";
       var tooltip = _("Science die");
-      tooltip += ":<br>" + _("Roll:") + " " + this.getTr(this.gamedatas.tech_track_types[r + 1].name) + onmat;
+      tooltip += ":<br>" + _("Roll:") + " " + this.getTr(this.gamedatas.tech_track_types[r + 1].name) + alt + onmat;
       this.addTooltipHtml("science_die", tooltip, 400);
       return tooltip;
+    },
+
+    /** Names the sampled second face a PSIONICS roller has not yet resolved, or "" when there is none. */
+    getAltDieFaceName: function (color, r) {
+      if (color == "science") {
+        var first = parseInt(this.gamedatas.dice.science);
+        var sampled = parseInt(this.gamedatas.dice.psionics);
+        if (!sampled || first == sampled) return "";
+        var other = r + 1 == first ? sampled : first;
+        if (!this.gamedatas.tech_track_types[other]) return "";
+        return this.getTooltipMessage(_("Sampled:") + " " + this.getTr(this.gamedatas.tech_track_types[other].name));
+      }
+      var encoded = parseInt(this.gamedatas.dice[color + "2"]); // face + 1, 0 for none
+      if (!encoded) return "";
+      var first = parseInt(this.gamedatas.dice[color]);
+      var sampled = encoded - 1;
+      if (first == sampled) return "";
+      var other = r == first ? sampled : first;
+      return this.getTooltipMessage(_("Sampled:") + " " + this.getTr(this.gamedatas.dice_names[color][other].name));
     },
 
     rolldie: function (color, num) {
@@ -4440,6 +4484,7 @@ define([
           slots += this.getTooltipMessage(info.slots_description);
           for (var sid in info.slots) {
             var slot = info.slots[sid];
+            if (!slot.benefit && !slot.title) continue;
             //if (slot.wrap)
             {
               slots += "<br/>";
@@ -4464,11 +4509,15 @@ define([
           }
         }
       }
+      var rulings = "";
+      if (info.rulings) {
+        rulings = this.getTooltipMessage("<b>" + _("Rulings:") + "</b>") + this.getTooltipMessage(info.rulings);
+      }
       if (this.gamedatas.variants.variant_adjustments) {
         var adj = this.getTooltipMessage(info["adjustment"]);
         if (adj) adj = "<b>" + this.getTooltipMessage(_("Adjustment:")) + "</b>" + adj;
       }
-      return title + desc + slots + adj;
+      return title + desc + slots + rulings + adj;
     },
 
     getTapestryTooltip: function (cid) {
@@ -5332,9 +5381,16 @@ define([
         return;
       }
 
-      var die = cid == "red_die" || cid == "button_red" ? 0 : 1;
-
-      this.axcallwrapper("choose_die", { die: die });
+      var color = cid.indexOf("red") >= 0 ? "red" : "black";
+      var args = { die: color == "red" ? 0 : 1 };
+      var face = event.currentTarget.dataset.face;
+      if (face !== undefined) {
+        args.face = parseInt(face);
+      } else if (parseInt(this.gamedatas.dice[color + "2"]) > 0) {
+        // a sampled die clicked directly keeps the face showing, its second face is on the buttons
+        args.face = parseInt(this.gamedatas.dice[color]);
+      }
+      this.axcallwrapper("choose_die", args);
     },
 
     onCubeClick: function (event) {
@@ -6030,18 +6086,29 @@ define([
     },
 
     notif_conquer_roll: function (notif) {
+      // the sampled second face, encoded as face + 1 (0 = none), the same as getAllDatas
+      if (notif.args.die_red_2 !== undefined) this.gamedatas.dice.red2 = parseInt(notif.args.die_red_2);
+      if (notif.args.die_black_2 !== undefined) this.gamedatas.dice.black2 = parseInt(notif.args.die_black_2);
       var die_red = notif.args.die_red;
       var die_black = notif.args.die_black;
-      this.updateConquerDice(die_red, die_black);
-      // face 0 is a real face, so this cannot be a falsy test
+      // face 0 is a real face, so these cannot be falsy tests
       if (die_red !== undefined) this.gamedatas.dice.red = parseInt(die_red);
       if (die_black !== undefined) this.gamedatas.dice.black = parseInt(die_black);
+      this.updateConquerDice(die_red, die_black);
     },
 
     notif_science_roll: function (notif) {
       var die = notif.args.die;
+      // the sampled roll paints its face like a reload does, but keeps the base track in dice.science
+      // so the "Sampled:" tooltip reads the two apart; a plain roll drops any sample left pending
+      if (parseInt(notif.args.psionics)) {
+        this.gamedatas.dice.psionics = parseInt(die);
+        this.updateScienceDie(die);
+        return;
+      }
       this.updateScienceDie(die);
       this.gamedatas.dice.science = parseInt(die);
+      this.gamedatas.dice.psionics = 0;
     },
 
     notif_illuminatiDice: function (notif) {
@@ -6593,6 +6660,9 @@ define([
           }
           if (card_location == "deck_territory") {
             return "territory_deck";
+          }
+          if (card_location == "draw") {
+            return "draw";
           }
           if (card_location.startsWith("civ_21_")) {
             return card_location;

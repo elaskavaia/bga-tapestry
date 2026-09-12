@@ -5,7 +5,17 @@ classification and sequencing. Rules arbitration is against [FORMAL_RULES.txt](F
 The die half shares the engine seam that [Illuminati](FF_PLAN_ILLUMINATI.md) built, so this plan
 reuses its vocabulary: `rollDieFace`, `dieRolled`, "interrupt before the roll, queue Normal after".
 
-Status: stage 1 (the engine seam) landed, stage 2 (the civilization) not started.
+Status: stage 1 (the engine seam) and stage 2 core (the civilization, its material entry, income
+table and the client that renders the sampled dice) landed, `npm run predeploy` green at 481 tests.
+Deferred out of stage 2 core: the UTILITARIENS Barracks first-face bug and the five "decisions, not
+swaps" sites (see the Stage 2 status below).
+
+Update: the ALCHEMISTS mat integration is DROPPED. ALCHEMISTS and PSIONICS are now incompatible
+civilizations (FORMAL_RULES CIV.PSIONICS.12) - a player never owns both - so a PSIONICS owner never
+sits at an ALCHEMISTS mat and the two-face-per-die mat UI is never needed. The plain `$extra = false`
+rolls in Alchemists.php are therefore permanent. Enforced at civ-card acquisition in one choke point,
+`dbPickCardsForLocation`: the forbidden partner is never offered on a choice draw, and discarded plus
+redrawn on a random single gain (predeploy green at 488 tests).
 
 Psionics samples nearby realities. Every random thing the owner gains gets one extra option and the
 owner keeps one: a die is rolled twice and one value is chosen, a card gained at random from a deck
@@ -139,7 +149,10 @@ seam only produces faces, it does not know what they mean:
   a face with no benefit contributing nothing, and a die with no benefit on either face printing the
   existing message.
 - `Alchemists::alchemistRoll` and `Alchemists::rollAllDice` ([Alchemists.php](../modules/civs/Alchemists.php)).
-  Ordinary rolls under CIV.PSIONICS.1: every die a pass rolls gets one extra face, and a die rolled
+  DROPPED (see the top Update): ALCHEMISTS and PSIONICS are incompatible, so no owner ever samples
+  an ALCHEMISTS die and this flow needs no sampling. The design below is kept only as a record of
+  what would have been built. Ordinary rolls under CIV.PSIONICS.1: every die a pass rolls gets one
+  extra face, and a die rolled
   again in a later pass gets a fresh one, the same as the 324 / 325 reroll loop. Variants 1, 2 and 4
   roll the science die once per pass, so the owner picks a face before the bust check: the roll
   stores both faces (`science_die`, `science_die_psionics`) and re-enters the ability with the two
@@ -326,6 +339,10 @@ Answered:
   question in it. Psionics on the Alchemists dice follows from "whenever you roll a die, roll it
   twice": one extra face per die, each with its own keep (CIV.PSIONICS.1). Stays in stage 2 with the
   mat UI.
+  UPDATE (resolved): DROPPED, not built. Victoria ruled the two civilizations incompatible
+  (CIV.PSIONICS.12) rather than reconcile the two-face-per-die mat, so `$extra = false` here is now
+  permanent and the comments in Alchemists.php say incompatible, not deferred. The whole
+  "silent rules hole" concern disappears because a PSIONICS owner can never hold ALCHEMISTS.
 - UTILITARIENS Barracks gains "the result of the red die" at roll time, before the pick, and still
   reads the first face. Is that the result, or is the kept face? Not ruled; unchanged for now. A:
   the kept face. The mat has the roller "choose 1 of the 2 values that you rolled", so the chosen
@@ -364,6 +381,60 @@ CIV_PSIONICS)` inline, one indexed query, the same shape `case 65` uses for INFI
 - `case BE_PSIONICS_*` joins the existing `case 172 / 175 / BE_ILLUMINATI_DRAW` group in
   `awardBenefits`; `BE_PSIONICS_CIV` joins 172 in the `effect_keepCard` stay-in-draw list.
 - `getAllDatas` gains the three new dice fields.
+
+### Stage 2 status (core)
+
+Done, `npm run predeploy` green at 481 tests (470 before). What landed, and where it differs from
+the plan above:
+
+- [modules/civs/Psionics.php](../modules/civs/Psionics.php): one method, `queueEraCivAbility`, the
+  Illuminati shape. In income turns 2-5 it queues that turn's row (`BE_TERRITORY`, `BE_TAPESTRY`,
+  `BE_INVENT`, `BE_RESEARCH`) with `reason_civ(CIV_PSIONICS)`; out of range it falls through to the
+  parent so the "not applicable in era" message still prints. No `setupCiv`, no `awardBenefits`, no
+  `finalScoring`, no predicate methods - the seams ask `hasExtraOption` on their own.
+- The `civilizations[CIV_PSIONICS]` material entry: `exp => "FF"`, `automa => true`,
+  `income_trigger => [2, 5, decline false]`, no `slots`, no `midgame_setup`, four
+  `clienttranslate` description sentences. Placed alphabetically among the FF civs (after MERFOLK).
+- **The six `BE_PSIONICS_*` CSV rows and `getAllDatas`'s three dice fields already landed in stage
+  1**, not here - `awardRandomCard` and the seam regressions could not be written without them - so
+  stage 2 added no CSV rows and no `genmat` run.
+- Client ([tapestry.js](../tapestry.js)): `notif_conquer_roll` now reads `die_red_2` / `die_black_2`
+  (the face + 1 encoding) with a `!== undefined` guard, not a truthy one. `notif_science_roll`
+  needed no change: the sampled science face is a second `science_roll` notification that already
+  repaints the die. The `research` subtitle gains a PSIONICS roll line beside the primary and
+  EMPIRICISM ones (the track highlights already come from the merged `all_advances`).
+  `updateDieTooltip` names the pending sampled face through a new `getAltDieFaceName` helper.
+- **Open question resolved (dice.psionics on setup): paint it.** Setup now paints the science die
+  with `dice.psionics || dice.science`, so a reload during a pending sampled research decision shows
+  the same face as the live board (the second, last-rolled face). The conquer dice already agreed
+  (both live and reload paint the first face), so only the science die needed it. EMPIRICISM has the
+  same minor reload-vs-live mismatch and is left as it was - out of scope here.
+- **One client piece beyond the five planned bullets: the conquer face picker.** `keepConquerDieFace`
+  rejects a face that was not rolled, so a sampled conquer where the client sent no face threw. The
+  `conquer_roll` state now offers a button per distinct face of a sampled die and `onDieClick` sends
+  `{die, face}`; a direct click on a sampled die keeps the shown face. Without this a PSIONICS owner
+  could not resolve a conquer at all, so it is core, not polish.
+- No CSS was added. The sampled conquer face is offered as its own action button and named in the
+  die tooltip, and the sampled science face is shown in the research subtitle - the same "render it
+  where it is chosen, no die badge" treatment `dice.empiricism` already gets - so the planned
+  `.on_civ_mat`-style badge was not needed.
+- Tests: [tests/PsionicsCivTest.php](../tests/PsionicsCivTest.php) (material, the income table, a
+  finished owner's dropped row, the zeroed dice fields) reusing the stage-1 `PsionicsUT` harness
+  (its material stub removed, an income helper added), plus five seam cases in
+  [tests/PsionicsSeamTest.php](../tests/PsionicsSeamTest.php) (GAMBLERS 311 and ILLUMINATI 354 draw
+  4, `BE_TAPESTRY` / `BE_GAIN_CIV` keep entry, a kept tapestry to hand).
+
+Deferred (separate follow-up runs, no rules question open in any):
+
+- ~~**ALCHEMISTS** mat `slots_choice` / two-faces-per-die integration~~ DROPPED. ALCHEMISTS and
+  PSIONICS are incompatible (CIV.PSIONICS.12); a player never owns both, so this integration cannot
+  arise. `rollAllDice` and `alchemistRoll` keep `$extra = false` permanently and their comments say
+  so. Enforced in `dbPickCardsForLocation` (the civ-draw choke point) via a `getForbiddenCivs`
+  helper reading the `incompatible` material key; covered by `tests/IncompatibleCivsTest.php`.
+- **UTILITARIENS Barracks** still reads the first red face, not the kept one (CIV.PSIONICS.10). Left
+  as a known bug.
+- The five **"decisions, not swaps"** sites: `effect_drawCardsUntil`, `coalBaron`'s own draw,
+  MERFOLK income / era-5 draws, MYSTICS private-deck draws, WEREFOLK's space-tile flip.
 
 ## Test infrastructure
 
@@ -501,3 +572,5 @@ Implementation notes those clauses deliberately leave out:
   argument, the extra face being a reroll from the ILLUMINATI owner's point of view.
 - PSIONICS against ALCHEMISTS is CIV.PSIONICS.1 applied per die and per pass, see the Alchemists
   entry in seam A; it needs no clause of its own.
+  UPDATE: superseded. The two are now incompatible (CIV.PSIONICS.12) and never share a table, so
+  there is no PSIONICS-against-ALCHEMISTS case to rule on.
