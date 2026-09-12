@@ -62,8 +62,12 @@ class Merfolk extends AbsCivilization {
         switch ($ben) {
             case BE_MERFOLK_DIVE:
                 return $this->dive($player_id, $reason);
+            case BE_MERFOLK_SUBMERGE:
+                return $this->promptSubmerge($player_id);
             case BE_MERFOLK_SURFACE:
                 return $this->surface($player_id, $reason);
+            case BE_MERFOLK_RETURN:
+                return $this->returnSubmerged($player_id);
             case BE_MERFOLK_CULL:
                 return $this->cull($player_id);
         }
@@ -73,18 +77,26 @@ class Merfolk extends AbsCivilization {
 
     /** The drawn card is a real gain, so ACADEMIA style triggers fire on it (FORMAL_RULES CIV.MERFOLK.2). */
     function dive(int $player_id, string $reason): bool {
-        $game = $this->game;
-        $game->awardCard($player_id, 1, CARD_TAPESTRY, false, $reason);
+        $this->game->awardRandomCard($player_id, 1, CARD_TAPESTRY, $reason, BE_MERFOLK_SUBMERGE);
+        return true;
+    }
+
+    /** Judged once the card is in hand: two or fewer cards leave nothing to choose. */
+    function promptSubmerge(int $player_id): bool {
         if (count($this->getHand($player_id)) > self::KEEP_SUBMERGED) {
             $this->queuePhase($player_id, self::PHASE_SUBMERGE);
         }
         return true;
     }
 
-    /** The submerged cards come back rather than being gained, so nothing triggers on them. */
     function surface(int $player_id, string $reason): bool {
+        $this->game->awardRandomCard($player_id, 1, CARD_TAPESTRY, $reason, BE_MERFOLK_RETURN);
+        return true;
+    }
+
+    /** The submerged cards come back rather than being gained, so nothing triggers on them. */
+    function returnSubmerged(int $player_id): bool {
         $game = $this->game;
-        $game->awardCard($player_id, 1, CARD_TAPESTRY, false, $reason);
         $submerged = array_keys($game->getCardsSearch(CARD_TAPESTRY, null, "submerged", $player_id));
         $game->moveCardsHidden(
             $submerged,

@@ -254,6 +254,12 @@ id|-con|name|r|t|php
 361|BE_PSIONICS_SPACE|PSIONICS draw 2 space tiles and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_SPACE,'draw'=>2,'keep'=>1,'sampled'=>1
 362|BE_PSIONICS_CIV|PSIONICS draw 2 civilizations and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_CIVILIZATION,'draw'=>2,'keep'=>1,'sampled'=>1
 363|BE_PSIONICS_TECH_UPGRADE|PSIONICS draw 2 technology cards, keep 1 and instantly upgrade it|||'icon' => 'no','tt'=>'card','ct'=>CARD_TECHNOLOGY,'draw'=>2,'keep'=>1,'sampled'=>1,'flags'=>FLAG_UPGRADE
+364|BE_PSIONICS_TAPESTRY_PUBLIC|PSIONICS draw 2 tapestry cards from the public deck and keep 1|||'icon' => 'no','tt'=>'card','ct'=>CARD_TAPESTRY,'draw'=>2,'keep'=>1,'sampled'=>1,'deck'=>'deck_tapestry','discard'=>'discard'
+365|BE_COAL_BARON_EXPLORE|COAL BARON explore with the drawn territory tile|||'icon' => 'no'
+366|BE_WEREFOLK_COIN|WEREFOLK flip the drawn space tile|||'civ'=>CIV_WEREFOLK
+367|BE_MERFOLK_SUBMERGE|MERFOLK place all but 2 tapestry cards under this mat|||'civ'=>CIV_MERFOLK
+368|BE_MERFOLK_RETURN|MERFOLK return the submerged tapestry cards to your hand|||'civ'=>CIV_MERFOLK
+369|BE_MYSTIC_DISCARD|MYSTICS discard your hand to the private discard pile, then gain 2 tapestry cards|||'civ'=>CIV_MYSTICS
 502||2 VP|v||
 503||3 VP|v||
 504||4 VP|v||

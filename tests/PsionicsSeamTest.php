@@ -199,7 +199,7 @@ final class PsionicsSeamTest extends TestCase {
         $game->seedRand(3, 1, 4, 2);
         $game->rollConquerDice(PsionicsUT::ROLLER);
 
-        $game->queueUnclaimedDieBenefit("red", PsionicsUT::OTHER);
+        $game->queueShownDieBenefit("red", PsionicsUT::OTHER);
 
         // red face 1 is the second face rolled, red face 3 was the first
         $this->assertEquals([[PsionicsUT::OTHER, 506]], $game->rows());
@@ -210,7 +210,7 @@ final class PsionicsSeamTest extends TestCase {
         $game->seedRand(3, 4);
         $game->rollConquerDice(PsionicsUT::ROLLER);
 
-        $game->queueUnclaimedDieBenefit("red", PsionicsUT::OTHER);
+        $game->queueShownDieBenefit("red", PsionicsUT::OTHER);
 
         $this->assertEquals([[PsionicsUT::OTHER, 504]], $game->rows());
     }
@@ -771,5 +771,253 @@ final class PsionicsSeamTest extends TestCase {
 
         $this->assertEquals([], $game->rows());
         $this->assertCount(1, $game->getCardsInHand(PsionicsUT::OTHER, CARD_TECHNOLOGY));
+    }
+
+    // ------------------------------------------ the row a gain continues with
+
+    private function continuationReason(PsionicsUT $game): string {
+        return $game->benefitQueue()[0]["benefit_data"];
+    }
+
+    /** An effect that goes on with the drawn card names the row: it is queued next, the card id in its reason arg. */
+    function testAContinuationIsQueuedNextWithTheCardWithoutASampler() {
+        $game = $this->game;
+        $game->fillDeck(CARD_TERRITORY, 4);
+        $game->queueBenefitNormal(BE_CONFIRM, PsionicsUT::ROLLER);
+
+        $game->awardRandomCard(PsionicsUT::ROLLER, 1, CARD_TERRITORY, reason_tapestry(TAP_COAL_BARON), BE_COAL_BARON_EXPLORE);
+
+        $hand = array_keys($game->getCardsInHand(PsionicsUT::ROLLER, CARD_TERRITORY));
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_COAL_BARON_EXPLORE], [PsionicsUT::ROLLER, BE_CONFIRM]], $game->rows());
+        $this->assertEquals($hand, [$game->getGainedCardId($this->continuationReason($game))]);
+    }
+
+    function testAContinuationFollowsTheKeepForASampler() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TERRITORY, 4);
+        $game->queueBenefitNormal(BE_CONFIRM, PsionicsUT::ROLLER);
+
+        $game->awardRandomCard(PsionicsUT::ROLLER, 1, CARD_TERRITORY, reason_tapestry(TAP_COAL_BARON), BE_COAL_BARON_EXPLORE);
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_PSIONICS_TERRITORY], [PsionicsUT::ROLLER, BE_CONFIRM]], $game->rows());
+
+        $game->runManager();
+        $drawn = $game->drawn(CARD_TERRITORY);
+        $bene = $game->getCurrentBenefitWithInfo();
+        $game->effect_keepCard([$drawn[1]], PsionicsUT::ROLLER, $bene);
+        $game->benefitCashed($bene);
+
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_COAL_BARON_EXPLORE], [PsionicsUT::ROLLER, BE_CONFIRM]], $game->rows());
+        $this->assertEquals($drawn[1], $game->getGainedCardId($this->continuationReason($game)));
+        $this->assertEquals(
+            TAP_COAL_BARON,
+            $game->getReasonArg($this->continuationReason($game), 2),
+            "the gain's reason, not the keep row's"
+        );
+        $this->assertEquals([$drawn[1]], array_keys($game->getCardsInHand(PsionicsUT::ROLLER, CARD_TERRITORY)));
+    }
+
+    function testAnEmptyDeckHandsTheContinuationNoCardWithoutASampler() {
+        $game = $this->game;
+
+        $game->awardRandomCard(PsionicsUT::ROLLER, 1, CARD_SPACE, reason_civ(CIV_WEREFOLK), BE_WEREFOLK_COIN);
+
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_WEREFOLK_COIN]], $game->rows());
+        $this->assertEquals(0, $game->getGainedCardId($this->continuationReason($game)));
+    }
+
+    /** A spot row carries its flags in reason arg 3; a keep row queued from it must not read them as a continuation. */
+    function testACallersOwnReasonArgIsNotReadAsAContinuation() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TERRITORY, 4);
+        $reason = $game->withReasonDataArg(reason("spot", "1_3"), FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS);
+
+        $game->awardRandomCard(PsionicsUT::ROLLER, 1, CARD_TERRITORY, $reason);
+        $game->runManager();
+        $drawn = $game->drawn(CARD_TERRITORY);
+        $bene = $game->getCurrentBenefitWithInfo();
+        $game->effect_keepCard([$drawn[0]], PsionicsUT::ROLLER, $bene);
+        $game->benefitCashed($bene);
+
+        $this->assertEquals([], $game->rows());
+    }
+
+    /** A keep with nothing to keep is cancelled, but the effect waiting on it still goes on, with no card. */
+    function testAnEmptySampleStillHandsTheContinuationNoCard() {
+        $game = $this->sampler();
+
+        $game->awardRandomCard(PsionicsUT::ROLLER, 1, CARD_SPACE, reason_civ(CIV_WEREFOLK), BE_WEREFOLK_COIN);
+        $game->resolveBenefit(BE_PSIONICS_SPACE, PsionicsUT::ROLLER);
+
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_WEREFOLK_COIN]], $game->rows());
+        $this->assertEquals(0, $game->getGainedCardId($this->continuationReason($game)));
+    }
+
+    // ------------------------------------------------- COAL BARON's own draw
+
+    /** The tile the explore must use is the kept one, marked once that explore is next in line. */
+    function testCoalBaronMarksTheKeptTileForASampler() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TERRITORY, 6);
+
+        $game->coalBaron();
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_PSIONICS_TERRITORY]], $game->rows(), "the neighbour's gain is not sampled");
+
+        $game->runManager();
+        $drawn = $game->drawn(CARD_TERRITORY);
+        $bene = $game->getCurrentBenefitWithInfo();
+        $game->effect_keepCard([$drawn[1]], PsionicsUT::ROLLER, $bene);
+        $game->benefitCashed($bene);
+        $game->resolveBenefit(BE_COAL_BARON_EXPLORE, PsionicsUT::ROLLER);
+
+        $this->assertEquals($drawn[1], $game->getGameStateValue("coal_baron"));
+        $this->assertEquals([[PsionicsUT::ROLLER, 17]], $game->rows());
+    }
+
+    function testCoalBaronMarksTheDrawnTileWithoutASampler() {
+        $game = $this->game;
+        $game->fillDeck(CARD_TERRITORY, 4);
+
+        $game->coalBaron();
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_COAL_BARON_EXPLORE]], $game->rows());
+        $game->resolveBenefit(BE_COAL_BARON_EXPLORE, PsionicsUT::ROLLER);
+
+        $hand = array_keys($game->getCardsInHand(PsionicsUT::ROLLER, CARD_TERRITORY));
+        $this->assertEquals($hand, [$game->getGameStateValue("coal_baron")]);
+        $this->assertEquals([[PsionicsUT::ROLLER, 17]], $game->rows());
+    }
+
+    // ------------------------------------------- MYSTICS' public deck draw
+
+    private function mystic(PsionicsUT $game): void {
+        $game->setGameStateValue("variant_adjustments", 8);
+        $game->doAdjustMaterial(2, 8);
+        $game->giveCiv(PsionicsUT::ROLLER, CIV_MYSTICS);
+    }
+
+    /** The income draw names the public deck, so its sample is the public deck row (FORMAL_RULES CIV.PSIONICS.2). */
+    function testMysticsSampleThePublicDeckDrawFromThePublicDeck() {
+        $game = $this->sampler();
+        $this->mystic($game);
+        $game->fillDeck(CARD_TAPESTRY, 2);
+        $private = [$game->addCard(CARD_TAPESTRY, "deck_13", 0, 1), $game->addCard(CARD_TAPESTRY, "deck_13", 0, 1)];
+
+        $this->assertTrue($game->resolveRow(BE_MYSTIC_TAP));
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_PSIONICS_TAPESTRY_PUBLIC]], $game->rows());
+
+        $game->runManager();
+        $drawn = $game->drawn(CARD_TAPESTRY);
+        $this->assertCount(2, $drawn);
+        $this->assertEquals([], array_intersect($drawn, $private), "drawn from the public deck");
+
+        $bene = $game->getCurrentBenefitWithInfo();
+        $game->effect_keepCard([$drawn[0]], PsionicsUT::ROLLER, $bene);
+        $game->benefitCashed($bene);
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_MYSTIC_DISCARD]], $game->rows());
+
+        $game->resolveBenefit(BE_MYSTIC_DISCARD, PsionicsUT::ROLLER);
+        $this->assertEquals([], $game->getCardsInHand(PsionicsUT::ROLLER, CARD_TAPESTRY), "the hand went to the private discard");
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_TAPESTRY]], $game->rows());
+    }
+
+    function testMysticsDrawThePublicDeckCardStraightToHandWithoutASampler() {
+        $game = $this->game;
+        $this->mystic($game);
+        $game->fillDeck(CARD_TAPESTRY, 2);
+        $game->addCard(CARD_TAPESTRY, "deck_13", 0, 1);
+
+        $this->assertTrue($game->resolveRow(BE_MYSTIC_TAP));
+
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_MYSTIC_DISCARD]], $game->rows());
+        $this->assertCount(1, $game->getCardsInHand(PsionicsUT::ROLLER, CARD_TAPESTRY));
+        $this->assertCount(1, $game->getCardsSearch(CARD_TAPESTRY, null, "deck_13"));
+    }
+
+    /** Gained mid-game, the first card comes off the new private deck, so the sample is the player's own row. */
+    function testMysticsSampleThePrivateDeckDrawFromThePrivateDeck() {
+        $game = $this->sampler();
+        $this->mystic($game);
+        $game->fillDeck(CARD_TAPESTRY, 10);
+        $game->eras[PsionicsUT::ROLLER] = 2;
+
+        $this->assertTrue($game->resolveRow(BE_MYSTIC_TAP_GAIN));
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_PSIONICS_TAPESTRY]], $game->rows());
+
+        $game->runManager();
+        $drawn = $game->drawn(CARD_TAPESTRY);
+        $this->assertCount(2, $drawn);
+        $this->assertCount(6, $game->getCardsSearch(CARD_TAPESTRY, null, "deck_13"), "drawn from the private deck");
+        $this->assertCount(2, $game->getCardsSearch(CARD_TAPESTRY, null, "deck_tapestry"));
+
+        $bene = $game->getCurrentBenefitWithInfo();
+        $game->effect_keepCard([$drawn[0]], PsionicsUT::ROLLER, $bene);
+        $game->benefitCashed($bene);
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_MYSTIC_DISCARD]], $game->rows());
+    }
+
+    // ---------------------------------------------- the UTILITARIENS Barracks
+
+    private function barracks(PsionicsUT $game): void {
+        $game->giveCiv(PsionicsUT::ROLLER, CIV_UTILITARIENS);
+        $game->addCubeAt(PsionicsUT::ROLLER, "civ_39_3");
+    }
+
+    /** FORMAL_RULES CIV.PSIONICS.10: the Barracks reads the red die once the roller has settled its face. */
+    function testTheBarracksReadTheKeptRedFace() {
+        $game = $this->sampler();
+        $this->barracks($game);
+        $game->seedRand(3, 1, 4, 2);
+        $game->rollConquerDice(PsionicsUT::ROLLER);
+        $game->keepConquerDieFace("red", 1);
+
+        $game->queueBarracksGain(PsionicsUT::ROLLER);
+
+        $this->assertEquals([[PsionicsUT::ROLLER, 506]], $game->rows());
+    }
+
+    function testTheBarracksReadTheSecondRedFaceWhenBlackWasClaimed() {
+        $game = $this->sampler();
+        $this->barracks($game);
+        $game->seedRand(3, 1, 4, 2);
+        $game->rollConquerDice(PsionicsUT::ROLLER);
+        $game->keepConquerDieFace("black", 4);
+
+        $game->queueBarracksGain(PsionicsUT::ROLLER);
+
+        $this->assertEquals([[PsionicsUT::ROLLER, 506]], $game->rows());
+    }
+
+    function testTheBarracksReadTheOnlyRedFaceOnAPlainRoll() {
+        $game = $this->game;
+        $this->barracks($game);
+        $game->seedRand(3, 4);
+        $game->rollConquerDice(PsionicsUT::ROLLER);
+        $game->keepConquerDieFace("red", 3);
+
+        $game->queueBarracksGain(PsionicsUT::ROLLER);
+
+        $this->assertEquals([[PsionicsUT::ROLLER, 504]], $game->rows());
+    }
+
+    /** Both dice gained outright leave no pick, so the Barracks gain is its own choice over the red faces. */
+    function testTheBarracksOfferBothRedFacesWhenBothDiceAreGainedOutright() {
+        $game = $this->sampler();
+        $this->barracks($game);
+        $game->seedRand(3, 1, 4, 2);
+        $game->rollConquerDice(PsionicsUT::ROLLER);
+
+        $game->queueBarracksGain(PsionicsUT::ROLLER, true);
+
+        $this->assertEquals([[PsionicsUT::ROLLER, "o,504,506"]], $game->rows());
+    }
+
+    function testNoBarracksGainWithoutTheCubeOnTheSlot() {
+        $game = $this->game;
+        $game->giveCiv(PsionicsUT::ROLLER, CIV_UTILITARIENS);
+        $game->seedRand(3, 4);
+        $game->rollConquerDice(PsionicsUT::ROLLER);
+
+        $game->queueBarracksGain(PsionicsUT::ROLLER);
+
+        $this->assertEquals([], $game->rows());
     }
 }

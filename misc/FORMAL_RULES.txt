@@ -450,6 +450,9 @@ CIV.PSIONICS.10 The face you choose is the result of that die for every effect t
     (UTILITARIANS Barracks, a TRADERS owner reading the claimed die; ILLUMINATI excepted,
     CIV.PSIONICS.6).
     Impl. Only the die the roller does not claim shows its second face (CIV.PSIONICS.9).
+    Impl. The Barracks gain is queued after the pick, from the face the red die then shows. When
+    both dice are gained outright there is no pick, so a sampled red die is offered to the Barracks
+    as a second choice over its two faces (CIV.PSIONICS.1, its own choice on each gain).
 CIV.PSIONICS.11 Impl. The face-down tapestry card placed on the income mat when your hand is empty is not a random
     gain.
     Impl. It is a placeholder: nothing is chosen, so no extra option.

@@ -224,8 +224,17 @@ class Mystics extends AbsCivilization {
                 4 cards --> choose two different:   [CONQUER]/[RESOURCE]/[INVENT]/[REMOVE INCOME BUILDING]     
                 6 cards --> choose three different:   [CONQUER-BOTH DICE]/[RESOURCE]/[INVENT]+[UPGRADE]/[INCOME BUILDING]  
                 */
-                $game->interruptBenefit();
-                $game->awardCard($player_id, 1, CARD_TAPESTRY, false, $reason, $game->card_types[CARD_TAPESTRY]["deck"], "discard");
+                $game->awardRandomCard(
+                    $player_id,
+                    1,
+                    CARD_TAPESTRY,
+                    $reason,
+                    BE_MYSTIC_DISCARD,
+                    $game->card_types[CARD_TAPESTRY]["deck"],
+                    "discard"
+                );
+                return true;
+            case BE_MYSTIC_DISCARD:
                 $this->misDiscard($player_id);
                 $game->queueBenefitNormal(BE_TAPESTRY, $player_id, $reason, 2); // gain 2 tapestry
                 return true;
@@ -249,9 +258,7 @@ class Mystics extends AbsCivilization {
                 $game->notifyDeckCounters("deck_13");
 
                 if ($era > 1) {
-                    $game->awardCard($player_id, 1, CARD_TAPESTRY, false, $reason);
-                    $this->misDiscard($player_id);
-                    $game->queueBenefitNormal(BE_TAPESTRY, $player_id, $reason, 2); // gain 2 tapestry
+                    $game->awardRandomCard($player_id, 1, CARD_TAPESTRY, $reason, BE_MYSTIC_DISCARD);
                 } else {
                     $game->queueBenefitNormal(BE_TAPESTRY, $player_id, $reason, 2); // gain 2 tapestry
                 }

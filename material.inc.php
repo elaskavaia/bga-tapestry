@@ -194,6 +194,12 @@ if (!defined("TAPESTRY")) {
     define("BE_PSIONICS_SPACE", 361);
     define("BE_PSIONICS_CIV", 362);
     define("BE_PSIONICS_TECH_UPGRADE", 363);
+    define("BE_PSIONICS_TAPESTRY_PUBLIC", 364);
+    define("BE_COAL_BARON_EXPLORE", 365);
+    define("BE_WEREFOLK_COIN", 366);
+    define("BE_MERFOLK_SUBMERGE", 367);
+    define("BE_MERFOLK_RETURN", 368);
+    define("BE_MYSTIC_DISCARD", 369);
     define("BE_CIV_END", 604);
     define("BE_OP_UNIQUE", 600);
 
@@ -2523,6 +2529,43 @@ $this->benefit_types = [
         "keep" => 1,
         "sampled" => 1,
         "flags" => FLAG_UPGRADE,
+    ],
+    364 => [
+        // BE_PSIONICS_TAPESTRY_PUBLIC
+        "name" => clienttranslate("PSIONICS draw 2 tapestry cards from the public deck and keep 1"),
+        "icon" => "no",
+        "tt" => "card",
+        "ct" => CARD_TAPESTRY,
+        "draw" => 2,
+        "keep" => 1,
+        "sampled" => 1,
+        "deck" => "deck_tapestry",
+        "discard" => "discard",
+    ],
+    365 => [
+        // BE_COAL_BARON_EXPLORE
+        "name" => clienttranslate("COAL BARON explore with the drawn territory tile"),
+        "icon" => "no",
+    ],
+    366 => [
+        // BE_WEREFOLK_COIN
+        "name" => clienttranslate("WEREFOLK flip the drawn space tile"),
+        "civ" => CIV_WEREFOLK,
+    ],
+    367 => [
+        // BE_MERFOLK_SUBMERGE
+        "name" => clienttranslate("MERFOLK place all but 2 tapestry cards under this mat"),
+        "civ" => CIV_MERFOLK,
+    ],
+    368 => [
+        // BE_MERFOLK_RETURN
+        "name" => clienttranslate("MERFOLK return the submerged tapestry cards to your hand"),
+        "civ" => CIV_MERFOLK,
+    ],
+    369 => [
+        // BE_MYSTIC_DISCARD
+        "name" => clienttranslate("MYSTICS discard your hand to the private discard pile, then gain 2 tapestry cards"),
+        "civ" => CIV_MYSTICS,
     ],
     502 => [
         //

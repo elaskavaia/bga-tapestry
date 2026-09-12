@@ -59,6 +59,7 @@ final class WerefolkTest extends TestCase {
         $game->queueEraCivAbility(CIV_WEREFOLK, 1, $turn);
         $game->useCivAbility(Werefolk::CHOICE_FLIP);
         $game->resolveBenefit(BE_WEREFOLK_FLIP);
+        $game->resolveBenefit(BE_WEREFOLK_COIN);
     }
 
     function testMaterialEntry() {
@@ -196,7 +197,35 @@ final class WerefolkTest extends TestCase {
         $this->game->queueEraCivAbility(CIV_WEREFOLK, 1, 2);
         $this->game->useCivAbility(Werefolk::CHOICE_FLIP);
         $this->game->resolveBenefit(BE_WEREFOLK_FLIP);
+        $this->game->resolveBenefit(BE_WEREFOLK_COIN);
         $this->assertEquals([], $this->game->benefitLabels(), "no advance or regress choice from a ghost flip");
+    }
+
+    /** A player who samples a second reality keeps one of two tiles, and the kept one is the marked one (FORMAL_RULES CIV.PSIONICS.2). */
+    function testASamplerFlipsTheTileTheyKept() {
+        $game = $this->game;
+        $game->giveCiv(1, CIV_PSIONICS);
+        $game->addCard(CARD_SPACE, "deck_space");
+        $game->addCard(CARD_SPACE, "deck_space");
+        $game->seedRand(Werefolk::FACE_DOWN);
+        $game->queueEraCivAbility(CIV_WEREFOLK, 1, 2);
+        $game->useCivAbility(Werefolk::CHOICE_FLIP);
+        $game->resolveBenefit(BE_WEREFOLK_FLIP);
+        $this->assertEquals([(string) BE_PSIONICS_SPACE], $game->benefitLabels());
+
+        $game->gamestate->jumpToState(18);
+        $game->resolveBenefit(BE_PSIONICS_SPACE);
+        $drawn = array_keys($game->getCardsSearch(CARD_SPACE, null, "draw", 1));
+        $this->assertCount(2, $drawn);
+        $bene = $game->getCurrentBenefit();
+        $game->effect_keepCard([$drawn[1]], 1, $bene);
+        $game->benefitCashed($bene);
+        $this->assertEquals([(string) BE_WEREFOLK_COIN], $game->benefitLabels());
+
+        $game->resolveBenefit(BE_WEREFOLK_COIN);
+        $this->assertEquals($drawn[1], $game->getGameStateValue("selected_space_tile"));
+        $this->assertEquals("discard", $game->getCardInfoById($drawn[0])["card_location"]);
+        $this->assertEquals((string) BE_CIV_END, $game->benefitLabels()[1]);
     }
 
     function testDiscardsTheTileAlreadyOnTheMat() {

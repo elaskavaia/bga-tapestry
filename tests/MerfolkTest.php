@@ -75,6 +75,7 @@ class MerfolkUT extends GameUT {
         $this->startIncomeTurn($player_id, $turn);
         $this->queueEraCivAbility(CIV_MERFOLK, $player_id, $turn);
         $this->resolveBenefit($turn == 5 ? BE_MERFOLK_SURFACE : BE_MERFOLK_DIVE, $player_id);
+        $this->resolveBenefit($turn == 5 ? BE_MERFOLK_RETURN : BE_MERFOLK_SUBMERGE, $player_id);
     }
 
     function useCivAbility(int $player_id, int $spot, $extra = ""): void {
@@ -162,6 +163,31 @@ final class MerfolkTest extends TestCase {
         $this->assertEquals([], $game->benefitLabels(), "nothing to submerge, no prompt");
     }
 
+    /** A player who samples a second reality keeps one of two cards, and only then is the submerge judged (FORMAL_RULES CIV.PSIONICS.2). */
+    function testASamplerKeepsOneOfTwoCardsBeforeSubmerging() {
+        $game = $this->game;
+        $game->giveCiv(MerfolkUT::OWNER, CIV_PSIONICS);
+        $game->fillDeck(2);
+        $game->giveTapestryCards(MerfolkUT::OWNER, 2);
+        $game->startIncomeTurn(MerfolkUT::OWNER, 2);
+        $game->queueEraCivAbility(CIV_MERFOLK, MerfolkUT::OWNER, 2);
+        $game->resolveBenefit(BE_MERFOLK_DIVE, MerfolkUT::OWNER);
+        $this->assertEquals([(string) BE_PSIONICS_TAPESTRY], $game->benefitLabels());
+
+        $game->gamestate->jumpToState(18);
+        $game->resolveBenefit(BE_PSIONICS_TAPESTRY, MerfolkUT::OWNER);
+        $drawn = array_keys($game->getCardsSearch(CARD_TAPESTRY, null, "draw", MerfolkUT::OWNER));
+        $this->assertCount(2, $drawn);
+        $bene = $game->getCurrentBenefit();
+        $game->effect_keepCard([$drawn[0]], MerfolkUT::OWNER, $bene);
+        $game->benefitCashed($bene);
+        $this->assertEquals([(string) BE_MERFOLK_SUBMERGE], $game->benefitLabels());
+
+        $game->resolveBenefit(BE_MERFOLK_SUBMERGE, MerfolkUT::OWNER);
+        $this->assertEquals(3, $game->getCardCountInHand(MerfolkUT::OWNER, CARD_TAPESTRY));
+        $this->assertEquals(Merfolk::PHASE_SUBMERGE, $game->civArgs(MerfolkUT::OWNER)["phase"]);
+    }
+
     function testSubmergeKeepsTheTwoSelectedCards() {
         $game = $this->game;
         $game->fillDeck(1);
@@ -185,6 +211,8 @@ final class MerfolkTest extends TestCase {
         $game->queueBenefitNormal(BE_CONFIRM, MerfolkUT::OWNER, reason("str", "income"));
 
         $game->resolveBenefit(BE_MERFOLK_DIVE, MerfolkUT::OWNER);
+        $this->assertEquals([(string) BE_MERFOLK_SUBMERGE, (string) BE_CONFIRM], $game->benefitLabels(), "the submerge waits on the card");
+        $game->resolveBenefit(BE_MERFOLK_SUBMERGE, MerfolkUT::OWNER);
 
         $this->assertEquals(["civ", (string) BE_CONFIRM], $game->benefitLabels());
     }

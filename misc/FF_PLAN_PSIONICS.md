@@ -343,6 +343,7 @@ Answered:
   (CIV.PSIONICS.12) rather than reconcile the two-face-per-die mat, so `$extra = false` here is now
   permanent and the comments in Alchemists.php say incompatible, not deferred. The whole
   "silent rules hole" concern disappears because a PSIONICS owner can never hold ALCHEMISTS.
+
 - UTILITARIENS Barracks gains "the result of the red die" at roll time, before the pick, and still
   reads the first face. Is that the result, or is the kept face? Not ruled; unchanged for now. A:
   the kept face. The mat has the roller "choose 1 of the 2 values that you rolled", so the chosen
@@ -431,10 +432,30 @@ Deferred (separate follow-up runs, no rules question open in any):
   arise. `rollAllDice` and `alchemistRoll` keep `$extra = false` permanently and their comments say
   so. Enforced in `dbPickCardsForLocation` (the civ-draw choke point) via a `getForbiddenCivs`
   helper reading the `incompatible` material key; covered by `tests/IncompatibleCivsTest.php`.
-- **UTILITARIENS Barracks** still reads the first red face, not the kept one (CIV.PSIONICS.10). Left
-  as a known bug.
-- The five **"decisions, not swaps"** sites: `effect_drawCardsUntil`, `coalBaron`'s own draw,
-  MERFOLK income / era-5 draws, MYSTICS private-deck draws, WEREFOLK's space-tile flip.
+
+- ~~**UTILITARIENS Barracks** still reads the first red face, not the kept one (CIV.PSIONICS.10).~~
+  DONE. The gain left `effect_conquer` (roll time, first face) for `queueBarracksGain`: after the
+  die pick, `action_choose_die` reads the face the red die is left showing through
+  `queueShownDieBenefit` (the renamed `queueUnclaimedDieBenefit`, which TRADERS still use), and on
+  the both-dice path of `effect_endOfConquer`, where nothing is picked, it is a second
+  `queueConquerDieGain("red")` choice. Five cases in `PsionicsSeamTest`.
+- ~~The five **"decisions, not swaps"** sites~~ DONE through one engine seam, not per-site code:
+  `awardRandomCard(..., ?int $then, $deck, $discard)` takes the row an effect continues with.
+  Without a sampler it draws inline and queues `$then` as an interrupt; with one the keep row
+  parks `$then` in its reason arg (`getSampleContinuation`) and `effect_keepCard` queues it after
+  the keep. Either way `queueAfterGainedCard` puts the card id in the continuation's reason arg
+  (the `BE_CARD_PLAY_TRIGGER` convention) and the handler reads it with `getGainedCardId`; an
+  empty deck hands 0 on both paths. The sites: `coalBaron` -> `BE_COAL_BARON_EXPLORE` (marks
+  `coal_baron`, queues 17); WEREFOLK `BE_WEREFOLK_FLIP` draws, `BE_WEREFOLK_COIN` marks and flips;
+  MERFOLK `BE_MERFOLK_DIVE` / `BE_MERFOLK_SURFACE` draw, `BE_MERFOLK_SUBMERGE` / `BE_MERFOLK_RETURN`
+  continue; MYSTICS 333 / 334 draw, `BE_MYSTIC_DISCARD` discards the hand and gains 2. MYSTICS'
+  public-deck draw is the one draw that names a deck, so it has its own sample row
+  `BE_PSIONICS_TAPESTRY_PUBLIC` with `deck` / `discard` material keys the keep case honours.
+  `effect_drawCardsUntil` is untouched: its only caller is HERALDS' `setupCiv` under `$start`,
+  which runs at game setup only, where nobody holds a second civilization (CIV.PSIONICS.3), so it
+  never meets a sampler. The six `BE_*` defines are hand-added to `material.inc.php`; `genmat`
+  only prints them. Tests: four seam cases plus two per site in `PsionicsSeamTest`, one sampler
+  case each in `WerefolkTest` and `MerfolkTest`, whose helpers now resolve the continuation row.
 
 ## Test infrastructure
 

@@ -113,7 +113,9 @@ The table contains outposts, cubes, landmarks and income buildings.
 - `benefit_prerequisite` - not actually a prerequisite, it's an order field, lower number goes
   first
 - `benefit_quantity` - quantity for `standard`, number of resources to pay for `bonus`
-- `benefit_data` - assorted crap, I use it to put the "reason" for `standard`
+- `benefit_data` - assorted crap, I use it to put the "reason" for `standard`. Its third `:` part
+  is a per-row payload the log never shows: a civ phase, a flags value, or the card id a row
+  queued by `queueAfterGainedCard` continues with (read it with `getGainedCardId`)
 - `benefit_player_id` - who owns it
 
 #### `benefit_category`

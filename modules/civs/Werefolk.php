@@ -48,6 +48,8 @@ class Werefolk extends AbsCivilization {
 
         switch ($ben) {
             case BE_WEREFOLK_FLIP:
+                return $this->drawTile($player_id, $reason);
+            case BE_WEREFOLK_COIN:
                 return $this->flip($player_id, $reason);
             case BE_WEREFOLK_REGRESS:
                 return $this->regressThenExplore($player_id, $reason);
@@ -64,25 +66,24 @@ class Werefolk extends AbsCivilization {
         }
     }
 
-    /** The drawn tile is the one that must be explored with, the way COAL BARON marks its territory. */
-    function drawTile(int $player_id, string $reason): int {
-        $game = $this->game;
-        $cards = $game->awardCard($player_id, 1, CARD_SPACE, false, $reason);
-        $card = reset($cards);
-        $tile_id = $card ? (int) $card["id"] : 0;
-        $game->setGameStateValue("selected_space_tile", $tile_id);
-        return $tile_id;
+    /** The tile is a random gain, so the flip waits on the draw the way any keep would (FORMAL_RULES CIV.PSIONICS.2). */
+    function drawTile(int $player_id, string $reason): bool {
+        $this->discardTileOnMat($player_id);
+        $this->game->awardRandomCard($player_id, 1, CARD_SPACE, $reason, BE_WEREFOLK_COIN);
+        return true;
     }
 
     /**
+     * The drawn tile is the one that must be explored with, the way COAL BARON marks its territory.
      * Face-up leaves the regress optional, and declining it is what pays the 4 VP, so both are
      * offered as one choice. A player who cannot regress anywhere did not regress, so they take
      * the VP with no prompt.
      */
     function flip(int $player_id, string $reason): bool {
         $game = $this->game;
-        $this->discardTileOnMat($player_id);
-        if (!$this->drawTile($player_id, $reason)) {
+        $tile_id = $game->getGainedCardId($reason);
+        $game->setGameStateValue("selected_space_tile", $tile_id);
+        if (!$tile_id) {
             // no tile gained means nothing to flip, the whole ability is skipped (FORMAL_RULES CIV.WEREFOLK.1)
             $game->notifyWithName(
                 "message",

@@ -1550,6 +1550,11 @@ abstract class PGameXBody extends tapcommon {
                 $this->ageOfSailCheck($player_id);
                 $this->gamestate->nextState("explore");
                 return false;
+            case BE_COAL_BARON_EXPLORE:
+                // marked only now, with the explore that consumes the marker next in line
+                $this->setGameStateValue("coal_baron", $this->getGainedCardId($reason));
+                $this->queueBenefitNormal(17, $player_id, $reason);
+                return true;
             case BE_RESEARCH:
             case BE_RESEARCH_NB:
                 return $this->research($ben, $reason, $player_id);
@@ -1916,11 +1921,24 @@ abstract class PGameXBody extends tapcommon {
             case BE_PSIONICS_SPACE:
             case BE_PSIONICS_CIV:
             case BE_PSIONICS_TECH_UPGRADE:
+            case BE_PSIONICS_TAPESTRY_PUBLIC:
                 $card_type = $this->getRulesBenefit($ben, "ct", 0);
                 $draw = $this->getDrawCount($ben, $player_id);
                 $type_info = $this->card_types[$card_type];
-                $cards = $this->dbPickCardsForLocation($count * $draw, $card_type, "draw", $player_id);
+                $cards = $this->dbPickCardsForLocation(
+                    $count * $draw,
+                    $card_type,
+                    "draw",
+                    $player_id,
+                    $this->getRulesBenefit($ben, "deck", null),
+                    $this->getRulesBenefit($ben, "discard", null)
+                );
                 if (count($cards) == 0) {
+                    // nothing to keep, but the effect waiting on the card still goes on without one
+                    [$then, $gain_reason] = $this->getSampleContinuation($ben, $reason);
+                    if ($then) {
+                        $this->queueAfterGainedCard($then, $player_id, $gain_reason, 0);
+                    }
                     return true; // cancel action
                 }
                 $this->notifyWithName(
@@ -2592,10 +2610,54 @@ abstract class PGameXBody extends tapcommon {
     /**
      * A card gained at random from a deck. A player who samples a second reality draws one extra
      * per card gained and keeps one (FORMAL_RULES CIV.PSIONICS.1); for everyone else this is
-     * awardCard. Use it wherever the drawn cards themselves are not needed, since a keep is
-     * interactive and cannot hand a card back.
+     * awardCard. A keep is interactive and cannot hand a card back, so an effect that goes on with
+     * the drawn card names the row to continue with in $then: it resolves right after the card is
+     * in hand, and getGainedCardId reads the card off its reason.
      */
-    function awardRandomCard($player_id, int $count, int $card_type, string $reason = ""): void {
+    function awardRandomCard(
+        $player_id,
+        int $count,
+        int $card_type,
+        string $reason = "",
+        ?int $then = null,
+        ?string $deck = null,
+        ?string $discard = null
+    ): void {
+        if (!$player_id) {
+            $player_id = $this->getActivePlayerId();
+        }
+        $this->systemAssertTrue("a continuation follows a single card, not $count", $then === null || $count == 1);
+        $keep_row = $this->getSampleRow($player_id, $card_type, $deck);
+        if (!$keep_row) {
+            $cards = $this->awardCard($player_id, $count, $card_type, false, $reason, $deck, $discard);
+            if ($then !== null) {
+                $card = reset($cards);
+                $this->queueAfterGainedCard($then, $player_id, $reason, $card ? (int) $card["id"] : 0);
+            }
+            return;
+        }
+        // the keep row parks the continuation in its reason arg for effect_keepCard to queue, so a
+        // caller's own arg (a spot's flags, a played card's id) must not be left there to be read as one
+        $keep_reason = $this->withReasonDataArg($reason, $then ?? "");
+        for ($i = 0; $i < $count; $i++) {
+            // one draw and keep per card gained, so a gain of two is two separate choices
+            $this->queueBenefitInterrupt($keep_row, $player_id, $keep_reason);
+        }
+    }
+
+    /**
+     * The draw 2 keep 1 row that stands in for a random gain of this card type, 0 for a player
+     * who does not sample. A draw from a deck other than the player's own has its own row, and only
+     * MYSTICS' public tapestry draw is one.
+     */
+    function getSampleRow($player_id, int $card_type, ?string $deck = null): int {
+        if (!$this->hasExtraOption($player_id)) {
+            return 0;
+        }
+        if ($deck !== null && $deck != $this->getDeckFor($player_id, $card_type)[0]) {
+            $this->systemAssertTrue("no sample row for a draw from $deck", $card_type == CARD_TAPESTRY);
+            return BE_PSIONICS_TAPESTRY_PUBLIC;
+        }
         $keep_rows = [
             CARD_TERRITORY => BE_PSIONICS_TERRITORY,
             CARD_TAPESTRY => BE_PSIONICS_TAPESTRY,
@@ -2603,17 +2665,32 @@ abstract class PGameXBody extends tapcommon {
             CARD_SPACE => BE_PSIONICS_SPACE,
             CARD_CIVILIZATION => BE_PSIONICS_CIV,
         ];
-        if (!$player_id) {
-            $player_id = $this->getActivePlayerId();
+        return $keep_rows[$card_type] ?? 0;
+    }
+
+    /**
+     * The row an effect continues with once its random card is in hand, queued to resolve next
+     * with the card id in its reason arg, the way BE_CARD_PLAY_TRIGGER carries its card. 0 says
+     * the deck had nothing to give.
+     */
+    function queueAfterGainedCard(int $then, $player_id, string $reason, int $card_id): void {
+        $this->queueBenefitInterrupt($then, $player_id, $this->withReasonDataArg($reason, $card_id));
+    }
+
+    /** The card a row queued by queueAfterGainedCard continues with, 0 when nothing was gained. */
+    function getGainedCardId(string $reason): int {
+        return (int) $this->getReasonArg($reason, 3);
+    }
+
+    /**
+     * [then, reason] of a sampled keep row: the continuation awardRandomCard parked in its reason
+     * arg, and the gain's own reason without it. [0, reason] for any other keep row.
+     */
+    function getSampleContinuation(int $ben, string $reason): array {
+        if (!$this->getRulesBenefit($ben, "sampled", 0)) {
+            return [0, $reason];
         }
-        if (!$this->hasExtraOption($player_id) || !isset($keep_rows[$card_type])) {
-            $this->awardCard($player_id, $count, $card_type, false, $reason);
-            return;
-        }
-        for ($i = 0; $i < $count; $i++) {
-            // one draw and keep per card gained, so a gain of two is two separate choices
-            $this->queueBenefitInterrupt($keep_rows[$card_type], $player_id, $reason);
-        }
+        return [(int) $this->getReasonArg($reason, 3), $this->withReasonDataArg($reason, "")];
     }
 
     /**
@@ -2839,14 +2916,9 @@ abstract class PGameXBody extends tapcommon {
 
     function coalBaron() {
         // Draw territory and explore with it. Then give neighbours each 1 territory.
-        $this->interruptBenefit();
         $player_id = $this->getActivePlayerId();
         $reason = reason_tapestry(TAP_COAL_BARON);
-        $cards = $this->awardCard($player_id, 1, CARD_TERRITORY, false, $reason);
-        foreach ($cards as $card) {
-            $this->setGameStateValue("coal_baron", $card["id"]);
-        }
-        $this->queueBenefitNormal(17, $player_id, $reason);
+        $this->awardRandomCard($player_id, 1, CARD_TERRITORY, $reason, BE_COAL_BARON_EXPLORE);
         $neighbours = $this->getPlayerNeighbours($player_id, false);
         foreach ($neighbours as $neighbour) {
             $this->awardRandomCard($neighbour, 1, CARD_TERRITORY, $reason);
@@ -6703,7 +6775,8 @@ abstract class PGameXBody extends tapcommon {
             }
         }
         $split[3] = $arg;
-        return implode(":", $split);
+        // an emptied arg leaves the plain reason, so it compares equal to what reason() builds
+        return rtrim(implode(":", $split), ":");
     }
 
     function setBenefitDataArg($bene, $arg, $commit = true) {
@@ -8013,14 +8086,23 @@ abstract class PGameXBody extends tapcommon {
             $this->rollConquerDice($player_id);
         }
         $this->queueBenefitNormal(141, $player_id, $orig_reason); // die pick
-        if ($this->hasCiv($player_id, CIV_UTILITARIENS)) {
-            //Barracks: Whenever you conquer, gain the result of the red die (even if you also chose that die’s benefit)
-            if ($this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_39_3", $player_id)) {
-                $benefit = $this->getConquerDieBenefit("red", $player_id);
-                if ($benefit) {
-                    $this->queueBenefitNormal($benefit, $player_id, reason_civ(CIV_UTILITARIENS));
-                }
-            }
+    }
+
+    /**
+     * UTILITARIENS Barracks: whenever you conquer, gain the result of the red die, even if that is
+     * also the die claimed. The result is the face the die is left showing once the pick is made
+     * (FORMAL_RULES CIV.PSIONICS.10); with both dice gained outright there is no pick, so a sampled
+     * red die is offered as a choice a second time.
+     */
+    function queueBarracksGain($player_id, bool $both = false): void {
+        if (!$this->hasCiv($player_id, CIV_UTILITARIENS) || !$this->getStructureInfoSearch(BUILDING_CUBE, null, "civ_39_3", $player_id)) {
+            return;
+        }
+        $reason = reason_civ(CIV_UTILITARIENS);
+        if ($both) {
+            $this->queueConquerDieGain("red", $player_id, $reason);
+        } else {
+            $this->queueShownDieBenefit("red", $player_id, $reason);
         }
     }
 
@@ -8041,7 +8123,7 @@ abstract class PGameXBody extends tapcommon {
             if ($trader && $trader != $player_id && $this->hasCiv($trader, CIV_TRADERS)) {
                 // if player has trader civ - it is trader
                 $other_color = $color == "red" ? "black" : "red";
-                $this->queueUnclaimedDieBenefit($other_color, $trader);
+                $this->queueShownDieBenefit($other_color, $trader);
             }
         }
         if ($this->isTapestryActive($player_id, 31)) {
@@ -8049,6 +8131,7 @@ abstract class PGameXBody extends tapcommon {
             $tileBen = $this->getTileBenefit();
             $this->queueBenefitNormal($tileBen, $player_id, reason_tapestry(31));
         }
+        $this->queueBarracksGain($player_id);
         $this->gamestate->nextState("next");
     }
 
@@ -8100,15 +8183,16 @@ abstract class PGameXBody extends tapcommon {
     }
 
     /**
-     * The gain a TRADERS owner takes from the die the roller did not claim. The roller rerolled
-     * that die, so what is left showing is the sampled face (FORMAL_RULES CIV.PSIONICS.9), and the
-     * owner is never offered a pick: they are not the active player.
+     * The gain from the face a die is left showing, never a pick: its only face on a plain roll,
+     * the kept face once the roller claimed it, and on the die the roller did not claim the
+     * sampled face, since the roller rerolled it (FORMAL_RULES CIV.PSIONICS.9). What a TRADERS
+     * owner and the UTILITARIENS Barracks read (CIV.PSIONICS.10).
      */
-    function queueUnclaimedDieBenefit(string $die_color, $player_id): void {
+    function queueShownDieBenefit(string $die_color, $player_id, ?string $reason = null): void {
         $faces = $this->getConquerDieFaces($die_color);
         $benefit = $this->getConquerDieBenefitOfFace($die_color, (int) end($faces));
         if ($benefit) {
-            $this->queueBenefitNormal($benefit, $player_id, reason("die", clienttranslate("Conquer die")));
+            $this->queueBenefitNormal($benefit, $player_id, $reason ?: reason("die", clienttranslate("Conquer die")));
         }
     }
 
@@ -9492,6 +9576,8 @@ abstract class PGameXBody extends tapcommon {
                 }
             }
         }
+        // the row's own reason, so the log names what caused the gain and not the keep row
+        [$then, $keep_reason] = $this->getSampleContinuation($ben, $bene["benefit_data"] ?: reason("be", $ben));
         foreach ($ids as $card_id) {
             if (!in_array($ben, [172, BE_PSIONICS_CIV])) {
                 // a drawn civilization stays in the draw area, row 174 moves it in later
@@ -9499,8 +9585,6 @@ abstract class PGameXBody extends tapcommon {
                 //if ($ben==175) $extra=4; // recyclers tech card cannot be upgraded on first income turn
                 $this->effect_moveCard($card_id, $player_id, "hand", $player_id, $extra);
             }
-            // the row's own reason, so the log names what caused the gain and not the keep row
-            $keep_reason = $bene["benefit_data"] ?: reason("be", $ben);
             if ($this->getRulesBenefit($ben, "flags", 0) & FLAG_UPGRADE) {
                 // invent and upgrade, the action_invent tail: no delayed resolve
                 $this->effect_cardComesInPlayTriggerResolve($card_id, $player_id, $keep_reason);
@@ -9512,6 +9596,9 @@ abstract class PGameXBody extends tapcommon {
         }
         foreach (array_keys($cards) as $card_id) {
             $this->effect_discardCard($card_id, $player_id);
+        }
+        if ($then) {
+            $this->queueAfterGainedCard($then, $player_id, $keep_reason, (int) $ids[0]);
         }
     }
 
@@ -12701,6 +12788,7 @@ abstract class PGameXBody extends tapcommon {
             $this->notifyWithName("message", clienttranslate('${player_name} gains benefits from both dice'));
             $this->queueConquerDieGain("black", $player_id);
             $this->queueConquerDieGain("red", $player_id);
+            $this->queueBarracksGain($player_id, true);
             if ($this->isTapestryActive($player_id, 31)) {
                 // PIRATE RULE
                 $this->queueBenefitNormal($this->getTileBenefit(), $player_id, reason_tapestry(31));
