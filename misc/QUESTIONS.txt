@@ -1,0 +1,163 @@
+Tapestry: Fantasies & Futures civilization rules questions
+
+These are the rulings I had to make while implementing the FF civilizations on Board Game Arena
+and could not settle from the mat text, the rulebook or an existing designer answer. Under each
+question is the reading currently implemented. Please confirm or correct.
+
+
+GENERAL
+
+1. Income buildings that end up outside the capital city grid come from four sources: set aside by
+   the Artificers, set aside when a Weefolk token replaces it, gained but "not placed in the city"
+   by the Mystics, and placed next to the mat because the city is full (rules FAQ). Are these one
+   zone with the same rules? Set aside buildings are confirmed to count for "per building of this
+   type" (thread 3092453 Mike Young); do the other two count as well?
+   Current reading: one zone, every building in it counts for its type, none of them is in a row,
+   column or district.
+
+2. Simpler still: can "gain 1 VP for each <type> in your capital city" be read as "each <type> you
+   have taken off your income mat", wherever it went (city grid, beside the mat, Craftsmen slot,
+   Nomads map, set aside, not placed), so the count is simply 5 minus the buildings still on that
+   income track, with no per-location exceptions at all?
+   Current reading: yes, scored as 5 minus the buildings still on the income track.
+
+3. Effects that trigger on gaining or on placing an income building: which of them fire for a
+   building set aside straight off the income mat (Artificers), and for a building gained but not
+   placed in the city (Mystics)?
+   Current reading: the Artificers set aside is not a gain and fires nothing; the Mystics building
+   is gained, so gain triggers fire and place triggers do not.
+
+
+CELESTIALS
+
+4. "Move your player token to an adjacent territory": must the target hex be explored (holding a
+   territory tile or printed terrain), or can the floating capital move onto an unexplored hex?
+   (BGG thread 3068279 asked about the token and other map elements; players only, no designer
+   answer.)
+   Current reading: explored territories only. With no explored adjacent territory the move is
+   skipped that turn.
+
+5. When the black die shows "the benefit on the territory tile", since the move is not a conquer,
+   does it pay the benefit of the territory the token just moved into?
+   Current reading: yes.
+
+6. Celestials gained mid-game: "replace one outpost of your starting territory with a player token".
+   If the only outpost of theirs still on the starting territory is toppled, is that the one
+   replaced (the opponent's upright outpost and the token then make 2 items)? And if no outpost of
+   theirs is there at all, where does the floating capital go?
+   Current reading: the token always goes onto the starting territory; an outpost found there,
+   upright or toppled, returns to the supply; with none found only the token is placed.
+
+
+ELDER ONES
+
+7. The rulebook ends a THIS ERA card at the beginning of the next income turn; the mat keeps the era
+   4 card in effect "after income turn 5". Is the era 4 card inactive during income turn 5 itself
+   (civilization step, upgrade, VP income) and active again from the first extended turn?
+   Current reading: yes, inactive during income turn 5, active again after it.
+
+8. Is ending the extended play voluntary? If the player can still afford an advance but chooses to
+   stop, is that allowed, and is it final (they cannot resume later)? Also, does a track blocked by
+   Theocracy or Dictatorship count toward "no longer able to take an advance turn"?
+   Current reading: voluntary and final; blocked tracks are not considered, only affordability.
+
+9. A second civilization with end of game scoring (Islanders, Riverfolk): does it score at income
+   turn 5 or at the end of the extended play?
+   Current reading: at the end of the extended play.
+
+
+FAEFOLK
+
+10. The "score any building" icon on the second spot of the ellipse: 1 VP per building of one chosen
+    type, or the sum over all four types?
+    Current reading: one chosen type.
+
+
+GENIES
+
+11. Is an opponent whose game is already over still in the token draw? The rulebook lets a finished
+    player "gain VP from passive civilization abilities", so if drawn, do they still choose and
+    score the circled benefit?
+    Current reading: finished opponents are excluded from the draw.
+
+
+ILLUMINATI
+
+12. When an opponent's conquer takes the dice and the black die shows "the benefit on the territory
+    tile", does the Illuminati player gain the benefit of the territory the opponent conquered?
+    Current reading: yes.
+
+13. Ordering: does the Illuminati player's gain from a taken die resolve before the roller uses the
+    roll (before the roller picks a die, before the roller's science advance)? This matters when
+    both players would reach a tier landmark from the same science roll.
+    Current reading: the Illuminati player resolves first and wins the landmark race.
+
+14. After the Illuminati player's game is over, an opponent takes dice still on the mat. Does the
+    Illuminati player gain nothing, or at least the VP faces (passive ability rule)?
+    Current reading: nothing.
+
+15. Illuminati gained during the civilization step of an income turn 2-5: setup places all 3 dice on
+    the mat, then the income ability fires the same turn, for 18 VP immediately?
+    Current reading: yes.
+
+
+MERFOLK
+
+16. After income turn 5, option (a) "discard any number of tapestry cards for 5 VP each": is zero
+    allowed, i.e. can the Merfolk player pass to keep trap cards in hand longer?
+    Current reading: at least one card must be discarded, there is no pass.
+
+17. Option (b) "play a tapestry card onto the era 4 stack for its WHEN PLAYED ability": may any card
+    be played (THIS ERA, no ability, trap card), or only cards with a WHEN PLAYED ability? If a THIS
+    ERA card is played, does it stay in effect for the rest of the Merfolk player's game, as it does
+    for the Elder Ones?
+    Current reading: any card may be played; a THIS ERA card stays in effect until covered.
+
+
+PSIONICS
+
+18. "Draw 3 tapestry cards, keep 1" with Psionics: draw 4 keep 1, or three separate draw 2 keep 1?
+    (BGG thread 3082746 asked this and got no designer answer.)
+    Current reading: draw 4 keep 1, from "adds, not multiplies".
+
+19. Random gains not from a deck or supply, e.g. a random card from an opponent's hand or a random
+    card from a discard pile: does Psionics apply?
+    Current reading: no, only draws from the deck or supply.
+
+20. Psionics player conquers at a table with Traders. The Psionics player rolled each conquer die
+    twice and picked one face per die, then picked one die for the benefit. Which face does the
+    Traders player take from the unclaimed die: the last physical roll, or the face the Psionics
+    player chose for that die?
+    Current reading: the last physical roll.
+
+
+WEEFOLK
+
+21. Income turn 5 scoring: a landmark that covers 2 plots in the same token's row, once or twice?
+    Current reading: once per row or column its footprint touches.
+
+22. Full city: can the opponent replace a landmark with the token, or only an income building? If a
+    landmark can be replaced, do the other plots of its footprint become open?
+    Current reading: income buildings only, landmarks are never replaced.
+
+23. Can a token be given to an opponent whose game is already over? They could still place it, and
+    it would still count for the Weefolk income turn 5 scoring.
+    Current reading: finished opponents are skipped; if no opponent can take the token, the gift is
+    skipped for that income turn.
+
+24. Weefolk token placed by an opponent who has Terraforming in effect: is placing the token
+    "placing a building" for the Terraforming VP, and may it go on an impassable plot?
+    Current reading: a planted token is not a building, so no Terraforming VP and impassable plots
+    are not offered.
+
+
+PSIONICS (continued)
+
+25. ALCHEMISTS and PSIONICS interact poorly: PSIONICS says roll every die twice and keep one, and
+    the ALCHEMISTS mat is nothing but dice. Rather than build a two-face-per-die mat, are the two
+    civilizations simply incompatible, so a player never owns both?
+    Current reading: yes, incompatible. A player who owns one can never gain the other. On a choice
+    draw (draw N keep 1, or discard-a-civ-gain-another) the forbidden partner is never among the
+    offered candidates; on a random single civ gain the drawn partner is discarded and a replacement
+    is drawn. If the partner is the only civilization left in the deck, the gain resolves with
+    nothing. The previously considered PSIONICS-on-ALCHEMISTS-dice sampling is dropped.
