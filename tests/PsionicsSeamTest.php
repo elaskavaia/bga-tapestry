@@ -147,6 +147,32 @@ final class PsionicsSeamTest extends TestCase {
         $this->assertEquals(0, $game->getGameStateValue("conquer_die_red_2"));
     }
 
+    /** Keeping the sampled face has to tell the clients, or they keep showing the first face. */
+    function testKeepingASampledFaceNotifiesTheKeptFaceAndClearsTheSample() {
+        $game = $this->sampler();
+        $game->seedRand(3, 1, 4, 2);
+        $game->rollConquerDice(PsionicsUT::ROLLER);
+
+        $game->keepConquerDieFace("red", 1);
+
+        $rolls = $game->notificationsOfType("conquer_roll");
+        $repaint = end($rolls);
+        $this->assertEquals(1, $repaint["args"]["die_red"]);
+        $this->assertEquals(0, $repaint["args"]["die_red_2"]);
+    }
+
+    /** A die that offered one face never sampled, so nothing repaints and no extra line is sent. */
+    function testKeepingAPlainFaceSendsNoRepaint() {
+        $game = $this->game;
+        $game->seedRand(3, 4);
+        $game->rollConquerDice(PsionicsUT::ROLLER);
+        $before = count($game->notificationsOfType("conquer_roll"));
+
+        $game->keepConquerDieFace("red", -1);
+
+        $this->assertCount($before, $game->notificationsOfType("conquer_roll"));
+    }
+
     function testKeepingAFaceThatWasNotRolledIsRefused() {
         $game = $this->sampler();
         $game->seedRand(3, 1, 4, 2);
@@ -343,6 +369,28 @@ final class PsionicsSeamTest extends TestCase {
         $game->action_research_decision(4, 1);
     }
 
+    /** The sampled roll must hand its track to the client, or the "Sampled:" tooltip never shows live. */
+    function testTheSampledScienceRollNotifiesItsTrackAndTheBaseCarriesNone() {
+        $game = $this->sampler();
+        $game->seedRand(3, 1);
+        $game->rollScienceDie2("");
+
+        $carried = array_map(fn($notif) => $notif["args"]["psionics"], $game->notificationsOfType("science_roll"));
+        $this->assertContains(1, $carried); // the sampled roll
+        $this->assertContains(0, $carried); // the base roll clears any pending sample
+    }
+
+    /** Without a sampler every science roll carries 0, so a client with no PSIONICS is unaffected. */
+    function testAPlainScienceRollCarriesNoSample() {
+        $game = $this->game;
+        $game->seedRand(3);
+        $game->rollScienceDie2("");
+
+        foreach ($game->notificationsOfType("science_roll") as $notif) {
+            $this->assertEquals(0, $notif["args"]["psionics"]);
+        }
+    }
+
     /** Lifetime again: the third global belongs to the decision that rolled it. */
     function testThePlainResearchRollClearsTheSampledTrackBeforeIt() {
         $game = $this->sampler();
@@ -512,7 +560,7 @@ final class PsionicsSeamTest extends TestCase {
     /** Additive, not multiplicative: draw 3 keep 1 becomes draw 4 keep 1. */
     function testADrawAndKeepRowDrawsOneMoreForASampler() {
         $game = $this->sampler();
-        $game->fillDeck(CARD_CIVILIZATION, 6);
+        $game->fillDeck(CARD_CIVILIZATION, 6, CIV_ARCHITECTS); // a civ the PSIONICS owner may hold
         $this->assertFalse($game->resolveRow(172));
 
         $this->assertCount(4, $game->getCardsSearch(CARD_CIVILIZATION, null, "draw", PsionicsUT::ROLLER));
@@ -526,6 +574,53 @@ final class PsionicsSeamTest extends TestCase {
         $this->assertCount(3, $game->getCardsSearch(CARD_CIVILIZATION, null, "draw", PsionicsUT::ROLLER));
     }
 
+    /** Additive, not multiplicative: GAMBLERS draw 3 keep 1 becomes draw 4 keep 1. */
+    function testTheGamblersDrawAndKeepRowDrawsOneMoreForASampler() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TAPESTRY, 6);
+        $this->assertFalse($game->resolveRow(311));
+
+        $this->assertCount(4, $game->getCardsSearch(CARD_TAPESTRY, null, "draw", PsionicsUT::ROLLER));
+    }
+
+    /** ILLUMINATI's own draw 3 keep 1 is enlarged the same way, not multiplied. */
+    function testTheIlluminatiDrawRowDrawsOneMoreForASampler() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TAPESTRY, 6);
+        $this->assertFalse($game->resolveRow(BE_ILLUMINATI_DRAW));
+
+        $this->assertCount(4, $game->getCardsSearch(CARD_TAPESTRY, null, "draw", PsionicsUT::ROLLER));
+    }
+
+    function testATapestryGainBecomesADrawAndKeepForASampler() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TAPESTRY, 4);
+        $this->assertTrue($game->resolveRow(BE_TAPESTRY));
+
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_PSIONICS_TAPESTRY]], $game->rows());
+    }
+
+    /** BE_GAIN_CIV with no INFILTRATORS to draw 3 first still samples: draw 2 keep 1. */
+    function testACivGainBecomesADrawAndKeepForASampler() {
+        $game = $this->sampler();
+        $this->assertTrue($game->resolveRow(BE_GAIN_CIV));
+
+        $this->assertEquals([[PsionicsUT::ROLLER, BE_PSIONICS_CIV]], $game->rows());
+    }
+
+    /** A kept tapestry moves to hand and the rest are discarded. */
+    function testAKeptTapestryMovesToHandAndTheRestAreDiscarded() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TAPESTRY, 4);
+        $this->assertFalse($game->resolveRow(BE_PSIONICS_TAPESTRY));
+        $drawn = $game->drawn(CARD_TAPESTRY);
+
+        $game->effect_keepCard([$drawn[0]], PsionicsUT::ROLLER, $game->getCurrentBenefitWithInfo());
+
+        $this->assertEquals([$drawn[0]], array_keys($game->getCardsInHand(PsionicsUT::ROLLER, CARD_TAPESTRY)));
+        $this->assertCount(1, $game->getCardsSearch(CARD_TAPESTRY, null, "discard"));
+    }
+
     /** The sampled rows are the sample; resolving one must not enlarge it a second time. */
     function testASampledRowIsNotEnlargedAgain() {
         $game = $this->sampler();
@@ -537,7 +632,7 @@ final class PsionicsSeamTest extends TestCase {
 
     function testAKeptCivilizationStaysInTheDrawArea() {
         $game = $this->sampler();
-        $game->fillDeck(CARD_CIVILIZATION, 4);
+        $game->fillDeck(CARD_CIVILIZATION, 4, CIV_ARCHITECTS); // a civ the PSIONICS owner may hold
         $this->assertFalse($game->resolveRow(BE_PSIONICS_CIV));
         $drawn = $game->drawn(CARD_CIVILIZATION);
 

@@ -2506,17 +2506,17 @@ abstract class PGameXBody extends tapcommon {
             $discard = $player_discard;
         }
 
-        $cards = $this->cards->pickCardsForLocation($count, $deck, $to_location, $location_arg, true);
-        $missing = $count - count($cards);
-        if ($missing) {
-            // resuffle discard into deck
-            $this->DbQuery("UPDATE card SET card_location='$deck' WHERE card_type='$card_type' AND card_location='$discard'");
-            $this->cards->shuffle($deck);
-            $cards += $this->cards->pickCardsForLocation($missing, $deck, $to_location, $location_arg, true);
-            $missing = $count - count($cards);
+        // one draw may reshuffle in several places (an incompatible redraw is another), so the
+        // reshuffle/insufficient lines are decided on the whole draw and fire at most once
+        $reshuffled = false;
+        $cards = $this->dbPickCardsReshuffling($count, $card_type, $to_location, $location_arg, $deck, $discard, $reshuffled);
+        if ($card_type == CARD_CIVILIZATION && $to_location == "draw") {
+            $cards = $this->dbDropIncompatibleCivs($cards, $count, (int) $location_arg, $to_location, $deck, $discard, $reshuffled);
+        }
+        if ($reshuffled) {
             $this->notifyAllPlayers("message", clienttranslate("Card deck is reshuffled"), []);
         }
-        if ($missing) {
+        if (count($cards) < $count) {
             $this->notifyAllPlayers("message", clienttranslate("Insufficient number of cards in deck"), []);
         }
         foreach ($cards as $cd => $card) {
@@ -2526,6 +2526,65 @@ abstract class PGameXBody extends tapcommon {
         }
         if (count($cards) > 0) {
             $this->prepareUndoSavepoint();
+        }
+        return $cards;
+    }
+
+    private function dbPickCardsReshuffling($count, $card_type, $to_location, $location_arg, $deck, $discard, bool &$reshuffled): array {
+        $cards = $this->cards->pickCardsForLocation($count, $deck, $to_location, $location_arg, true);
+        if (count($cards) < $count) {
+            // resuffle discard into deck
+            $this->DbQuery("UPDATE card SET card_location='$deck' WHERE card_type='$card_type' AND card_location='$discard'");
+            $this->cards->shuffle($deck);
+            $cards += $this->cards->pickCardsForLocation($count - count($cards), $deck, $to_location, $location_arg, true);
+            $reshuffled = true;
+        }
+        return $cards;
+    }
+
+    /**
+     * ALCHEMISTS and PSIONICS are incompatible (FORMAL_RULES CIV.PSIONICS.12): a player who owns one
+     * never draws the other. A forbidden partner drawn is set aside and a replacement drawn in its
+     * place, then the set-aside partner is discarded, so it is never offered nor kept. Civilizations
+     * are unique so the redraw ends; when the only card left is the forbidden partner the gain
+     * resolves short rather than looping.
+     */
+    private function dbDropIncompatibleCivs(
+        array $cards,
+        int $count,
+        int $player_id,
+        $to_location,
+        $deck,
+        $discard,
+        bool &$reshuffled
+    ): array {
+        $forbidden = $this->getForbiddenCivs($player_id);
+        if (!$forbidden) {
+            return $cards;
+        }
+        $aside = [];
+        while (true) {
+            foreach ($cards as $cd => $card) {
+                if (in_array($card["type_arg"], $forbidden)) {
+                    // it stays in the draw pile (out of deck and discard) until the fill is done, so
+                    // a reshuffle in the redraw below cannot deal it back
+                    $aside[] = (int) $card["id"];
+                    unset($cards[$cd]);
+                }
+            }
+            $missing = $count - count($cards);
+            if ($missing <= 0) {
+                break;
+            }
+            $more = $this->dbPickCardsReshuffling($missing, CARD_CIVILIZATION, $to_location, $player_id, $deck, $discard, $reshuffled);
+            if (!$more) {
+                break;
+            }
+            $cards += $more;
+        }
+        // discarded silently: the partner was filtered before the draw was shown, so it is hidden info
+        foreach ($aside as $card_id) {
+            $this->cards->moveCard($card_id, $discard);
         }
         return $cards;
     }
@@ -3253,6 +3312,22 @@ abstract class PGameXBody extends tapcommon {
         return $card_id != null;
     }
 
+    /**
+     * Civilization ids the player may not acquire given what they already own. Driven by the
+     * 'incompatible' material key naming the mutually exclusive partner (ALCHEMISTS <-> PSIONICS,
+     * FORMAL_RULES CIV.PSIONICS.12); a second pair is a material addition, not new code.
+     */
+    function getForbiddenCivs(int $player_id): array {
+        $forbidden = [];
+        foreach ($this->civilizations as $civ_id => $civ_data) {
+            $partner = (int) array_get($civ_data, "incompatible", 0);
+            if ($partner && $this->hasCiv($player_id, $civ_id)) {
+                $forbidden[$partner] = $partner;
+            }
+        }
+        return array_values($forbidden);
+    }
+
     function getAllCivs($player_id) {
         return $this->getCardsSearch(CARD_CIVILIZATION, null, "hand", $player_id);
     }
@@ -3622,12 +3697,15 @@ abstract class PGameXBody extends tapcommon {
         $faces = $this->rollDieFaces("science", $roller_id, $extra);
         $die_roll = $faces[0];
         $this->setGameStateValue($dievar, $die_roll);
+        // a plain roll carries psionics 0 so the client drops any pending sample; the sampled roll
+        // carries its track so the client keeps it for the "Sampled:" tooltip without moving the die
         $this->notifyWithTrack(
             "science_roll",
             clienttranslate('${player_name} rolls the science die with result ${track_name} ${reason}'),
             [
                 "die" => $die_roll,
                 "track" => $die_roll,
+                "psionics" => $dievar === "science_die_psionics" ? $die_roll : 0,
                 "reason" => $this->getReasonFullRec($data),
             ],
             $player_id
@@ -3639,6 +3717,7 @@ abstract class PGameXBody extends tapcommon {
                 [
                     "die" => $faces[1],
                     "track" => $faces[1],
+                    "psionics" => $faces[1],
                     "reason" => $this->getReasonFullRec(reason_civ(CIV_PSIONICS)),
                 ],
                 $player_id
@@ -8044,6 +8123,12 @@ abstract class PGameXBody extends tapcommon {
         }
         $this->userAssertTrue(self::_("This die was not rolled with that face"), in_array($face, $faces));
         $this->setConquerDieFaces($die_color, [$face]);
+        // the sample is resolved: repaint the die to the kept face and drop its "Sampled:" tooltip state
+        $this->notifyAllPlayers("conquer_roll", "", [
+            "die_$die_color" => $face,
+            "die_{$die_color}_2" => 0,
+            "preserve" => ["die_$die_color", "die_{$die_color}_2"],
+        ]);
     }
 
     function getConquerDieBenefit($die_color) {

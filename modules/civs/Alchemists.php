@@ -229,8 +229,9 @@ class Alchemists extends AbsCivilization {
     }
 
     /**
-     * Plain rolls: this mat keeps a die per pass through its own slot choice UI, so offering a
-     * sampled face here needs that UI to carry two faces per die. Stage 2 of the PSIONICS plan.
+     * Plain rolls, permanently: ALCHEMISTS and PSIONICS are incompatible (FORMAL_RULES
+     * CIV.PSIONICS.12), so no owner of this mat ever samples a second face. The dropped dice
+     * integration is why the sample is never offered here.
      */
     function rollAllDice(int $player_id, array $remaining) {
         $civ = $this->civ;
@@ -254,7 +255,7 @@ class Alchemists extends AbsCivilization {
 
         // interrupt before the roll, so a civilization reacting to it is ahead of the bust benefit
         $game->interruptBenefit();
-        // plain roll, see rollAllDice for why a sampled face waits for stage 2
+        // plain roll, permanently: ALCHEMISTS and PSIONICS are incompatible, see rollAllDice
         $die_roll = $game->rollScienceDie(reason_civ($civ), "science_die", -1, true, false)[0];
         $token_data = $this->getAllCubesOnCiv();
         $bust = false;
