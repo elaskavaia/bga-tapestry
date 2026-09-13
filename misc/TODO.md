@@ -6,12 +6,16 @@ the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no act
 
 P1 - MUST FIX BEFORE THE FF DEPLOY
 
-- [ ] [blocker/P1] TYRANNY with 2 or more tapestry cards gained at once. queueBenefitInterrupt is
-      LIFO, so playing the first-gained card throws "You can only play a just drawn card", then the
-      second pending row fires with TYRANNY already covered and canDeclineTapestry() false: the
-      player is forced into an extra tapestry play for 0 VP. Reproduced. This is Jamey's "it
-      wouldn't let the player play a card on top of it" and "prevented the game from continuing"
-      (JAMEY below). The 5 VP on every overplay is a separate item under P2.
+- [x] [blocker/P1] FIXED. TYRANNY with 2 or more tapestry cards gained at once (Jamey's "it wouldn't
+      let the player play a card on top of it" and "prevented the game from continuing", JAMEY
+      below). A gain still queues one benefit 64 row per card, but argTapestryCard now offers the
+      whole gain at once (tyranny_cards, the cards of every pending TYRANNY row) instead of only the
+      card whose row popped first, and stTapestryCard voids a TYRANNY row that has nothing left to
+      offer, which is every other row of the gain once one card has covered TYRANNY. A TYRANNY row
+      is told apart from a HERALDS or MERFOLK benefit 64 by its data being a bare card id.
+      tests/TyrannyTest.php. The 5 VP on every overplay is a separate item under P2.
+      NOTE: the client half (tapestry.js, one button per gained card and only those cards clickable)
+      is not browser-verified, please confirm on Studio.
 
 - [ ] [blocker/P1] "generated notifications are larger than 128k" (seen at 331844 bytes) on a solo
       table while the Automa and Shadow Empire ran their end of game turns, studio 2026-09-08. The
@@ -58,7 +62,7 @@ P2 - BEFORE THE DEPLOY, NARROWER OR CHEAPER
       reaches the console but no toast and no title change, so the state just sits there and looks
       like the button did nothing. Anything that reports the rejection would do.
 
-- [ ] [rules/P2] TYRANNY awards 5 VP on every overplay (PGameXBody.php 3709); the card says "first
+- [ ] [rules/P2] TYRANNY awards 5 VP on every overplay (PGameXBody.php 3710); the card says "first
       and only time". Separate from the LIFO blocker under P1.
 
 - [ ] [rules/P2] getDeckFor inside dbPickCardsForLocation (PGameXBody around 2489) silently changed

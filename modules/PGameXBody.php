@@ -3659,6 +3659,13 @@ abstract class PGameXBody extends tapcommon {
 
         $this->systemAssertTrue("ERR:playTapestryCard:01", $ben);
 
+        // refused here, before the mat is rewritten further down
+        $tyranny_cards = array_get($opargs, "tyranny_cards", []);
+        $this->userAssertTrue(
+            clienttranslate("You can only play a just drawn card"),
+            !$tyranny_cards || isset($tyranny_cards[(int) $card_id])
+        );
+
         if ($ben == 112) {
             $this->userAssertTrue(totranslate("Cannot play tapestry card from hand, select a card to copy from the mat"));
         }
@@ -3699,15 +3706,8 @@ abstract class PGameXBody extends tapcommon {
         $era_string = "era$era";
         $this->dbSetTapestryEraSlot($card_id, $era_string, $player_id);
 
-        $tyranny = array_get($opargs, "tyranny");
-        if ($tyranny) {
-            $just_played = array_get($opargs, "just_played");
-            if ($just_played) {
-                if ($tap_type != $just_played) {
-                    throw new BgaUserException($this->_("You can only play a just drawn card"));
-                }
-                $this->awardVP($player_id, 5, reason_tapestry(TAP_TYRANNY));
-            }
+        if ($tyranny_cards) {
+            $this->awardVP($player_id, 5, reason_tapestry(TAP_TYRANNY));
         }
         $args = $this->notifArgsAddCardInfo($card_id, [
             "espionage" => false,
@@ -10249,18 +10249,53 @@ abstract class PGameXBody extends tapcommon {
         return $tyranny || $herald;
     }
 
+    /**
+     * A benefit 64 row queued by TYRANNY carries the gained card id as its data, where the other
+     * producers of that row (HERALDS, MERFOLK) carry a reason, which always starts with a colon.
+     */
+    function isTyrannyOverplayRow(?array $benefit_row): bool {
+        return is_numeric(array_get($benefit_row, "benefit_data"));
+    }
+
+    /** The gained card a TYRANNY row is about, null once that card has left the player's hand. */
+    function getTyrannyOverplayCard(?array $benefit_row, int $player_id): ?array {
+        if (!$this->isTyrannyOverplayRow($benefit_row)) {
+            return null;
+        }
+        $card = $this->getCardInfoById($benefit_row["benefit_data"]);
+        if (!$card || $card["card_location"] != "hand" || $card["card_location_arg"] != $player_id) {
+            return null;
+        }
+        return $card;
+    }
+
+    /**
+     * card_id => tapestry type of every card the player may put on top of TYRANNY right now. A gain
+     * of several cards queues one benefit 64 row per card and the rows pop last in first out, so the
+     * whole gain is offered at once rather than only the card whose row happens to pop first.
+     */
+    function getTyrannyOverplayCards(int $player_id): array {
+        $cards = [];
+        foreach ($this->dbGetBenefits() as $row) {
+            if ($row["benefit_type"] != 64 || $row["benefit_category"] != "standard" || $row["benefit_player_id"] != $player_id) {
+                continue;
+            }
+            $card = $this->getTyrannyOverplayCard($row, $player_id);
+            if ($card) {
+                $cards[(int) $card["card_id"]] = (int) $card["card_type_arg"];
+            }
+        }
+        return $cards;
+    }
+
     function argTapestryCard() {
         $res = ["decline" => $this->canDeclineTapestry()];
         $this->addBenefitData($res);
         $player_id = $this->getActivePlayerId();
         $tyranny = $this->isTapestryActive($player_id, TAP_TYRANNY);
-        if ($tyranny) {
-            $card_id = array_get($res, "data");
-            if ($card_id) {
-                $info = $this->cards->getCard($card_id);
-                $res["just_played"] = $info ? $info["type_arg"] : 0;
-                $res["tyranny"] = $tyranny;
-            }
+        if ($tyranny && $this->isTyrannyOverplayRow($this->getCurrentBenefit())) {
+            $res["tyranny"] = $tyranny;
+            $res["tyranny_cards"] = $this->getTyrannyOverplayCards($player_id);
         }
 
         $ben = $res["bid"];
@@ -12184,6 +12219,16 @@ abstract class PGameXBody extends tapcommon {
         $type = $this->getCurrentBenefitType();
         if ($type == 64) {
             // tapestry overplay
+            if ($this->isTyrannyOverplayRow($this->getCurrentBenefit())) {
+                // one gain of several cards queues a row per card, and playing any of them covers TYRANNY
+                $offer = $this->isTapestryActive($player_id, TAP_TYRANNY) ? $this->getTyrannyOverplayCards($player_id) : [];
+                if (!$offer) {
+                    $this->clearCurrentBenefit($type);
+                    $this->notifyWithName("message_error", clienttranslate("No gained tapestry card can be played on top of TYRANNY"));
+                    $this->nextStateBenefitManager();
+                    return;
+                }
+            }
             if ($era == 1) {
                 return;
             }

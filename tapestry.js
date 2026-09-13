@@ -1862,13 +1862,23 @@ define([
           if (args.title) {
             this.setDescriptionOnMyTurn(this.getTr(args.title));
           }
-          if (args.bid == 64 && args.tyranny && args.just_played) {
-            var info = this.tapestry_data[parseInt(args.just_played)];
-            if (!info) console.log(this.tapestry_data);
-            var name = info["name"];
-            this.setDescriptionOnMyTurn(_("TYRANNY: ${you} may choose to play ${card_name} on top"), { card_name: name });
-            this.addActionButton("button_yes", _("Yes"), () => {
-              this.axcallwrapper("playCard", { card_id: args.data });
+          var tyranny_cards = args.bid == 64 && args.tyranny ? args.tyranny_cards || {} : {};
+          var tyranny_ids = Object.keys(tyranny_cards);
+          if (tyranny_ids.length) {
+            // a gain of several cards offers all of them, playing any one of them covers TYRANNY
+            var names = tyranny_ids.map((card_id) => this.getTr(this.tapestry_data[tyranny_cards[card_id]]["name"]));
+            if (tyranny_ids.length == 1) {
+              this.setDescriptionOnMyTurn(_("TYRANNY: ${you} may choose to play ${card_name} on top"), { card_name: names[0] });
+            } else {
+              this.setDescriptionOnMyTurn(_("TYRANNY: ${you} may choose one of the gained tapestry cards to play on top"));
+            }
+            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").forEach((node) => {
+              if (!tyranny_ids.includes(node.dataset.cardId)) node.classList.remove("active_slot");
+            });
+            tyranny_ids.forEach((card_id, i) => {
+              this.addActionButton("button_yes_" + card_id, tyranny_ids.length > 1 ? names[i] : _("Yes"), () => {
+                this.axcallwrapper("playCard", { card_id: parseInt(card_id) });
+              });
             });
           }
           if (args.decline) this.addActionButton("button_tapDecline", _("Decline"), "onTapDecline");
