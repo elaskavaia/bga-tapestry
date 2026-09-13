@@ -264,6 +264,6 @@ complexity order are called out below.
 ## Per civilization plans
 
 - [Illuminati](FF_PLAN_ILLUMINATI.md) - done.
-- [Psionics](FF_PLAN_PSIONICS.md) - stage 1, the engine seam, landed; the civilization is next.
+- [Psionics](FF_PLAN_PSIONICS.md) - done.
 - [Celestials](FF_PLAN_CELESTIALS.md) - done.
 - [Artificers](FF_PLAN_ARTIFICERS.md) - done.
