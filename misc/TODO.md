@@ -43,6 +43,57 @@ P1 - MUST FIX BEFORE THE FF DEPLOY
       Fix needs both halves: private state args for the tapestry case, and a private (or name-less)
       notification for the keep and the discard when card_type is CARD_TAPESTRY.
 
+Designer answers of 2026-09 (misc/QUESTIONS.txt) overturned eight readings. FORMAL_RULES.txt and
+the material rulings are already updated; each item below is the code change for one clause.
+
+- [ ] [rules/P1] CIV.ELDER_ONES.1 (QUESTIONS 7): getCivInExtendedPlay (PGameXBody around 3562)
+      answers null during income turn 5, so getTapestryEra reads 5 and the era 4 card is inactive
+      for that turn. Fix: a player with an extended play civ reads era 4 during income turn 5 as
+      well (hasExtendedPlayCiv rather than isExtendedPlay in getTapestryEra), while
+      ElderOnes.onGainLandmark keeps isExtendedPlay so the 10 VP still starts after the turn.
+      Applies to MERFOLK too (Victoria, QUESTIONS 7, CIV.MERFOLK.5).
+
+- [ ] [rules/P1] CIV.ELDER_ONES.2 (QUESTIONS 8): stPlayerTurn (PGameXBody around 11960) ends
+      extended play only when getPossibleAdvances is empty, and that test (11796) is affordability
+      only, THEOCRACY and DICTATORSHIP blocks are not consulted; action_endMyGame (11970) and the
+      client "End my game" button let the player stop early. Fix: drop the voluntary stop (action,
+      button, state transition) and count a blocked track as not advanceable in the end test.
+
+- [ ] [rules/P1] CIV.ELDER_ONES.5 (QUESTIONS 9): effect_endOfIncome (PGameXBody around 12443)
+      returns before finishPlayer for an extended play civ, so finalGameScoring (ISLANDERS,
+      RIVERFOLK, every civ finalScoring) waits for endExtendedPlay. Fix: run finalGameScoring at the
+      end of income turn 5 for everyone and leave endExtendedPlay the era 6 write only. Decide the
+      non-scoring cleanup in finalGameScoring (checkDictatorship forceEnd, HERALDS clear): clearing
+      a dictatorship on the ELDER ONES player at income turn 5 would unblock their extended play.
+
+- [ ] [rules/P1] CIV.FAEFOLK.1 (QUESTIONS 10): benefit 342 BE_VP_ANY_BUILDING is
+      'alias'=>['or'=>[...]] in misc/benefit_types.csv 235, a choose-one row. Fix: make the alias
+      the plain list of all four VP rows (BE_VP_FARM, BE_VP_ARMORY, BE_VP_HOUSE, 54), regenerate with
+      npm run genmat, reword its name, add a FaefolkTest case for spot 2.
+
+- [ ] [rules/P1] CIV.GENIES.1 (QUESTIONS 11): Genies.php drawOpponent (93-121) filters tokens of
+      opponents past income turn 5 out of the draw and skips the ability when none is left;
+      grantRandomWish picks for a zombie. Fix: draw from every token; when the drawn opponent is
+      finished or zombie, queue the circled "or" choice on the GENIES player instead and score only
+      them (grantWish already skips the zombie's row); grantRandomWish and the "nobody left" skip go.
+
+- [ ] [rules/P1] CIV.ILLUMINATI.5 (QUESTIONS 14): Illuminati.php onDieRolled (82-84) returns
+      before queueDieGain when the owner is not alive. Fix: a finished owner still gains the VP part
+      of whatever the face pays, awarded directly (a finished player's benefit rows are dropped),
+      the rest of the face is lost; a zombie owner stays at nothing.
+
+- [ ] [rules/P1] CIV.MERFOLK.5 (QUESTIONS 17): Merfolk.php argCivAbilitySingle (around 180) offers
+      CHOICE_PLAY whenever an era 4 card exists, and the MERFOLK 64 row then accepts any hand card.
+      Fix: offer the play only when the hand holds a card with a "when played" ability (trap cards
+      included) and restrict the selectable cards to those. Material has no such key: tapestry card
+      descriptions start with "THIS ERA:" for the this-era cards, so add a flag rather than parse.
+
+- [ ] [rules/P1] CIV.WEEFOLK.4 (QUESTIONS 23): Weefolk.php getEligibleOpponents (72-80) drops
+      opponents past era 5, and the BE_WEEFOLK_PLOT row giveToken queues on a finished recipient
+      would be dropped by the engine like a zombie's. Fix: offer every real opponent, and let a
+      finished recipient pick the plot themselves like anyone else, through a path that survives
+      their finished state (Victoria, QUESTIONS 23).
+
 P2 - BEFORE THE DEPLOY, NARROWER OR CHEAPER
 
 - [ ] [rules/P2] Utilitarians: no city when they place a landmark. The landmark row is declinable

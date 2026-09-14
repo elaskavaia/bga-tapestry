@@ -118,6 +118,8 @@ TAPESTRY.2 When a tapestry card is played as a benefit, TAPESTRY.1 applies as we
 TAPESTRY.3 A "this era" ability ends either a) at the beginning of the player's next income turn,
     before the tapestry card of that turn is played, or b) when the card is covered by an overplay,
     as soon as it is covered and before the effects of the new card resolve.
+    Exception: the era 4 card of a player with extended play stays in effect through income turn 5
+    and extended play (CIV.ELDER_ONES.1, CIV.MERFOLK.5).
 TAPESTRY.4 Benefit "play a tapestry card" (an overplay) - if the player has no tapestry card in hand
     the effect is void and the active tapestry card remains.
 TAPESTRY.5 An overplay needs a card to cover: when the tapestry space of the current era is still
@@ -246,12 +248,13 @@ BUILDING.6 An income building leaving the mat is not gaining. Any income buildin
     income mat uncovers its space, which pays from then on. A building is gained only when the
     effect says gain, and the gain is what fires effects that trigger on gaining or placing a
     building, wherever the building goes.
-    Three civs put a building out of the capital city (not gained?):
-    ARTIFICERS sets it aside straight off the mat, "not in your capital city";
-    WEEFOLK sets aside one already in the grid;
-    MYSTICS gains one it does "not place in the city" (this one is a gain?).
-    Whether "set aside", "do not place in the city" and "place out of city bounds" are the same
-    zone is a question to the designer. Does this zone score for "per building of this type"?
+    Three civs put a building out of the capital city: ARTIFICERS sets it aside straight off the
+    mat, "not in your capital city", and fires nothing; WEEFOLK sets aside one already in the grid;
+    MYSTICS gains one it does "not place in the city", so gain triggers fire and place triggers do
+    not. Set aside, "do not place in the city" and beside the mat are one zone: every building in
+    it counts for its type, none of them is in a row, column or district, and the count for "per
+    building of this type" is 5 minus the buildings still on that income track.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 1-3 (2026-09).
 
 MAP - territories and items
 MAP.1 Every outpost or player token on a territory is an item. A territory holding 2 items may not
@@ -308,11 +311,13 @@ CIV.CELESTIALS.1 The floating capital is an inert item (MAP.2). It grants no con
     on the board.".
 CIV.CELESTIALS.2 The move is to an explored adjacent territory. With no explored adjacent territory
     the ability is void for that turn. A skipped move is not caught up.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 4 (2026-09).
 CIV.CELESTIALS.3 The move may float any inert token of the owner (MAP.4).
     Impl. A zombie owner never moves it (MAP.5).
 CIV.CELESTIALS.4 The move is not a conquer: no "whenever you conquer" trigger, die pick, trap card,
     TRADERS leftover die, UTILITARIENS barracks or explore. Both dice pay, red then black; black
     face 1 pays the benefit of the territory moved into; a face with no benefit pays nothing.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 5 (2026-09).
 CIV.CELESTIALS.5 The dice are rolled from the ILLUMINATI mat: the ILLUMINATI owner is paid first
     (CIV.ILLUMINATI.1, CIV.ILLUMINATI.4).
 CIV.CELESTIALS.6 A landmark hangs off the side when any plot of its footprint is outside the grid.
@@ -326,20 +331,32 @@ CIV.CELESTIALS.7 Hanging off changes nothing else: the plots outside the grid be
     column or district and are never a WEEFOLK token's line; the WEEFOLK scoring (CIV.WEEFOLK.1)
     still counts a hanging landmark once per line it touches inside the grid. The landmark itself still counts for
     per-landmark scoring (BUILDING.5).
-CIV.CELESTIALS.8 Gained mid-game, the floating capital always goes onto the starting territory. An
-    outpost of the owner there, upright or toppled, returns to the supply; with none there the
-    token is placed alone.
+CIV.CELESTIALS.8 Gained mid-game, the floating capital always goes onto the starting territory. The
+    player chooses which outpost there it replaces, their own or an opponent's, upright or toppled;
+    that outpost returns to its owner's supply. With none there the token is placed alone.
+    Ref. Mike Young and Chris Scaffidi (co-designers), QUESTIONS.txt 6 (2026-09): the mat says
+    outpost, with no preference for the CELESTIALS' own.
+    Impl. Two outposts of one owner in the same state are told apart by nothing, so the choice is
+    made for the player. In practice that is the only case: the starting territory holds the
+    owner's two upright outposts from setup, 2 items make it unconquerable (MAP.1), toppling needs
+    a conquer, and an outpost never leaves its territory. The code takes one of the two.
 
 CIV.ELDER_ONES
-CIV.ELDER_ONES.1 Extended play begins after income turn 5. During income turn 5 the era 4 tapestry
-    card is inactive (TAPESTRY.3) and a landmark gained scores no 10 VP. In extended play the era 4
-    tapestry space is the active one; an overplay lands there.
+CIV.ELDER_ONES.1 Extended play begins after income turn 5. The era 4 tapestry card stays in effect
+    through income turn 5 and the rest of the game (TAPESTRY.3); a landmark gained during income
+    turn 5 scores no 10 VP. In extended play the era 4 tapestry space is the active one; an
+    overplay lands there.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 7 (2026-09): any era 4 card
+    remains in effect through the rest of the game, including during and after income turn 5.
     Ref. Mike Young (co-designer), BGG thread 3193257: past era 4 an overplay is played on top of
     the era 4 card and takes effect immediately, or for the current era, as the card says.
-CIV.ELDER_ONES.2 "No longer able to take an advance turn" is judged at the start of the player's
-    turn by the affordability test that auto-triggers an income turn; blocked tracks are not
-    consulted. Ending is also voluntary ("may take advance turns") and final: no further income
-    turn.
+CIV.ELDER_ONES.2 "No longer able to take an advance turn" is judged at the start of each of the
+    player's turns: no track they can advance on is affordable, and a track blocked by THEOCRACY or
+    DICTATORSHIP is one they cannot advance on. Ending is not voluntary: the player plays on until
+    they cannot, and the end is final, with no further income turn.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 8 (2026-09): play until you
+    can't any more, declining effects is not in the spirit of the game; a blocked track contributes
+    to being unable to play.
     Ref. Mike Young (co-designer), BGG thread 3057126 "A question on Elder Ones' After Income 5
     actions": they keep playing for as long as they are able to advance on tracks.
 CIV.ELDER_ONES.3 Every landmark gained after income turn 5 scores the 10 VP, whatever granted it
@@ -348,13 +365,20 @@ CIV.ELDER_ONES.3 Every landmark gained after income turn 5 scores the 10 VP, wha
     is per landmark gained, not once.
 CIV.ELDER_ONES.4 In extended play the player still answers prompts aimed at opponents (GENIES wish,
     WEEFOLK token). The trap response on a conquer of their territory is skipped.
-CIV.ELDER_ONES.5 Income turn 5 is unchanged: VP income, achievement VP, confirmation. Only final
-    scoring is deferred to the end of extended play, a second
-    civilization's final scoring included (ISLANDERS, RIVERFOLK).
+CIV.ELDER_ONES.5 Income turn 5 is unchanged: VP income, achievement VP, confirmation, and whatever
+    a civilization scores on the final income turn, a second one included (ISLANDERS, RIVERFOLK).
+    Income turn 5 is the player's final income turn; there is no end of game scoring and extended
+    play defers nothing.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 9 (2026-09): the mats have no
+    "end of game scoring", they score during the final income turn, which for the ELDER ONES is
+    income turn 5.
+    Impl. The end of extended play only marks the player finished.
 
 CIV.FAEFOLK
-CIV.FAEFOLK.1 "Score any building": the player picks one income building type and scores it, not
-    the sum of all types.
+CIV.FAEFOLK.1 "Score any building": 1 VP per income building of every type, the sum over all four
+    types, not one chosen type.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 10 (2026-09): consistent with
+    the second Virtual Reality Holocenter symbol on the Arts track, consolidated rulebook p. 16.
 CIV.FAEFOLK.2 "Visible tapestry" counts the hand and the income mat; a card covered by an overplay
     does not count. The card gained at the start of the ability counts; a card moved from hand to
     mat during the same resolution counts once.
@@ -367,10 +391,12 @@ CIV.FAEFOLK.3 The ability triggers on income turns 2-5 only, never on income tur
     BGG thread 3054727 "Consolidated List of Misprints".
 
 CIV.GENIES
-CIV.GENIES.1 A finished opponent is out of the bag for the draw. With no opponent able to answer the
-    ability is skipped and the GENIES player scores nothing.
-    Impl. A zombie opponent stays in and picks a random circled benefit; only the GENIES player
-    scores.
+CIV.GENIES.1 A finished opponent stays in the bag for the draw. When their token is drawn they
+    neither choose nor score: the GENIES player chooses the circled benefit and scores it alone.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 11 (2026-09): the mat does
+    not remove tokens as players finish, and choosing a benefit is not a passive ability.
+    Ruled by Victoria: the GENIES player chooses in the finished opponent's place.
+    Impl. A zombie opponent is handled as a finished one.
 
 CIV.ILLUMINATI
 CIV.ILLUMINATI.1 Each die taken pays its own benefit: a roll of the black die alone takes only the
@@ -387,16 +413,23 @@ CIV.ILLUMINATI.2 Impl. Any opponent's science roll takes the science die, whatev
     Ref. Mike Young (designer), BGG thread 3058558 "Illuminati - Chimera".
 CIV.ILLUMINATI.3 Conquer roll: the black die's territory benefit face pays the benefit of the
     territory being conquered, nothing when that territory has none.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 12 (2026-09).
     Impl. A track landmark reached by the science advance is gained (MOVE.4).
     Impl. The science die pays an optional advance with no benefit and no bonus.
 CIV.ILLUMINATI.4 The owner's gain from a taken die resolves before the roller uses the roll; a
     race to a track landmark goes to the owner.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 13 (2026-09).
     Impl. Before the die pick, the research decision, the roller's advance, a keep-or-reroll
     choice.
-CIV.ILLUMINATI.5 Impl. A finished or zombie owner gains nothing from a taken die; their dice never
-    return.
+CIV.ILLUMINATI.5 A finished owner still gains the VP a taken die pays, from any face, as a passive
+    ability; anything else the face pays is lost. Their dice never return.
+    Ref. Mike Young (co-designer), QUESTIONS.txt 14 (2026-09): the passive bonus takes effect,
+    that is why the dice go back on the mat at the start of income turn 5. Chris Scaffidi read it
+    as nothing; ruled by Victoria for Mike's reading.
+    Impl. A zombie owner gains nothing.
 CIV.ILLUMINATI.6 A civilization gained in the civilization step of income turns 2-5 scores that
     same turn with all three dice on the mat.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 15 (2026-09).
     Impl. The income ability scores the dice on the mat at the start of the income turn.
 CIV.ILLUMINATI.7 Impl. The owner rolling a die from their own mat, on any turn and for any effect,
     leaves it on the mat: only an opponent takes a die.
@@ -410,8 +443,15 @@ CIV.MERFOLK.2 Returning the submerged cards on income turn 5 is not a gain.
 CIV.MERFOLK.3 Impl. "Keep up to 5" is answered as exactly 5 (discarding more gains nothing).
 CIV.MERFOLK.4 An extended turn is mandatory: discarding discards at least one card; there is no
     pass.
-CIV.MERFOLK.5 Any card can be played on an extended turn; a "this era" card stays in effect for the
-    rest of the game unless overplayed.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 16 (2026-09): it keeps the
+    player from dragging the game out.
+CIV.MERFOLK.5 Only a card with a "when played" ability can be played on an extended turn, trap
+    cards included; a card with a "this era" ability alone cannot. The era 4 card stays in effect
+    through income turn 5 and the extended turns, as for the ELDER ONES (TAPESTRY.3); a played card
+    with both abilities keeps its "this era" ability for the rest of the game unless overplayed.
+    Ref. Mike Young and Chris Scaffidi (co-designers), QUESTIONS.txt 17 (2026-09): trap cards
+    carry a WHEN PLAYED ability and can be played. Ruled by Victoria: the answer reads as only
+    WHEN PLAYED cards, and the ELDER ONES era 4 ruling (QUESTIONS.txt 7) applies to MERFOLK too.
     Impl. The game ends at the start of a turn with an empty hand.
     Impl. A trap card played in defence empties the hand between turns, so the game ends on the next
     turn.
@@ -428,11 +468,16 @@ CIV.PSIONICS.1 Impl. "This effect adds (not multiplies) with other effects that 
     effect rolling two dice gets an extra face on each even where only one of them will pay
     (conquer); an effect that gains the result of every roll gets an extra face and its own choice
     on each of those rolls.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 18 (2026-09): draw 4 keep 1;
+    the two tech cards of track space 7 are two separate random draws when no face up card is
+    selected.
+    Impl. BE_2_INVENT is an alias of two BE_INVENT rows, so each face down draw is its own sample.
     Ref. BGG thread 3082746 "Psionics seems like a very weak Civ", players only and no designer
     answer: they agree on one more, not double, and the draw 4 versus three draw 2 question is
     asked there and left open. Ruled by Victoria from the card's own worked example.
 CIV.PSIONICS.2 Impl. A gain is random only where the deck or supply decides it. A card an effect
     names, or takes from a discard, an opponent's hand or a set aside pile, is not a random gain.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 19 (2026-09).
 CIV.PSIONICS.3 Impl. The ability applies only after game setup; the civilization pick is not a
     gain. A civilization gained during play runs its setup draw with the extra option: ILLUMINATI's
     draw 3 keep 1 becomes draw 4 keep 1.
@@ -445,6 +490,8 @@ CIV.PSIONICS.7 A coin flip is not a die roll and gains no extra option.
 CIV.PSIONICS.8 Impl. A gain another player's civilization copies (ADVISORS) is a separate gain for
     each of them, each subject only to its own owner's civilization.
 CIV.PSIONICS.9 On a conquer you choose a face for each die (2 red + 2 black); the die you do not claim stays at second roll.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 20 (2026-09): TRADERS take
+    the last physical roll of the unclaimed die.
     Impl. The roller rerolled the same die, so that is the face left showing.
 CIV.PSIONICS.10 The face you choose is the result of that die for every effect that reads it
     (UTILITARIANS Barracks, a TRADERS owner reading the claimed die; ILLUMINATI excepted,
@@ -472,15 +519,23 @@ CIV.WEEFOLK
 CIV.WEEFOLK.1 Scoring is per token, not per distinct line: two tokens in one row score it twice; a
     building in both a token's row and column scores twice. A landmark counts once per line its
     footprint touches. The income turn 5 token is planted before the scoring.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 21 (2026-09).
 CIV.WEEFOLK.2 A plot is an open plot: impassable plots are not offered, even to an opponent with
     TERRAFORMING or RIVERFOLK. No TERRAFORMING VP for a planted token.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 24 (2026-09): placing a token
+    is not placing a building.
 CIV.WEEFOLK.3 A city with no open plot: the opponent chooses the income building to replace;
-    landmarks are never offered. The set aside building is treated as one placed outside the grid
-    (BUILDING.2, BUILDING.4).
+    landmarks are never offered, since no landmark of the game fits one plot. The set aside
+    building is treated as one placed outside the grid (BUILDING.2, BUILDING.4).
     The plot stays filled: districts and rows keep their state, no district completes twice.
-CIV.WEEFOLK.4 A finished opponent is not offered a token. With no opponent able to take a token the
-    gift is skipped for that income turn; the territory trade (turns 2-4) and the scoring (turn 5)
-    still happen.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 22 (2026-09): the mat reads
+    any building, but replacing a landmark would open plots and complete districts twice, so only
+    an income building or a 1 by 1 landmark may be replaced; a reprint would say income building.
+CIV.WEEFOLK.4 A finished opponent is still offered a token and plants it: it counts for the WEEFOLK
+    scoring, whatever it does for the recipient. With no real opponent (solo) the gift is skipped
+    for that income turn; the territory trade (turns 2-4) and the scoring (turn 5) still happen.
+    Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 23 (2026-09): the mat does
+    not filter out finished players.
     Impl. A zombie opponent is offered one: the token is planted on a random open plot, or kept if
     the city has none.
 CIV.WEEFOLK.5 A planted token is not a building, outpost or income building of the WEEFOLK player.

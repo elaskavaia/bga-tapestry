@@ -5867,7 +5867,7 @@ $this->civilizations = [
                 "Hanging off changes nothing else: the plots outside the grid belong to no row, column or district and are never a WEEFOLK token's line; the WEEFOLK scoring still counts a hanging landmark once per line it touches inside the grid. The landmark itself still counts for per-landmark scoring."
             ),
             clienttranslate(
-                "Gained mid-game, the floating capital always goes onto the starting territory. An outpost of the owner there, upright or toppled, returns to the supply; with none there the token is placed alone."
+                "Gained mid-game, the floating capital always goes onto the starting territory. The player chooses which outpost there it replaces, their own or an opponent's, upright or toppled; that outpost returns to its owner's supply. With none there the token is placed alone."
             ),
         ],
     ],
@@ -5893,10 +5893,10 @@ $this->civilizations = [
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
         "rulings" => [
             clienttranslate(
-                "Extended play begins after income turn 5. During income turn 5 the era 4 tapestry card is inactive and a landmark gained scores no 10 VP. In extended play the era 4 tapestry space is the active one; an overplay lands there."
+                "Extended play begins after income turn 5. The era 4 tapestry card stays in effect through income turn 5 and the rest of the game; a landmark gained during income turn 5 scores no 10 VP. In extended play the era 4 tapestry space is the active one; an overplay lands there."
             ),
             clienttranslate(
-                "\"No longer able to take an advance turn\" is judged at the start of the player's turn by the affordability test that auto-triggers an income turn; blocked tracks are not consulted. Ending is also voluntary (\"may take advance turns\") and final: no further income turn."
+                "\"No longer able to take an advance turn\" is judged at the start of each of the player's turns: no track they can advance on is affordable, and a track blocked by THEOCRACY or DICTATORSHIP is one they cannot advance on. Ending is not voluntary: the player plays on until they cannot, and the end is final, with no further income turn."
             ),
             clienttranslate(
                 "Every landmark gained after income turn 5 scores the 10 VP, whatever granted it and on whoever's turn (SOCIALISM included), track and tech card landmarks alike."
@@ -5905,7 +5905,7 @@ $this->civilizations = [
                 "In extended play the player still answers prompts aimed at opponents (GENIES wish, WEEFOLK token). The trap response on a conquer of their territory is skipped."
             ),
             clienttranslate(
-                "Income turn 5 is unchanged: VP income, achievement VP, confirmation. Only final scoring is deferred to the end of extended play, a second civilization's final scoring included (ISLANDERS, RIVERFOLK)."
+                "Income turn 5 is unchanged: VP income, achievement VP, confirmation, and whatever a civilization scores on the final income turn, a second one included (ISLANDERS, RIVERFOLK). Income turn 5 is the player's final income turn; there is no end of game scoring and extended play defers nothing."
             ),
         ],
     ],
@@ -5941,7 +5941,9 @@ $this->civilizations = [
             7 => ["top" => 68.2, "left" => 57.5, "w" => 11.6, "h" => 7.5, "benefit" => [BE_SPACE, BE_EXPLORE_SPACE]], //
         ],
         "rulings" => [
-            clienttranslate("\"Score any building\": the player picks one income building type and scores it, not the sum of all types."),
+            clienttranslate(
+                "\"Score any building\": 1 VP per income building of every type, the sum over all four types, not one chosen type."
+            ),
             clienttranslate(
                 "\"Visible tapestry\" counts the hand and the income mat; a card covered by an overplay does not count. The card gained at the start of the ability counts; a card moved from hand to mat during the same resolution counts once."
             ),
@@ -5986,7 +5988,7 @@ $this->civilizations = [
         ],
         "rulings" => [
             clienttranslate(
-                "A finished opponent is out of the bag for the draw. With no opponent able to answer the ability is skipped and the GENIES player scores nothing."
+                "A finished opponent stays in the bag for the draw. When their token is drawn they neither choose nor score: the GENIES player chooses the circled benefit and scores it alone."
             ),
         ],
     ],
@@ -6022,6 +6024,9 @@ $this->civilizations = [
                 "The owner's gain from a taken die resolves before the roller uses the roll; a race to a track landmark goes to the owner."
             ),
             clienttranslate(
+                "A finished owner still gains the VP a taken die pays, from any face, as a passive ability; anything else the face pays is lost. Their dice never return."
+            ),
+            clienttranslate(
                 "A civilization gained in the civilization step of income turns 2-5 scores that same turn with all three dice on the mat."
             ),
         ],
@@ -6055,7 +6060,7 @@ $this->civilizations = [
             clienttranslate("Returning the submerged cards on income turn 5 is not a gain."),
             clienttranslate("An extended turn is mandatory: discarding discards at least one card; there is no pass."),
             clienttranslate(
-                "Any card can be played on an extended turn; a \"this era\" card stays in effect for the rest of the game unless overplayed."
+                "Only a card with a \"when played\" ability can be played on an extended turn, trap cards included; a card with a \"this era\" ability alone cannot. The era 4 card stays in effect through income turn 5 and the extended turns, as for the ELDER ONES; a played card with both abilities keeps its \"this era\" ability for the rest of the game unless overplayed."
             ),
             clienttranslate(
                 "A player holding both MERFOLK and ELDER ONES chooses on each turn after income turn 5 whether it is a MERFOLK turn or an ELDER ONES advance turn. The game ends for them when neither kind of turn is possible."
@@ -6127,10 +6132,10 @@ $this->civilizations = [
                 "A plot is an open plot: impassable plots are not offered, even to an opponent with TERRAFORMING or RIVERFOLK. No TERRAFORMING VP for a planted token."
             ),
             clienttranslate(
-                "A city with no open plot: the opponent chooses the income building to replace; landmarks are never offered. The set aside building is treated as one placed outside the grid. The plot stays filled: districts and rows keep their state, no district completes twice."
+                "A city with no open plot: the opponent chooses the income building to replace; landmarks are never offered, since no landmark of the game fits one plot. The set aside building is treated as one placed outside the grid. The plot stays filled: districts and rows keep their state, no district completes twice."
             ),
             clienttranslate(
-                "A finished opponent is not offered a token. With no opponent able to take a token the gift is skipped for that income turn; the territory trade (turns 2-4) and the scoring (turn 5) still happen."
+                "A finished opponent is still offered a token and plants it: it counts for the WEEFOLK scoring, whatever it does for the recipient. With no real opponent (solo) the gift is skipped for that income turn; the territory trade (turns 2-4) and the scoring (turn 5) still happen."
             ),
             clienttranslate(
                 "A planted token is not a building, outpost or income building of the WEEFOLK player. An ARCHITECTS cube in the player's own capital city is not a planted token."
