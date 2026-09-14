@@ -78,10 +78,12 @@ the material rulings are already updated; each item below is the code change for
       finished or zombie, queue the circled "or" choice on the GENIES player instead and score only
       them (grantWish already skips the zombie's row); grantRandomWish and the "nobody left" skip go.
 
-- [ ] [rules/P1] CIV.ILLUMINATI.5 (QUESTIONS 14): Illuminati.php onDieRolled (82-84) returns
-      before queueDieGain when the owner is not alive. Fix: a finished owner still gains the VP part
-      of whatever the face pays, awarded directly (a finished player's benefit rows are dropped),
-      the rest of the face is lost; a zombie owner stays at nothing.
+- [x] [rules/P1] CIV.ILLUMINATI.5 (QUESTIONS 14): FIXED. onDieRolled now sends a non-alive owner
+      to awardFinishedOwnerVP, which puts each row of the face to the engine's own checkAliveForBenefit
+      and awards what it allows: a finished owner keeps the VP and the log names what was lost, a
+      zombie returns early with nothing. queueDieGain reads the rolled face rather than the die
+      global, so both paths are paid from the same face. Tests: IlluminatiTest, the four
+      testAFinishedOwner* cases and testAZombieOwnerGainsNothing.
 
 - [ ] [rules/P1] CIV.MERFOLK.5 (QUESTIONS 17): Merfolk.php argCivAbilitySingle (around 180) offers
       CHOICE_PLAY whenever an era 4 card exists, and the MERFOLK 64 row then accepts any hand card.

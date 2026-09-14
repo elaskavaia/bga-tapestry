@@ -14,6 +14,8 @@ class DiceUT extends GameUT {
 
     /** getTileBenefit is raw SQL over the map table, which the harness does not model. */
     public array $tileBenefit = [];
+    /** Hex coords each player controls, for the same reason: getControlHexes reads the map table. */
+    public array $controlHexes = [];
     /** Tapestry ids isTapestryActive() answers true for, the card table is not modelled here. */
     public array $tapestries = [];
 
@@ -25,6 +27,10 @@ class DiceUT extends GameUT {
 
     function getTileBenefit() {
         return $this->tileBenefit;
+    }
+
+    function getControlHexes($player_id, $map = null) {
+        return array_fill_keys($this->controlHexes[(int) $player_id] ?? [], []);
     }
 
     function isTapestryActive($player_id, $tapestry_id, $throw = false) {

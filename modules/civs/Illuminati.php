@@ -80,9 +80,35 @@ class Illuminati extends AbsCivilization {
             $die
         );
         if (!$game->isPlayerAlive($owner_id)) {
-            return; // a finished or zombie owner gains nothing, and their dice never return
+            $this->awardFinishedOwnerVP($owner_id, $die, $face);
+            return;
         }
         $this->queueDieGain($owner_id, $die, $face);
+    }
+
+    /**
+     * FORMAL_RULES CIV.ILLUMINATI.5: collecting from a taken die is a passive ability, so an owner
+     * past their income turn 5 keeps the VP the face pays and loses the rest of it, having no turn
+     * left to spend a resource or a tile on. A zombie is out of the game entirely and gains nothing.
+     *
+     * checkAliveForBenefit is the engine's own rule for what a finished player may still be paid,
+     * and it logs what was lost, so each row is put to it rather than sorted here. Awarded outright
+     * rather than queued because BE_VP_TERRITORY is a standard row off the benefit manager's VP
+     * fast path: queueing it would make a finished player the active one to resolve it.
+     *
+     * The science die is skipped on its index, not on its rules: its faces are 1-4 while
+     * $this->dice["science"] is keyed 0-3, so face 4 has no entry to read.
+     */
+    function awardFinishedOwnerVP(int $owner_id, string $die, int $face): void {
+        $game = $this->game;
+        if ($die == "science" || $game->isZombiePlayer($owner_id)) {
+            return;
+        }
+        foreach ($game->getConquerDieBenefitOfFace($die, $face) as $ben) {
+            if ($game->checkAliveForBenefit($owner_id, $ben, "standard")) {
+                $game->awardBenefits($owner_id, $ben, 1, reason_civ($this->civ));
+            }
+        }
     }
 
     /**
@@ -98,7 +124,7 @@ class Illuminati extends AbsCivilization {
             $game->queueBenefitNormal(["or" => [BE_ADVANCE_EXPLORATION_NOBENEFIT + $face - 1, BE_DECLINE]], $owner_id, $reason);
             return;
         }
-        $benefit = $game->getConquerDieBenefit($die);
+        $benefit = $game->getConquerDieBenefitOfFace($die, $face);
         if (!$benefit) {
             $game->notif("message", $owner_id)->notifyAll(clienttranslate('${player_name} gains nothing, that die face has no benefit'));
             return;

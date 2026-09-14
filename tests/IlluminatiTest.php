@@ -279,13 +279,76 @@ final class IlluminatiTest extends TestCase {
 
     // ------------------------------------------------------ absent or finished
 
-    function testAFinishedOwnerLosesTheDieAndGainsNothing() {
+    /**
+     * FORMAL_RULES CIV.ILLUMINATI.5: collecting from a taken die is a passive ability, so a
+     * finished owner still gets the VP the face pays. It is awarded outright rather than queued,
+     * since a finished player has no turn in which to be made active for a benefit row.
+     */
+    function testAFinishedOwnerStillGainsTheVPOfTheTakenDie() {
         $game = $this->game;
         $game->eras[IlluminatiUT::OWNER] = 6;
-        $game->seedRand(3);
+        $game->seedRand(3); // the red face that pays 4 VP
+        $game->rollRedConquerDie(IlluminatiUT::ROLLER, false);
+
+        $this->assertEquals(4, $game->dbGetScore(IlluminatiUT::OWNER));
+        $this->assertEquals(Illuminati::ALL_DICE & ~Illuminati::DICE["red"], $game->mask());
+        $this->assertEquals([], $game->rows(), "awarded outright, nothing queued on a finished player");
+    }
+
+    /**
+     * The red face that pays per controlled territory, the one VP face whose amount is computed
+     * rather than printed. It is also the face the outright award exists for: it is a standard row
+     * the benefit manager would resolve by making the finished owner active.
+     */
+    function testAFinishedOwnerScoresPerTerritoryOnTheTerritoryFace() {
+        $game = $this->game;
+        $game->eras[IlluminatiUT::OWNER] = 6;
+        $game->controlHexes[IlluminatiUT::OWNER] = ["1_1", "1_2", "2_1"];
+        $game->seedRand(2); // the red face that pays VP per controlled territory
+        $game->rollRedConquerDie(IlluminatiUT::ROLLER, false);
+
+        $this->assertEquals(3, $game->dbGetScore(IlluminatiUT::OWNER));
+        $this->assertEquals([], $game->rows());
+    }
+
+    /** Only the VP part survives: a face paying resources pays a finished owner nothing. */
+    function testAFinishedOwnerGainsNothingFromAFaceWithoutVP() {
+        $game = $this->game;
+        $game->eras[IlluminatiUT::OWNER] = 6;
+        $game->seedRand(3); // the black face that pays food
         $game->rollBlackConquerDie(IlluminatiUT::ROLLER, false);
 
+        $this->assertEquals(0, $game->dbGetScore(IlluminatiUT::OWNER));
         $this->assertEquals(Illuminati::ALL_DICE & ~Illuminati::DICE["black"], $game->mask());
+        $this->assertEquals([], $game->rows());
+        $lost = $game->notificationLike("cannot get"); // throws when the loss went unlogged
+        $this->assertEquals($game->getBenefitName(BE_GAIN_FOOD), $lost["args"]["bename"]);
+    }
+
+    /** The black face that pays whatever the conquered tile pays, the other computed face. */
+    function testAFinishedOwnerGainsNothingFromTheTileFace() {
+        $game = $this->game;
+        $game->eras[IlluminatiUT::OWNER] = 6;
+        $game->tileBenefit = [BE_GAIN_COIN];
+        $game->seedRand(1); // the black face that pays the conquered tile's benefit
+        $game->rollBlackConquerDie(IlluminatiUT::ROLLER, false);
+
+        $this->assertEquals(0, $game->dbGetScore(IlluminatiUT::OWNER));
+        $this->assertEquals([], $game->rows());
+    }
+
+    /**
+     * The science die pays an advance, never VP. Face 4 is the case that matters: the science
+     * faces are 1-4 and the material table is keyed 0-3, so reading it would find nothing there.
+     */
+    function testAFinishedOwnerGainsNothingFromTheScienceDie() {
+        $game = $this->game;
+        $game->eras[IlluminatiUT::OWNER] = 6;
+        $game->seedRand(4);
+        $game->rollScienceDie("", "science_die", IlluminatiUT::ROLLER, false);
+
+        $this->assertEquals(0, $game->dbGetScore(IlluminatiUT::OWNER));
+        $this->assertEquals(Illuminati::ALL_DICE & ~Illuminati::DICE["science"], $game->mask());
         $this->assertEquals([], $game->rows());
     }
 
@@ -293,10 +356,11 @@ final class IlluminatiTest extends TestCase {
         $game = $this->game;
         $game->_setPlayerBasicInfo([IlluminatiUT::ROLLER => [], IlluminatiUT::OWNER => ["player_zombie" => 1]]);
         $game->seedRand(3);
-        $game->rollBlackConquerDie(IlluminatiUT::ROLLER, false);
+        $game->rollRedConquerDie(IlluminatiUT::ROLLER, false);
 
         // the die leaves the mat all the same, and a zombie owner's dice never return
-        $this->assertEquals(Illuminati::ALL_DICE & ~Illuminati::DICE["black"], $game->mask());
+        $this->assertEquals(0, $game->dbGetScore(IlluminatiUT::OWNER));
+        $this->assertEquals(Illuminati::ALL_DICE & ~Illuminati::DICE["red"], $game->mask());
         $this->assertEquals([], $game->rows());
     }
 
