@@ -12005,7 +12005,7 @@ abstract class PGameXBody extends tapcommon {
         );
     }
 
-    /** The deferred end of income turn 5: score, mark finished, and let the transition skip them. */
+    /** The real end of their game: mark them finished and let the transition skip them. */
     function endExtendedPlay($player_id, $message) {
         $this->notifyWithName("message_info", $message, [], $player_id);
         $this->finishPlayer($player_id);
@@ -12479,16 +12479,19 @@ abstract class PGameXBody extends tapcommon {
         if ($income_turn_count == 5) {
             // FINAL INCOME
             if ($this->hasExtendedPlayCiv($player_id)) {
+                // their final income turn scores like everyone else's, nothing about the end of the
+                // game is deferred; only the end of their game itself waits (CIV.ELDER_ONES.5)
                 $this->notifyWithName("message_info", clienttranslate('${player_name} plays on after their income turn 5'), [], $player_id);
+                $this->finalCivScoring($player_id);
                 return;
             }
             $this->finishPlayer($player_id);
         }
     }
 
-    /** Final scoring and the era 6 write, deferred to the end of extended play for who has it. */
+    /** The era 6 write and everything the end of a player's game does, once it really ends. */
     function finishPlayer($player_id) {
-        $this->finalGameScoring($player_id);
+        $this->endPlayerGame($player_id);
         $this->dbSetPlayerIncomeTurns($player_id, 6);
         if ($player_id == PLAYER_AUTOMA) {
             $this->dbSetPlayerIncomeTurns(PLAYER_SHADOW, 6); // shadow is done also
@@ -12501,7 +12504,24 @@ abstract class PGameXBody extends tapcommon {
         $this->DbQuery("UPDATE playerextra SET player_income_turns='$turns' WHERE player_id='$player_id'");
     }
 
-    function finalGameScoring($player_id) {
+    /**
+     * The end of a player's game: score whatever is left to score and tear their leftovers down. An
+     * extended play player still at era 5 was scored at the end of their income turn 5 like everyone
+     * else, so only the teardown is left for them (FORMAL_RULES CIV.ELDER_ONES.5).
+     *
+     * That test deliberately does not read isExtendedPlay: the income_turn global stays set for the
+     * rest of the turn their income turn 5 was part of, so a quitter who abandons the confirm at the
+     * end of it would look unscored and be scored a second time.
+     */
+    function endPlayerGame($player_id) {
+        if (!$this->hasExtendedPlayCiv($player_id) || $this->getCurrentEra($player_id) != 5) {
+            $this->finalCivScoring($player_id);
+        }
+        $this->finalGameCleanup($player_id);
+    }
+
+    /** What the player's civilizations score once their last income turn is over. */
+    function finalCivScoring($player_id) {
         $civs = $this->getAllCivs($player_id);
         foreach ($civs as $info) {
             $civ = $info["card_type_arg"];
@@ -12514,7 +12534,15 @@ abstract class PGameXBody extends tapcommon {
                 $civ->finalScoring($player_id);
             }
         }
+    }
 
+    /**
+     * What the end of their game clears, which is not scoring and so waits for it rather than
+     * happening at their income turn 5: a DICTATORSHIP of theirs still blocks their opponents and a
+     * HERALDS clone of theirs is still an active tapestry while they keep taking turns. The aux
+     * score is their final resource count, which extended play is still changing.
+     */
+    function finalGameCleanup($player_id) {
         // clear dictator data
         $this->checkDictatorship($player_id, true);
         // clear heralds data
@@ -13108,7 +13136,7 @@ abstract class PGameXBody extends tapcommon {
             }
             if ($statename == "playerTurnEnd") {
                 $this->notifyWithName("message", clienttranslate('${player_name} is zombie, ends their game'), [], $player_id);
-                $this->finalGameScoring($player_id);
+                $this->endPlayerGame($player_id);
                 $this->gamestate->nextState("next");
                 return;
             }

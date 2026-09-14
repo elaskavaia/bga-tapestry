@@ -19,8 +19,10 @@ class ElderOnesUT extends GameUT {
 
     /** What getPossibleAdvances() answers, playerextra and the track cubes are not modelled. */
     public array $advances = [];
-    /** Players finalGameScoring() ran for, in order. */
+    /** Players finalCivScoring() ran for, in order. */
     public array $finalScored = [];
+    /** Players whose game actually ended, in order. */
+    public array $cleanedUp = [];
 
     function __construct(int $players = 2) {
         parent::__construct($players);
@@ -42,8 +44,14 @@ class ElderOnesUT extends GameUT {
         return $this->advances;
     }
 
-    function finalGameScoring($player_id) {
+    /** The real one scores through the civ instances, which is what these tests are counting. */
+    function finalCivScoring($player_id) {
         $this->finalScored[] = (int) $player_id;
+    }
+
+    /** The teardown writes stats and playerextra columns the harness does not model. */
+    function finalGameCleanup($player_id) {
+        $this->cleanedUp[] = (int) $player_id;
     }
 
     function useCivAbility(int $player_id, int $spot): void {
@@ -103,7 +111,8 @@ final class ElderOnesTest extends TestCase {
 
     /** The state where the player has finished income turn 5 and keeps taking advance turns. */
     private function enterExtendedPlay(int $player_id = ElderOnesUT::OWNER): void {
-        $this->game->eras[$player_id] = 5;
+        $this->game->startIncomeTurn($player_id, 5);
+        $this->game->effect_endOfIncome($player_id);
         $this->game->startPlayerTurn($player_id);
     }
 
@@ -220,14 +229,19 @@ final class ElderOnesTest extends TestCase {
 
     // ------------------------------------------------------- end of income 5
 
-    function testIncomeTurn5DoesNotFinishThePlayer() {
+    /**
+     * FORMAL_RULES CIV.ELDER_ONES.5: the final income turn scores the civilizations like anyone
+     * else's and only the end of the player's game waits, so nothing is deferred but the teardown.
+     */
+    function testIncomeTurn5ScoresTheCivsButDoesNotFinishThePlayer() {
         $game = $this->game;
         $game->startIncomeTurn(ElderOnesUT::OWNER, 5);
 
         $game->effect_endOfIncome(ElderOnesUT::OWNER);
 
         $this->assertEquals(5, $game->getCurrentEra(ElderOnesUT::OWNER), "the era stays 5");
-        $this->assertEquals([], $game->finalScored, "final scoring is deferred");
+        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored, "scored on their final income turn");
+        $this->assertEquals([], $game->cleanedUp, "their game has not ended");
         $this->assertTrue($game->isPlayerAlive(ElderOnesUT::OWNER));
     }
 
@@ -239,6 +253,48 @@ final class ElderOnesTest extends TestCase {
 
         $this->assertEquals(6, $game->getCurrentEra(ElderOnesUT::OPPONENT));
         $this->assertEquals([ElderOnesUT::OPPONENT], $game->finalScored);
+        $this->assertEquals([ElderOnesUT::OPPONENT], $game->cleanedUp);
+    }
+
+    /** The teardown must not score a second time, whichever path reaches it. */
+    function testTheEndOfExtendedPlayDoesNotScoreASecondTime() {
+        $game = $this->game;
+        $this->enterExtendedPlay();
+        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored, "scored at income turn 5");
+
+        $game->endPlayerGame(ElderOnesUT::OWNER);
+
+        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored, "and not again when their game ends");
+        $this->assertEquals([ElderOnesUT::OWNER], $game->cleanedUp);
+    }
+
+    /**
+     * The quitter who abandons the confirm at the end of the turn their income turn 5 was part of.
+     * The income_turn global is still set there, so a skip read off isExtendedPlay would miss and
+     * score them twice.
+     */
+    function testQuittingRightAfterIncomeTurn5DoesNotScoreASecondTime() {
+        $game = $this->game;
+        $game->startIncomeTurn(ElderOnesUT::OWNER, 5);
+        $game->effect_endOfIncome(ElderOnesUT::OWNER);
+        $this->assertFalse($game->isExtendedPlay(ElderOnesUT::OWNER), "still inside that turn");
+
+        $game->endPlayerGame(ElderOnesUT::OWNER);
+
+        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+        $this->assertEquals([ElderOnesUT::OWNER], $game->cleanedUp);
+    }
+
+    /** A quitter who never reached their final income turn still gets their civs scored. */
+    function testAQuitterBeforeIncomeTurn5IsStillScored() {
+        $game = $this->game;
+        $game->eras[ElderOnesUT::OWNER] = 3;
+        $game->startPlayerTurn(ElderOnesUT::OWNER);
+
+        $game->endPlayerGame(ElderOnesUT::OWNER);
+
+        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+        $this->assertEquals([ElderOnesUT::OWNER], $game->cleanedUp);
     }
 
     function testExtendedPlayStartsOnlyAfterIncomeTurn5() {
@@ -266,23 +322,24 @@ final class ElderOnesTest extends TestCase {
 
         $game->playerTurn(ElderOnesUT::OWNER);
 
-        $this->assertEquals([], $game->finalScored);
+        $this->assertEquals([], $game->cleanedUp);
         $this->assertTrue($game->isPlayerAlive(ElderOnesUT::OWNER));
     }
 
     function testTurnWithNoAffordableAdvanceFinishesThePlayerOnce() {
         $game = $this->game;
-        $game->eras[ElderOnesUT::OWNER] = 5;
+        $this->enterExtendedPlay();
         $game->advances = [];
 
         $game->playerTurn(ElderOnesUT::OWNER);
 
-        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+        $this->assertEquals([ElderOnesUT::OWNER], $game->cleanedUp);
         $this->assertEquals(6, $game->getCurrentEra(ElderOnesUT::OWNER));
         $this->assertFalse($game->isExtendedPlay(ElderOnesUT::OWNER));
 
         $game->playerTurn(ElderOnesUT::OWNER);
-        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored, "not scored a second time");
+        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored, "scored once, on income turn 5");
+        $this->assertEquals([ElderOnesUT::OWNER], $game->cleanedUp, "and torn down once");
     }
 
     /** The civ does not block the income turn that reaches era 5, and that turn is not extended play. */
@@ -332,7 +389,7 @@ final class ElderOnesTest extends TestCase {
 
         $game->playerTurn(ElderOnesUT::OWNER);
 
-        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+        $this->assertEquals([ElderOnesUT::OWNER], $game->cleanedUp);
         $this->assertEquals(6, $game->getCurrentEra(ElderOnesUT::OWNER));
     }
 
@@ -344,7 +401,7 @@ final class ElderOnesTest extends TestCase {
 
         $game->playerTurn(ElderOnesUT::OWNER);
 
-        $this->assertEquals([], $game->finalScored);
+        $this->assertEquals([], $game->cleanedUp);
         $this->assertTrue($game->isPlayerAlive(ElderOnesUT::OWNER));
     }
 
@@ -361,7 +418,7 @@ final class ElderOnesTest extends TestCase {
 
         $game->playerTurn(ElderOnesUT::OWNER);
 
-        $this->assertEquals([], $game->finalScored);
+        $this->assertEquals([], $game->cleanedUp, "nothing ended, they just take income");
         $this->assertEquals(4, $game->getCurrentEra(ElderOnesUT::OWNER), "the income turn was taken for them");
     }
 
@@ -374,7 +431,7 @@ final class ElderOnesTest extends TestCase {
 
         $game->playerTurn(ElderOnesUT::OWNER);
 
-        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+        $this->assertEquals([ElderOnesUT::OWNER], $game->cleanedUp);
     }
 
     /** An opponent's DICTATORSHIP blocks the track for this turn only, and counts while it holds. */
@@ -392,7 +449,7 @@ final class ElderOnesTest extends TestCase {
 
         $game->playerTurn(ElderOnesUT::OWNER);
 
-        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+        $this->assertEquals([ElderOnesUT::OWNER], $game->cleanedUp);
     }
 
     /**
@@ -409,7 +466,7 @@ final class ElderOnesTest extends TestCase {
 
         $game->playerTurn(ElderOnesUT::OWNER);
 
-        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+        $this->assertEquals([ElderOnesUT::OWNER], $game->cleanedUp);
         $this->assertEquals(6, $game->getCurrentEra(ElderOnesUT::OWNER));
     }
 

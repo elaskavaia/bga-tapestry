@@ -20,8 +20,10 @@ class MerfolkUT extends GameUT {
 
     /** What getPossibleAdvances() answers, playerextra and the track cubes are not modelled. */
     public array $advances = [];
-    /** Players finalGameScoring() ran for, in order. */
+    /** Players finalCivScoring() ran for, in order. */
     public array $finalScored = [];
+    /** Players whose game actually ended, in order. */
+    public array $cleanedUp = [];
 
     function __construct(int $players = 2) {
         parent::__construct($players);
@@ -43,8 +45,14 @@ class MerfolkUT extends GameUT {
         return $this->advances;
     }
 
-    function finalGameScoring($player_id) {
+    /** The real one scores through the civ instances, which is what these tests are counting. */
+    function finalCivScoring($player_id) {
         $this->finalScored[] = (int) $player_id;
+    }
+
+    /** The teardown writes stats and playerextra columns the harness does not model. */
+    function finalGameCleanup($player_id) {
+        $this->cleanedUp[] = (int) $player_id;
     }
 
     /** Cards for awardCard to draw; with an empty deck the draw is announced as void instead. */
@@ -372,14 +380,16 @@ final class MerfolkTest extends TestCase {
         $this->assertCount(2, $game->getCardsSearch(CARD_TAPESTRY, null, "discard"));
     }
 
-    function testIncomeTurn5DoesNotFinishThePlayer() {
+    /** FORMAL_RULES CIV.ELDER_ONES.5 holds for MERFOLK too: only the end of their game waits. */
+    function testIncomeTurn5ScoresTheCivsButDoesNotFinishThePlayer() {
         $game = $this->game;
         $game->startIncomeTurn(MerfolkUT::OWNER, 5);
 
         $game->effect_endOfIncome(MerfolkUT::OWNER);
 
         $this->assertEquals(5, $game->getCurrentEra(MerfolkUT::OWNER), "the era stays 5");
-        $this->assertEquals([], $game->finalScored, "final scoring is deferred");
+        $this->assertEquals([MerfolkUT::OWNER], $game->finalScored, "scored on their final income turn");
+        $this->assertEquals([], $game->cleanedUp, "their game has not ended");
         $this->assertTrue($game->isPlayerAlive(MerfolkUT::OWNER));
     }
 
@@ -393,7 +403,7 @@ final class MerfolkTest extends TestCase {
         $game->playerTurn(MerfolkUT::OWNER);
 
         $this->assertEquals(Merfolk::PHASE_TURN, $game->civArgs(MerfolkUT::OWNER)["phase"]);
-        $this->assertEquals([], $game->finalScored);
+        $this->assertEquals([], $game->cleanedUp);
     }
 
     function testExtendedTurnDiscardScoresFiveVPPerCard() {
@@ -500,16 +510,19 @@ final class MerfolkTest extends TestCase {
 
     function testEmptyHandFinishesThePlayerExactlyOnce() {
         $game = $this->game;
-        $game->eras[MerfolkUT::OWNER] = 5;
+        $game->startIncomeTurn(MerfolkUT::OWNER, 5);
+        $game->effect_endOfIncome(MerfolkUT::OWNER);
+        $this->assertEquals([MerfolkUT::OWNER], $game->finalScored, "scored on their final income turn");
 
         $game->playerTurn(MerfolkUT::OWNER);
 
-        $this->assertEquals([MerfolkUT::OWNER], $game->finalScored);
+        $this->assertEquals([MerfolkUT::OWNER], $game->finalScored, "and not again when their game ends");
+        $this->assertEquals([MerfolkUT::OWNER], $game->cleanedUp);
         $this->assertEquals(6, $game->getCurrentEra(MerfolkUT::OWNER));
         $this->assertFalse($game->isExtendedPlay(MerfolkUT::OWNER));
 
         $game->playerTurn(MerfolkUT::OWNER);
-        $this->assertEquals([MerfolkUT::OWNER], $game->finalScored, "not scored a second time");
+        $this->assertEquals([MerfolkUT::OWNER], $game->cleanedUp, "their game did not end a second time");
     }
 
     /** Advance turns are gone: the civ takes every extended turn over, affordable advance or not. */
@@ -545,7 +558,7 @@ final class MerfolkTest extends TestCase {
 
         $game->playerTurn(MerfolkUT::OWNER);
 
-        $this->assertEquals([MerfolkUT::OWNER], $game->finalScored);
+        $this->assertEquals([MerfolkUT::OWNER], $game->cleanedUp);
     }
 
     // -------------------------------------------------------- other civs
@@ -559,14 +572,14 @@ final class MerfolkTest extends TestCase {
         $game->advances = ["1_5" => 1];
 
         $game->playerTurn(MerfolkUT::OWNER);
-        $this->assertEquals([MerfolkUT::OWNER], $game->finalScored, "the empty hand ends the Merfolk game");
+        $this->assertEquals([MerfolkUT::OWNER], $game->cleanedUp, "the empty hand ends the Merfolk game");
 
         $game->playerTurn(MerfolkUT::OPPONENT);
-        $this->assertEquals([MerfolkUT::OWNER], $game->finalScored, "the Elder Ones player can still advance");
+        $this->assertEquals([MerfolkUT::OWNER], $game->cleanedUp, "the Elder Ones player can still advance");
 
         $game->advances = [];
         $game->playerTurn(MerfolkUT::OPPONENT);
-        $this->assertEquals([MerfolkUT::OWNER, MerfolkUT::OPPONENT], $game->finalScored);
+        $this->assertEquals([MerfolkUT::OWNER, MerfolkUT::OPPONENT], $game->cleanedUp);
     }
 
     /** Not supported, but a read on every getTapestryEra cannot throw: the first civ found decides. */

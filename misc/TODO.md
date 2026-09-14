@@ -71,12 +71,34 @@ the material rulings are already updated; each item below is the code change for
       testAnAdvanceOnAnUnblockedTrackStillContinues, testExtendedPlayEndsEvenWithAnActivatedAbilityPending,
       testABlockedTrackBeforeExtendedPlayTakesAnIncomeTurnInstead.
 
-- [ ] [rules/P1] CIV.ELDER_ONES.5 (QUESTIONS 9): effect_endOfIncome (PGameXBody around 12443)
-      returns before finishPlayer for an extended play civ, so finalGameScoring (ISLANDERS,
-      RIVERFOLK, every civ finalScoring) waits for endExtendedPlay. Fix: run finalGameScoring at the
-      end of income turn 5 for everyone and leave endExtendedPlay the era 6 write only. Decide the
-      non-scoring cleanup in finalGameScoring (checkDictatorship forceEnd, HERALDS clear): clearing
-      a dictatorship on the ELDER ONES player at income turn 5 would unblock their extended play.
+- [x] [rules/P1] CIV.ELDER_ONES.5 (QUESTIONS 9): FIXED. finalGameScoring is split into
+      finalCivScoring (the civ scoring) and finalGameCleanup (their DICTATORSHIP markers, a HERALDS
+      clone, final stats, aux score, the log line), and finalGameScoring itself is renamed
+      endPlayerGame since it may now do no scoring at all. effect_endOfIncome runs finalCivScoring at
+      the end of income turn 5 for an extended play player too, and endPlayerGame skips the scoring
+      for one still at era 5.
+      NOTE the cleanup deliberately stays at the real end of their game rather than moving to income
+      turn 5: a DICTATORSHIP of theirs should keep blocking opponents while they still take turns, a
+      HERALDS clone of theirs is still an active tapestry (CIV.ELDER_ONES.1), and the aux score is a
+      final resource count extended play keeps changing. Say so if you want any of the four at
+      income turn 5 instead.
+      NOTE the skip is judged on hasExtendedPlayCiv plus era 5, not isExtendedPlay: the income_turn
+      global stays set for the rest of the turn their income turn 5 was part of, so a quitter who
+      abandons the confirm there would have been scored twice.
+      Tests: ElderOnesTest testIncomeTurn5ScoresTheCivsButDoesNotFinishThePlayer,
+      testTheEndOfExtendedPlayDoesNotScoreASecondTime,
+      testQuittingRightAfterIncomeTurn5DoesNotScoreASecondTime, testAQuitterBeforeIncomeTurn5IsStillScored,
+      MerfolkTest testIncomeTurn5ScoresTheCivsButDoesNotFinishThePlayer.
+
+- [ ] [debt/P2] A player who quits in the middle of their own income turn 5 is never finally scored
+      at all: effect_zombieBenefits deletes their pending 602 row so effect_endOfIncome never runs,
+      canSkipConfirm is true for a zombie so the playerTurnEnd zombie branch never fires, and
+      stTransition skips them from then on. Pre-existing, not FF specific. zombieTurn could finish an
+      abandoned income turn (effect_endOfIncome when isIncomeTurn and the era is 5).
+
+- [ ] [debt/P4] finalIslandersScoring() ignores the player it is scoring and reads
+      getActivePlayerId(). Correct at both call sites today, but finalCivScoring made it
+      load-bearing in one more place; it should take the player_id its siblings take.
 
 - [x] [rules/P1] CIV.FAEFOLK.1 (QUESTIONS 10): FIXED. Benefit 342 BE_VP_ANY_BUILDING is now the
       plain alias list of the four VP rows in misc/benefit_types.csv, so it scores every income
