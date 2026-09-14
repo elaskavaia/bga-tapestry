@@ -55,6 +55,14 @@ class WeefolkUT extends GameUT {
         $this->_setPlayerBasicInfo($players);
     }
 
+    /** What actionEliminate does for a finished player who presses "Leave the table". */
+    function makeEliminated(int $player_id): void {
+        $players = $this->loadPlayersBasicInfos();
+        $players[$player_id]["player_eliminated"] = 1;
+        $this->_setPlayerBasicInfo($players);
+        $this->eras[$player_id] = 6;
+    }
+
     function useCivAbility(int $player_id, int $spot, $extra = ""): void {
         $this->civTokenAdvance(CIV_WEEFOLK, $player_id, $spot, $extra);
     }
@@ -142,16 +150,16 @@ final class WeefolkTest extends TestCase {
         $this->assertEquals(["civ"], $this->game->benefitLabels());
     }
 
-    /** Nobody to receive it means no prompt: the gift has no decline, so an empty one would stall. */
+    /**
+     * Nobody to receive it means no prompt: the gift has no decline, so an empty one would stall.
+     * Solo only, where the civ is never dealt, so the branch is defensive.
+     */
     function testMidgameGainWithNoEligibleOpponentQueuesNothing() {
-        $this->game->eras[WeefolkUT::OPPONENT] = 6;
-        $this->game->weefolk()->setupCiv(WeefolkUT::OWNER, "");
+        $game = $this->newGame(1);
+        $game->weefolk()->setupCiv(WeefolkUT::OWNER, "");
 
-        $this->assertEquals([], $this->game->benefitLabels());
-        $this->assertContains(
-            '${player_name} has nobody to give a player token to, the token is skipped',
-            $this->game->notificationTexts()
-        );
+        $this->assertEquals([], $game->benefitLabels());
+        $this->assertContains('${player_name} has nobody to give a player token to, the token is skipped', $game->notificationTexts());
     }
 
     function testAbilityDoesNotFireOnIncomeTurn1() {
@@ -169,34 +177,83 @@ final class WeefolkTest extends TestCase {
         $this->assertEquals([WeefolkUT::OPPONENT, WeefolkUT::OPPONENT + 1], array_column($args["slots_choice"], "player_id"));
     }
 
-    /** An opponent past income turn 5 can no longer place, so they are not offered (FORMAL_RULES CIV.WEEFOLK.4). */
-    function testFinishedOpponentIsNotOffered() {
+    /** Every real opponent is offered a token, finished or not (FORMAL_RULES CIV.WEEFOLK.4). */
+    function testFinishedOpponentIsStillOffered() {
         $game = $this->newGame(3);
         $game->eras[WeefolkUT::OPPONENT] = 6;
         $game->queueEraCivAbility(CIV_WEEFOLK, WeefolkUT::OWNER, 2);
         $args = $game->argCivAbilitySingle(WeefolkUT::OWNER, CIV_WEEFOLK, $game->getCurrentBenefit(CIV_WEEFOLK, "civ"));
 
-        $this->assertEquals([WeefolkUT::OPPONENT + 1], array_column($args["slots_choice"], "player_id"));
+        $this->assertEquals([WeefolkUT::OPPONENT, WeefolkUT::OPPONENT + 1], array_column($args["slots_choice"], "player_id"));
     }
 
-    /** With nobody left to take a token the gift is skipped, but the trade is still offered. */
-    function testNobodyEligibleSkipsTheTokenAndStillOffersTheTrade() {
+    /**
+     * A finished recipient plants the token themselves, which only works because the row is an
+     * auto one: checkAliveForBenefit drops every other kind of row for a player past income turn 5.
+     */
+    function testFinishedOpponentPlantsTheTokenThemselves() {
+        $this->giveToken();
         $this->game->eras[WeefolkUT::OPPONENT] = 6;
-        $this->game->addCard(CARD_TERRITORY, "hand", WeefolkUT::OWNER, 3);
-        $this->game->queueEraCivAbility(CIV_WEEFOLK, WeefolkUT::OWNER, 2);
 
-        $this->assertEquals(["civ"], $this->game->benefitLabels());
-        $this->assertTrue($this->game->weefolk()->isBuildPhase($this->game->getCurrentBenefit(CIV_WEEFOLK, "civ")));
+        $this->game->offerPlot(WeefolkUT::OPPONENT);
+
+        $this->assertEquals("placeStructure", $this->game->gamestate->state()["name"]);
+        $this->game->place_structure(0, 5, 7);
+        $this->assertEquals(
+            WeefolkUT::OWNER,
+            (int) $this->game->getStructureInfoSearch(BUILDING_CUBE, null, "capital_cell_" . WeefolkUT::OPPONENT . "_5_7")[
+                "card_location_arg"
+            ]
+        );
+    }
+
+    /**
+     * A finished opponent who has left the table cannot be made active, so the token is planted for
+     * them rather than offered: it still lands in their city and still scores for WEEFOLK.
+     */
+    function testEliminatedOpponentHasTheTokenPlantedForThem() {
+        $this->game->makeEliminated(WeefolkUT::OPPONENT);
+        $this->game->seedRand(0);
+        $this->giveToken();
+
+        $this->assertEquals([], $this->game->benefitLabels(), "no row waits on a player who has left");
+        $this->assertEquals(WeefolkUT::OWNER, (int) $this->game->getActivePlayerId());
+        $this->assertNotNull($this->game->getStructureInfoSearch(BUILDING_CUBE, null, "capital\\_cell\\_" . WeefolkUT::OPPONENT . "\\_%"));
         $this->assertContains(
-            '${player_name} has nobody to give a player token to, the token is skipped',
+            '${player_name} is out of the game, a random plot is chosen for the player token',
             $this->game->notificationTexts()
         );
     }
 
-    function testNobodyEligibleAndNoTileLeavesNothingPending() {
+    /** The point of the ruling: a token in a finished opponent's city still scores at income turn 5. */
+    function testATokenInAFinishedOpponentsCityStillScores() {
+        $this->giveToken();
         $this->game->eras[WeefolkUT::OPPONENT] = 6;
-        $this->game->queueEraCivAbility(CIV_WEEFOLK, WeefolkUT::OWNER, 2);
-        $this->assertEquals([], $this->game->benefitLabels());
+        $this->game->offerPlot(WeefolkUT::OPPONENT);
+        $this->game->place_structure(0, 5, 7);
+        $this->game->dbAddStructure(WeefolkUT::OPPONENT, BUILDING_FARM, 0, "capital_cell_" . WeefolkUT::OPPONENT . "_5_3");
+
+        $this->game->queueBenefitNormal(BE_WEEFOLK_SCORE, WeefolkUT::OWNER, reason_civ(CIV_WEEFOLK));
+        $this->game->resolveBenefit(BE_WEEFOLK_SCORE, WeefolkUT::OWNER);
+
+        $this->assertEquals(1, $this->game->dbGetScore(WeefolkUT::OWNER), "the farm shares the token's row");
+    }
+
+    /** With no real opponent at all the gift is skipped, but the trade is still offered (solo only). */
+    function testNobodyEligibleSkipsTheTokenAndStillOffersTheTrade() {
+        $game = $this->newGame(1);
+        $game->addCard(CARD_TERRITORY, "hand", WeefolkUT::OWNER, 3);
+        $game->queueEraCivAbility(CIV_WEEFOLK, WeefolkUT::OWNER, 2);
+
+        $this->assertEquals(["civ"], $game->benefitLabels());
+        $this->assertTrue($game->weefolk()->isBuildPhase($game->getCurrentBenefit(CIV_WEEFOLK, "civ")));
+        $this->assertContains('${player_name} has nobody to give a player token to, the token is skipped', $game->notificationTexts());
+    }
+
+    function testNobodyEligibleAndNoTileLeavesNothingPending() {
+        $game = $this->newGame(1);
+        $game->queueEraCivAbility(CIV_WEEFOLK, WeefolkUT::OWNER, 2);
+        $this->assertEquals([], $game->benefitLabels());
     }
 
     /** The row that plants the token belongs to the opponent, which is what makes them active. */
@@ -599,7 +656,10 @@ final class WeefolkTest extends TestCase {
         $tokens = $this->game->plantedTokens(WeefolkUT::OWNER);
         $this->assertCount(1, $tokens);
         $this->assertEquals("capital_cell_" . WeefolkUT::OPPONENT . "_3_3", reset($tokens)["card_location"]);
-        $this->assertContains('${player_name} is zombie, a random plot is chosen for the player token', $this->game->notificationTexts());
+        $this->assertContains(
+            '${player_name} is out of the game, a random plot is chosen for the player token',
+            $this->game->notificationTexts()
+        );
     }
 
     function testZombieOpponentWithAFullCityKeepsTheToken() {
@@ -609,7 +669,7 @@ final class WeefolkTest extends TestCase {
 
         $this->assertCount(0, $this->game->plantedTokens(WeefolkUT::OWNER));
         $this->assertContains(
-            '${player_name} is zombie and their city is full, the player token is not placed',
+            '${player_name} is out of the game and their city is full, the player token is not placed',
             $this->game->notificationTexts()
         );
     }

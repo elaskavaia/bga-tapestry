@@ -96,11 +96,20 @@ the material rulings are already updated; each item below is the code change for
       included) and restrict the selectable cards to those. Material has no such key: tapestry card
       descriptions start with "THIS ERA:" for the this-era cards, so add a flag rather than parse.
 
-- [ ] [rules/P1] CIV.WEEFOLK.4 (QUESTIONS 23): Weefolk.php getEligibleOpponents (72-80) drops
-      opponents past era 5, and the BE_WEEFOLK_PLOT row giveToken queues on a finished recipient
-      would be dropped by the engine like a zombie's. Fix: offer every real opponent, and let a
-      finished recipient pick the plot themselves like anyone else, through a path that survives
-      their finished state (Victoria, QUESTIONS 23).
+- [x] [rules/P1] CIV.WEEFOLK.4 (QUESTIONS 23): FIXED. getEligibleOpponents offers every real
+      opponent, and BE_WEEFOLK_PLOT carries 'auto' so checkAliveForBenefit lets the row reach a
+      recipient past income turn 5, who plants it themselves. A recipient who has left the table
+      (actionEliminate) or quit cannot be made active at all, so plantForZombie became
+      plantForAbsent and covers both. Tests: WeefolkTest testFinishedOpponentIsStillOffered,
+      testFinishedOpponentPlantsTheTokenThemselves, testATokenInAFinishedOpponentsCityStillScores,
+      testEliminatedOpponentHasTheTokenPlantedForThem.
+      NOTE not verified in a browser: a finished seat's client is greyed out by
+      updateEliminatedPlayer, which should only disable the player panel and not the capital mat.
+      Worth one studio check that an era 6 seat can actually click a plot when given a token.
+
+- [ ] [debt/P4] Weefolk and Genies both walk getOpponentsStartingFromLeft filtering on
+      isRealPlayer, which is now the same loop in both. A getRealOpponents helper on PGameXBody
+      next to getOpponentsStartingFromLeft would hold it once.
 
 P2 - BEFORE THE DEPLOY, NARROWER OR CHEAPER
 

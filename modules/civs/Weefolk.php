@@ -68,12 +68,16 @@ class Weefolk extends AbsCivilization {
         $game->benefitCivEntry($this->civ, $player_id, reason_civ($this->civ, self::PHASE_BUILD));
     }
 
-    /** Opponents who can still be given a token: real players who have not finished (FORMAL_RULES CIV.WEEFOLK.4). */
+    /**
+     * Every real opponent, finished or not: the token counts for the WEEFOLK scoring whatever it
+     * does for the recipient, so nobody drops out of the gift (FORMAL_RULES CIV.WEEFOLK.4). Only a
+     * table without a real opponent, which is a solo one, has none.
+     */
     function getEligibleOpponents(int $player_id): array {
         $game = $this->game;
         $opponents = [];
         foreach ($game->getOpponentsStartingFromLeft($player_id) as $opponent_id) {
-            if ($game->isRealPlayer($opponent_id) && $game->getCurrentEra($opponent_id) <= 5) {
+            if ($game->isRealPlayer($opponent_id)) {
                 $opponents[] = (int) $opponent_id;
             }
         }
@@ -148,6 +152,16 @@ class Weefolk extends AbsCivilization {
         $game->queueBenefitNormal(BE_GAIN_ANY_INCOME_BUILDING, $player_id, reason_civ($this->civ));
     }
 
+    /**
+     * Who can be asked where the token goes. A player past their income turn 5 still can, and the
+     * plot row is an auto one so the engine lets it reach them (FORMAL_RULES CIV.WEEFOLK.4), but one
+     * who has left the table or quit cannot be made active at all.
+     */
+    function canPlantOwnToken(int $opponent_id): bool {
+        $game = $this->game;
+        return !$game->isZombiePlayer($opponent_id) && !$game->isPlayerEliminated($opponent_id);
+    }
+
     /** The token is a cube of the owner, but the row that plants it belongs to the opponent. */
     function giveToken(int $player_id, int $opponent_id): void {
         $game = $this->game;
@@ -155,10 +169,10 @@ class Weefolk extends AbsCivilization {
             ->notif("message", $player_id)
             ->withPlayer2($opponent_id)
             ->notifyAll(clienttranslate('${player_name} gives a player token to ${player_name2}'));
-        if ($game->isZombiePlayer($opponent_id)) {
-            // a zombie counts as finished, so their benefit row would be dropped before it reaches
-            // the civ; the token is planted for them here instead (FORMAL_RULES CIV.WEEFOLK.4)
-            $this->plantForZombie($opponent_id);
+        if (!$this->canPlantOwnToken($opponent_id)) {
+            // a player who left the table or quit cannot be made active to place anything, so the
+            // token is planted for them; a finished player who is still here places their own
+            $this->plantForAbsent($opponent_id);
             // nobody else becomes active, so the roll needs its own savepoint or undo re-rolls it
             $game->prepareUndoSavepoint();
             return;
@@ -183,7 +197,10 @@ class Weefolk extends AbsCivilization {
 
     /**
      * The opponent plants the token themselves, through the ordinary structure placement state: the
-     * cube waits in capital_structure the way a claimed income building does.
+     * cube waits in capital_structure the way a claimed income building does. A recipient past their
+     * income turn 5 places it too, which is why BE_WEEFOLK_PLOT is an auto row: apart from VP,
+     * checkAliveForBenefit drops what is queued on a finished player. It does not help an eliminated
+     * one, who is never queued the row in the first place.
      */
     function plantToken(int $opponent_id): bool {
         $game = $this->game;
@@ -251,16 +268,17 @@ class Weefolk extends AbsCivilization {
     /** A quitter cannot be asked where the token goes, so it lands on a random plot (FORMAL_RULES CIV.WEEFOLK.4). */
     function zombieBenefit(array $benefit): void {
         if ((int) $benefit["benefit_type"] == BE_WEEFOLK_PLOT) {
-            $this->plantForZombie((int) $benefit["benefit_player_id"]);
+            $this->plantForAbsent((int) $benefit["benefit_player_id"]);
         }
     }
 
     /**
-     * A quitter who was already at the placement prompt has the token waiting in capital_structure:
-     * that cube is the one to plant, or to put back, or it strands there and every later placement
-     * of any player picks it up instead of their own structure.
+     * A recipient who cannot answer gets a random plot. One who was already at the placement prompt
+     * has the token waiting in capital_structure: that cube is the one to plant, or to put back, or
+     * it strands there and every later placement of any player picks it up instead of their own
+     * structure.
      */
-    function plantForZombie(int $opponent_id): void {
+    function plantForAbsent(int $opponent_id): void {
         $game = $this->game;
         $owner = $this->getOwner();
         $pending = $game->getPendingStructure();
@@ -269,7 +287,7 @@ class Weefolk extends AbsCivilization {
         if (!$plots) {
             $game->notifyWithName(
                 "message",
-                clienttranslate('${player_name} is zombie and their city is full, the player token is not placed'),
+                clienttranslate('${player_name} is out of the game and their city is full, the player token is not placed'),
                 [],
                 $opponent_id
             );
@@ -278,7 +296,7 @@ class Weefolk extends AbsCivilization {
         }
         $game->notifyWithName(
             "message",
-            clienttranslate('${player_name} is zombie, a random plot is chosen for the player token'),
+            clienttranslate('${player_name} is out of the game, a random plot is chosen for the player token'),
             [],
             $opponent_id
         );

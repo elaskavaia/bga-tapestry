@@ -198,7 +198,13 @@ Income:
   era 4 tapestry stays in force (FORMAL_RULES CIV.ELDER_ONES.1).
 - `isPlayerFinished` - era > 5, or a zombie real player. `getPlayersInGame` filters on it,
   `stTransition` skips finished players and calls `endOfGame` when nobody is left.
-- The client greys a player out on the `income` notification with `turn_number` >= 6.
+- The client greys a player out on the `income` notification with `turn_number` >= 6, and offers a
+  finished player a "Leave the table" button (`actionEliminate`). An eliminated player cannot be
+  made the active player at all, so a cross-player prompt has to resolve itself for them, the way
+  it does for a zombie.
+- `checkAliveForBenefit` drops a row queued on a player who is not alive, except a standard VP row
+  or one whose `benefit_types` entry has `auto`. That is the only thing `auto` does, and it is how a
+  prompt aimed at a finished player survives (BE_WEEFOLK_PLOT).
 
 Globals around a turn:
 

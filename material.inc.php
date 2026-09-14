@@ -2424,6 +2424,7 @@ $this->benefit_types = [
         "civ" => CIV_WEEFOLK,
         "tt" => "structure",
         "ct" => BUILDING_CUBE,
+        "auto" => 1,
     ],
     350 => [
         // BE_WEEFOLK_SCORE
