@@ -397,16 +397,30 @@ final class ElderOnesTest extends TestCase {
 
     // ------------------------------------------------------------- tapestry
 
-    function testEra4TapestryIsInactiveDuringIncomeTurn5AndActiveAfter() {
+    /**
+     * FORMAL_RULES TAPESTRY.3 exception: an extended play player's era 4 card stays in effect for
+     * the rest of the game, income turn 5 included, so it never has the gap TAPESTRY.3 gives
+     * everyone else between the last card and the end.
+     */
+    function testEra4TapestryStaysActiveThroughIncomeTurn5AndAfter() {
         $game = $this->game;
         $card_id = $game->addCard(CARD_TAPESTRY, "era4", ElderOnesUT::OWNER, TAP_ACADEMIA);
 
         $game->startIncomeTurn(ElderOnesUT::OWNER, 5);
-        $this->assertNull($game->isTapestryActive(ElderOnesUT::OWNER, TAP_ACADEMIA), "1.3 applies as for everyone");
+        $this->assertEquals($card_id, $game->isTapestryActive(ElderOnesUT::OWNER, TAP_ACADEMIA)["card_id"], "during income turn 5");
 
         $game->startPlayerTurn(ElderOnesUT::OWNER);
-        $active = $game->isTapestryActive(ElderOnesUT::OWNER, TAP_ACADEMIA);
-        $this->assertEquals($card_id, $active["card_id"]);
+        $this->assertEquals($card_id, $game->isTapestryActive(ElderOnesUT::OWNER, TAP_ACADEMIA)["card_id"], "in extended play");
+    }
+
+    /** The same holds for MERFOLK, the other extended play civ (FORMAL_RULES CIV.MERFOLK.5). */
+    function testEra4TapestryStaysActiveDuringIncomeTurn5ForMerfolk() {
+        $game = $this->game;
+        $game->giveCiv(ElderOnesUT::OPPONENT, CIV_MERFOLK);
+        $card_id = $game->addCard(CARD_TAPESTRY, "era4", ElderOnesUT::OPPONENT, TAP_ACADEMIA);
+        $game->startIncomeTurn(ElderOnesUT::OPPONENT, 5);
+
+        $this->assertEquals($card_id, $game->isTapestryActive(ElderOnesUT::OPPONENT, TAP_ACADEMIA)["card_id"]);
     }
 
     function testEra4TapestryStaysInactiveForAPlayerWithoutTheCiv() {
@@ -432,11 +446,33 @@ final class ElderOnesTest extends TestCase {
         $this->assertEquals($new_id, $game->getLatestTapestry(ElderOnesUT::OWNER, 4)["card_id"]);
     }
 
-    function testOverplayIsStillRefusedDuringIncomeTurn5() {
+    /**
+     * With the era 4 card in effect during income turn 5 there is something to cover, so an overplay
+     * granted then lands on era 4 like one in extended play (FORMAL_RULES TAPESTRY.5). A player
+     * without an extended play civ still has nothing to cover and the row is dropped.
+     */
+    function testOverplayDuringIncomeTurn5LandsOnEra4() {
         $game = $this->game;
-        $game->addCard(CARD_TAPESTRY, "era4", ElderOnesUT::OWNER, TAP_ACADEMIA);
+        $old_id = $game->addCard(CARD_TAPESTRY, "era4", ElderOnesUT::OWNER, TAP_ACADEMIA);
+        $new_id = $game->addCard(CARD_TAPESTRY, "hand", ElderOnesUT::OWNER, TAP_ACADEMIA);
         $game->startIncomeTurn(ElderOnesUT::OWNER, 5);
         $game->queueBenefitNormal(64, ElderOnesUT::OWNER, reason("str", "overplay"));
+
+        $game->gamestate->jumpToState(15);
+        $game->stTapestryCard();
+        $this->assertEquals(["64"], $game->benefitLabels(), "the row survives the gate, the player is asked");
+
+        $game->playTapestryCard($new_id, ElderOnesUT::OWNER);
+
+        $this->assertEquals("era4", $game->getCardInfoById($new_id)["card_location"]);
+        $this->assertEquals("era_6", $game->getCardInfoById($old_id)["card_location"]);
+    }
+
+    function testOverplayIsStillRefusedForAPlayerWithoutTheCiv() {
+        $game = $this->game;
+        $game->addCard(CARD_TAPESTRY, "era4", ElderOnesUT::OPPONENT, TAP_ACADEMIA);
+        $game->startIncomeTurn(ElderOnesUT::OPPONENT, 5);
+        $game->queueBenefitNormal(64, ElderOnesUT::OPPONENT, reason("str", "overplay"));
 
         $game->gamestate->jumpToState(15);
         $game->stTapestryCard();

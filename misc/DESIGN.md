@@ -45,7 +45,8 @@ The table contains tech cards, tapestry cards, civ cards, tiles and space tiles.
 - `card_type_arg` - unique tapestry card type defined in the material file, there are multiple
   instances of the TRAP card
 - `card_location` - `deck_tapestry` when in deck; `hand` when in hand; `discard` when in discard;
-  `era1`..`era4` when played (no card is ever played at income 5, so `era5` does not occur);
+  `era1`..`era4` when played (`era5` never occurs: past era 4 a play lands on `era4` for a player
+  with an extended play civ, and is void for anyone else);
   `era_6` (underscore) when covered by an overplay
 - `card_location_arg` - player_id when location is `hand` or `era*`; deck position when
   `deck_tapestry` or `discard`
@@ -194,8 +195,14 @@ Income:
   and `finishPlayer` runs when they stop (`endExtendedPlay`).
 - `isExtendedPlay` - era 5, such a civilization, and income turn 5 over. "Over" is read off the
   `current_player_turn` and `income_turn` globals below, since an income turn only ever happens
-  inside the player's own turn. `getTapestryEra` returns 4 instead of 5 while it holds, so the
-  era 4 tapestry stays in force (FORMAL_RULES CIV.ELDER_ONES.1).
+  inside the player's own turn. It gates what starts only once that turn ends: the ELDER ONES 10 VP
+  per landmark, the "End my game" action, the refusal of a further income turn, and the skipped
+  trap response.
+- `getTapestryEra` returns 4 instead of 5 for a player with an extended play civ, from the moment
+  era 5 starts rather than only once income turn 5 is over (`hasExtendedPlayCiv`, not
+  `isExtendedPlay`): their era 4 card never stops (FORMAL_RULES TAPESTRY.3, CIV.ELDER_ONES.1). So an
+  overplay granted during their income turn 5 covers era 4, where any other player has nothing to
+  cover and the row is void.
 - `isPlayerFinished` - era > 5, or a zombie real player. `getPlayersInGame` filters on it,
   `stTransition` skips finished players and calls `endOfGame` when nobody is left.
 - The client greys a player out on the `income` notification with `turn_number` >= 6, and offers a

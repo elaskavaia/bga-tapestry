@@ -46,12 +46,15 @@ P1 - MUST FIX BEFORE THE FF DEPLOY
 Designer answers of 2026-09 (misc/QUESTIONS.txt) overturned eight readings. FORMAL_RULES.txt and
 the material rulings are already updated; each item below is the code change for one clause.
 
-- [ ] [rules/P1] CIV.ELDER_ONES.1 (QUESTIONS 7): getCivInExtendedPlay (PGameXBody around 3562)
-      answers null during income turn 5, so getTapestryEra reads 5 and the era 4 card is inactive
-      for that turn. Fix: a player with an extended play civ reads era 4 during income turn 5 as
-      well (hasExtendedPlayCiv rather than isExtendedPlay in getTapestryEra), while
-      ElderOnes.onGainLandmark keeps isExtendedPlay so the 10 VP still starts after the turn.
-      Applies to MERFOLK too (Victoria, QUESTIONS 7, CIV.MERFOLK.5).
+- [x] [rules/P1] CIV.ELDER_ONES.1 (QUESTIONS 7): FIXED. getTapestryEra asks hasExtendedPlayCiv
+      rather than isExtendedPlay, so a player with an extended play civ reads era 4 from the start
+      of era 5, income turn 5 included; MERFOLK gets it for free. ElderOnes.onGainLandmark still
+      asks isExtendedPlay, so the 10 VP per landmark still starts only after the turn. Consequence
+      worth knowing: an overplay granted during their income turn 5 now has the era 4 card to cover
+      and lands there (TAPESTRY.5), where it used to be void. Tests: ElderOnesTest
+      testEra4TapestryStaysActiveThroughIncomeTurn5AndAfter,
+      testEra4TapestryStaysActiveDuringIncomeTurn5ForMerfolk,
+      testOverplayDuringIncomeTurn5LandsOnEra4, testOverplayIsStillRefusedForAPlayerWithoutTheCiv.
 
 - [ ] [rules/P1] CIV.ELDER_ONES.2 (QUESTIONS 8): stPlayerTurn (PGameXBody around 11960) ends
       extended play only when getPossibleAdvances is empty, and that test (11796) is affordability
@@ -177,7 +180,7 @@ P2 - BEFORE THE DEPLOY, NARROWER OR CHEAPER
       [ERR:Genies:13]" toast in the log. The state survived and the button still worked afterwards.
       One-line fix; system errors get bug-reported even when harmless.
 
-- [ ] [ux/perf/P2] Era 5 cost: getTapestryEra runs isExtendedPlay on every isTapestryActive,
+- [ ] [ux/perf/P2] Era 5 cost: getTapestryEra runs hasExtendedPlayCiv on every isTapestryActive,
       stTapestryCard and playTapestryCard call for a player in era 5, and that runs getAllCivs plus a
       getCivilizationInstance per civ in hand. 42 isTapestryActive call sites, none inside a hex
       loop. Correctness is unchanged without an extended play civ. getTapestryEra already short
@@ -286,8 +289,11 @@ P3
 
 - [ ] [ui-temp/P3] Elder Ones: during extended play updateCurrentEra finds no era 5 slot and drops
       the income mat highlight, so the era 4 tapestry that is still in force looks inactive. Keeping
-      era 4 lit while isExtendedPlay holds needs the flag on the client side (argPlayerTurn already
-      sends extended_play, the panel does not get it).
+      era 4 lit needs the flag on the client side (argPlayerTurn already sends extended_play, the
+      panel does not get it). Since getTapestryEra now answers 4 from the start of era 5, this
+      covers income turn 5 as well, where the server plays an overplay into slot 4 while the client
+      rings slot 5 - and argPlayerTurn's extended_play is still false there, so the flag has to ride
+      on the income notification instead.
 
 - [ ] [ui-temp/P3] Celestials: moveStructure no longer gates a cube on a land slot behind
       Infiltrators ownership, so any cube on a territory now sits on the hex itself rather than in

@@ -5895,7 +5895,7 @@ $this->civilizations = [
         "income_trigger" => ["from" => 2, "to" => 5, "decline" => false],
         "rulings" => [
             clienttranslate(
-                "Extended play begins after income turn 5. The era 4 tapestry card stays in effect through income turn 5 and the rest of the game; a landmark gained during income turn 5 scores no 10 VP. In extended play the era 4 tapestry space is the active one; an overplay lands there."
+                "Extended play begins after income turn 5. The era 4 tapestry card stays in effect through income turn 5 and the rest of the game; a landmark gained during income turn 5 scores no 10 VP. From era 5 on, income turn 5 included, the era 4 tapestry space is the active one; an overplay lands there, where for any other player it is void."
             ),
             clienttranslate(
                 "\"No longer able to take an advance turn\" is judged at the start of each of the player's turns: no track they can advance on is affordable, and a track blocked by THEOCRACY or DICTATORSHIP is one they cannot advance on. Ending is not voluntary: the player plays on until they cannot, and the end is final, with no further income turn."

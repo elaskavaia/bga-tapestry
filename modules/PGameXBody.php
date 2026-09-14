@@ -3573,11 +3573,15 @@ abstract class PGameXBody extends tapcommon {
         return $this->getCivInExtendedPlay($player_id) !== null;
     }
 
-    /** The era slot tapestry cards are played on and read from: era 4 stays in force in extended play. */
+    /**
+     * The era slot tapestry cards are played on and read from. A player with an extended play civ
+     * reads era 4 from the moment era 5 starts, income turn 5 included, rather than only once that
+     * turn is over: their era 4 card never stops (FORMAL_RULES TAPESTRY.3, CIV.ELDER_ONES.1).
+     */
     function getTapestryEra($player_id) {
         // isTapestryActive calls this constantly, so keep the era 1-4 path at the one query it was
         $era = $this->getCurrentEra($player_id);
-        return $era == 5 && $this->isExtendedPlay($player_id) ? 4 : $era;
+        return $era == 5 && $this->hasExtendedPlayCiv($player_id) ? 4 : $era;
     }
 
     function isPlayerFinished($player_id) {
