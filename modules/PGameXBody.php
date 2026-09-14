@@ -11572,6 +11572,11 @@ abstract class PGameXBody extends tapcommon {
         return $cards;
     }
 
+    /** The player's hand, filtered to the cards that have a WHEN PLAYED ability, TRAP included. */
+    function getWhenPlayedCardsInHand($player_id): array {
+        return array_filter($this->getCardsInHand($player_id, CARD_TAPESTRY), fn($card) => $this->isWhenPlayedTapestry($card));
+    }
+
     function isWhenPlayedTapestry($card) {
         $tapnum = $card;
         if (is_array($card)) {
@@ -12234,6 +12239,11 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
+    /** A row 64 of MERFOLK's extended turn, which always names the card it plays. */
+    function isMerfolkOverplayRow($benefit): bool {
+        return getReasonCiv(array_get($benefit, "benefit_data", "")) == CIV_MERFOLK;
+    }
+
     /** MERFOLK carries the card picked in its own prompt on the row, so nothing is left to ask here. */
     function getPreselectedTapestryCard(int $player_id): int {
         $data = array_get($this->getCurrentBenefit(), "benefit_data", "");
@@ -12282,6 +12292,15 @@ abstract class PGameXBody extends tapcommon {
             $preselected = $this->getPreselectedTapestryCard($player_id);
             if ($preselected) {
                 $this->playTapestryCard($preselected, $player_id);
+                $this->nextStateBenefitManager();
+                return;
+            }
+            if ($this->isMerfolkOverplayRow($this->getCurrentBenefit())) {
+                // MERFOLK names its card in its own prompt (FORMAL_RULES CIV.MERFOLK.5), so a card
+                // that is gone by the time the row pops voids the play; opening the hand here would
+                // offer cards with no WHEN PLAYED ability to play
+                $this->clearCurrentBenefit($type);
+                $this->notifyWithName("message_error", clienttranslate("The tapestry card selected to play is no longer in hand"));
                 $this->nextStateBenefitManager();
                 return;
             }

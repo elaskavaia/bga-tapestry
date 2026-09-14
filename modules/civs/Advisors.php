@@ -172,18 +172,7 @@ class Advisors extends AbsCivilization {
     }
 
     function getWhenPlayedInHand($player_id) {
-        $game = $this->game;
-        $res = [];
-        $cards = $game->getCardsInHand($player_id, CARD_TAPESTRY);
-        foreach ($cards as $card) {
-            $tap_type = $card["card_type_arg"];
-            $tapvar = $game->getRulesCard(CARD_TAPESTRY, $tap_type, "type");
-            if ($tapvar == "now") {
-                // WHEN PLAYED
-                $res[] = $card;
-            }
-        }
-        return $res;
+        return $this->game->getWhenPlayedCardsInHand($player_id);
     }
 
     function moveCivCube(int $player_id, int $slot, $extra, array $civ_args) {

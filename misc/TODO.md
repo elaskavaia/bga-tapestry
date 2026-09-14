@@ -124,11 +124,22 @@ the material rulings are already updated; each item below is the code change for
       global, so both paths are paid from the same face. Tests: IlluminatiTest, the four
       testAFinishedOwner* cases and testAZombieOwnerGainsNothing.
 
-- [ ] [rules/P1] CIV.MERFOLK.5 (QUESTIONS 17): Merfolk.php argCivAbilitySingle (around 180) offers
-      CHOICE_PLAY whenever an era 4 card exists, and the MERFOLK 64 row then accepts any hand card.
-      Fix: offer the play only when the hand holds a card with a "when played" ability (trap cards
-      included) and restrict the selectable cards to those. Material has no such key: tapestry card
-      descriptions start with "THIS ERA:" for the this-era cards, so add a flag rather than parse.
+- [x] [rules/P1] CIV.MERFOLK.5 (QUESTIONS 17): FIXED, and no new material flag was needed after
+      all: tapestry_card_data already carries "type" => "now" for the WHEN PLAYED cards and "era" for
+      the THIS ERA ones, TRAP included, and isWhenPlayedTapestry already read it. Every one of the 44
+      real cards was checked: the type agrees with its description clause and none has both. So
+      CHOICE_PLAY is offered only when the hand holds a WHEN PLAYED card, the card must now be named
+      at the prompt (leaving it to stTapestryCard would have asked over the whole hand), and a named
+      card that is gone when the row pops voids the play instead of reopening the hand.
+      Which cards are playable deliberately does not travel in the state args: those are public, and
+      whether MERFOLK is holding a TRAP is not. The client tests the type it already has.
+      Tests: MerfolkTest testPlayOptionIsNotOfferedForAHandOfThisEraCards, testPlayOptionIsOfferedForATrap,
+      testPlayOptionRequiresASelection, testPlayOptionRefusesAThisEraCard,
+      testAThisEraCardCanStillBeDiscardedForVP, testSelectedCardGoneFromTheHandVoidsThePlay.
+      NOTE the clause's "a played card with both abilities keeps its THIS ERA ability" has nothing to
+      implement: no card in the game has both.
+      NOTE client-side halves of this and of the other seven are NOT browser-verified, there are no
+      JS tests. The MERFOLK selection check in tapestry.js is worth one studio pass.
 
 - [x] [rules/P1] CIV.WEEFOLK.4 (QUESTIONS 23): FIXED. getEligibleOpponents offers every real
       opponent, and BE_WEEFOLK_PLOT carries 'auto' so checkAliveForBenefit lets the row reach a

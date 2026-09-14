@@ -62,10 +62,11 @@ class MerfolkUT extends GameUT {
         }
     }
 
-    function giveTapestryCards(int $player_id, int $count): array {
+    /** ACADEMIA by default, which is a THIS ERA card and so cannot be played on an extended turn. */
+    function giveTapestryCards(int $player_id, int $count, int $type = TAP_ACADEMIA): array {
         $ids = [];
         for ($i = 0; $i < $count; $i++) {
-            $ids[] = $this->addCard(CARD_TAPESTRY, "hand", $player_id, TAP_ACADEMIA);
+            $ids[] = $this->addCard(CARD_TAPESTRY, "hand", $player_id, $type);
         }
         return $ids;
     }
@@ -430,7 +431,7 @@ final class MerfolkTest extends TestCase {
 
     function testPlayOptionIsOfferedOnlyOverAnEra4Card() {
         $game = $this->game;
-        $game->giveTapestryCards(MerfolkUT::OWNER, 2);
+        $game->giveTapestryCards(MerfolkUT::OWNER, 2, TAP_TRAP);
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
         $this->assertArrayNotHasKey(Merfolk::CHOICE_PLAY, $game->civArgs(MerfolkUT::OWNER)["slots_choice"], "no card to cover");
@@ -439,22 +440,70 @@ final class MerfolkTest extends TestCase {
         $this->assertArrayHasKey(Merfolk::CHOICE_PLAY, $game->civArgs(MerfolkUT::OWNER)["slots_choice"]);
     }
 
-    function testPlayOptionQueuesTheOverplay() {
+    /**
+     * FORMAL_RULES CIV.MERFOLK.5: an extended turn plays a card for its WHEN PLAYED ability, so a
+     * hand of THIS ERA cards has nothing to play and is not offered the option at all.
+     */
+    function testPlayOptionIsNotOfferedForAHandOfThisEraCards() {
         $game = $this->game;
         $game->giveTapestryCards(MerfolkUT::OWNER, 2);
         $game->addCard(CARD_TAPESTRY, "era4", MerfolkUT::OWNER, TAP_ACADEMIA);
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
 
-        $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY);
+        $args = $game->civArgs(MerfolkUT::OWNER)["slots_choice"];
+        $this->assertArrayNotHasKey(Merfolk::CHOICE_PLAY, $args);
+        $this->assertArrayHasKey(Merfolk::CHOICE_DISCARD, $args, "discarding for VP is still there");
+    }
+
+    /** A TRAP is a WHEN PLAYED card (10 VP when played as a tapestry), so it counts. */
+    function testPlayOptionIsOfferedForATrap() {
+        $game = $this->game;
+        $trap = $game->giveTapestryCards(MerfolkUT::OWNER, 1, TAP_TRAP)[0];
+        $game->giveTapestryCards(MerfolkUT::OWNER, 1);
+        $game->addCard(CARD_TAPESTRY, "era4", MerfolkUT::OWNER, TAP_ACADEMIA);
+        $game->eras[MerfolkUT::OWNER] = 5;
+        $game->playerTurn(MerfolkUT::OWNER);
+
+        $offered = $game->civArgs(MerfolkUT::OWNER)["slots_choice"];
+        $this->assertArrayHasKey(Merfolk::CHOICE_PLAY, $offered);
+        // which cards they are stays out of the state args, the hand is not public
+        $this->assertArrayNotHasKey("cards", $offered[Merfolk::CHOICE_PLAY]);
+
+        $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY, [$trap]);
+        $this->assertEquals(["64"], $game->benefitLabels());
+    }
+
+    /** The filter is on the play only: a THIS ERA card is still worth 5 VP discarded. */
+    function testAThisEraCardCanStillBeDiscardedForVP() {
+        $game = $this->game;
+        $era_card = $game->giveTapestryCards(MerfolkUT::OWNER, 1)[0];
+        $game->addCard(CARD_TAPESTRY, "era4", MerfolkUT::OWNER, TAP_ACADEMIA);
+        $game->eras[MerfolkUT::OWNER] = 5;
+        $game->playerTurn(MerfolkUT::OWNER);
+
+        $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_DISCARD, [$era_card]);
+
+        $this->assertEquals("discard", $game->getCardInfoById($era_card)["card_location"]);
+        $this->assertEquals(Merfolk::DISCARD_VP, $game->dbGetScore(MerfolkUT::OWNER));
+    }
+
+    function testPlayOptionQueuesTheOverplay() {
+        $game = $this->game;
+        $cards = $game->giveTapestryCards(MerfolkUT::OWNER, 2, TAP_TRAP);
+        $game->addCard(CARD_TAPESTRY, "era4", MerfolkUT::OWNER, TAP_ACADEMIA);
+        $game->eras[MerfolkUT::OWNER] = 5;
+        $game->playerTurn(MerfolkUT::OWNER);
+
+        $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY, [$cards[0]]);
 
         $this->assertEquals(["64"], $game->benefitLabels());
         $this->assertEquals(4, $game->getTapestryEra(MerfolkUT::OWNER), "the overplay lands on era 4");
     }
 
-    function testPlayOptionPlaysThePreselectedCard() {
+    function testPlayOptionPlaysTheSelectedCard() {
         $game = $this->game;
-        $cards = $game->giveTapestryCards(MerfolkUT::OWNER, 2);
+        $cards = $game->giveTapestryCards(MerfolkUT::OWNER, 2, TAP_TRAP);
         $game->addCard(CARD_TAPESTRY, "era4", MerfolkUT::OWNER, TAP_ACADEMIA);
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
@@ -466,23 +515,38 @@ final class MerfolkTest extends TestCase {
         $this->assertEquals([$cards[1]], $game->handIds(MerfolkUT::OWNER));
     }
 
-    function testPlayOptionWithoutASelectionStillAsks() {
+    /**
+     * The card has to be named here rather than left to stTapestryCard, which would offer the whole
+     * hand and let a THIS ERA card through.
+     */
+    function testPlayOptionRequiresASelection() {
         $game = $this->game;
-        $game->giveTapestryCards(MerfolkUT::OWNER, 2);
+        $game->giveTapestryCards(MerfolkUT::OWNER, 2, TAP_TRAP);
         $game->addCard(CARD_TAPESTRY, "era4", MerfolkUT::OWNER, TAP_ACADEMIA);
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
 
+        $this->expectException(BgaUserException::class);
+        $this->expectExceptionMessage("Select a single tapestry card to play");
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY);
-        $game->stTapestryCard();
+    }
 
-        $this->assertEquals(["64"], $game->benefitLabels());
-        $this->assertEquals(2, $game->getCardCountInHand(MerfolkUT::OWNER, CARD_TAPESTRY));
+    function testPlayOptionRefusesAThisEraCard() {
+        $game = $this->game;
+        $game->giveTapestryCards(MerfolkUT::OWNER, 1, TAP_TRAP);
+        $era_card = $game->giveTapestryCards(MerfolkUT::OWNER, 1)[0];
+        $game->addCard(CARD_TAPESTRY, "era4", MerfolkUT::OWNER, TAP_ACADEMIA);
+        $game->eras[MerfolkUT::OWNER] = 5;
+        $game->playerTurn(MerfolkUT::OWNER);
+
+        $this->expectException(BgaUserException::class);
+        $this->expectExceptionMessage("WHEN PLAYED");
+        $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY, [$era_card]);
     }
 
     function testPlayOptionRefusesTwoSelectedCards() {
         $game = $this->game;
-        $cards = $game->giveTapestryCards(MerfolkUT::OWNER, 2);
+        $cards = $game->giveTapestryCards(MerfolkUT::OWNER, 2, TAP_TRAP);
         $game->addCard(CARD_TAPESTRY, "era4", MerfolkUT::OWNER, TAP_ACADEMIA);
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
@@ -492,9 +556,13 @@ final class MerfolkTest extends TestCase {
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY, $cards);
     }
 
-    function testPreselectedCardGoneFromTheHandFallsBackToAsking() {
+    /**
+     * MERFOLK always names its card, so a card that is gone by the time the row pops voids the play
+     * rather than reopening the hand, which would offer THIS ERA cards to play.
+     */
+    function testSelectedCardGoneFromTheHandVoidsThePlay() {
         $game = $this->game;
-        $cards = $game->giveTapestryCards(MerfolkUT::OWNER, 2);
+        $cards = $game->giveTapestryCards(MerfolkUT::OWNER, 2, TAP_TRAP);
         $game->addCard(CARD_TAPESTRY, "era4", MerfolkUT::OWNER, TAP_ACADEMIA);
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
@@ -503,9 +571,9 @@ final class MerfolkTest extends TestCase {
         $game->effect_discardCard($cards[0], MerfolkUT::OWNER);
         $game->stTapestryCard();
 
-        $this->assertEquals(["64"], $game->benefitLabels(), "the overplay is still pending");
-        $this->assertEquals("discard", $game->getCardInfoById($cards[0])["card_location"]);
+        $this->assertEquals([], $game->benefitLabels(), "the overplay is void");
         $this->assertEquals([$cards[1]], $game->handIds(MerfolkUT::OWNER), "the other card was not played instead");
+        $this->assertNotEmpty($game->notificationLike("no longer in hand"));
     }
 
     function testEmptyHandFinishesThePlayerExactlyOnce() {
@@ -609,7 +677,7 @@ final class MerfolkTest extends TestCase {
     /** The overplay is void with no era 4 card, and it would burn the mandatory turn. */
     function testPlayOptionIsRefusedWithoutAnEra4Card() {
         $game = $this->game;
-        $game->giveTapestryCards(MerfolkUT::OWNER, 2);
+        $game->giveTapestryCards(MerfolkUT::OWNER, 2, TAP_TRAP);
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
 

@@ -5663,9 +5663,13 @@ define([
             const bene = this.gamedatas.gamestate.args.benefits[bid];
             const cards = this.tapestry[this.player_id].getSelectedItems();
             if (bene.slots_choice[id].play) {
-              // no selection is fine, the server asks which card to play then
-              if (cards.length > 1) {
-                this.showError(_("You can only play one tapestry card"));
+              // the card has to be named: only those with a WHEN PLAYED ability can be played
+              if (cards.length != 1) {
+                this.showError(_("You must select a single tapestry card to play"));
+                return;
+              }
+              if (this.tapestry_data[cards[0].type]?.type != "now") {
+                this.showError(_("Only a tapestry card with a WHEN PLAYED ability can be played"));
                 return;
               }
             } else if (bene.keep && cards.length != bene.keep) {

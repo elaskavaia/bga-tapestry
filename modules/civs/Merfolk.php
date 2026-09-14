@@ -177,12 +177,15 @@ class Merfolk extends AbsCivilization {
                         "tooltip" => clienttranslate("Gain 5 VP per discarded tapestry card, at least one card must be selected"),
                     ],
                 ];
-                if ($game->getLatestTapestry($player_id, 4)) {
+                // an extended turn plays a card for its WHEN PLAYED ability, so a hand of THIS ERA
+                // cards has nothing to play (FORMAL_RULES CIV.MERFOLK.5). Which cards those are stays
+                // off the state args: the hand is the player's alone, and the client knows the types
+                if ($game->getWhenPlayedCardsInHand($player_id) && $game->getLatestTapestry($player_id, 4)) {
                     $data["slots_choice"][self::CHOICE_PLAY] = [
-                        "play" => true, // the client sends the one picked card here, or none and the server asks
+                        "play" => true, // the client sends the one picked card here
                         "title" => clienttranslate("Play a tapestry"),
                         "tooltip" => clienttranslate(
-                            "Play a tapestry card over the era 4 stack for its WHEN PLAYED ability; select the card first, or leave the hand unselected to be asked"
+                            "Select one tapestry card with a WHEN PLAYED ability and play it over the era 4 stack for that ability"
                         ),
                     ];
                 }
@@ -208,12 +211,19 @@ class Merfolk extends AbsCivilization {
                 return;
             case self::PHASE_TURN:
                 if ($spot == self::CHOICE_PLAY) {
-                    // without an era 4 card to cover the overplay is void, and the turn would be spent
+                    // the offer needs an era 4 card to cover and a WHEN PLAYED card in hand, and
+                    // without a card to cover the overplay is void and the mandatory turn is spent
                     $offered = $this->argCivAbilitySingle($player_id, $civ_args)["slots_choice"];
                     $this->systemAssertTrue("ERR:Merfolk:21", isset($offered[self::CHOICE_PLAY]));
                     $selected = $this->getSelectedCards($player_id, $extra);
-                    $game->userAssertTrue(clienttranslate("Select a single tapestry card to play"), count($selected) <= 1);
-                    $this->playTapestry($player_id, (int) array_key_first($selected));
+                    // named here rather than left to stTapestryCard, which asks over the whole hand
+                    $game->userAssertTrue(clienttranslate("Select a single tapestry card to play"), count($selected) == 1);
+                    $card_id = (int) array_key_first($selected);
+                    $game->userAssertTrue(
+                        clienttranslate("Only a tapestry card with a WHEN PLAYED ability can be played on an extended turn"),
+                        isset($game->getWhenPlayedCardsInHand($player_id)[$card_id])
+                    );
+                    $this->playTapestry($player_id, $card_id);
                     return;
                 }
                 $this->systemAssertTrue("ERR:Merfolk:19", $spot == self::CHOICE_DISCARD);
@@ -276,7 +286,7 @@ class Merfolk extends AbsCivilization {
      * The overplay lands on era 4 through getTapestryEra and covers the old card as usual. A card
      * picked in the prompt rides along in the reason, so stTapestryCard plays it without asking again.
      */
-    function playTapestry(int $player_id, int $card_id = 0): void {
+    function playTapestry(int $player_id, int $card_id): void {
         $this->game->queueBenefitNormal(64, $player_id, reason_civ($this->civ, $card_id));
     }
 }
