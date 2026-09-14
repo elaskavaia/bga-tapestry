@@ -72,11 +72,16 @@ the material rulings are already updated; each item below is the code change for
       Row 54 got the BE_VP_MARKET constant it was missing. Tests: FaefolkTest
       testScoreAnyBuildingScoresEveryType, testScoreAnyBuildingPaysTheSumOverAllFourMats.
 
-- [ ] [rules/P1] CIV.GENIES.1 (QUESTIONS 11): Genies.php drawOpponent (93-121) filters tokens of
-      opponents past income turn 5 out of the draw and skips the ability when none is left;
-      grantRandomWish picks for a zombie. Fix: draw from every token; when the drawn opponent is
-      finished or zombie, queue the circled "or" choice on the GENIES player instead and score only
-      them (grantWish already skips the zombie's row); grantRandomWish and the "nobody left" skip go.
+- [x] [rules/P1] CIV.GENIES.1 (QUESTIONS 11): FIXED. drawOpponent draws from every token, and a
+      drawn opponent who is finished or zombie has the wish handed back to the GENIES player as their
+      own civ ability row (queueWishForOwner), carrying the drawn opponent in the reason arg; the
+      owner clicks one of the ring's circles and scores it alone. grantRandomWish is gone and
+      zombieBenefit delegates the same way. NOTE the choice had to come back as a civ ability row
+      rather than an "or" row because effect_onQueueBenefit only offers interceptOpponentBenefit to
+      players other than the civ owner, so an owner's pick never reached grantWish. The "nobody left"
+      skip became ERR:Genies:22: the civ is not dealt in solo games, so a token always exists.
+      Tests: GeniesTest testFinishedOpponentStaysInTheBag, testFinishedOpponentHasTheOwnerChooseInTheirPlace,
+      testZombieOpponentDrawnHasTheOwnerChooseInTheirPlace, testOpponentQuittingAtThePromptHandsTheChoiceToTheOwner.
 
 - [x] [rules/P1] CIV.ILLUMINATI.5 (QUESTIONS 14): FIXED. onDieRolled now sends a non-alive owner
       to awardFinishedOwnerVP, which puts each row of the face to the engine's own checkAliveForBenefit

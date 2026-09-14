@@ -196,25 +196,29 @@ final class GeniesTest extends TestCase {
         }
     }
 
-    /** An opponent past income turn 5 cannot answer, so their token is skipped (FORMAL_RULES CIV.GENIES.1). */
-    function testFinishedOpponentIsNotDrawn() {
+    /** The mat keeps every token, so a finished opponent is still drawn (FORMAL_RULES CIV.GENIES.1). */
+    function testFinishedOpponentStaysInTheBag() {
         $game = $this->newGame(3);
         $game->eras[GeniesUT::OPPONENT] = 6;
         $this->summon([0], 2, $game);
-        $this->assertEquals(GeniesUT::OPPONENT + 1, (int) $game->benefitQueue()[0]["benefit_player_id"]);
+
+        $this->assertEquals(["civ"], $game->benefitLabels());
+        $this->assertEquals(GeniesUT::OWNER, (int) $game->benefitQueue()[0]["benefit_player_id"]);
     }
 
-    function testNoOpponentLeftSkipsTheAbility() {
+    /**
+     * A drawn opponent who cannot answer neither chooses nor scores: the row goes back to the
+     * GENIES player as their own civ ability, offering the four circles of the ring.
+     */
+    function testFinishedOpponentHasTheOwnerChooseInTheirPlace() {
         $this->game->eras[GeniesUT::OPPONENT] = 6;
         $this->summon();
-        $this->assertEquals([], $this->game->benefitLabels());
-        $this->assertContains('${player_name} has nobody left to grant a wish, the ability is skipped', $this->game->notificationTexts());
-    }
 
-    /** A zombie stays in the pile, answers with a random circle and scores nothing (FORMAL_RULES CIV.GENIES.1). */
-    function testZombieOpponentDrawnAnswersWithARandomCircle() {
-        $this->game->makeZombie(GeniesUT::OPPONENT);
-        $this->summon([0, 1]); // draw the only token, then the second circle
+        $args = $this->game->argCivAbilitySingle(GeniesUT::OWNER, CIV_GENIES, $this->game->benefitQueue()[0]);
+        $this->assertEquals([2, 4, 6, 8], array_keys($args["slots_choice"]));
+        $this->assertEquals([BE_VP_TILES], $args["slots_choice"][4]["benefit"]);
+
+        $this->game->civTokenAdvance(CIV_GENIES, GeniesUT::OWNER, 4);
 
         $this->assertEquals($this->slot(4), $this->game->tokenLocation(GeniesUT::OPPONENT));
         $rows = $this->game->benefitQueue();
@@ -224,7 +228,60 @@ final class GeniesTest extends TestCase {
             "only the owner scores"
         );
         $this->assertEquals(GeniesUT::OWNER, (int) $rows[0]["benefit_player_id"]);
-        $this->assertContains('${player_name} is zombie, a random circled benefit is chosen for them', $this->game->notificationTexts());
+    }
+
+    /** The delegated wish returns the token to the pile once the owner is paid, like any other. */
+    function testTokenReturnsToThePileAfterADelegatedWish() {
+        $this->game->eras[GeniesUT::OPPONENT] = 6;
+        $this->summon();
+        $this->game->civTokenAdvance(CIV_GENIES, GeniesUT::OWNER, 4);
+        $this->game->chooseOption(BE_VP_TILES, GeniesUT::OWNER);
+        $this->game->resolveBenefit(BE_GENIES_SQUARE, GeniesUT::OWNER);
+        $this->game->chooseOption(BE_GAIN_CULTURE, GeniesUT::OWNER);
+        $this->game->resolveBenefit(BE_CIV_END, GeniesUT::OWNER);
+
+        $this->assertEquals($this->slot(Genies::PILE), $this->game->tokenLocation(GeniesUT::OPPONENT));
+    }
+
+    /** A zombie is handled as a finished opponent: drawn, but the owner chooses and scores alone. */
+    function testZombieOpponentDrawnHasTheOwnerChooseInTheirPlace() {
+        $this->game->makeZombie(GeniesUT::OPPONENT);
+        $this->summon();
+        $this->game->civTokenAdvance(CIV_GENIES, GeniesUT::OWNER, 4);
+
+        $this->assertEquals($this->slot(4), $this->game->tokenLocation(GeniesUT::OPPONENT));
+        $rows = $this->game->benefitQueue();
+        $this->assertEquals(
+            ["a," . BE_VP_TILES . "," . BE_GENIES_SQUARE, (string) BE_CIV_END],
+            $this->game->benefitLabels(),
+            "only the owner scores"
+        );
+        $this->assertEquals(GeniesUT::OWNER, (int) $rows[0]["benefit_player_id"]);
+    }
+
+    /** The owner cannot answer the delegated wish with a squared spot, only the circles are offered. */
+    function testDelegatedWishRejectsASquaredSpot() {
+        $this->game->eras[GeniesUT::OPPONENT] = 6;
+        $this->summon();
+
+        $this->expectOutputRegex("/Internal Error during move 0: ERR:Genies:23/");
+        $this->expectException(BgaUserException::class);
+        $this->expectExceptionMessage("ERR:Genies:23");
+        $this->game->civTokenAdvance(CIV_GENIES, GeniesUT::OWNER, 3);
+    }
+
+    /**
+     * The drawn opponent rides in reason arg 3, the same slot the opponent's own choice row uses
+     * for the WISH tag: the tag must not read as a player id, or an ordinary wish would delegate.
+     */
+    function testTheDelegatedRowNamesTheDrawnOpponentAndTheWishTagDoesNot() {
+        $game = $this->game;
+        $game->eras[GeniesUT::OPPONENT] = 6;
+        $this->summon();
+
+        $this->assertEquals($game->withReasonDataArg(reason_civ(CIV_GENIES), GeniesUT::OPPONENT), $game->benefitQueue()[0]["benefit_data"]);
+        $this->assertEquals(0, $game->genies()->getDrawnOpponent(["benefit_data" => reason_civ(CIV_GENIES, Genies::WISH)]));
+        $this->assertEquals(0, $game->genies()->getDrawnOpponent(["benefit_data" => reason_civ(CIV_GENIES)]));
     }
 
     /**
@@ -335,23 +392,22 @@ final class GeniesTest extends TestCase {
      * zombieTurn drops every row of the quitter, and the wish row is theirs. The civ answers for
      * them first, so the owner still gets the mirror (FORMAL_RULES CIV.GENIES.1).
      */
-    function testOpponentQuittingAtThePromptGetsARandomCircle() {
+    function testOpponentQuittingAtThePromptHandsTheChoiceToTheOwner() {
         $this->summon();
         $this->game->makeZombie(GeniesUT::OPPONENT);
-        $this->game->seedRand(2); // the third circle
         $this->game->gamestate->jumpToState(19);
 
         $this->game->zombieTurn(null, GeniesUT::OPPONENT);
 
-        $this->assertEquals($this->slot(6), $this->game->tokenLocation(GeniesUT::OPPONENT));
         $rows = $this->game->benefitQueue();
-        $this->assertEquals(
-            ["a," . BE_VP_TERRITORY . "," . BE_GENIES_SQUARE, (string) BE_CIV_END],
-            $this->game->benefitLabels(),
-            "only the owner's row survives"
-        );
+        $this->assertEquals(["civ"], $this->game->benefitLabels(), "only the owner's row survives");
         $this->assertEquals(GeniesUT::OWNER, (int) $rows[0]["benefit_player_id"]);
         $this->assertEquals(18, $this->game->gamestate->state()["id"]);
+
+        $this->game->civTokenAdvance(CIV_GENIES, GeniesUT::OWNER, 6);
+
+        $this->assertEquals($this->slot(6), $this->game->tokenLocation(GeniesUT::OPPONENT));
+        $this->assertEquals(["a," . BE_VP_TERRITORY . "," . BE_GENIES_SQUARE, (string) BE_CIV_END], $this->game->benefitLabels());
     }
 
     function testIncomeTurn5ScoresTwoDifferentCircles() {

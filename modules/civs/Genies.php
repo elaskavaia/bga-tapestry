@@ -27,14 +27,23 @@ class Genies extends AbsCivilization {
     }
 
     /**
-     * Nothing on the mat is clicked, the owner only confirms the ability. It still goes through the
-     * civ ability state, the one place a player holding two income civs picks the order.
+     * The owner normally only confirms the ability, nothing on the mat is clicked. It still goes
+     * through the civ ability state, the one place a player holding two income civs picks the
+     * order, and the state a delegated wish comes back in with the ring's circles to click.
      */
     function argCivAbilitySingle($player_id, $benefit) {
         $data = $benefit;
         $data["reason"] = $this->game->getReasonFullRec(reason(CARD_CIVILIZATION, $this->civ), false);
         $data["slots"] = [];
         $this->populateSlotChoiceForArgs($data);
+        if ($this->getDrawnOpponent($benefit)) {
+            $data["title"] = clienttranslate("Choose the circled benefit for the drawn player, who cannot choose");
+            $data["slots_choice"] = [];
+            foreach ($this->getCircleSpots() as $spot) {
+                $data["slots_choice"][$spot] = ["benefit" => [$this->getSlotBenefit($spot)]];
+            }
+            return $data;
+        }
         if ($this->game->getCurrentEra($player_id) >= 5) {
             $data["title"] = clienttranslate("Score 2 different circled benefits of your choice");
             $data["slots_choice"] = [
@@ -61,6 +70,13 @@ class Genies extends AbsCivilization {
         $game = $this->game;
         $this->systemAssertTrue("ERR:Genies:11", $game->isRealPlayer($player_id));
         $this->systemAssertTrue("ERR:Genies:12", $game->hasCiv($player_id, $this->civ));
+
+        $drawn_id = $this->getDrawnOpponent($civ_args);
+        if ($drawn_id) {
+            $this->systemAssertTrue("ERR:Genies:23", $this->isCircle($spot));
+            $this->grantWish($drawn_id, $spot);
+            return;
+        }
         $this->systemAssertTrue("ERR:Genies:13", $spot == self::CHOICE_USE);
 
         if ($game->getCurrentEra($player_id) >= 5) {
@@ -87,38 +103,51 @@ class Genies extends AbsCivilization {
 
     /**
      * The draw is with replacement: every token goes back in the pile first, which also clears a
-     * token left on the ring by a wish that was undone. An opponent past income turn 5 cannot answer, so
-     * their token is skipped; a zombie answers with a random circle (FORMAL_RULES CIV.GENIES.1).
+     * token left on the ring by a wish that was undone. Nobody leaves the bag as they finish, and a
+     * drawn opponent who cannot answer has the owner choose in their place (FORMAL_RULES CIV.GENIES.1).
+     *
+     * The civ is never dealt in a solo game, so there is always at least one opponent token.
      */
     function drawOpponent(int $player_id): bool {
         $game = $this->game;
         $this->returnTokensToPile();
-        $tokens = array_values(
-            array_filter($this->getAllCubesOnCiv(), fn($token) => $game->getCurrentEra((int) $token["card_location_arg"]) <= 5)
-        );
-        if (count($tokens) == 0) {
-            $game->notifyWithName(
-                "message",
-                clienttranslate('${player_name} has nobody left to grant a wish, the ability is skipped'),
-                [],
-                $player_id
-            );
-            return true;
-        }
+        $tokens = array_values($this->getAllCubesOnCiv());
+        $this->systemAssertTrue("ERR:Genies:22", count($tokens) > 0);
 
         $opponent_id = (int) $tokens[$game->bgaRand(0, count($tokens) - 1)]["card_location_arg"];
         $game
             ->notif("message", $player_id)
             ->withPlayer2($opponent_id)
             ->notifyAll(clienttranslate('${player_name} draws the player token of ${player_name2}'));
-        if ($game->isZombiePlayer($opponent_id)) {
-            $this->grantRandomWish($opponent_id);
-            // nobody else becomes active, so the rolls need their own savepoint or undo re-draws
-            $game->prepareUndoSavepoint();
+        if ($game->isPlayerAlive($opponent_id)) {
+            $game->queueBenefitInterrupt(["or" => $this->getCircleBenefits()], $opponent_id, reason_civ($this->civ, self::WISH));
             return true;
         }
-        $game->queueBenefitInterrupt(["or" => $this->getCircleBenefits()], $opponent_id, reason_civ($this->civ, self::WISH));
+        $this->queueWishForOwner($player_id, $opponent_id);
+        // nobody else becomes active, so the draw needs its own savepoint or an undo re-draws it
+        $game->prepareUndoSavepoint();
         return true;
+    }
+
+    /**
+     * The wish the drawn opponent cannot answer, handed to the owner as their own civ ability row.
+     * The drawn opponent rides in the reason arg: it is the whole difference between this row and
+     * the ordinary one, and it is what the pick then places the token of.
+     */
+    function queueWishForOwner(int $owner_id, int $opponent_id): void {
+        $game = $this->game;
+        $this->systemAssertTrue("ERR:Genies:24", $owner_id > 0);
+        $game
+            ->notif("message", $opponent_id)
+            ->withPlayer2($owner_id)
+            ->notifyAll(clienttranslate('${player_name} is out of the game, ${player_name2} chooses the circled benefit in their place'));
+        $game->interruptBenefit();
+        $game->benefitCivEntry($this->civ, $owner_id, $game->withReasonDataArg(reason_civ($this->civ), $opponent_id));
+    }
+
+    /** The opponent a delegated wish is answered for, 0 on an ordinary civ ability row. */
+    function getDrawnOpponent(array $benefit): int {
+        return (int) $this->game->getReasonArg(array_get($benefit, "benefit_data", ""), 3);
     }
 
     /** The drawn opponent's pick comes back through the queue as a circled benefit tagged as the wish. */
@@ -130,24 +159,17 @@ class Genies extends AbsCivilization {
         return false;
     }
 
+    /** A quitter at the prompt is a drawn opponent who cannot answer, like a finished one. */
     function zombieBenefit(array $benefit): void {
         if ($this->game->getReasonArg($benefit["benefit_data"], 3) === self::WISH) {
-            $this->grantRandomWish((int) $benefit["benefit_player_id"]);
+            $this->queueWishForOwner((int) $this->game->getCivOwner($this->civ), (int) $benefit["benefit_player_id"]);
         }
-    }
-
-    function grantRandomWish(int $opponent_id): void {
-        $game = $this->game;
-        $spots = $this->getCircleSpots();
-        $game
-            ->notif("message", $opponent_id)
-            ->notifyAll(clienttranslate('${player_name} is zombie, a random circled benefit is chosen for them'));
-        $this->grantWish($opponent_id, $spots[$game->bgaRand(0, count($spots) - 1)]);
     }
 
     /**
      * Both score the circle; the owner also gains one of its neighbouring squares, in either order.
-     * A zombie opponent does not score, so the engine never has to make them active (FORMAL_RULES CIV.GENIES.1).
+     * An opponent who is finished or zombie does not score, so the engine never has to make them
+     * active (FORMAL_RULES CIV.GENIES.1).
      */
     function grantWish(int $opponent_id, int $spot): void {
         $game = $this->game;
@@ -157,16 +179,19 @@ class Genies extends AbsCivilization {
         $token = $this->getTokenOf($opponent_id);
         $this->systemAssertTrue("ERR:Genies:19", $token !== null);
 
+        $delegated = !$game->isPlayerAlive($opponent_id);
         $game->dbSetStructureLocation(
             (int) $token["card_id"],
             $this->getCivSlot($spot),
             null,
-            clienttranslate('${player_name} places their player token on the chosen circled benefit'),
-            $opponent_id
+            $delegated
+                ? clienttranslate('${player_name} places the drawn player token on the chosen circled benefit')
+                : clienttranslate('${player_name} places their player token on the chosen circled benefit'),
+            $delegated ? $owner : $opponent_id
         );
         $circle = $this->getSlotBenefit($spot);
         $game->interruptBenefit();
-        if (!$game->isZombiePlayer($opponent_id)) {
+        if (!$delegated) {
             $game->queueBenefitNormal($circle, $opponent_id, reason_civ($this->civ));
         }
         $game->queueBenefitNormal(["choice" => [$circle, BE_GENIES_SQUARE]], $owner, reason_civ($this->civ));
