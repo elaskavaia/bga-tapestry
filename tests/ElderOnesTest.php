@@ -307,25 +307,110 @@ final class ElderOnesTest extends TestCase {
         $game->takeIncome();
     }
 
-    function testEndingVoluntarilyFinishesThePlayer() {
+    /**
+     * FORMAL_RULES CIV.ELDER_ONES.2: "no longer able" is not "no longer willing", so there is no
+     * action and no button for stopping while an advance turn is still possible.
+     */
+    function testThereIsNoVoluntaryStop() {
         $game = $this->game;
         $this->enterExtendedPlay();
-        $game->advances = ["1_5" => 1];
         $game->gamestate->jumpToState(13);
 
-        $game->action_endMyGame();
+        $this->assertEquals(["advance", "takeIncome"], $game->gamestate->state(true)["possibleactions"]);
+        $this->assertFalse(method_exists($game, "action_endMyGame"));
+    }
+
+    /**
+     * A track the player may not advance on is not an advance turn they can take: THEOCRACY blocks
+     * the science track, so a science advance they can afford does not keep the game going.
+     */
+    function testABlockedTrackIsNotAnAdvanceTurn() {
+        $game = $this->game;
+        $game->addCard(CARD_TAPESTRY, "era4", ElderOnesUT::OWNER, TAP_THEOCRACY);
+        $this->enterExtendedPlay();
+        $game->advances = ["2_5" => 1];
+
+        $game->playerTurn(ElderOnesUT::OWNER);
 
         $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
         $this->assertEquals(6, $game->getCurrentEra(ElderOnesUT::OWNER));
     }
 
-    function testEndingIsRefusedBeforeIncomeTurn5IsOver() {
+    function testAnAdvanceOnAnUnblockedTrackStillContinues() {
         $game = $this->game;
-        $game->startIncomeTurn(ElderOnesUT::OWNER, 5);
-        $game->gamestate->jumpToState(13);
+        $game->addCard(CARD_TAPESTRY, "era4", ElderOnesUT::OWNER, TAP_THEOCRACY);
+        $this->enterExtendedPlay();
+        $game->advances = ["2_5" => 1, "1_5" => 1];
 
-        $this->expectException(BgaUserException::class);
-        $game->action_endMyGame();
+        $game->playerTurn(ElderOnesUT::OWNER);
+
+        $this->assertEquals([], $game->finalScored);
+        $this->assertTrue($game->isPlayerAlive(ElderOnesUT::OWNER));
+    }
+
+    /**
+     * Before extended play the same test decides whether the turn is an advance turn at all: with
+     * the only affordable advance blocked there is nothing to advance on, so income auto-triggers
+     * rather than leaving the player to click a spot that would be refused.
+     */
+    function testABlockedTrackBeforeExtendedPlayTakesAnIncomeTurnInstead() {
+        $game = $this->game;
+        $game->eras[ElderOnesUT::OWNER] = 3;
+        $game->addCard(CARD_TAPESTRY, "era3", ElderOnesUT::OWNER, TAP_THEOCRACY);
+        $game->advances = ["2_5" => 1];
+
+        $game->playerTurn(ElderOnesUT::OWNER);
+
+        $this->assertEquals([], $game->finalScored);
+        $this->assertEquals(4, $game->getCurrentEra(ElderOnesUT::OWNER), "the income turn was taken for them");
+    }
+
+    /** BROKER OF PEACE blocks the military track, and it is counted like the other two blocks. */
+    function testABrokerOfPeaceBlockAlsoEndsExtendedPlay() {
+        $game = $this->game;
+        $game->addCard(CARD_TAPESTRY, "era4", ElderOnesUT::OWNER, TAP_BROKER_OF_PEACE);
+        $this->enterExtendedPlay();
+        $game->advances = ["3_5" => 1];
+
+        $game->playerTurn(ElderOnesUT::OWNER);
+
+        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+    }
+
+    /** An opponent's DICTATORSHIP blocks the track for this turn only, and counts while it holds. */
+    function testAnOpponentsDictatorshipAlsoEndsExtendedPlay() {
+        $game = $this->game;
+        $this->enterExtendedPlay();
+        $game->advances = ["1_5" => 1];
+        $game->dbAddStructure(
+            ElderOnesUT::OPPONENT,
+            BUILDING_CUBE,
+            0,
+            "tech_spot_1_4",
+            "dic_" . $game->getPlayerTurn(ElderOnesUT::OPPONENT) . "_1"
+        );
+
+        $game->playerTurn(ElderOnesUT::OWNER);
+
+        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+    }
+
+    /**
+     * The end test comes before the returns that keep a player from being auto-incomed, or an
+     * ELDER ONES player with an activated ability and nothing to advance on would sit in a turn
+     * with no legal action at all.
+     */
+    function testExtendedPlayEndsEvenWithAnActivatedAbilityPending() {
+        $game = $this->game;
+        $game->giveCiv(ElderOnesUT::OWNER, CIV_URBAN_PLANNERS);
+        $game->dbAddStructure(ElderOnesUT::OWNER, BUILDING_LANDMARK, 0, "civilization_" . CIV_URBAN_PLANNERS);
+        $this->enterExtendedPlay();
+        $game->advances = [];
+
+        $game->playerTurn(ElderOnesUT::OWNER);
+
+        $this->assertEquals([ElderOnesUT::OWNER], $game->finalScored);
+        $this->assertEquals(6, $game->getCurrentEra(ElderOnesUT::OWNER));
     }
 
     function testExtendedPlayFlagReachesTheClient() {

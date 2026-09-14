@@ -56,11 +56,20 @@ the material rulings are already updated; each item below is the code change for
       testEra4TapestryStaysActiveDuringIncomeTurn5ForMerfolk,
       testOverplayDuringIncomeTurn5LandsOnEra4, testOverplayIsStillRefusedForAPlayerWithoutTheCiv.
 
-- [ ] [rules/P1] CIV.ELDER_ONES.2 (QUESTIONS 8): stPlayerTurn (PGameXBody around 11960) ends
-      extended play only when getPossibleAdvances is empty, and that test (11796) is affordability
-      only, THEOCRACY and DICTATORSHIP blocks are not consulted; action_endMyGame (11970) and the
-      client "End my game" button let the player stop early. Fix: drop the voluntary stop (action,
-      button, state transition) and count a blocked track as not advanceable in the end test.
+- [x] [rules/P1] CIV.ELDER_ONES.2 (QUESTIONS 8): FIXED. The voluntary stop is gone: no
+      action_endMyGame, no entry in tapestry.action.php, no "endMyGame" in state 13, no client button
+      or handler, and an extended play player now simply has no button in that state. The end test is
+      getAvailableAdvances, which drops a track blocked by THEOCRACY, BROKER OF PEACE or an
+      opponent's DICTATORSHIP (isTrackBlocked, a silent mode on triggerAdvanceCheck), and it runs
+      ahead of the activated-ability and lighthouse returns so such a turn cannot stall.
+      NOTE the same test now also decides the ordinary auto-income, so a player whose only
+      affordable advance is blocked takes an income turn instead of a turn where every clickable
+      spot is refused. That is the same rule applied consistently, but it is base game behaviour,
+      not FF only - veto it if you want the filter scoped to extended play.
+      Tests: ElderOnesTest testThereIsNoVoluntaryStop, testABlockedTrackIsNotAnAdvanceTurn,
+      testABrokerOfPeaceBlockAlsoEndsExtendedPlay, testAnOpponentsDictatorshipAlsoEndsExtendedPlay,
+      testAnAdvanceOnAnUnblockedTrackStillContinues, testExtendedPlayEndsEvenWithAnActivatedAbilityPending,
+      testABlockedTrackBeforeExtendedPlayTakesAnIncomeTurnInstead.
 
 - [ ] [rules/P1] CIV.ELDER_ONES.5 (QUESTIONS 9): effect_endOfIncome (PGameXBody around 12443)
       returns before finishPlayer for an extended play civ, so finalGameScoring (ISLANDERS,
@@ -239,13 +248,11 @@ P3
       way Genies and Werefolk do. Check first whether BE_ALCHEMISTS_DIE in the level 9 branch relies
       on getRemainingDice() seeing an empty mat.
 
-- [ ] [rules?/P3] Elder Ones: stPlayerTurn returns early when a civ has activated abilities or the
-      player owns a playable lighthouse (PGameXBody.php around 11290), before the "no affordable
-      advance" test, so an extended play player in that position is never auto-finished and has to
-      press "End my game" themselves. That mirrors what happens to everyone else (no auto income
-      either), but for an Elder Ones player the only other button ends their game for good. Confirm
-      this is the wanted reading of FORMAL_RULES CIV.ELDER_ONES.2, or move the extended play test
-      above the two early returns.
+- [x] [rules?/P3] Elder Ones: stPlayerTurn returned early for an activated ability or a playable
+      lighthouse before the "no affordable advance" test. RESOLVED with CIV.ELDER_ONES.2: the
+      extended play test now runs ahead of both returns, because the voluntary stop that used to be
+      the way out of that turn is gone. Neither a lighthouse play nor an activated ability is an
+      advance turn, so it does not keep the game alive.
 
 - [ ] [rules?/P3] The open "Questions for Jamey (orig dev)" block under JAMEY below. Blocked on the
       designer.
@@ -282,6 +289,11 @@ P3
 - [ ] [ux/P3] Jamey: show in each opponent's tableau (near the income mat) whether they hold
       tapestry cards and how many, face down. It is in the upper right today, everything else is
       tracked in the tableau.
+
+- [ ] [ux/P3] argPlayerTurn still marks a blocked advance as allowed, so the client gives it an
+      active_slot and a button and the click earns a rejection toast. isTrackBlocked now exists to
+      answer it: mark such a spot 0 in getPossibleAdvances(false) so it renders illegal_slot like an
+      unaffordable one, which would also make the client agree with the extended play end test.
 
 - [ ] [ui-temp/P3] The benefit stack tooltip prints a bonus row's raw quantity (tapestry.js around
       4785), so the Elder Ones trade reads "Bonus:-6 x Tapestry" and the older unlimited row reads

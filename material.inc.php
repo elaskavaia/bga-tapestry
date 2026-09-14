@@ -267,6 +267,7 @@ if (!defined("TAPESTRY")) {
     define("TAP_ACADEMIA", 1);
     define("TAP_AGE_OF_DISCOVERY", 2);
     define("TAP_AGE_OF_SAIL", 3);
+    define("TAP_BROKER_OF_PEACE", 7);
     define("TAP_COAL_BARON", 9);
     define("TAP_DARK_AGES", 11);
     define("TAP_DICTATORSHIP", 13);
@@ -278,6 +279,7 @@ if (!defined("TAPESTRY")) {
     define("TAP_OLYMPIC_HOST", 29);
     define("TAP_REVISIONISM", 34);
     define("TAP_STEAM_TYCOON", 37);
+    define("TAP_THEOCRACY", 40);
     define("TAP_TRADE_ECONOMY", 41);
     define("TAP_TRAP", 42);
     define("TAP_TYRANNY", 43);
@@ -5898,7 +5900,7 @@ $this->civilizations = [
                 "Extended play begins after income turn 5. The era 4 tapestry card stays in effect through income turn 5 and the rest of the game; a landmark gained during income turn 5 scores no 10 VP. From era 5 on, income turn 5 included, the era 4 tapestry space is the active one; an overplay lands there, where for any other player it is void."
             ),
             clienttranslate(
-                "\"No longer able to take an advance turn\" is judged at the start of each of the player's turns: no track they can advance on is affordable, and a track blocked by THEOCRACY or DICTATORSHIP is one they cannot advance on. Ending is not voluntary: the player plays on until they cannot, and the end is final, with no further income turn."
+                "\"No longer able to take an advance turn\" is judged at the start of each of the player's turns: no track they can advance on is affordable, and a track blocked by THEOCRACY, BROKER OF PEACE or DICTATORSHIP is one they cannot advance on. Ending is not voluntary: the player plays on until they cannot, and the end is final, with no further income turn."
             ),
             clienttranslate(
                 "Every landmark gained after income turn 5 scores the 10 VP, whatever granted it and on whoever's turn (SOCIALISM included), track and tech card landmarks alike."

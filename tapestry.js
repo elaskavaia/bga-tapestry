@@ -1270,8 +1270,8 @@ define([
             } else if (allowed == 0) dojo.addClass(spot, "illegal_slot");
             else if (allowed == -1) dojo.addClass(spot, "illegal_slot");
           }
-          if (args.extended_play) this.addActionButton("button_income", _("End my game"), "onEndMyGame", undefined, undefined, "red");
-          else this.addActionButton("button_income", _("Income"), "onIncomeTurn");
+          // in extended play there is no income turn left and no way to stop: advance or nothing
+          if (!args.extended_play) this.addActionButton("button_income", _("Income"), "onIncomeTurn");
 
           break;
         case "playerTurnEnd":
@@ -4951,19 +4951,6 @@ define([
       } else {
         this.axcallwrapper("takeIncome");
       }
-    },
-
-    onEndMyGame: function (event) {
-      dojo.stopEvent(event);
-      if (!this.checkAction("endMyGame")) {
-        return;
-      }
-      this.confirmationDialog(
-        _("Are you sure you wish to end your game? You cannot take any more turns after this."),
-        dojo.hitch(this, function () {
-          this.axcallwrapper("endMyGame");
-        })
-      );
     },
 
     onCubeHolderClick: function (event) {

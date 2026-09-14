@@ -196,8 +196,9 @@ Income:
 - `isExtendedPlay` - era 5, such a civilization, and income turn 5 over. "Over" is read off the
   `current_player_turn` and `income_turn` globals below, since an income turn only ever happens
   inside the player's own turn. It gates what starts only once that turn ends: the ELDER ONES 10 VP
-  per landmark, the "End my game" action, the refusal of a further income turn, and the skipped
-  trap response.
+  per landmark, the automatic end once no unblocked advance is affordable
+  (`getAvailableAdvances`), the refusal of a further income turn, and the skipped trap response.
+  Stopping is never the player's choice: there is no action for it (FORMAL_RULES CIV.ELDER_ONES.2).
 - `getTapestryEra` returns 4 instead of 5 for a player with an extended play civ, from the moment
   era 5 starts rather than only once income turn 5 is over (`hasExtendedPlayCiv`, not
   `isExtendedPlay`): their era 4 card never stops (FORMAL_RULES TAPESTRY.3, CIV.ELDER_ONES.1). So an

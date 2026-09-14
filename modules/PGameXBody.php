@@ -4338,7 +4338,7 @@ abstract class PGameXBody extends tapcommon {
         $this->checkAction("takeIncome");
         $player_id = $this->getActivePlayerId();
         $this->userAssertTrue(
-            clienttranslate("You cannot take additional income turns, use End my game to stop"),
+            clienttranslate("You cannot take additional income turns, you keep taking advance turns until you cannot advance"),
             !$this->isExtendedPlay($player_id)
         );
         $this->takeIncomeAuto(false);
@@ -8492,9 +8492,9 @@ abstract class PGameXBody extends tapcommon {
                 $this->awardVP($card["card_location_arg"], 3, reason_tapestry(7));
             }
         }
-        $theocracy = $this->isTapestryActive($player_id, 40); // THOCRACY
+        $theocracy = $this->isTapestryActive($player_id, TAP_THEOCRACY);
         if ($theocracy && in_array($new_spot, [1, 4, 7, 10])) {
-            $this->awardVP($player_id, 4, reason_tapestry(40));
+            $this->awardVP($player_id, 4, reason_tapestry(TAP_THEOCRACY));
         }
         if ($track == 2 && $this->isTapestryActive($player_id, 16)) {
             // EMPIRICISM
@@ -8520,10 +8520,22 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
-    function triggerAdvanceCheck($player_id, $track, $check) {
-        if ($track == 3 && $this->isTapestryActive($player_id, 7)) {
+    /** Whether the player may not advance on the track this turn, asked without saying anything. */
+    function isTrackBlocked($player_id, int $track): bool {
+        return $this->triggerAdvanceCheck($player_id, $track, false, true);
+    }
+
+    /**
+     * $check throws, so it is the answer to a player's click; otherwise the reason is logged for
+     * everyone. $silent answers neither way, for a test of what the player could still do.
+     */
+    function triggerAdvanceCheck($player_id, $track, $check, bool $silent = false): bool {
+        if ($track == 3 && $this->isTapestryActive($player_id, TAP_BROKER_OF_PEACE)) {
             // BROKER OF PEACE
             $message = clienttranslate("As BROKER OF PEACE you cannot advance on the military track");
+            if ($silent) {
+                return true;
+            }
             if ($check) {
                 throw new BgaUserException(self::_($message));
             } else {
@@ -8531,9 +8543,12 @@ abstract class PGameXBody extends tapcommon {
             }
             return true;
         }
-        if ($track == 2 && $this->isTapestryActive($player_id, 40)) {
+        if ($track == 2 && $this->isTapestryActive($player_id, TAP_THEOCRACY)) {
             // THEOCRACY
             $message = clienttranslate("With THEOCRACY you cannot advance on the science track");
+            if ($silent) {
+                return true;
+            }
             if ($check) {
                 throw new BgaUserException(self::_($message));
             } else {
@@ -8541,15 +8556,15 @@ abstract class PGameXBody extends tapcommon {
             }
             return true;
         }
-        $track_stub = "tech_spot_{$track}_";
-        $dictator_data = $this->getObjectFromDB(
-            "SELECT * FROM structure WHERE card_location LIKE '{$track_stub}%' AND card_location_arg2 LIKE 'dic_%' LIMIT 1"
-        );
+        $dictator_data = $this->getStructureInfoSearch(null, null, "tech_spot_{$track}_%", null, "dic_%");
         if ($dictator_data) {
             $dd = explode("_", $dictator_data["card_location_arg2"]);
             $dictator = $dictator_data["card_location_arg"];
             $turn = $this->getPlayerTurn($dictator);
             if ($turn == $dd[1] && $dictator && $player_id != $dictator) {
+                if ($silent) {
+                    return true;
+                }
                 $dictName = $this->customGetPlayerNameById($dictator);
                 if ($check) {
                     throw new BgaUserException($this->_("Cannot advance on this track this turn due to DICTATORSHIP") . " " . $dictName);
@@ -11948,6 +11963,15 @@ abstract class PGameXBody extends tapcommon {
         if ($extended && $extended->startExtendedTurn($player_id)) {
             return; // the civilization ran the turn itself
         }
+        if ($extended) {
+            // nothing else ends their game now that stopping is not the player's choice, so this
+            // comes before the returns below: neither a lighthouse play nor an activated ability
+            // is an advance turn (FORMAL_RULES CIV.ELDER_ONES.2)
+            if (count($this->getAvailableAdvances()) == 0) {
+                $this->endExtendedPlay($player_id, clienttranslate('${player_name} can no longer take an advance turn'));
+            }
+            return;
+        }
         if ($this->ownsLighthouseAndCanPlayIt($player_id)) {
             return; // do not auto-income
         }
@@ -11961,21 +11985,24 @@ abstract class PGameXBody extends tapcommon {
             }
         }
 
-        if (count($this->getPossibleAdvances()) == 0) {
-            if ($this->isExtendedPlay($player_id)) {
-                $this->endExtendedPlay($player_id, clienttranslate('${player_name} can no longer take an advance turn'));
-                return;
-            }
-            $this->takeIncomeAuto(true); // When cannot afford advancement.
-            return;
+        if (count($this->getAvailableAdvances()) == 0) {
+            $this->takeIncomeAuto(true); // When no advance is affordable or allowed.
         }
     }
 
-    function action_endMyGame() {
-        $this->checkAction("endMyGame");
+    /**
+     * The advances the active player could actually take: affordable, and on a track nothing blocks
+     * this turn. "No longer able to take an advance turn" is judged on these, not on affordability
+     * alone, and a player whose only affordable advance is blocked has an income turn to take and
+     * nothing else (FORMAL_RULES CIV.ELDER_ONES.2).
+     */
+    function getAvailableAdvances(): array {
         $player_id = $this->getActivePlayerId();
-        $this->userAssertTrue(clienttranslate("You are not playing on past your income turn 5"), $this->isExtendedPlay($player_id));
-        $this->endExtendedPlay($player_id, clienttranslate('${player_name} chooses to stop taking advance turns'));
+        return array_filter(
+            $this->getPossibleAdvances(),
+            fn($spot) => !$this->isTrackBlocked($player_id, (int) getPart($spot, 0)),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /** The deferred end of income turn 5: score, mark finished, and let the transition skip them. */

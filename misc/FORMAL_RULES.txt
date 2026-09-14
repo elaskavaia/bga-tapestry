@@ -351,8 +351,8 @@ CIV.ELDER_ONES.1 Extended play begins after income turn 5. The era 4 tapestry ca
     Ref. Mike Young (co-designer), BGG thread 3193257: past era 4 an overplay is played on top of
     the era 4 card and takes effect immediately, or for the current era, as the card says.
 CIV.ELDER_ONES.2 "No longer able to take an advance turn" is judged at the start of each of the
-    player's turns: no track they can advance on is affordable, and a track blocked by THEOCRACY or
-    DICTATORSHIP is one they cannot advance on. Ending is not voluntary: the player plays on until
+    player's turns: no track they can advance on is affordable, and a track blocked by THEOCRACY,
+    BROKER OF PEACE or DICTATORSHIP is one they cannot advance on. Ending is not voluntary: the player plays on until
     they cannot, and the end is final, with no further income turn.
     Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 8 (2026-09): play until you
     can't any more, declining effects is not in the spirit of the game; a blocked track contributes
