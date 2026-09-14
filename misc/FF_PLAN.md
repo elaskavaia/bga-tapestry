@@ -258,7 +258,7 @@ complexity order are called out below.
 
 - The Faefolk ellipse and the Genies ring are transcribed. Every icon maps to an existing benefit
   type in `benefit_types.csv`. The only new row appears to be Faefolk's "score any building", which
-  is a choose one over the existing farm, armory, house and market VP benefits.
+  is the gain-all sum over the farm, armory, house and market VP benefits (CIV.FAEFOLK.1).
 - Art is available, so `slots` coordinate tuning is unblocked.
 
 ## Per civilization plans

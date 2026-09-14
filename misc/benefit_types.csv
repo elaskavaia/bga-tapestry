@@ -53,7 +53,7 @@ id|-con|name|r|t|php
 52|BE_EXPLORE_SPACE|Explore space|s||'state'=>'explore_space'
 #same as 143 for now
 53|BE_REFRESH|Refresh tech cards (Optional)|||'alias'=>['or'=>[143, 401]],'icon'=>0
-54||VP - Markets|v||
+54|BE_VP_MARKET|VP - Markets|v||
 55||Start new tech track|||'s'=>'t','sflags'=>0,'adv'=>0
 56||Landmark - Bakery|||'lm'=>13
 57||Landmark - Barn|||'lm'=>14
@@ -232,7 +232,7 @@ id|-con|name|r|t|php
 339|BE_ADVISORS_OVERTAKE_ADVISE_SELECTED|Opponent decides on Tapestry card|||'civ'=>CIV_ADVISORS
 340|BE_OPPONENTS_GAIN_TILE|All opponents gain hex tile
 341|BE_ALCHEMISTS_DIE|ALCHEMISTS gain the black conquer die benefits|||'civ'=>CIV_ALCHEMISTS,'die'=>'black','r'=>'die'
-342|BE_VP_ANY_BUILDING|Score any income building|||'alias'=>['or'=>[BE_VP_FARM,BE_VP_ARMORY,BE_VP_HOUSE,54]]
+342|BE_VP_ANY_BUILDING|Score every income building|||'alias'=>[BE_VP_FARM,BE_VP_ARMORY,BE_VP_HOUSE,BE_VP_MARKET]
 343|BE_FAEFOLK_FLICKER|FAEFOLK move around the ellipse and gain the new spot|||'civ'=>CIV_FAEFOLK
 344|BE_WEREFOLK_FLIP|WEREFOLK discard the mat tile, draw a space tile and flip it|||'civ'=>CIV_WEREFOLK
 345|BE_WEREFOLK_REGRESS|WEREFOLK regress on 1 track, then explore with the space tile|||'civ'=>CIV_WEREFOLK

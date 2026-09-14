@@ -96,6 +96,7 @@ if (!defined("TAPESTRY")) {
     define("BE_TECH_SQUARE", 33);
     define("BE_SPACE", 51);
     define("BE_EXPLORE_SPACE", 52);
+    define("BE_VP_MARKET", 54);
 
     define("BE_VP_HOUSE", 63);
     define("BE_GAIN_CIV", 65);
@@ -1256,7 +1257,7 @@ $this->benefit_types = [
         "icon" => 0,
     ],
     54 => [
-        //
+        // BE_VP_MARKET
         "name" => clienttranslate("VP - Markets"),
         "r" => "v",
     ],
@@ -2382,8 +2383,8 @@ $this->benefit_types = [
     ],
     342 => [
         // BE_VP_ANY_BUILDING
-        "name" => clienttranslate("Score any income building"),
-        "alias" => ["or" => [BE_VP_FARM, BE_VP_ARMORY, BE_VP_HOUSE, 54]],
+        "name" => clienttranslate("Score every income building"),
+        "alias" => [BE_VP_FARM, BE_VP_ARMORY, BE_VP_HOUSE, BE_VP_MARKET],
     ],
     343 => [
         // BE_FAEFOLK_FLICKER

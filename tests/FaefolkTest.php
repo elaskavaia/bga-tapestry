@@ -128,10 +128,36 @@ final class FaefolkTest extends TestCase {
         }
     }
 
-    /** SCORE ANY BUILDING resolves into a single four way choice, it is not four separate scores. */
-    function testScoreAnyBuildingResolvesToAChooseOne() {
+    /**
+     * FORMAL_RULES CIV.FAEFOLK.1: "score any building" is the sum over all four income building
+     * types, so it expands into the four scoring rows, not a choose-one between them.
+     */
+    function testScoreAnyBuildingScoresEveryType() {
         $this->game->awardBenefits(1, BE_VP_ANY_BUILDING);
-        $this->assertEquals(["o," . BE_VP_FARM . "," . BE_VP_ARMORY . "," . BE_VP_HOUSE . ",54"], $this->game->benefitLabels());
+        $this->assertEquals(
+            [(string) BE_VP_FARM, (string) BE_VP_ARMORY, (string) BE_VP_HOUSE, (string) BE_VP_MARKET],
+            $this->game->benefitLabels()
+        );
+    }
+
+    /**
+     * The spot 2 scoring row resolved end to end: each of the four rows pays for its own mat and
+     * the player keeps the sum. A choose-one would have paid for the best single mat instead.
+     */
+    function testScoreAnyBuildingPaysTheSumOverAllFourMats() {
+        foreach ([BUILDING_FARM => 5, BUILDING_ARMORY => 3, BUILDING_HOUSE => 0, BUILDING_MARKET => 4] as $type => $onMat) {
+            for ($i = 0; $i < $onMat; $i++) {
+                $this->game->dbAddStructure(1, $type, 0, "income", 0);
+            }
+        }
+        $this->game->awardBenefits(1, BE_VP_ANY_BUILDING);
+        foreach ([BE_VP_FARM, BE_VP_ARMORY, BE_VP_HOUSE, BE_VP_MARKET] as $row) {
+            $this->game->resolveBenefit($row);
+        }
+
+        // off the mats: 0 farms, 2 armories, 5 houses, 1 market
+        $this->assertEquals(8, $this->game->dbGetScore(1));
+        $this->assertEquals([], $this->game->benefitLabels(), "all four rows cashed, nothing left over");
     }
 
     function testSetupPlacesTokenOnSpotOne() {
@@ -320,7 +346,7 @@ final class FaefolkTest extends TestCase {
         );
     }
 
-    /** The four icon spot doubled: eight rows, and each copy of 342 stays its own choice. */
+    /** The four icon spot doubled: eight rows, and each copy of 342 stays its own unexpanded row. */
     function testIncomeTurn5OnTheFourIconSpot() {
         $this->game->era = 5;
         $this->game->setTapestryOnMat(1);

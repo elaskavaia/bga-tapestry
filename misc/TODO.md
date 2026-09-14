@@ -66,10 +66,11 @@ the material rulings are already updated; each item below is the code change for
       non-scoring cleanup in finalGameScoring (checkDictatorship forceEnd, HERALDS clear): clearing
       a dictatorship on the ELDER ONES player at income turn 5 would unblock their extended play.
 
-- [ ] [rules/P1] CIV.FAEFOLK.1 (QUESTIONS 10): benefit 342 BE_VP_ANY_BUILDING is
-      'alias'=>['or'=>[...]] in misc/benefit_types.csv 235, a choose-one row. Fix: make the alias
-      the plain list of all four VP rows (BE_VP_FARM, BE_VP_ARMORY, BE_VP_HOUSE, 54), regenerate with
-      npm run genmat, reword its name, add a FaefolkTest case for spot 2.
+- [x] [rules/P1] CIV.FAEFOLK.1 (QUESTIONS 10): FIXED. Benefit 342 BE_VP_ANY_BUILDING is now the
+      plain alias list of the four VP rows in misc/benefit_types.csv, so it scores every income
+      building type instead of offering a choose-one, and is renamed "Score every income building".
+      Row 54 got the BE_VP_MARKET constant it was missing. Tests: FaefolkTest
+      testScoreAnyBuildingScoresEveryType, testScoreAnyBuildingPaysTheSumOverAllFourMats.
 
 - [ ] [rules/P1] CIV.GENIES.1 (QUESTIONS 11): Genies.php drawOpponent (93-121) filters tokens of
       opponents past income turn 5 out of the draw and skips the ability when none is left;
