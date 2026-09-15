@@ -25,7 +25,7 @@ priority ordering, not a filter - a report on a deprecated adjustment value is s
 and still gets triaged; it just waits behind the Pack ones.
 
 The "Civilization Adjustments" game option (id 100 in
-[gameoptions.inc.php](../gameoptions.inc.php)):
+[gameoptions.jsonc](../gameoptions.jsonc)):
 
 - `8` - Adjustment Civilization Pack (the official expansion) - **priority**
 - `9` - Pack + reworked Alchemists (testing) - also the Pack, **priority**

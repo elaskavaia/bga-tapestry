@@ -54,7 +54,7 @@ Done once, before the first civ lands.
   `isExpansionIncluded()`. No new filtering code is needed: the civ pool in `setupNewGame` already
   drops any civ whose `exp` flag is not in the selected set.
 - New values on the existing "Civilization Set" option (140) in
-  [gameoptions.inc.php](../gameoptions.inc.php) rather than a separate option, since it is already
+  [gameoptions.jsonc](../gameoptions.jsonc) rather than a separate option, since it is already
   the bitmask that picks which packs are in play:
   - `0b1001` Original + Fantasies & Futures.
   - `0b1000` Fantasies & Futures only. Testing only, marked `beta`, and removed before the pack

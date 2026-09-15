@@ -33,9 +33,8 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
 - Player-visible strings use `clienttranslate()`: states, notifications and the message of a
   `userAssertTrue`. `totranslate()` is deprecated by the framework: flag any new call to it, and
   flag a rewritten block that carries an existing one along only if the line was actually changed,
-  not just re-indented. [gameinfos.inc.php](../gameinfos.inc.php) and
-  [gameoptions.inc.php](../gameoptions.inc.php) still use it: the framework's replacement there is
-  JSON options/stats, not `clienttranslate()`, so leave those alone.
+  not just re-indented. [gameinfos.inc.php](../gameinfos.inc.php) still uses it: the framework's
+  replacement there is JSON, not `clienttranslate()`, so leave it alone.
 
 ## Generated material (`misc/*.csv` -> `material.inc.php`)
 

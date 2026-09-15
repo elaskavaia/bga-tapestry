@@ -1,0 +1,39 @@
+{
+  // user preferences ids should be between 100 and 199
+  // ids and values are mirrored as PREF_* / PREFVALUE_* constants in material.inc.php
+  // See https://en.doc.boardgamearena.com/Options_and_preferences:_gameoptions.json,_gamepreferences.json for more details
+  "150": {
+    "name": "Auto Confirm",
+    // "needReload": true,
+    "values": {
+      "0": {
+        "name": "No Auto Confirm",
+        "cssPref": "tap_confirm_manual"
+      },
+      "1": {
+        "name": "Auto Confirm",
+        "cssPref": "tap_confirm_auto"
+      },
+      "2": {
+        "name": "Auto Confirm with Timer",
+        "cssPref": "tap_confirm_timer"
+      }
+    },
+    "default": 2
+  },
+  "151": {
+    "name": "Show Benefit Queue",
+    "needReload": true,
+    "values": {
+      "0": {
+        "name": "No",
+        "cssPref": "show_breadcrumbs_no"
+      },
+      "1": {
+        "name": "Yes",
+        "cssPref": "show_breadcrumbs_yes"
+      }
+    },
+    "default": 0
+  }
+}

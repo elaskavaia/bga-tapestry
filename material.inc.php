@@ -356,6 +356,11 @@ if (!function_exists("str_repeat_join")) {
         return $str . $res;
     }
 }
+// game option id => [card_type, card_type_arg] cards removed when the option is set to 1
+$this->option_removals = [
+    101 => [[3, 23]], // Marriage of State
+    102 => [[3, 33]], // Renaissance
+];
 $this->decision_cards = [
     /* --- gen php begin decision_deck --- */
     // #columns: i - income, t - topple, at - automa track, st - shadow track
