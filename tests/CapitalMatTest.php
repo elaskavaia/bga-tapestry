@@ -10,6 +10,7 @@ class CapitalMatUT extends GameUT {
     const PLAYER = 11;
     const TECH_HUB = 1; // 3 wide, 2 high
     const TANK_FACTORY = 5; // 3 by 3, exactly one district
+    const APOTHECARY = 2; // 2 by 2, a single rotation
 
     function __construct(int $players = 2) {
         parent::__construct($players);
@@ -28,6 +29,14 @@ class CapitalMatUT extends GameUT {
     /** A structure waiting to be placed, where effect_gainLandmark and the income building benefits leave it. */
     function pendingStructure(int $type, int $landmark = 0): int {
         return $this->dbAddStructure(self::PLAYER, $type, 0, "capital_structure", $landmark);
+    }
+
+    /** The landmark benefit on the stack and the game in placeStructure, as claimLandmark leaves them. */
+    function pendingLandmark(int $landmark): int {
+        $id = $this->pendingStructure(BUILDING_LANDMARK, $landmark);
+        $this->benefitSingleEntry("standard", $this->landmark_data[$landmark]["benefit"], self::PLAYER);
+        $this->gamestate->jumpToState(26);
+        return $id;
     }
 
     function occupy(int $x, int $y, int $building = BUILDING_FARM): void {
@@ -127,6 +136,50 @@ final class CapitalMatTest extends TestCase {
 
         $this->expectException(BgaUserException::class);
         $game->effect_placeOnCapitalMat($id, 3, 3, 0, CapitalMatUT::PLAYER);
+    }
+
+    /**
+     * place_structure used to take the cell from the client as is, so an anchor no option offered
+     * landed in a cell no count reads. The options argPlaceStructure computed are the legal cells.
+     */
+    function testPlacingOnACellOutsideTheOptionsIsRefused() {
+        $game = $this->game;
+        $game->pendingLandmark(CapitalMatUT::APOTHECARY);
+        $this->assertNotContains("0_0", $game->argPlaceStructure()["options"][0]);
+
+        $this->expectOutputRegex("/Invalid structure placement cell 0_0 rotation 0/");
+        $this->expectException(BgaUserException::class);
+        $game->place_structure(0, 0, 0);
+    }
+
+    /** The options are per rotation: the same anchor can be legal for one rotation and not the other. */
+    function testTheCellIsCheckedForTheRequestedRotation() {
+        $game = $this->game;
+        $game->occupy(3, 5);
+        $id = $game->pendingLandmark(CapitalMatUT::TECH_HUB);
+        $options = $game->argPlaceStructure()["options"];
+        $this->assertNotContains("3_3", $options[0]);
+        $this->assertContains("3_3", $options[1]);
+
+        $this->expectOutputRegex("/Invalid structure placement cell 3_3 rotation 0/");
+        try {
+            $game->place_structure(0, 3, 3);
+            $this->fail("rotation 0 covers the occupied cell");
+        } catch (BgaUserException $e) {
+        }
+        $game->place_structure(1, 3, 3);
+        $this->assertEquals("capital_cell_" . CapitalMatUT::PLAYER . "_3_3", $game->structureLocation($id));
+        $this->assertEquals([], $game->benefitLabels(), "the landmark benefit is cashed");
+    }
+
+    /** The cell past the mat the client offers for "Place outside of Capital Mat" still goes through. */
+    function testPlacingOutsideTheMatIsAlwaysAccepted() {
+        $game = $this->game;
+        $id = $game->pendingLandmark(CapitalMatUT::APOTHECARY);
+
+        $game->place_structure(0, 100, 100);
+
+        $this->assertEquals("hand", $game->structureLocation($id));
     }
 
     /** BE_VP_CAPITAL: 1 VP per full row and per full column, times the benefit count. */

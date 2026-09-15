@@ -2496,35 +2496,66 @@ define([
       dojo.addClass("button_confirm", "disabled");
     },
 
+    isForeignTokenPending: function () {
+      return this.gamedatas.gamestate.args.structure_type == this.CON.BUILDING_CUBE;
+    },
+
+    isCapitalCellOutside: function () {
+      return this.capitalx >= 12 && this.capitaly >= 12;
+    },
+
+    isCapitalCellPossible: function () {
+      if (this.isCapitalCellOutside()) return !this.isForeignTokenPending();
+      return (this.capitalRotOptions[this.capitalRot] || []).includes(this.capitalx + "_" + this.capitaly);
+    },
+
     onConfirmStructure: function () {
       dojo.destroy("button_confirm"); // to cancel timer
       if (this.capitalx === undefined || this.capitalx === null || this.capitalx === "") {
         this.showError(_("You have to place the building on your capital mat first"));
         return;
       }
-
-      if (this.capitalx >= 12 && this.capitaly >= 12) {
-        this.confirmationDialog(_("Proceed placing building out of city bounds?"), () => {
-          this.structure_id = null;
-          this.axcallwrapper("place_structure", {
-            x: this.capitalx,
-            y: this.capitaly,
-            rot: this.capitalRot
-          });
-        });
+      if (!this.isCapitalCellPossible()) {
+        this.showError(_("Invalid structure placement"));
+        this.onCancelStructure();
         return;
       }
+      if (this.isCapitalCellOutside()) {
+        this.confirmationDialog(
+          _("Proceed placing building out of city bounds?"),
+          () => this.sendPlaceStructure(),
+          () => this.onCancelStructure()
+        );
+        return;
+      }
+      this.sendPlaceStructure();
+    },
+
+    /** The structure id is dropped while the call is in flight so no click moves it; a refusal puts it back. */
+    sendPlaceStructure: function () {
+      var structure_id = this.structure_id;
       this.structure_id = null;
-      this.axcallwrapper("place_structure", {
-        x: this.capitalx,
-        y: this.capitaly,
-        rot: this.capitalRot
-      });
+      this.axcallwrapper(
+        "place_structure",
+        {
+          x: this.capitalx,
+          y: this.capitaly,
+          rot: this.capitalRot
+        },
+        (err) => {
+          this.callbackErrorHandler(err);
+          if (err) {
+            this.structure_id = structure_id;
+            this.onCancelStructure();
+          }
+        }
+      );
     },
 
     onCapitalRotate: function (event) {
       dojo.stopEvent(event);
       console.log("rotate");
+      if (!this.structure_id) return;
       do {
         this.capitalRot = (this.capitalRot + 1) % 4;
       } while (!(this.capitalRot in this.capitalRotOptions));
@@ -2533,6 +2564,7 @@ define([
       }
       dojo.addClass(this.structure_id, "rot" + this.capitalRot);
       this.updateCapitalRot();
+      if (this.capitalx !== null && !this.isCapitalCellPossible()) this.onCancelStructure();
     },
 
     onRotateTileLeft: function (event) {
@@ -3595,7 +3627,7 @@ define([
         var coord = rot_data[c];
         dojo.addClass("capital_cell_" + this.player_id + "_" + coord, "possible");
       }
-      dojo.addClass("capital_cell_" + this.player_id + "_12_12", "possible"); //out of bounds - always on
+      if (!this.isForeignTokenPending()) dojo.addClass("capital_cell_" + this.player_id + "_12_12", "possible"); //out of bounds
     },
 
     addCapitalGrid: function (player_id) {

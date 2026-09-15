@@ -397,6 +397,7 @@ final class WeefolkTest extends TestCase {
 
     /** With a plot still free the token has no business evicting anyone (FORMAL_RULES CIV.WEEFOLK.3). */
     function testReplacementIsRefusedWhileTheCityHasAnEmptyPlot() {
+        $this->expectOutputRegex("/Invalid structure placement cell 6_8 rotation 0/");
         $this->game->putStructure(WeefolkUT::OPPONENT, BUILDING_MARKET, 6, 8);
         $this->giveToken();
         $this->game->offerPlot(WeefolkUT::OPPONENT);
@@ -432,6 +433,16 @@ final class WeefolkTest extends TestCase {
 
         $this->expectException(BgaUserException::class);
         $this->game->conquer_structure(3, 3);
+    }
+
+    /** Nor beside the mat: BUILDING.3 keeps that zone for a full city, and a full city offers replacements. */
+    function testForeignTokenCannotBePlacedBesideTheMat() {
+        $this->expectOutputRegex("/Invalid structure placement cell 100_100 rotation 0/");
+        $this->giveToken();
+        $this->game->offerPlot(WeefolkUT::OPPONENT);
+
+        $this->expectException(BgaUserException::class);
+        $this->game->place_structure(0, 100, 100);
     }
 
     // ------------------------------------------------------------------ undo

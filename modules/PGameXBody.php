@@ -9136,8 +9136,7 @@ abstract class PGameXBody extends tapcommon {
             $unpassable = 1;
         }
         $oobounds = 0;
-        if ($x >= 12 && $y >= 12) {
-            // out of bounds
+        if ($this->isOutsideCapitalMat($x, $y)) {
             $oobounds = 1;
             $this->dbSetStructureLocationRot($sid, "hand", $rot);
         } else {
@@ -9232,6 +9231,11 @@ abstract class PGameXBody extends tapcommon {
         $structure_data = $this->getPendingStructure();
         $structure_id = $structure_data["card_id"];
         $this->systemAssertTrue("unexpected structure type $ct", $ct == $structure_data["card_type"]);
+        // a plot token always has a cell: the full city branch of argPlaceStructure offers replacements
+        $legal = $this->isOutsideCapitalMat($x, $y)
+            ? $ct != BUILDING_CUBE
+            : in_array("{$x}_{$y}", array_get($this->argPlaceStructure()["options"], $rot, []));
+        $this->userAssertTrue(clienttranslate("Invalid structure placement"), $legal, "cell {$x}_{$y} rotation $rot");
         $this->effect_placeOnCapitalMat($structure_id, $x, $y, $rot, $player_id);
         $this->clearCurrentBenefit($bene, true);
 
@@ -11149,6 +11153,11 @@ abstract class PGameXBody extends tapcommon {
 
     function onMat($x, $y) {
         return $x >= 3 && $x <= 11 && $y >= 3 && $y <= 11;
+    }
+
+    /** The cell past the grid the client sends for "Place outside of Capital Mat". */
+    function isOutsideCapitalMat($x, $y) {
+        return $x >= 12 && $y >= 12;
     }
 
     function getCardOnTop(int $type, string $location) {

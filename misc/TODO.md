@@ -164,16 +164,19 @@ P2 - BEFORE THE DEPLOY, NARROWER OR CHEAPER
       is a material line. The same block has a null-unsafe getObjectFromDB with no player filter
       (PGameXBody.php 5445).
 
-- [ ] [blocker/ux/P2] place_structure never validates the requested x_y against the options
-      argPlaceStructure computed, so the only thing stopping an illegal cell is the client "possible"
-      class plus whatever effect_placeOnCapitalMat happens to assert. Pre-existing, and it applies to
-      income buildings and landmarks as much as to the Weefolk token; the token's own "only in a full
-      city" rule is now enforced server-side, the general case is not.
-      The other half of it, seen in the studio 2026-09-08 placing a 2 by 2 landmark: the client
-      offers Confirm for a cell the server then refuses, and the refusal is invisible. The
-      "Invalid structure placement" userAssert (effect_placeOnCapitalMat, PGameXBody.php around 8740)
-      reaches the console but no toast and no title change, so the state just sits there and looks
-      like the button did nothing. Anything that reports the rejection would do.
+- [x] [blocker/ux/P2] FIXED place_structure now refuses a cell that is not in the options
+      argPlaceStructure computed for the requested rotation, before anything is written; a plot
+      token cannot go beside the mat either. Client: Confirm validates the cell first, Rotate drops a
+      cell the new rotation no longer allows, and a server refusal puts the structure and the
+      Confirm button back instead of leaving a dead state. Tests: CapitalMatTest
+      testPlacingOnACellOutsideTheOptionsIsRefused, testTheCellIsCheckedForTheRequestedRotation,
+      testPlacingOutsideTheMatIsAlwaysAccepted; WeefolkTest testForeignTokenCannotBePlacedBesideTheMat.
+      NOTE client side is NOT browser-verified, please confirm on Studio with a 2 by 2 landmark
+      (the 2026-09-08 case). The error toast itself is the framework's: the client only restores
+      the UI, so if the toast is still missing that is a framework-level question.
+      NOTE judgment call: an own building or landmark may still go beside the mat while legal
+      cells exist (the 12_12 cell the client always offers). BUILDING.3 reads as full-city only;
+      tightening it is a rules decision, not done here.
 
 - [ ] [rules/P2] TYRANNY awards 5 VP on every overplay (PGameXBody.php 3710); the card says "first
       and only time". Separate from the LIFO blocker under P1.
