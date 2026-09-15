@@ -58,7 +58,7 @@ abstract class PGameXBody extends tapcommon {
         //  Here, you can assign labels to global variables you are using for this game.
         //  You can use any number of global variables with IDs between 10 and 99.
         //  If your game has options (variants), you also have to associate here a label to
-        //  the corresponding ID in gameoptions.inc.php.
+        //  the corresponding ID in gameoptions.jsonc.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
         $this->initGameStateLabels([
@@ -10482,14 +10482,13 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function removeSomeComponents() {
-        $gameoptions = $this->getTableOptions();
-        foreach ($gameoptions as $gameoption_id => $gameoption) {
+        foreach ($this->option_removals as $gameoption_id => $removals) {
             $value = 0;
             if (array_key_exists($gameoption_id, $this->gamestate->table_globals)) {
                 $value = (int) $this->gamestate->table_globals[$gameoption_id];
             }
-            if ($value == 1 && isset($gameoption["tap_remove"])) {
-                foreach ($gameoption["tap_remove"] as $rem) {
+            if ($value == 1) {
+                foreach ($removals as $rem) {
                     list($card_type, $card_type_arg) = $rem;
                     $this->DbQuery("UPDATE card SET card_location='limbo' WHERE card_type='$card_type' AND card_type_arg='$card_type_arg'");
                     $this->notifyWithName("message", clienttranslate('game options: ${card_name} is removed from the game'), [
