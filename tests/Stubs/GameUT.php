@@ -106,7 +106,15 @@ class GameUT extends Tapestry {
     public array $stats = [];
 
     function incStat(int $inc, string $name, ?int $playerId = null, bool $bDoNotLoop = false): void {
+        $kind = $playerId === null ? "table" : "player";
+        if (!isset($this->getStatTypes()[$kind][$name])) {
+            throw new BgaSystemException("Unknown $kind statistic: $name");
+        }
         $this->stats[$playerId][$name] = ($this->stats[$playerId][$name] ?? 0) + $inc;
+    }
+
+    function setStat($value, $name, $player_id = null, $bDoNotLoop = false): void {
+        $this->stats[$player_id][$name] = $value;
     }
 
     /** The framework stub reports no stats at all, so dbIncStatChecked would reject every one. */
@@ -357,6 +365,22 @@ class GameUT extends Tapestry {
         return $this->dbAddStructure($player_id, BUILDING_CUBE, $type_arg, $location, $arg2);
     }
 
+    /** The real one runs raw SQL over structure; this reads the in memory model instead. */
+    function dbGetCubesOnTrack($player_id, $track = null, $spot = null, $type_arg = null) {
+        $like = $this->getTrackLocationLike($track, $spot);
+        $player_id = (int) $player_id;
+        $cubes = $this->getStructuresSearch(BUILDING_CUBE, $type_arg, $like, $player_id > 0 ? $player_id : null);
+        if ($player_id < 0) {
+            $cubes = array_filter($cubes, fn($cube) => $cube["card_location_arg"] != -$player_id);
+        }
+        foreach ($cubes as &$cube) {
+            $cube["spot"] = (int) getPart($cube["card_location"], 3);
+            $cube["virtual"] = $cube["card_type_arg"] == CUBE_AI;
+        }
+        $this->sortTrackCubes($cubes);
+        return $cubes;
+    }
+
     function structureLocation($structure_id): string {
         return $this->structures->getCard((int) $structure_id)["location"];
     }
@@ -364,6 +388,51 @@ class GameUT extends Tapestry {
     /** The real one writes the row with raw SQL, which the in memory structure model never sees. */
     function dbSetStructureArg2($structure_id, $arg2): void {
         $this->structures->setLocationArg2($structure_id, $arg2);
+    }
+
+    // ------------------------------------------------------------ resources
+
+    /** player_res_<resource> per player, playerextra is not modelled; a player starts with none. */
+    public array $resources = [];
+
+    function setResources(int $player_id, int $coin, int $worker, int $food, int $culture): void {
+        $this->resources[$player_id] = [
+            "player_res_coin" => $coin,
+            "player_res_worker" => $worker,
+            "player_res_food" => $food,
+            "player_res_culture" => $culture,
+        ];
+    }
+
+    function dbGetPlayerResources($player_id) {
+        return $this->resources[(int) $player_id] ?? ["player_res_coin" => 0, "player_res_worker" => 0, "player_res_food" => 0, "player_res_culture" => 0];
+    }
+
+    function getResourceCountAll($player_id = 0, $specific = null) {
+        if (!$player_id) {
+            $player_id = $this->getActivePlayerId();
+        }
+        $total = 0;
+        foreach ($this->dbGetPlayerResources($player_id) as $field => $count) {
+            if (!$specific || $field == "player_res_" . $this->income_tracks[$specific]["resource"]) {
+                $total += $count;
+            }
+        }
+        return $total;
+    }
+
+    /** The real one reads playerextra with raw SQL; the cap of 8 and the affordability check are kept, the parent still notifies. */
+    function dbIncResourceCount($benefit_id, $notif, $new_count, $increase, $player_id, $reason = null) {
+        $field = "player_res_" . $this->income_tracks[$benefit_id]["resource"];
+        $row = $this->dbGetPlayerResources($player_id);
+        if ($new_count === null) {
+            $new_count = min($row[$field] + $increase, 8);
+            $this->userAssertTrue(totranslate("You cannot afford this payment combination"), $new_count >= 0);
+        }
+        $increase = $new_count - $row[$field];
+        $row[$field] = $new_count;
+        $this->resources[(int) $player_id] = $row;
+        return parent::dbIncResourceCount($benefit_id, $notif, $new_count, $increase, $player_id, $reason);
     }
 
     // -------------------------------------------------------- income tracks
