@@ -420,6 +420,7 @@ abstract class PGameXBody extends tapcommon {
         $this->initStat("player", "turns_era_2", 0);
         $this->initStat("player", "turns_era_3", 0);
         $this->initStat("player", "turns_era_4", 0);
+        $this->initStat("player", "turns_era_5", 0);
         $this->initStat("player", "bonuses", 0);
         $this->initStat("player", "track1", 0);
         $this->initStat("player", "track2", 0);
@@ -5116,8 +5117,8 @@ abstract class PGameXBody extends tapcommon {
         $this->checkTrack($track);
         $this->checkSpot($spot - 1);
         // stat
-        $era = $this->getCurrentEra($player_id);
-        $this->incStat(1, "turns_era_" . $era, $player_id);
+        // checked: an extended play advance at era 5 on a table that predates the turns_era_5 stat must not throw
+        $this->dbIncStatChecked(1, "turns_era_" . $this->getCurrentEra($player_id), $player_id);
         // CHECK PAYMENT COMBINATION
         $level = 1 + floor(($spot - 1) / 3);
         $base_type = $this->tech_track_types[$track]["resource"];
@@ -11830,7 +11831,7 @@ abstract class PGameXBody extends tapcommon {
     function getPossibleAdvances($onlyValid = true) {
         $player_id = $this->getActivePlayerId();
         $tokens = $this->dbGetCubesOnTrack($player_id);
-        $player_data = $this->getObjectFromDB("SELECT * FROM playerextra WHERE player_id='$player_id'");
+        $player_data = $this->dbGetPlayerResources($player_id);
         $advances = [];
         foreach ($tokens as $token) {
             $coords = explode("_", $token["card_location"]);
@@ -11856,6 +11857,11 @@ abstract class PGameXBody extends tapcommon {
             }
         }
         return $advances;
+    }
+
+    /** The playerextra row, for its player_res_* columns. */
+    function dbGetPlayerResources($player_id) {
+        return $this->getObjectFromDB("SELECT * FROM playerextra WHERE player_id='$player_id'");
     }
 
     function getClosestBonus($player_id = 0, $sel_track = 0, $cube_id = 0) {

@@ -85,6 +85,10 @@ $stats_type = array(
                     "name" => totranslate("Number of advances (Era 4)"),
                     "type" => "int" ),
 
+        "turns_era_5" => array("id"=> 50,
+                    "name" => totranslate("Number of advances (after income turn 5)"),
+                    "type" => "int" ),
+
         "bonuses" => array("id"=> 15,
                     "name" => totranslate("Number of claimed bonuses"),
                     "type" => "int" ),

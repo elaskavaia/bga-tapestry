@@ -46,6 +46,13 @@ P1 - MUST FIX BEFORE THE FF DEPLOY
 Designer answers of 2026-09 (misc/QUESTIONS.txt) overturned eight readings. FORMAL_RULES.txt and
 the material rulings are already updated; each item below is the code change for one clause.
 
+- [x] [bug/P1] Elder Ones: "Unknown player statistic: turns_era_5" on the first advance after
+      income turn 5 (bug report, GS1 18/09 05:34:33). action_advance counted turns_era_<era> and the
+      stat stopped at era 4. FIXED: turns_era_5 (id 50) added to stats.inc.php and initStat, and the
+      count goes through dbIncStatChecked so an in-flight table without the stat row logs instead of
+      throwing. GameUT.incStat now rejects an undefined stat like the framework does. Test:
+      ElderOnesTest testAdvanceTurnAtEra5WithArchitectsAsSecondCiv.
+
 - [x] [rules/P1] CIV.ELDER_ONES.1 (QUESTIONS 7): FIXED. getTapestryEra asks hasExtendedPlayCiv
       rather than isExtendedPlay, so a player with an extended play civ reads era 4 from the start
       of era 5, income turn 5 included; MERFOLK gets it for free. ElderOnes.onGainLandmark still

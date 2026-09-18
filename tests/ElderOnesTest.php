@@ -17,8 +17,9 @@ class ElderOnesUT extends GameUT {
     const OWNER = 11;
     const OPPONENT = 12;
 
-    /** What getPossibleAdvances() answers, playerextra and the track cubes are not modelled. */
+    /** What getPossibleAdvances() answers unless $realAdvances, when the real one reads the modelled cubes and resources. */
     public array $advances = [];
+    public bool $realAdvances = false;
     /** Players finalCivScoring() ran for, in order. */
     public array $finalScored = [];
     /** Players whose game actually ended, in order. */
@@ -41,7 +42,7 @@ class ElderOnesUT extends GameUT {
     }
 
     function getPossibleAdvances($onlyValid = true) {
-        return $this->advances;
+        return $this->realAdvances ? parent::getPossibleAdvances($onlyValid) : $this->advances;
     }
 
     /** The real one scores through the civ instances, which is what these tests are counting. */
@@ -324,6 +325,34 @@ final class ElderOnesTest extends TestCase {
 
         $this->assertEquals([], $game->cleanedUp);
         $this->assertTrue($game->isPlayerAlive(ElderOnesUT::OWNER));
+    }
+
+    /**
+     * Bug report: no advance after income turn 5, "Unknown player statistic: turns_era_5". The
+     * advance counted its era stat and era 5 had none.
+     */
+    function testAdvanceTurnAtEra5WithArchitectsAsSecondCiv() {
+        $game = $this->game;
+        $game->giveCiv(ElderOnesUT::OWNER, CIV_ARCHITECTS);
+        $game->realAdvances = true;
+        $game->setResources(ElderOnesUT::OWNER, 8, 8, 8, 8);
+        $cubes = [];
+        for ($track = 1; $track <= 4; $track++) {
+            $cubes[$track] = $game->addCubeAt(ElderOnesUT::OWNER, "tech_spot_{$track}_0");
+        }
+        $this->enterExtendedPlay();
+
+        $game->playerTurn(ElderOnesUT::OWNER);
+
+        $this->assertEquals([], $game->cleanedUp, "the turn continues");
+        $args = $game->argPlayerTurn();
+        $this->assertTrue($args["extended_play"]);
+        $this->assertEquals(["1_1", "2_1", "3_1", "4_1"], $args["advances"]);
+
+        $game->action_advance(1, 1, [1], 0);
+        $this->assertEquals("tech_spot_1_1", $game->structureLocation($cubes[1]));
+        $this->assertEquals(7, $game->dbGetPlayerResources(ElderOnesUT::OWNER)["player_res_coin"]);
+        $this->assertEquals(1, $game->stats[ElderOnesUT::OWNER]["turns_era_5"], "the stat exists, the bug was the throw on an unknown one");
     }
 
     function testTurnWithNoAffordableAdvanceFinishesThePlayerOnce() {
