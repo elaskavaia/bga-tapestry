@@ -79,40 +79,44 @@
     "name": "Civilization Set",
     // bit flags: 0b0001 original, 0b0010 Plans & Ploys, 0b0100 Arts & Architecture, 0b1000 Fantasies & Futures
     "values": {
-      "15": {
-        "name": "All (Original + PP + AA + FF)",
-        "tmdisplay": "Civilation Set: All",
-        "beta": true
-      },
+      // "15": { // 0b1111
+      //   "name": "All (Original + PP + AA + FF)",
+      //   "tmdisplay": "Civilation Set: All",
+      //   "beta": true
+      // },
       "7": {
+        // 0b0111
         "name": "Original + PP + AA",
         "tmdisplay": "Civilation Set: Original, Plans & Ploys, Arts & Architecture"
       },
       "1": {
+        // 0b0001
         "name": "Original Only"
       },
       "3": {
+        // 0b0011
         "name": "Original + Plans & Ploys",
         "tmdisplay": "Civilation Set: Original, Plans & Ploys",
         "beta": true
       },
-      // "9": {
+      // "9": { // 0b1001
       //   "name": "Original + Fantasies & Futures",
       //   "tmdisplay": "Fantasies & Futures",
       //   "beta": true
       // },
       "8": {
+        // 0b1000
         "name": "Fantasies & Futures - For Testing",
         "tmdisplay": "Civilation Set: Fantasies & Futures",
         "beta": true
       }
-      // "5": { "name": "Original + Arts & Architecture" },
-      // "2": {
+      // "5": { "name": "Original + Arts & Architecture" }, // 0b0101
+      // "2": { // 0b0010
       //   "name": "Plans & Ploys Only - Do not use",
       //   "tmdisplay": "Plans & Ploys",
       //   "beta": true
       // },
-      // "6": {
+      // "6": { // 0b0110
       //   "name": "Only Expansions (PP + AA) - For Testing",
       //   "tmdisplay": "Civilation Set: Only Expansions",
       //   "beta": true
