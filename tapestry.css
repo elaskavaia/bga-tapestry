@@ -1312,20 +1312,6 @@ div[data-income="0"] #subtitle_bar {
   left: 2px;
 }
 
-/* a die still on the ILLUMINATI mat, badged in the owner's colour */
-.on_civ_mat {
-  position: relative;
-  font: normal normal normal 14px/1 FontAwesome;
-}
-.on_civ_mat::after {
-  content: "\f06e"; /* fa-eye */
-  position: absolute;
-  top: -12px;
-  left: 2px;
-  /* .die_wrapper is preserve-3d, so without this the badge paints behind the cube's front face */
-  transform: translateZ(40px);
-}
-
 .tech_spot .cube {
   display: inline-block;
   margin: unset;
@@ -3025,6 +3011,33 @@ div[data-income="0"] #subtitle_bar {
   width: 16px;
   height: 16px;
   vertical-align: middle;
+}
+
+/* ILLUMINATI mat slots over the card art, sized like the dice homes on the board and scaled down to the art */
+.illuminati_slot {
+  position: absolute;
+  top: 45.6%;
+  width: 50px;
+  height: 50px;
+  transform: scale(0.66);
+  transform-origin: 0 0;
+  perspective: 1000px;
+}
+.illuminati_slot_black {
+  left: 12.4%;
+}
+.illuminati_slot_red {
+  left: 39%;
+}
+.illuminati_slot_science {
+  left: 66.1%;
+  top: 42.8%;
+  width: 90px;
+  height: 90px;
+  transform: scale(0.55);
+}
+.illuminati_slot .die {
+  margin-right: 0;
 }
 @keyframes roll {
   0% {

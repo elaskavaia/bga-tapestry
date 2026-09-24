@@ -3934,7 +3934,7 @@ define([
       this.rolldie("science", die - 1);
     },
 
-    // ILLUMINATI: the dice never move, they carry a badge while they sit on the mat
+    // ILLUMINATI: a die on the mat is moved into its slot on the civ card, its wrapper on the board is its home
     ILLUMINATI_DICE: { black: 1, red: 2, science: 4 },
 
     isDieOnCivMat: function (color) {
@@ -3942,24 +3942,26 @@ define([
       return owner && (this.gamedatas.dice.on_mat & this.ILLUMINATI_DICE[color]) != 0;
     },
 
-    // the badge sits on the wrapper, not on the rotating cube, so the roll animation leaves it alone
-    getDieMatNode: function (color) {
-      var die = $(color == "science" ? "science_die" : color + "_die");
-      if (!die) return null;
-      return color == "science" ? die : die.parentNode;
+    getDieHome: function (color) {
+      return $(color == "science" ? "dice_holder2" : color + "_die_home");
     },
 
-    updateIlluminatiDice: function (mask, owner) {
+    updateIlluminatiDice: function (mask, owner, animate) {
       this.gamedatas.dice.on_mat = mask;
       this.gamedatas.dice.mat_owner = owner;
       for (var color in this.ILLUMINATI_DICE) {
-        var node = this.getDieMatNode(color);
-        if (!node) continue;
-        var on = this.isDieOnCivMat(color);
-        dojo.toggleClass(node, "on_civ_mat", on);
-        dojo.style(node, "color", on ? "#" + this.getPlayerColor(owner) : "");
         this.updateDieTooltip(color, this.gamedatas.dice[color] - (color == "science" ? 1 : 0));
+        this.placeIlluminatiDie(color, animate);
       }
+    },
+
+    placeIlluminatiDie: function (color, animate) {
+      var die = $(color + "_die");
+      var slot = $("illuminati_slot_" + color);
+      var target = slot && this.isDieOnCivMat(color) ? slot : this.getDieHome(color);
+      if (!die || !target || die.parentNode == target) return;
+      if (animate) this.phantomMove(die.id, target);
+      else target.appendChild(die);
     },
 
     updateTapestryCount: function (player_id, delta) {
@@ -4041,7 +4043,11 @@ define([
 
       var div_id = "civilization_" + civ_id;
       var card_div = $(div_id);
-      if (card_div) dojo.destroy(card_div);
+      if (card_div) {
+        // ILLUMINATI dice sit in the card and must outlive it
+        dojo.query(".illuminati_slot > *", card_div).forEach((die) => this.getDieHome(getPart(die.id, 0)).appendChild(die));
+        dojo.destroy(card_div);
+      }
 
       var card_div = dojo.place(this.format_block("jstpl_civilization", { cid: civ_id }), location);
       dojo.addClass(card_div, "exp_" + this.civilizations[civ_id]["exp"]);
@@ -4084,6 +4090,12 @@ define([
       if (civ_id == this.CON.CIV_ISLANDERS) {
         dojo.place('<div id="islanders" class="islanders_map"></div>', div_id);
         this.setupLandOther(1, "islanders", "islanders");
+      }
+      if (civ_id == this.CON.CIV_ILLUMINATI) {
+        for (var color in this.ILLUMINATI_DICE) {
+          dojo.place('<div id="illuminati_slot_' + color + '" class="illuminati_slot illuminati_slot_' + color + '"></div>', div_id);
+          this.placeIlluminatiDie(color, false);
+        }
       }
       if (civ_id == this.CON.CIV_MYSTICS && this.getAdjustmentLevel() >= 8) {
         dojo.place('<div id="deck_13" class="tapestry_deck"></div>', div_id);
@@ -6145,7 +6157,7 @@ define([
     },
 
     notif_illuminatiDice: function (notif) {
-      this.updateIlluminatiDice(parseInt(notif.args.on_mat), parseInt(notif.args.mat_owner));
+      this.updateIlluminatiDice(parseInt(notif.args.on_mat), parseInt(notif.args.mat_owner), true);
     },
 
     notif_techtransfer: function (notif) {

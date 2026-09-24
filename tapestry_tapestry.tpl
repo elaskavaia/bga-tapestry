@@ -105,7 +105,7 @@ var jstpl_automa_civ='<div id="automaciv_${cid}" class="automaciv automaciv_${ci
         </div>
 
 			<div class="die-scene" id="die_scene">
-			   <div class="die_wrapper">
+			   <div id="black_die_home" class="die_wrapper">
 				<div id="black_die" class="die shape black">
 					<div class="die-face  die-face-front"></div>
 					<div class="die-face  die-face-back"></div>
@@ -115,7 +115,7 @@ var jstpl_automa_civ='<div id="automaciv_${cid}" class="automaciv automaciv_${ci
 					<div class="die-face  die-face-bottom"></div>
 				</div>
 				</div>
-				<div class="die_wrapper">
+				<div id="red_die_home" class="die_wrapper">
 				<div id="red_die" class="die shape red">
 					<div class="die-face  die-face-front"></div>
 					<div class="die-face  die-face-back"></div>
