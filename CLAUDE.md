@@ -127,7 +127,10 @@ panel, not the chat box (see the `game-play-in-studio` skill).
 
 - The studio project is `tapestry`: manage page
   `studio.boardgamearena.com/studiogame?game=tapestry`, lobby game number `4009`.
-  `misc/rename.sh` produces the separate renamed `taptest` copy, which is a stale side project.
+  `npm run sync:alpha` builds the renamed `taptest` copy with `misc/rename.sh` and pushes it to the
+  `~/Develop/bga/remote/taptest/` studio mount.
+- Branches map to BGA projects: `main` deploys as `taptest` (alpha), `prod2` deploys as `tapestry`
+  (production). Each branch carries its own `CHANGELOG.md` entries and release tags.
 - `~/Develop/bga/remote/` is the sshfs mount of the studio filesystem, and
   `~/Develop/bga/remote/tapestry/` mirrors this working tree, so an edit here is live in the studio
   with no deploy step. `diff` a changed file against it to confirm before testing.
@@ -151,5 +154,3 @@ conversion, and the action handler hands the array to the civ (MYSTICS and MERFO
 
 Naming, assertion, notification, test and formatting conventions are in
 [misc/CODE_STYLE.md](misc/CODE_STYLE.md) - read it before writing code.
-
-- `misc/rename.sh` produces the renamed `taptest` copy of the project used for studio testing.

@@ -10,6 +10,7 @@
     "lint:php": "find modules/ tests/ -name '*.php' -exec php8.4 -l {} + && echo 'All PHP files OK'",
     "lint:phpstan": "phpstan analyse -c misc/phpstan.neon",
     "predeploy": "npm run lint:php && npm run tests",
+    "sync:alpha": "misc/rename.sh taptest ~/Develop/bga/bga-git/games/tapestry/taptest && rsync -v -ltsrO --delete --ignore-errors --exclude-from=$HOME/Develop/bga/rsync.exclude ~/Develop/bga/bga-git/games/tapestry/taptest/ ~/Develop/bga/remote/taptest/",
     "genmat": "php8.4 ~/git/bga-sharedcode/misc/genmat.php misc/benefit_types.csv && prettier --write material.inc.php",
     "end": "echo The End"
   },
