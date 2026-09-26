@@ -3536,11 +3536,12 @@ define([
         return;
       }
 
-      if (this.prefs[150].value == 0) {
+      const autoConfirm = this.bga.userPreferences.get(150);
+      if (autoConfirm == 0) {
         // auto confirm off
         return;
       }
-      if (this.prefs[150].value == 1) {
+      if (autoConfirm == 1) {
         // auto confirm instant
         butt.click();
         return;
@@ -3823,26 +3824,11 @@ define([
     },
 
     setupPreference: function () {
-      // Extract the ID and value from the UI control
-      var _this = this;
-      function onchange(e) {
-        var match = e.target.id.match(/^preference_[cf]ontrol_(\d+)$/);
-        if (!match) {
-          return;
-        }
-        var prefId = +match[1];
-        var prefValue = +e.target.value;
-        _this.prefs[prefId].value = prefValue;
-        _this.onPreferenceChange(prefId, prefValue);
-      }
-
-      dojo.query(".preference_control").connect("onchange", onchange);
-      // Call onPreferenceChange() now
-      dojo.query("#ingame_menu_content .preference_control").forEach((el) => onchange({ target: el }));
-    },
-
-    onPreferenceChange: function (prefId, prefValue) {
-      console.log("Preference changed", prefId, prefValue);
+      // controls are moved out of the BGA menu by setupSettings, so the framework does not see their changes
+      dojo.query(".preference_control").connect("onchange", (e) => {
+        const match = e.target.id.match(/^preference_[cf]ontrol_(\d+)$/);
+        if (match) this.bga.userPreferences.set(+match[1], +e.target.value);
+      });
     },
 
     toggleSettings() {
