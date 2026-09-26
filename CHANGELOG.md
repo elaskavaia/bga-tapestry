@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-09-25 (v260926-0320)
+
+- Fixed ILLUMINATI dice not showing on the civilization mat
+
 ## 2026-08-26 (v260826-2103)
 
 - Adjustment Civilization Pack is now the default
