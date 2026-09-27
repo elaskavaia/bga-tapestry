@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-27 (v260927-2144)
+
+- Fixed PSIONICS invent from a track spot granting a free Food (#246785)
+- Fixed drawn tapestry cards and space tiles being visible to other players (#245659)
+- Fixed space tile click not exploring after a keep
+
 ## 2026-09-25 (v260926-0320)
 
 - Fixed ILLUMINATI dice not showing on the civilization mat
