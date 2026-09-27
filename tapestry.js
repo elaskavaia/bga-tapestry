@@ -1354,6 +1354,7 @@ define([
 
           break;
         case "spaceExploration":
+          this.clientStateArgs.action = "explore_space";
           dojo.query("#space_tiles_" + this.player_id + " .space_tile").forEach((tile) => {
             const selected = args.selected_space_tile;
             if (!selected || dojo.getAttr(tile, "data-type-arg") == selected.card_type_arg) {
