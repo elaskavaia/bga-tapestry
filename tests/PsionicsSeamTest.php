@@ -841,6 +841,24 @@ final class PsionicsSeamTest extends TestCase {
         $this->assertEquals([], $game->rows());
     }
 
+    /** POTTERY: the spot's flags (3) were read as a continuation and gained a Food. */
+    function testASpotsFlagsAreNotReadAsAContinuationOfAnInvent() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TECHNOLOGY, 4);
+        $reason = $game->withReasonDataArg(reason("spot", "4_1"), FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS);
+        $game->queueBenefitNormal(BE_INVENT, PsionicsUT::ROLLER, $reason);
+        $game->runManager();
+
+        $game->action_invent(0);
+        $game->runManager();
+        $drawn = $game->drawn(CARD_TECHNOLOGY);
+        $bene = $game->getCurrentBenefitWithInfo();
+        $game->effect_keepCard([$drawn[0]], PsionicsUT::ROLLER, $bene);
+        $game->benefitCashed($bene);
+
+        $this->assertEquals([], $game->rows());
+    }
+
     /** A keep with nothing to keep is cancelled, but the effect waiting on it still goes on, with no card. */
     function testAnEmptySampleStillHandsTheContinuationNoCard() {
         $game = $this->sampler();

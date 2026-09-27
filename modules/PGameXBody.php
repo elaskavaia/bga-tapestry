@@ -2638,9 +2638,8 @@ abstract class PGameXBody extends tapcommon {
             }
             return;
         }
-        // the keep row parks the continuation in its reason arg for effect_keepCard to queue, so a
-        // caller's own arg (a spot's flags, a played card's id) must not be left there to be read as one
-        $keep_reason = $this->withReasonDataArg($reason, $then ?? "");
+        // the keep row parks the continuation as "then:<row>" in its reason arg for effect_keepCard to queue
+        $keep_reason = $this->withReasonDataArg($reason, $then === null ? "" : "then:$then");
         for ($i = 0; $i < $count; $i++) {
             // one draw and keep per card gained, so a gain of two is two separate choices
             $this->queueBenefitInterrupt($keep_row, $player_id, $keep_reason);
@@ -2686,13 +2685,14 @@ abstract class PGameXBody extends tapcommon {
 
     /**
      * [then, reason] of a sampled keep row: the continuation awardRandomCard parked in its reason
-     * arg, and the gain's own reason without it. [0, reason] for any other keep row.
+     * arg, and the gain's own reason without it. [0, reason] for any other keep row, or one whose
+     * arg is a caller's own (a spot's flags, a played card's id) and not tagged "then".
      */
     function getSampleContinuation(int $ben, string $reason): array {
-        if (!$this->getRulesBenefit($ben, "sampled", 0)) {
+        if (!$this->getRulesBenefit($ben, "sampled", 0) || $this->getReasonArg($reason, 3) != "then") {
             return [0, $reason];
         }
-        return [(int) $this->getReasonArg($reason, 3), $this->withReasonDataArg($reason, "")];
+        return [(int) $this->getReasonArg($reason, 4), $this->withReasonDataArg($reason, "")];
     }
 
     /**
