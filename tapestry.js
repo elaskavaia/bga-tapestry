@@ -1217,7 +1217,17 @@ define([
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
+    // the framework hands each player only their own slice of _private, flatten it so handlers need not care
+    mergePrivateArgs: function (args) {
+      const priv = args?._private;
+      if (!priv || typeof priv !== "object") return args;
+      const merged = { ...args, ...priv };
+      delete merged._private;
+      return merged;
+    },
+
     onUpdateActionButtons: function (stateName, args) {
+      args = this.mergePrivateArgs(args);
       console.log("onUpdateActionButtons: " + stateName, args);
       this.gamestate = stateName;
       var subtitle = "subtitle_bar";

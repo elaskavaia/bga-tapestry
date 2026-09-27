@@ -856,9 +856,7 @@ abstract class PGameXBody extends tapcommon {
             );
             if (!$setupphase) {
                 $result["players"][$player_id]["civilizations"] = $this->getCardsInHand($player_id, CARD_CIVILIZATION);
-                $played = $this->getCollectionFromDB(
-                    "SELECT *  FROM card WHERE card_type='3' AND card_location <> 'hand' AND card_location_arg='$player_id'"
-                );
+                $played = $this->getPublicCards($player_id, CARD_TAPESTRY);
                 if ($player_id != $current_player_id) {
                     $submerged = array_filter($played, fn($card) => $card["card_location"] == "submerged");
                     $played = $this->getCardsFaceDown($submerged) + $played;
@@ -866,9 +864,7 @@ abstract class PGameXBody extends tapcommon {
                 $result["players"][$player_id]["tapestry"] = $played;
                 $result["players"][$player_id]["technology"] = $this->getCardsInHand($player_id, 4);
                 $result["players"][$player_id]["technology_updates"] = $this->argUpdateCardList($player_id);
-                $result["players"][$player_id]["space"] = $this->getCollectionFromDB(
-                    "SELECT * FROM card WHERE card_type='2' AND card_location<>'hand' AND card_location_arg='$player_id'"
-                );
+                $result["players"][$player_id]["space"] = $this->getPublicCards($player_id, CARD_SPACE);
                 $result["players"][$player_id]["hand"]["territory"] = $this->getCardsInHand($player_id, 1);
                 $result["players"][$player_id]["hand"]["space"] = $this->getCardsInHand($player_id, 2);
                 if ($player_id == $current_player_id) {
@@ -1241,6 +1237,12 @@ abstract class PGameXBody extends tapcommon {
         $sql .= $this->queryExpression("card_location_arg", $card_location_arg);
         $sql .= $this->queryExpression("card_location_arg2", $card_location_arg2, 2);
         return $sql;
+    }
+
+    /** A player's cards outside the hand; a pending draw is not theirs until kept, so it stays hidden. */
+    function getPublicCards(int $player_id, int $card_type): array {
+        $cards = $this->getCardsSearch($card_type, null, null, $player_id);
+        return array_filter($cards, fn($card) => !in_array($card["card_location"], ["hand", "draw"]));
     }
 
     function getCardInfoSearch(
@@ -9529,9 +9531,8 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function effect_keepCard($ids, $player_id, $bene) {
-        $args = $this->arg_keepCard($bene);
-        $cards = $args["cards"];
         $ben = $bene["benefit_type"];
+        $cards = $this->getKeepCards((int) $ben, (int) $player_id);
         $keep = $this->getRulesBenefit($ben, "keep", 1);
         if ($ids === null) {
             $ids = array_keys($cards);
@@ -9604,7 +9605,9 @@ abstract class PGameXBody extends tapcommon {
         // the row's own reason, so the log names what caused the gain and not the keep row
         [$then, $keep_reason] = $this->getSampleContinuation($ben, $bene["benefit_data"] ?: reason("be", $ben));
         foreach ($ids as $card_id) {
-            if (!in_array($ben, [172, BE_PSIONICS_CIV])) {
+            if ($this->getRulesBenefit($ben, "ct", 0) == CARD_TAPESTRY) {
+                $this->moveCardsHidden([$card_id], (int) $player_id, "hand", clienttranslate('${player_name} keeps a Tapestry card'));
+            } elseif (!in_array($ben, [172, BE_PSIONICS_CIV])) {
                 // a drawn civilization stays in the draw area, row 174 moves it in later
                 $extra = 0;
                 //if ($ben==175) $extra=4; // recyclers tech card cannot be upgraded on first income turn
@@ -10367,40 +10370,51 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function arg_keepCard($benefit_data = null) {
-        $player_id = $this->getActivePlayerId();
+        $player_id = (int) $this->getActivePlayerId();
         if (!$benefit_data) {
             $benefit_data = $this->getCurrentBenefit();
         }
         $args = [];
-        $ben = $benefit_data["benefit_type"];
-        if ($ben == 191 || $ben == 192 || $ben == 193 || $ben == 321 || $ben == 320) {
-            $neighbours = $this->getPlayerNeighbours($player_id, false);
-            $cards = [];
-            foreach ($neighbours as $other) {
-                if ($ben == 191) {
-                    $cards += $this->getCardsSearch(CARD_TERRITORY, null, "hand", $other);
-                    $cards += $this->getCardsSearch(CARD_SPACE, null, "hand", $other);
-                } elseif ($ben == 192) {
-                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, "hand", $other, 1);
-                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, "hand", $other, 2);
-                } elseif ($ben == 320) {
-                    $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, "hand", $other);
-                } elseif ($ben == 193) {
-                    $cards += $this->getCardsSearch(CARD_TAPESTRY, null, "era%", $other);
-                } elseif ($ben == 321) {
-                    $cards += $this->getCardsSearch(CARD_TERRITORY, null, "hand", $other);
-                }
-            }
+        $ben = (int) $benefit_data["benefit_type"];
+        if ($this->isKeepFromNeighbours($ben) || $ben == BE_GAMBLES_PICK || $ben == 319) {
             $args["title"] = $this->getBenefitName($ben);
-        } else {
-            $cards = $this->getCardsSearch(null, null, "draw", $player_id);
-            if ($ben == BE_GAMBLES_PICK || $ben == 319) {
-                $args["title"] = $this->getBenefitName($ben);
-            }
         }
         $args = $this->notifArgsAddBen($benefit_data, $args);
-        $args["cards"] = $cards;
+        $cards = $this->getKeepCards($ben, $player_id);
+        if ($this->isKeepFromNeighbours($ben)) {
+            $args["cards"] = $cards;
+        } else {
+            // a draw is hidden information until kept, state args are sent to everyone
+            $args["_private"] = [$player_id => ["cards" => $cards]];
+        }
         return $args;
+    }
+
+    function isKeepFromNeighbours(int $ben): bool {
+        return in_array($ben, [191, 192, 193, 320, 321]);
+    }
+
+    function getKeepCards(int $ben, int $player_id): array {
+        if (!$this->isKeepFromNeighbours($ben)) {
+            return $this->getCardsSearch(null, null, "draw", $player_id);
+        }
+        $cards = [];
+        foreach ($this->getPlayerNeighbours($player_id, false) as $other) {
+            if ($ben == 191) {
+                $cards += $this->getCardsSearch(CARD_TERRITORY, null, "hand", $other);
+                $cards += $this->getCardsSearch(CARD_SPACE, null, "hand", $other);
+            } elseif ($ben == 192) {
+                $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, "hand", $other, 1);
+                $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, "hand", $other, 2);
+            } elseif ($ben == 320) {
+                $cards += $this->getCardsSearch(CARD_TECHNOLOGY, null, "hand", $other);
+            } elseif ($ben == 193) {
+                $cards += $this->getCardsSearch(CARD_TAPESTRY, null, "era%", $other);
+            } elseif ($ben == 321) {
+                $cards += $this->getCardsSearch(CARD_TERRITORY, null, "hand", $other);
+            }
+        }
+        return $cards;
     }
 
     function getRulesBenefit($ben, $field = "flags", $def = null) {

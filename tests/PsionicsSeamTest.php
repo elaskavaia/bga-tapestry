@@ -621,6 +621,68 @@ final class PsionicsSeamTest extends TestCase {
         $this->assertCount(1, $game->getCardsSearch(CARD_TAPESTRY, null, "discard"));
     }
 
+    /** #245659: the other players learn a tapestry was kept, never which one. */
+    function testAKeptTapestryReachesTheOtherPlayersFaceDown() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TAPESTRY, 4);
+        $this->assertFalse($game->resolveRow(BE_PSIONICS_TAPESTRY));
+        $kept = $game->drawn(CARD_TAPESTRY)[0];
+
+        $game->effect_keepCard([$kept], PsionicsUT::ROLLER, $game->getCurrentBenefitWithInfo());
+
+        $faces = [];
+        $collect = function ($args) use (&$collect, &$faces, $kept) {
+            if (!is_array($args)) {
+                return;
+            }
+            if (($args["card_id"] ?? null) == $kept) {
+                $faces[] = (int) ($args["card_type_arg"] ?? 0);
+            }
+            array_map($collect, $args);
+        };
+        foreach ($game->notifications() as $notif) {
+            if ($notif["channel"] == "broadcast") {
+                $collect($notif["args"]);
+            }
+        }
+        $this->assertNotEmpty($faces);
+        $this->assertEquals([0], array_values(array_unique($faces)));
+    }
+
+    /** #245659: the keep state args hold the drawn faces for the drawing player only. */
+    function testTheKeepArgsShowTheDrawOnlyToItsOwner() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TAPESTRY, 4);
+        $this->assertFalse($game->resolveRow(BE_PSIONICS_TAPESTRY));
+        $game->gamestate->changeActivePlayer(PsionicsUT::ROLLER);
+
+        $args = $game->arg_keepCard($game->getCurrentBenefit());
+
+        $this->assertArrayNotHasKey("cards", $args);
+        $this->assertEquals($game->drawn(CARD_TAPESTRY), array_keys($args["_private"][PsionicsUT::ROLLER]["cards"]));
+    }
+
+    /** #245659: on reload a pending draw reaches only the drawing player. */
+    function testAReloadShowsAPendingDrawOnlyToTheDrawingPlayer() {
+        $game = $this->sampler();
+        $game->fillDeck(CARD_TAPESTRY, 4);
+        $game->fillDeck(CARD_SPACE, 4);
+        $this->assertFalse($game->resolveRow(BE_PSIONICS_TAPESTRY));
+        $game->gamestate->jumpToState(18);
+        $this->assertFalse($game->resolveRow(BE_PSIONICS_SPACE));
+        $drawn = array_merge($game->drawn(CARD_TAPESTRY), $game->drawn(CARD_SPACE));
+        $played = $game->addCard(CARD_TAPESTRY, "era1", PsionicsUT::ROLLER);
+
+        $public = $game->getPublicCards(PsionicsUT::ROLLER, CARD_TAPESTRY) + $game->getPublicCards(PsionicsUT::ROLLER, CARD_SPACE);
+        $this->assertEquals([$played], array_keys($public));
+
+        $game->_setCurrentPlayerId(PsionicsUT::OTHER);
+        $this->assertEquals([], $game->getAllDatas()["cards"]);
+
+        $game->_setCurrentPlayerId(PsionicsUT::ROLLER);
+        $this->assertEqualsCanonicalizing($drawn, array_keys($game->getAllDatas()["cards"]));
+    }
+
     /** The sampled rows are the sample; resolving one must not enlarge it a second time. */
     function testASampledRowIsNotEnlargedAgain() {
         $game = $this->sampler();
