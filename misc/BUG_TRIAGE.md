@@ -364,21 +364,19 @@ bugs, run log) is production only.
 
 ### Tracked bugs (taptest)
 
-- [ ] **BGA #248010** - "Psionics + Age of Sail on E3 draws and plays every territory tile in the
+- [x] **BGA #248010** - "Psionics + Age of Sail on E3 draws and plays every territory tile in the
       game". CONFIRMED on BGA, `rules`. Table 925076357, 2 players. Options: adj=8, set=8 (FF only),
       Marriage of State removed, Renaissance removed.
-      **CONFIRMED 2026-10-18.** Test `tests/PsionicsAgeOfSailTest.php` (2 tests, green, pinning the
-      buggy behaviour).
-      Root cause: case 17 / 46 in `awardBenefits` calls `ageOfSailCheck()` then goes straight to
-      the `explore` state. For a sampler `awardRandomCard` only queues 3 BE_PSIONICS_TERRITORY rows
-      above the explore row, so `stExplore` / `action_explore` consume a 358 row instead of row 17.
-      Row 17 stays, re-runs Age of Sail, and the loop draws the whole territory deck.
-      Fix: let the sample rows resolve before explore and skip Age of Sail on the re-queued explore
-      (a `then` continuation like BE_COAL_BARON_EXPLORE).
-      Rules: AGE OF SAIL "Whenever you explore, draw a total of 3 Territory tiles." PSIONICS
-      ([FF_CIVILIZATIONS.md](FF_CIVILIZATIONS.md)) "Whenever you gain a random ... [TERRITORY] ...
-      draw two and keep one." Open question: 3 x draw-2-keep-1 (current, consistent with every
-      other "gain N random") vs one draw-4-keep-3. Victoria leaning towards keeping per-tile.
+      **FIXED 2026-10-18 (not deployed).** The explore entered the explore state before the 3
+      Psionics keep rows resolved, consumed a keep row instead of itself and re-ran Age of Sail in a
+      loop. `ageOfSailCheck` now, for a sampler, puts the explore back behind the keeps with a
+      `sail` reason mark so it does not draw again (a quantity > 1 row keeps the rest unmarked).
+      Tested in `tests/PsionicsAgeOfSailTest.php`: keeps before explore, next explore of the row
+      draws again, non-sampler explore anywhere unchanged.
+      NOTE: kept 3 x draw-2-keep-1, not one draw-4-keep-3. Backed by CIV.PSIONICS.1 in
+      [FORMAL_RULES.txt](FORMAL_RULES.txt): "the two tech cards of track space 7 are two separate
+      random draws" (co-designers, QUESTIONS.txt 18) - a gain of N is N samples; draw 4 keep 1 is
+      for a single pick. No clause names Age of Sail yet; add one if you agree.
 - [ ] **BGA #248665** - "pscionic effect not triggering during the age of discovery tapestry roll".
       CONFIRMED on BGA, `rules`. Table 927353515, 2 players, move 373. Options: adj=9, set=8 (FF
       only), Marriage of State removed, Renaissance removed.

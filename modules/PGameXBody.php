@@ -1547,11 +1547,10 @@ abstract class PGameXBody extends tapcommon {
                 $this->getCivilizationInstance((int) $this->getReasonArg($reason, 2), true)->endCivAbility($player_id);
                 return true;
             case 17: // EXPLORE
-                $this->ageOfSailCheck($player_id);
-                $this->gamestate->nextState("explore");
-                return false;
             case 46: // EXPLORE anywhere
-                $this->ageOfSailCheck($player_id);
+                if ($this->ageOfSailCheck($player_id, $ben, $count, $reason)) {
+                    return true;
+                }
                 $this->gamestate->nextState("explore");
                 return false;
             case BE_COAL_BARON_EXPLORE:
@@ -2935,11 +2934,28 @@ abstract class PGameXBody extends tapcommon {
         $this->queueBonus(7, -1 /* unlimited*/, "15,15", 0, $player_id); // then discard any tapestry to gain 2 vp each
     }
 
-    function ageOfSailCheck($player_id) {
-        if ($this->isTapestryActive($player_id, TAP_AGE_OF_SAIL)) {
-            // AGE OF SAIL
-            $this->awardRandomCard($player_id, 3, CARD_TERRITORY, reason_tapestry(TAP_AGE_OF_SAIL));
+    /**
+     * AGE OF SAIL draws 3 territory tiles on every explore. A sampler's draws are keep rows that must
+     * resolve before the explore, so the explore goes back on the stack behind them, marked so it
+     * does not draw again. True when the explore was put back that way.
+     */
+    function ageOfSailCheck($player_id, int $ben, int $count, string $reason): bool {
+        $drawn_mark = "sail";
+        if (!$this->isTapestryActive($player_id, TAP_AGE_OF_SAIL) || getReasonPart($reason, 3) === $drawn_mark) {
+            return false;
         }
+        $sampled = $this->getSampleRow($player_id, CARD_TERRITORY) != 0;
+        if ($sampled) {
+            // straight back on the stack: effect_onQueueBenefit already saw this explore when it was queued
+            if ($count > 1) {
+                $this->interruptBenefit();
+                $this->benefitSingleEntry("standard", $ben, $player_id, $count - 1, $reason);
+            }
+            $this->interruptBenefit();
+            $this->benefitSingleEntry("standard", $ben, $player_id, 1, $this->withReasonDataArg($reason, $drawn_mark));
+        }
+        $this->awardRandomCard($player_id, 3, CARD_TERRITORY, reason_tapestry(TAP_AGE_OF_SAIL));
+        return $sampled;
     }
 
     function pleaForAid() {
