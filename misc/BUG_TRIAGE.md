@@ -12,7 +12,8 @@ triage run.
 - **Studio error log:** https://studio.boardgamearena.com/studioissues?game=tapestry - studio short
   name is `tapestry`, not the numeric id above. Add `&tableId=<TABLE_ID>` for one table,
   `&id=<ERROR_ID>` for one error, `&projects=frontend|backend` to filter. (`taptest` is the renamed
-  test copy produced by `misc/rename.sh`, not the production project - never triage against it.)
+  alpha copy produced by `misc/rename.sh`; its reports are triaged separately, see "Taptest (alpha)
+  bugs" at the end of this file.)
 - **Designer:** Jamey Stegmaier designed Tapestry, and his playtest feedback is transcribed in
   [TODO.md](TODO.md). He does not really file bug reports, so unlike some sibling projects there is
   no standing "hands off the designer's reports" rule here. If one ever does appear under his name,
@@ -347,3 +348,54 @@ Short log of each run: date, reports touched, outcome.
   now the convention, in CLAUDE.md); its predeploy-gate finding (FakeTestCase runs only `GameTest`)
   was declined by Victoria as legacy. Fix committed; entry flipped to fixed, studio check still
   pending before the tracker is touched.
+
+## Taptest (alpha) bugs
+
+The alpha copy has its own bug tracker, marker and deploy model. Everything above (marker, tracked
+bugs, run log) is production only.
+
+- **BGA game id:** 1652 (Tapestry Test, studio short name `taptest`)
+- **Bug list:** https://boardgamearena.com/bugs?game=1652
+- **Studio error log:** https://studio.boardgamearena.com/studioissues?game=taptest
+- **Deploy model:** `main` deploys as taptest, so a fix is live when it is in the latest tag on
+  `main` (`git tag --merged main --sort=creatordate | tail -1`). Production tags live on `prod2`.
+
+**Taptest triage last checked:** 2026-10-18 10:24 EDT
+
+### Tracked bugs (taptest)
+
+- [ ] **BGA #248010** - "Psionics + Age of Sail on E3 draws and plays every territory tile in the
+      game". CONFIRMED on BGA, `rules`. Table 925076357, 2 players. Options: adj=8, set=8 (FF only),
+      Marriage of State removed, Renaissance removed.
+      **CONFIRMED 2026-10-18.** Test `tests/PsionicsAgeOfSailTest.php` (2 tests, green, pinning the
+      buggy behaviour).
+      Root cause: case 17 / 46 in `awardBenefits` calls `ageOfSailCheck()` then goes straight to
+      the `explore` state. For a sampler `awardRandomCard` only queues 3 BE_PSIONICS_TERRITORY rows
+      above the explore row, so `stExplore` / `action_explore` consume a 358 row instead of row 17.
+      Row 17 stays, re-runs Age of Sail, and the loop draws the whole territory deck.
+      Fix: let the sample rows resolve before explore and skip Age of Sail on the re-queued explore
+      (a `then` continuation like BE_COAL_BARON_EXPLORE).
+      Rules: AGE OF SAIL "Whenever you explore, draw a total of 3 Territory tiles." PSIONICS
+      ([FF_CIVILIZATIONS.md](FF_CIVILIZATIONS.md)) "Whenever you gain a random ... [TERRITORY] ...
+      draw two and keep one." Open question: 3 x draw-2-keep-1 (current, consistent with every
+      other "gain N random") vs one draw-4-keep-3. Victoria leaning towards keeping per-tile.
+- [ ] **BGA #248665** - "pscionic effect not triggering during the age of discovery tapestry roll".
+      CONFIRMED on BGA, `rules`. Table 927353515, 2 players, move 373. Options: adj=9, set=8 (FF
+      only), Marriage of State removed, Renaissance removed.
+      **CONFIRMED 2026-10-18.** Test `tests/PsionicsAgeOfDiscoveryTest.php`
+      `testAgeOfDiscoveryIgnoresTheSampledTrack` (green, pinning the buggy behaviour).
+      Root cause: `effect_ageOfDiscovery` calls `rollScienceDie2` (which rolls the Psionics second
+      value into `science_die_psionics`) but queues the roller's and opponents' advances from the
+      first value only; only `action_research_decision` reads the second value.
+      Fix: when a second value exists, let the roller pick the track first, then queue the
+      roller's advance and the opponents' rows on the chosen track (likely a new benefit type).
+      Rules: PSIONICS "Whenever you roll a die, roll it twice and choose 1 of the 2 values that you
+      rolled." AGE OF DISCOVERY "Roll the science die. All players must advance on the resulting
+      track; only you gain the benefit".
+
+### Triage run log (taptest)
+
+- **2026-10-18** - First taptest run, full sweep (188 reports; 4 open, 2 waiting for deploy).
+  Fixed (fix in a deployed `main` tag): #246785 (712bd3e), #245659 (bf2545b), #246528 and #245135
+  (3ad0867, Illuminati dice). Confirmed with tests: #248010, #248665. All posted with BGA default
+  templates.
