@@ -2884,11 +2884,39 @@ abstract class PGameXBody extends tapcommon {
         // interrupt before the roll, so a civilization reacting to it is ahead of the roller
         $this->interruptBenefit();
         $track = $this->rollScienceDie2($reason);
-        $next_player_list = $this->getOpponentsStartingFromLeft($player_id);
-        $this->queueBenefitNormal(21 + $track, $player_id, $reason);
-        foreach ($next_player_list as $other) {
-            $this->queueBenefitNormal(75 + $track, $other, $reason); // age of discovery
+        if ($this->hasScienceDieChoice()) {
+            // the roller picks first, and everyone advances on the track picked (action_research_decision)
+            $this->queueBenefitNormal(BE_ADVANCE_EXPLORATION_BENEFIT_OPT + $track - 1, $player_id, $reason);
+            return;
         }
+        $this->queueBenefitNormal(21 + $track, $player_id, $reason);
+        $this->queueAgeOfDiscoveryOpponents($player_id, $track);
+    }
+
+    function queueAgeOfDiscoveryOpponents(int $player_id, int $track): void {
+        foreach ($this->getOpponentsStartingFromLeft($player_id) as $other) {
+            $this->queueBenefitNormal(75 + $track, $other, reason_tapestry(TAP_AGE_OF_DISCOVERY));
+        }
+    }
+
+    /** The roller's pick between the faces, which the opponents' advance waits on */
+    function isAgeOfDiscoveryDecision(?array $benefit_row): bool {
+        $ben = (int) array_get($benefit_row, "benefit_type");
+        return array_get($benefit_row, "benefit_data") === reason_tapestry(TAP_AGE_OF_DISCOVERY) &&
+            $ben >= BE_ADVANCE_EXPLORATION_BENEFIT_OPT &&
+            $ben <= BE_ADVANCE_TECHNOLOGY_BENEFIT_OPT;
+    }
+
+    /** EMPIRICISM or PSIONICS rolled a track other than the science die's own */
+    function hasScienceDieChoice(): bool {
+        $science = $this->getGameStateValue("science_die");
+        foreach (["science_die_empiricism", "science_die_psionics"] as $extra) {
+            $face = $this->getGameStateValue($extra);
+            if ($face && $face != $science) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function getOpponentsStartingFromLeft($player_id = null) {
@@ -8252,7 +8280,17 @@ abstract class PGameXBody extends tapcommon {
 
     function action_research_decision($track, $spot) {
         $this->checkAction("research_decision");
+        $this->userAssertTrue(
+            clienttranslate("AGE OF DISCOVERY: All players must advance on the resulting track"),
+            $track > 0 || $this->argResearch()["decline"]
+        );
         $benefit_data = $this->clearCurrentBenefit();
+        $player_id = (int) $benefit_data["benefit_player_id"];
+        if ($this->isAgeOfDiscoveryDecision($benefit_data)) {
+            // opponents go ahead of anything already pending, the roller's advance below goes ahead of them
+            $this->interruptBenefit();
+            $this->queueAgeOfDiscoveryOpponents($player_id, $track ?: (int) $this->getGameStateValue("science_die"));
+        }
         if ($track > 0) {
             // Only need to do anything if accepting advancement.
             $op1 = $this->getGameStateValue("science_die");
@@ -8282,7 +8320,6 @@ abstract class PGameXBody extends tapcommon {
                 $spot = 13;
             }
             $this->setGameStateValue("cube_choice", $spot - 1);
-            $player_id = $this->getActivePlayerId();
             $cubes = $this->dbGetCubesOnTrack($player_id, $track, $spot - 1);
             $this->userAssertTrue(totranslate("You may only advance by a single space"), count($cubes) >= 1);
             $ben = $benefit_data["benefit_type"];
@@ -10282,6 +10319,7 @@ abstract class PGameXBody extends tapcommon {
                 $res["all_advances"] += $this->getPossibleTrackChoices($res[$extra], 1, $res["cubes"]);
             }
         }
+        $res["decline"] = !$this->isAgeOfDiscoveryDecision($this->getCurrentBenefit()) || count($res["all_advances"]) == 0;
         $this->addBenefitData($res);
         return $res;
     }
@@ -13158,8 +13196,15 @@ abstract class PGameXBody extends tapcommon {
      */
     function effect_zombieBenefits($player_id) {
         foreach ($this->dbGetBenefits() as $benefit) {
+            if ($benefit["benefit_player_id"] != $player_id) {
+                continue;
+            }
+            if ($this->isAgeOfDiscoveryDecision($benefit)) {
+                // all players must advance, so the opponents do not wait on a pick that never comes
+                $this->queueAgeOfDiscoveryOpponents((int) $player_id, (int) $this->getRulesBenefit($benefit["benefit_type"], "t"));
+            }
             $civ = getReasonCiv($benefit["benefit_data"]);
-            if ($benefit["benefit_player_id"] != $player_id || !$civ || $this->getCivOwner($civ) == $player_id) {
+            if (!$civ || $this->getCivOwner($civ) == $player_id) {
                 continue;
             }
             $this->getCivilizationInstance($civ)->zombieBenefit($benefit);

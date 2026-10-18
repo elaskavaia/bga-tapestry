@@ -377,19 +377,23 @@ bugs, run log) is production only.
       [FORMAL_RULES.txt](FORMAL_RULES.txt): "the two tech cards of track space 7 are two separate
       random draws" (co-designers, QUESTIONS.txt 18) - a gain of N is N samples; draw 4 keep 1 is
       for a single pick. No clause names Age of Sail yet; add one if you agree.
-- [ ] **BGA #248665** - "pscionic effect not triggering during the age of discovery tapestry roll".
+- [x] **BGA #248665** - "pscionic effect not triggering during the age of discovery tapestry roll".
       CONFIRMED on BGA, `rules`. Table 927353515, 2 players, move 373. Options: adj=9, set=8 (FF
       only), Marriage of State removed, Renaissance removed.
-      **CONFIRMED 2026-10-18.** Test `tests/PsionicsAgeOfDiscoveryTest.php`
-      `testAgeOfDiscoveryIgnoresTheSampledTrack` (green, pinning the buggy behaviour).
-      Root cause: `effect_ageOfDiscovery` calls `rollScienceDie2` (which rolls the Psionics second
-      value into `science_die_psionics`) but queues the roller's and opponents' advances from the
-      first value only; only `action_research_decision` reads the second value.
-      Fix: when a second value exists, let the roller pick the track first, then queue the
-      roller's advance and the opponents' rows on the chosen track (likely a new benefit type).
+      **FIXED 2026-10-18 (not deployed).** The second face was rolled but every advance was queued
+      from the first. When PSIONICS or EMPIRICISM rolls a different face, `effect_ageOfDiscovery`
+      now queues the research decision row with the AoD reason; `action_research_decision` refuses
+      Decline (unless no advance is offered) and queues the opponents on the picked track after the
+      roller. A zombie roller's pending pick still advances the opponents. The client hides Decline
+      via `argResearch` `decline`. Tested in `tests/PsionicsAgeOfDiscoveryTest.php` (7 tests).
       Rules: PSIONICS "Whenever you roll a die, roll it twice and choose 1 of the 2 values that you
       rolled." AGE OF DISCOVERY "Roll the science die. All players must advance on the resulting
       track; only you gain the benefit".
+      NOTE: if the roller has no token on any rolled track they decline and the opponents advance on
+      the first face - the roller does not pick a track they cannot use. Rare (AI Singularity /
+      tech 12); veto if the pick should still apply to the opponents.
+      NOTE: the research prompt still reads "Advance (optional, benefits)" while Decline is hidden.
+      Client change not verified in Studio: please confirm Decline is gone on an AoD pick.
 
 ### Triage run log (taptest)
 

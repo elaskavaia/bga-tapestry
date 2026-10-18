@@ -1491,7 +1491,8 @@ define([
             }
           }
 
-          this.addActionButton("button_research_decline", _("Decline"), "onResearchDecision", undefined, undefined, "red");
+          if (args.decline)
+            this.addActionButton("button_research_decline", _("Decline"), "onResearchDecision", undefined, undefined, "red");
 
           // add roll
           var rolltemp = '<div class="research_icon"></div> ${verb}: ${roll}';

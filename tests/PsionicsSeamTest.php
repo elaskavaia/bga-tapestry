@@ -309,6 +309,7 @@ final class PsionicsSeamTest extends TestCase {
         $this->assertEquals(3, $args["science"]);
         $this->assertEquals(0, $args["empiricism"]);
         $this->assertEquals(0, $args["psionics"]);
+        $this->assertTrue($args["decline"]);
     }
 
     function testResearchOffersTwoTracksToASamplerWithoutEmpiricism() {
