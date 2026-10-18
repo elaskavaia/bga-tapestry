@@ -3872,19 +3872,11 @@ abstract class PGameXBody extends tapcommon {
     function dbGetCubesOnTrack($player_id, $track = null, $spot = null, $type_arg = null) {
         //$this->getCubeInfoWithFlags($player_id);
         $track_stub = $this->getTrackLocationLike($track, $spot);
-        $sql = "SELECT * FROM structure WHERE card_location LIKE '$track_stub' AND card_type='7'";
+        $cubes = $this->getStructuresSearch(BUILDING_CUBE, $type_arg, $track_stub, $player_id > 0 ? $player_id : null);
         if ($player_id < 0) {
-            $player_id = -$player_id;
-            $sql .= " AND card_location_arg!='$player_id'";
-        } elseif ($player_id) {
-            $sql .= " AND card_location_arg='$player_id'";
+            // a negative id asks for everyone else's cubes
+            $cubes = array_filter($cubes, fn($cube) => $cube["card_location_arg"] != -$player_id);
         }
-        if ($type_arg !== null) {
-            $sql .= " AND card_type_arg='$type_arg'";
-        } else {
-            $sql .= " ORDER BY card_type_arg ASC";
-        }
-        $cubes = $this->getCollectionFromDB($sql);
         foreach ($cubes as &$cube) {
             $spot = (int) getPart($cube["card_location"], 3); // tech_spot_1_3
             $cube["spot"] = $spot;

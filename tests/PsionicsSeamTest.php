@@ -338,9 +338,9 @@ final class PsionicsSeamTest extends TestCase {
     }
 
     /**
-     * The advance itself reads the cubes on the technology track with raw SQL, which the in memory
-     * model does not answer, so the case stops there. What it pins is that the sampled track got
-     * past the selection check and that the decision settled all three globals.
+     * No cube is placed on the track, so the advance itself is refused and the case stops there. What
+     * it pins is that the sampled track got past the selection check and that the decision settled
+     * all three globals.
      */
     function testTheResearchDecisionAcceptsTheSampledTrackAndClearsAllThree() {
         $game = $this->sampler();

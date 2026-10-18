@@ -7,24 +7,6 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . "/Stubs/PsionicsUT.php";
 
 class PsionicsAgeOfDiscoveryUT extends PsionicsUT {
-    /** Tracks the roller has a token on, at the start; the cube lookup is raw SQL the harness does not model. */
-    public array $tokenTracks = [1, 2, 3, 4];
-
-    function dbGetCubesOnTrack($player_id, $track = null, $spot = null, $type_arg = null) {
-        $cubes = [];
-        foreach ($this->tokenTracks as $t) {
-            if ((!$track || $t == $track) && !$spot) {
-                $cubes[] = [
-                    "card_id" => $t,
-                    "card_location" => "tech_spot_{$t}_0",
-                    "card_type_arg" => 0,
-                    "card_location_arg" => $player_id,
-                ];
-            }
-        }
-        return $cubes;
-    }
-
     /** Stands in for the roller's advance: the row it would resolve, on top of the stack. */
     function trackMovementProper($track, $spot, $change, $flags, $mandatory, $player_id) {
         $this->queueBenefitNormal(21 + $track, $player_id);
@@ -39,6 +21,9 @@ final class PsionicsAgeOfDiscoveryTest extends TestCase {
         $this->game = new PsionicsAgeOfDiscoveryUT();
         $this->game->init();
         $this->game->sample();
+        for ($track = 1; $track <= 4; $track++) {
+            $this->game->dbAddStructure(PsionicsUT::ROLLER, BUILDING_CUBE, 0, "tech_spot_{$track}_0");
+        }
     }
 
     private function playAgeOfDiscovery(int ...$faces): void {
@@ -98,7 +83,11 @@ final class PsionicsAgeOfDiscoveryTest extends TestCase {
     /** With no token to move on either track the roller declines, and the opponents still advance on the die. */
     function testAgeOfDiscoveryDeclinesWithNowhereToAdvance() {
         $game = $this->game;
-        $game->tokenTracks = [2, 4];
+        foreach ([1, 3] as $track) {
+            foreach ($game->dbGetCubesOnTrack(PsionicsUT::ROLLER, $track) as $cube) {
+                $game->dbSetStructureLocation($cube["card_id"], "hand");
+            }
+        }
         $this->playAgeOfDiscovery(3, 1);
         $game->runManager();
         $this->assertTrue($game->argResearch()["decline"]);
