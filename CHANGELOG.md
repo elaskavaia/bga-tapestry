@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-24 (v261024-2009)
+
+- Added 10 Fantasies & Futures civilizations (testing only)
+- Civilization tooltip shows rulings
+- Fixed drawn tapestry cards and space tiles visible to other players (#245659)
+- Fixed all track cubes highlighted on a choice
+- Other small fixes
+
 ## 2026-10-18 (v261018-1740)
 
 - Fixed PSIONICS with Age of Sail drawing every territory tile (#248010)
