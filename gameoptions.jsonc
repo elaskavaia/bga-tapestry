@@ -106,9 +106,9 @@
       // },
       "8": {
         // 0b1000
-        "name": "Fantasies & Futures - For Testing",
+        "name": "Fantasies & Futures (Testing)",
         "tmdisplay": "Civilation Set: Fantasies & Futures",
-        "beta": true
+        "alpha": true
       }
       // "5": { "name": "Original + Arts & Architecture" }, // 0b0101
       // "2": { // 0b0010
@@ -137,28 +137,22 @@
     "values": {
       // "0": { "name": "0 - None" },
       "1": {
-        "name": "1 - Automa the Underachiever",
-        "beta": true
+        "name": "1 - Automa the Underachiever"
       },
       "2": {
-        "name": "2 - Automa the Average",
-        "beta": true
+        "name": "2 - Automa the Average"
       },
       "3": {
-        "name": "3 - Automa the Slightly Intimidating",
-        "beta": true
+        "name": "3 - Automa the Slightly Intimidating"
       },
       "4": {
-        "name": "4 - Automa the Somewhat Awesome",
-        "beta": true
+        "name": "4 - Automa the Somewhat Awesome"
       },
       "5": {
-        "name": "5 - Automa the Definitely Awesome",
-        "beta": true
+        "name": "5 - Automa the Definitely Awesome"
       },
       "6": {
-        "name": "6 - Automa the Crusher of Dreams",
-        "beta": true
+        "name": "6 - Automa the Crusher of Dreams"
       }
     },
     "displaycondition": [
@@ -179,7 +173,6 @@
       },
       "1": {
         "name": "Yes",
-        "beta": true,
         "description": "Only affects 2 player game"
       }
     },
