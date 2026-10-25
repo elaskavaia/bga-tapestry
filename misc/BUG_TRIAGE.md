@@ -254,6 +254,15 @@ confirmed two are still OPEN on the tracker.
       defect, possibly the #183142 setup stranding class - unverified.
       NOTE: `Historians::sendHistorian` still throws untranslated `feException` for a bad token or
       tile and never checks `$pid` - out of scope here.
+      Client part FIXED 2026-10-25 (not deployed): `Invalid historian token` (studio error 731839)
+      came from `onCubeHolderClick` letting an empty Historians holder be clicked and never
+      clearing earlier clicks, so `onSelectHistorian` sent the first, empty one. Reproduced in the
+      studio both ways (empty slot alone; empty then full slot). Now empty holders ignore clicks and
+      only one holder stays selected. Client-only, no JS tests.
+      NOTE: please confirm on Studio: both repros give no error and the full slot sends.
+      NOTE: `onMystic` (~2427) collects global `.clicked`; an owner of both Historians and Mystics
+      could send a leftover historian holder as a Mystics id. Should be scoped to
+      `#civilization_13` - untested.
 
 ### Lower priority (deprecated adjustment options)
 

@@ -5012,6 +5012,9 @@ define([
         case "civAbility":
           switch (cid) {
             case 7:
+              if (!event.currentTarget.querySelector(".cube")) return;
+              dojo.query(`#civilization_7 .clicked:not(#${holder_id})`).removeClass("clicked");
+            // fallthrough
             case 13:
               dojo.toggleClass(holder_id, "clicked");
               return;
