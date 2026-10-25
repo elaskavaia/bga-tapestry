@@ -91,19 +91,33 @@ class Tapestry extends PGameXBody {
      *
      */
     function upgradeTableDb($from_version) {
-        // income buildings started carrying their spot in card_location_arg2; the sixth building
-        // of each type never had a spot to sit on and goes
-        // only players with unassigned rows: a re-run would undo an Artificers slide
-        if ($from_version <= 2610242100) {
-            foreach ($this->getObjectListFromDB("SELECT player_id FROM playerextra", true) as $player_id) {
-                $unassigned = $this->getUniqueValueFromDB(
-                    "SELECT COUNT(*) FROM structure WHERE card_location='income' AND card_location_arg='$player_id' AND card_location_arg2='0'"
-                );
-                if ($unassigned) {
-                    $this->dbAssignIncomeSpots((int) $player_id);
-                }
+        // income buildings carry their spot in card_location_arg2 since v261024-2009, whose migration
+        // and the v261025-0248 one skipped the undo copies: an undo brings back unplaced rows
+        if ($from_version <= 2610250248) {
+            $level = "CASE s.card_type";
+            $caps = [];
+            for ($track = 1; $track <= 4; $track++) {
+                $field = $this->getIncomeTrackDbColumn($track);
+                $level .= " WHEN $track THEN p.$field";
+                $caps[] = "$field = LEAST($field, 6)";
             }
-            $this->DbQuery("DELETE FROM structure WHERE card_location='income' AND card_location_arg2='0'");
+            $spot = "($level END + r.nth)";
+            // unplaced rows take level+1.. in id order, as dbAssignIncomeSpots does; the sixth building stays 0 and goes
+            $this->applyDbUpgradeToAllDB(
+                "UPDATE DBPREFIX_structure s
+                JOIN (
+                    SELECT a.card_id, COUNT(*) nth FROM DBPREFIX_structure a
+                    JOIN DBPREFIX_structure b ON b.card_location = 'income' AND b.card_location_arg2 = '0'
+                        AND b.card_location_arg = a.card_location_arg AND b.card_type = a.card_type AND b.card_id <= a.card_id
+                    WHERE a.card_location = 'income' AND a.card_location_arg2 = '0'
+                    GROUP BY a.card_id
+                ) r ON r.card_id = s.card_id
+                JOIN DBPREFIX_playerextra p ON p.player_id = s.card_location_arg
+                SET s.card_location_arg2 = IF($spot <= 6, $spot, 0)"
+            );
+            $this->applyDbUpgradeToAllDB("DELETE FROM DBPREFIX_structure WHERE card_location = 'income' AND card_location_arg2 = '0'");
+            // an unplaced level 6 track still handed out its sixth building, leaving level 7
+            $this->applyDbUpgradeToAllDB("UPDATE DBPREFIX_playerextra SET " . implode(", ", $caps));
         }
     }
 }
