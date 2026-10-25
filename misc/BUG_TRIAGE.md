@@ -111,8 +111,8 @@ deploy**. When unsure whether a tag is deployed, ask.
 history before that, so a fix commit older than 5ac2007 cannot be dated by tag - such a commit
 predates the last deploy and is therefore live.
 
-The local `prod` branch is stale (tip 2025-09-05, far behind `main`) and is NOT a deploy marker.
-Ignore it.
+`main` is the production branch; its latest tag is what runs on prod. The `prod`, `prod1` and
+`prod2` branches are inactive and NOT deploy markers. Ignore them.
 
 ## Investigation and tests
 
@@ -358,7 +358,7 @@ bugs, run log) is production only.
 - **Bug list:** https://boardgamearena.com/bugs?game=1652
 - **Studio error log:** https://studio.boardgamearena.com/studioissues?game=taptest
 - **Deploy model:** `main` deploys as taptest, so a fix is live when it is in the latest tag on
-  `main` (`git tag --merged main --sort=creatordate | tail -1`). Production tags live on `prod2`.
+  `main` (`git tag --merged main --sort=creatordate | tail -1`). Production deploys the same tags.
 
 **Taptest triage last checked:** 2026-10-18 10:24 EDT
 
