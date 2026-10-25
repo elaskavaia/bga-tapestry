@@ -71,14 +71,22 @@ final class UtilitariansAgeOfSailTest extends TestCase {
         $this->assertEquals(6, $this->handCount());
     }
 
+    /** BGA #252057: the Lighthouse is used once per turn, the confirm screen included. */
     function testLighthouseOncePerTurn() {
         $game = $this->game;
         for ($i = 0; $i < 4; $i++) {
             $game->addCard(CARD_TERRITORY, "hand", PsionicsUT::ROLLER);
         }
         $this->playLighthouse();
-        // documents buggy behavior for BGA #252057: nothing records the Lighthouse use, so it is
-        // playable again in the same turn; flips to false when the fix lands
+        $this->assertEquals(2, $this->handCount());
+        $this->assertFalse($game->ownsLighthouseAndCanPlayIt(PsionicsUT::ROLLER));
+
+        $spot_marker = $game->addMarker(PsionicsUT::ROLLER, "tech_spot_1_1");
+        $game->effect_endOfTurn(PsionicsUT::ROLLER);
+        $this->assertEquals("hand", $game->getStructureInfoById($spot_marker)["card_location"]);
+        $this->assertFalse($game->ownsLighthouseAndCanPlayIt(PsionicsUT::ROLLER));
+
+        $game->effect_startOfTurn(PsionicsUT::ROLLER);
         $this->assertTrue($game->ownsLighthouseAndCanPlayIt(PsionicsUT::ROLLER));
     }
 }

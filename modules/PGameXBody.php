@@ -9452,6 +9452,10 @@ abstract class PGameXBody extends tapcommon {
             $this->systemAssertTrue("player does not have Lighthouse ability activated", $bThrow == false); // NON-I18N
             return false;
         }
+        if ($this->getStructureInfoSearch(BUILDING_MARKER, null, "civ_39_5", $player_id)) {
+            $this->userAssertTrue(clienttranslate("Lighthouse has already been used this turn"), $bThrow == false);
+            return false;
+        }
         $items = $this->getCardsInHand($player_id, CARD_TERRITORY);
         if (count($items) < 2) {
             $this->userAssertTrue(self::_("You do not have enough Territory Tiles"), $bThrow == false);
@@ -9470,6 +9474,8 @@ abstract class PGameXBody extends tapcommon {
 
             // Lighthouse: Once on each of your advancement turns you may spend 2 [TERRITORY TILE] to gain [ANY REOURCE]
             if ($this->ownsLighthouseAndCanPlayIt($player_id, true)) {
+                // effect_startOfTurn sends the marker back
+                $this->dbSetStructureLocation($this->addMarker($player_id, "hand"), "civ_39_5");
                 $curr = $this->getCurrentBenefit();
                 $this->interruptBenefit();
                 $this->queueBonus(BE_TERRITORY, 2, BE_ANYRES, ORDER_NORMAL, $player_id);
@@ -12151,13 +12157,11 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("coal_baron", 0);
         $this->setGameStateValue("selected_space_tile", 0);
         $this->checkDictatorship($player_id);
-        $marker = CUBE_MARKER;
-        $turn_markers = $this->getObjectListFromDB("SELECT * FROM structure WHERE card_type='7' AND card_type_arg='$marker'");
-        $turn_markers += $this->getObjectListFromDB("SELECT * FROM structure WHERE card_type='8'");
-        if (count($turn_markers) > 0) {
-            foreach ($turn_markers as $marker) {
-                $structure_id = $marker["card_id"];
-                $this->dbSetStructureLocation($structure_id, "hand");
+        $turn_markers = $this->structures->getCardsOfType(BUILDING_CUBE, CUBE_MARKER) + $this->structures->getCardsOfType(BUILDING_MARKER);
+        foreach ($turn_markers as $marker) {
+            // the Lighthouse is still usable on the confirm screen, its marker waits for effect_startOfTurn
+            if ($marker["location"] != "hand" && $marker["location"] != "civ_39_5") {
+                $this->dbSetStructureLocation($marker["id"], "hand");
             }
         }
         if ($this->getGameStateValue("income_turn")) {
@@ -12171,6 +12175,10 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("cube_choice", -1);
         $this->setGameStateValue("coal_baron", 0);
         $this->setGameStateValue("selected_space_tile", 0);
+        $lighthouse = $this->getStructureInfoSearch(BUILDING_MARKER, null, "civ_39_5", $player_id);
+        if ($lighthouse) {
+            $this->dbSetStructureLocation($lighthouse["card_id"], "hand");
+        }
         $turns = $this->getPlayerTurn($player_id);
         return $turns;
     }
