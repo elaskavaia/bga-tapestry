@@ -21,12 +21,27 @@ OPEN FROM 2026-10-25 (income spot incident, BGA #252057) - review feedback on bd
 - [ ] [debt/P4] Damage from the broken window that no migration can undo: VPincomeStructure counted
       one building short per type (negative at level 1), Traders read spot 0 (PHP warning, opponent
       got nothing). Only tables that did those between v261024-2009 and v261025-0248.
-- [ ] [bug/P1] BGA #252057 fixes parked on branch `park/bga-252057`, not ready to deploy: 96f1439 (Age
-      of Sail redraws on every re-entered explore) and c27b72e (Lighthouse usable more than once per
-      turn). Their review follow-ups are in that branch's TODO.md. Rebase onto main, finish, then
-      set the report to Waiting for deploy.
-- [ ] [rules/P3] Typo in player-visible text: Lighthouse "[ANY REOURCE]" in the UTILITARIANS civ
-      description in material.inc.php.
+- [x] [bug/P1] BGA #252057 FIXED on main (a55c572..1e679bf), not deployed yet. Age of Sail no longer
+      redraws on a re-entered explore. The Lighthouse is once per turn: the turn now starts in
+      stTransition / stFinishSetup instead of on every entry into playerTurn (a BE_RESUME re-entry
+      also double counted turns_total, which Dictatorship and Relentless compare), and a marker on a
+      slot with material `"once" => "turn"` means used this turn, cleared at the owner's next turn
+      start. Set the report to Waiting for deploy, then Fixed after the release.
+- [ ] [ux/P2] Check the Lighthouse `ability_used` client change on Studio (not browser verified):
+      after a use the cube is not highlighted or clickable, it comes back at the owner's next turn,
+      and how the dashed marker looks on the slot.
+- [ ] [rules/P3] Urban Planners: the activated ability used from playerTurn (state 13) jumps to state
+      18; with an empty stack the turn seems to end without the advance/income choice. Unverified.
+- [ ] [rules/P4] Merfolk in extended play using the Lighthouse from state 13 would re-run
+      startExtendedTurn through the BE_RESUME re-entry. Pre-existing, unverified combination.
+- [x] [ui-temp/P4] WONT FIX: the Lighthouse marker stays on a finished player's mat. Clearing it at
+      finish would make the dead player's Lighthouse look usable again; it correctly reads as used.
+- [x] [rules/P3] FIXED (db51a9a): Lighthouse "[ANY REOURCE]" typo. Existing translations of that
+      title are lost.
+- [ ] [debt/P3] Remove the deploy-transition branch in the BE_RESUME (201) handler from 1e679bf: it
+      starts the turn when `getPlayerTurn == 0`, only for a table caught resolving setup rows by
+      the deploy that moved the turn start into stTransition / stFinishSetup. Drop it one or two
+      releases after that deploy, once no table can still be in setup.
 
 P1 - MUST FIX BEFORE THE FF DEPLOY
 
