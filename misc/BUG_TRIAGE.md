@@ -148,120 +148,62 @@ confirmed two are still OPEN on the tracker.
 
 ### Priority: Adjustment Civilization Pack (adj=8), plus anything proven to hit it
 
-- [ ] **BGA #183142** - "Islanders gained exploration tiles after the opportunity to use civ
-      ability". OPEN on BGA, 11 votes, `rules`. Table 726016713, 5 players, dump state 15 move 9,
-      created 2025-09-06. Options: adj=8 (Pack), set=7 (All: Original + PP + AA), Marriage of State
-      removed, Renaissance removed.
-      Reporter: prompted to explore on the Islanders mat at the start of income turn 1 _before_ being
-      given the 4 starting territory tiles; expects the 4 tiles first.
-      **CONFIRMED 2026-08-26 (code ordering only - see the caveat).** Test
-      `tests/IslandersTest.php`, method
-      `testIslandersIncomeTurn1TriggerJumpsAheadOfStartTiles` - green, pinning the buggy behaviour.
-      Verified here: 2 tests, 7 assertions, OK.
-      Root cause, and it is **not Islanders-specific** - Islanders just exposes it. `setupCiv` calls
-      `interruptBenefit()` at [PGameXBody.php:10503](../modules/PGameXBody.php#L10503) before queuing
-      the civ's `start_benefit`, and `interruptBenefit` is global:
-      `UPDATE benefit SET benefit_prerequisite = benefit_prerequisite + 1`
-      ([:6241](../modules/PGameXBody.php#L6241)). `stFinishSetup` runs `setupCiv` once per player, so
-      every later player's setup pushes every earlier player's start rows one prerequisite deeper.
-      `BE_RESUME` is then queued after the loop at prerequisite 0
-      ([:10475](../modules/PGameXBody.php#L10475)). `getCurrentBenefit()` pops
-      `ORDER BY benefit_prerequisite, benefit_id` ([:9189](../modules/PGameXBody.php#L9189)), and
-      `awardBenefits` case 201 does `clearCurrentBenefit(); jumpToState(13); return false`
-      ([:1897](../modules/PGameXBody.php#L1897)), which ends the drain. **So setup finishes with the
-      start benefits of every player except the last one processed still on the stack.** If such a
-      player is the randomly chosen starting player, their income turn 1 calls
-      `queueEraCivAbilities()` first ([:3891](../modules/PGameXBody.php#L3891)), inserting the civ
-      trigger at prerequisite 0 - ahead of their own stranded tiles. That is literally the report
-      title.
-      Repro window is narrow: the Islanders player must be the starting player AND not last in the
-      `setupCiv` loop. If anyone else acts first, that turn's end-of-turn drain flushes the stranded
-      rows and the bug disappears. (Every player's first turn is an income turn per
-      [RULES.md](RULES.md) Player setup - "Each player's first turn is an income turn" - so that
-      condition is automatic, not a third constraint.)
-      **This is a class of bug.** Verified in material: **ADVISORS** has
-      `start_benefit => ["m" => 3, "g" => BE_TAPESTRY]` with `income_trigger@a8` from=1, and
-      **HISTORIANS** has `start_benefit@a4a8 => [BE_TERRITORY]` with `income_trigger@a4a8p4p5` from=1
-      (4-5 players). Both have the same collision under the Pack. Fix the class, not the civ.
-      Proposed fix: after the `setupCiv` loop in `stFinishSetup`, flatten the stack
-      (`UPDATE benefit SET benefit_prerequisite = 0`) before queuing `BE_RESUME`, so setup rows drain
-      in insertion order and `BE_RESUME` - highest `benefit_id` - pops last. Narrower alternative:
-      skip `interruptBenefit()` in `setupCiv` when `$start` is true, since that interrupt exists for
-      the midgame path (a civ gained mid-turn must cut ahead of the current stack) and is actively
-      harmful during setup. **Confirm that reading of `interruptBenefit` before committing to it.**
-      There is no `Islanders.php` in [modules/civs/](../modules/civs/) - it falls back to
-      `BasicCivilization`, so nothing sequences setup against the income trigger. `slots` and
-      `midgame_setup` are irrelevant here (they feed the midgame path).
-      **Caveat on the evidence - weaker than the other two confirmations.** The vendored stubs run no
-      SQL (`DbQuery` is a no-op), so the test cannot exercise the benefit table end to end. It
-      overrides `interruptBenefit()` and `benefitSingleEntry()` with in-memory equivalents and then
-      calls the _real_ `setupCiv` and `queueEraCivAbility`, so the sequencing decisions come from
-      production code - but the final step ("`BE_RESUME` pops and ends the drain, stranding the
-      rest") is established by reading `awardBenefits` case 201 and `stBenefitManager`, not by
-      executing them. Those lines were re-read and confirmed by hand. Treat this as strong evidence,
-      not the same grade of proof as a studio repro.
-      Rules half: **still OPEN.** The only in-repo source is card text transcribed into
-      implementation data - `CIV_ISLANDERS` `description@a8` says "Start with 4 territory tiles in
-      your supply." and "<b>At the beginning of your income turns (1-5)</b>, you may explore 1 of the
-      hexes on this mat". "Start with" reads naturally as setup-time and therefore before income turn
-      1, but that is a reading of card text, not a ruling. Nothing in
-      [FORMAL_RULES.txt](FORMAL_RULES.txt) or [TODO.md](TODO.md) settles it. Maintainer to decide.
-      Aside: the reported dump state 15 (`playTapestryCard`) cannot be income turn 1 - tapestry play
-      is only queued for income turns 2-4 ([:3895](../modules/PGameXBody.php#L3895)) - so the dump
-      was taken after the incident. The reporter's own pointer is "before move #10".
-      No fix commit.
+- [x] **BGA #183142** - "Islanders gained exploration tiles after the opportunity to use civ
+      ability". OPEN on BGA, 11 votes, `rules`. Table 726016713, 5 players, adj=8, set=7.
+      **FIXED 2026-10-25 (not deployed)** in 014fd29, together with #214486: the start rows of every
+      civ but the last one set up were stranded behind `BE_RESUME`, so a starting player with an
+      income turn 1 trigger got it before their start benefits. `stFinishSetup` now queues
+      `BE_RESUME` via `queueFirstTurn` one prerequisite below the deepest setup row; `setupCiv` and
+      `interruptBenefit` unchanged, setup prompt order unchanged. Tested in `tests/IslandersTest.php`
+      `testIslandersStartTilesArriveBeforeIncomeTurn1Trigger` (Islanders 4 tiles, Traders 2, trigger
+      on top). Also covers ADVISORS (`start_benefit` tapestry, `income_trigger@a8` from 1) - untested.
+      NOTE: visible change in every game: all players' start-benefit prompts now resolve before the
+      starting player's first turn, not only the last civ's. Not checked in Studio.
+      NOTE: rules half was never ruled ("Start with 4 territory tiles" read as setup-time).
 
-- [ ] **BGA #252057** - "A conflict appeared between my tapestry card and my civilisation, causing
-      an infinite loop of action". OPEN on BGA, 2 votes, `rules`. Table 935891363, 2 players, replay
-      move 235. Options: adj=8 (Pack), set=7 (All), Marriage of State removed, Renaissance removed.
-      UTILITARIANS with the Lighthouse slot (`civ_39_5`) plus AGE OF SAIL: using the Lighthouse
-      mid-explore redraws 3 tiles each time and can be repeated, so the player farmed every
-      resource to 8.
-      **CONFIRMED 2026-10-24.** Test `tests/AgeOfSailLighthouseLoopTest.php`, method
-      `testLighthouseDuringExploreRedrawsAgeOfSailAndRepeats` - green, pinning the buggy
-      behaviour (in-memory benefit stack; the Lighthouse bonus row is resolved by hand, not through
-      its UI handler). Two independent defects, both present in v260916-0116 and v261024-2009:
-      (a) `ageOfSailCheck` (PGameXBody.php ~2970) draws and leaves the explore row unmarked in the
-      non-sampler branch, so any interrupt that returns to the same row draws 3 again. Fix: put the
-      `sail` mark on the row on the first draw, as the sampler branch already does.
-      (b) Lighthouse once-per-turn is never tracked: `ownsLighthouseAndCanPlayIt` /
-      `action_activatedAbility` (~9449-9484) only check turn, cube on `civ_39_5` and 2 tiles. Fix:
-      record the use per turn and check it there.
-      Rules: card text only, no ruling in RULES.md or FORMAL_RULES.txt. Lighthouse
-      (material.inc.php civ text): "Once on each of your advancement turns you may discard 2
-      [TERRITORY TILE] to gain [ANY REOURCE]". AGE OF SAIL: "THIS ERA: Whenever you explore, draw a
-      total of 3 Territory tiles." Open: the "advancement turns" limit is not enforced either
-      (usable on an income turn?) - untested. (a) likely also fires for other mid-explore
-      activated abilities - untested.
-
-- [x] **BGA #252235** - "Historians: 1st turn in 5 player game, unable to give any player any token
-      or tile". OPEN on BGA, 0 votes, `action`. Table 936744922, 5 players. Options: adj=8 (Pack),
-      set=7 (All), Marriage of State kept, Renaissance kept. Same crash as the later comments on
-      **#138733** (17 votes, adj=4, 4 players, tables 849662220, 916856312, 922955622, 929278523,
-      933059617, 936272901); #245071 is another. Likely duplicate of #138733 - not marked yet.
-      Studio error 725998 `This transition (benefit) is impossible at this state (36)` from
-      `sendHistorian`: 78 events / 14 users since 10/15, predates the Oct 24-25 deploys.
-      **FIXED 2026-10-25 (not deployed).** The action called `nextState('benefit')` twice, once in
-      `Historians::sendHistorian` and once in `PGameXBody::sendHistorian`; the second ran from
-      wherever state 18 had moved on to, 36 on an empty stack. The civ method no longer
-      transitions, matching `sendInventor`. Tested in `tests/HistoriansSendTest.php` (real local
-      MySQL): one transition to 18, token moved to the opponent, tile discarded.
-      NOTE: on income turns 2-4 the second call likely re-entered `playTapestryCard` (15) and ran
-      `stTapestryCard` twice instead of crashing - also gone now, but never reproduced.
-      NOTE: #138733's original claim (no territory tile at income turn 1) may be a separate
-      defect, possibly the #183142 setup stranding class - unverified.
-      NOTE: `Historians::sendHistorian` still throws untranslated `feException` for a bad token or
-      tile and never checks `$pid` - out of scope here.
-      Client part FIXED 2026-10-25 (not deployed): `Invalid historian token` (studio error 731839)
-      came from `onCubeHolderClick` letting an empty Historians holder be clicked and never
-      clearing earlier clicks, so `onSelectHistorian` sent the first, empty one. Reproduced in the
-      studio both ways (empty slot alone; empty then full slot). Now empty holders ignore clicks and
-      only one holder stays selected. Client-only, no JS tests. Verified on Studio: an empty holder
-      does not select and nothing reaches the server; empty then full keeps only the full one,
-      which sends.
+- [ ] **Historians client, no BGA id** - studio error 731839 `Invalid historian token`.
+      **FIXED 2026-10-25 (not deployed)** in 52459b2: `onCubeHolderClick` let an empty Historians
+      holder be clicked and never cleared earlier clicks, so `onSelectHistorian` sent the first,
+      empty one. Now empty holders ignore clicks and only one holder stays selected. Client-only,
+      no JS tests; verified on Studio (empty holder alone, empty then full).
       NOTE: `onMystic` (~2427) collects global `.clicked`; an owner of both Historians and Mystics
       could send a leftover historian holder as a Mystics id. Should be scoped to
       `#civilization_13` - untested.
+      NOTE: `Historians::sendHistorian` still throws untranslated `feException` for a bad token or
+      tile and never checks `$pid`.
+
+- [ ] **BGA #168202** - "Utilitarians are able to use the Lighthouse effect during their Income
+      turn". OPEN on BGA, 1 vote, `rules`. Not triaged. The card says "Once on each of your
+      advancement turns"; `ownsLighthouseAndCanPlayIt` checks once per turn (v261025-1948, #252057)
+      but not the turn kind. Open rules question, no ruling in RULES.md or FORMAL_RULES.txt.
+
+- [x] **BGA #214486** - "Historians should start with a territory tile but it was not given to this
+      player". CONFIRMED on BGA 2026-10-25 as the canonical report; Duplicate of it: #246956, #196736,
+      #195672, #193150, #177610, #171977, #160624. 4-5 players, adj 8/9 (and removed 4), Historians
+      as starting player.
+      **FIXED 2026-10-25 (not deployed)** in 014fd29 - same fix as #183142 above. Tested in
+      `tests/HistoriansSendTest.php` `testStartTileArrivesBeforeTheIncomeTurn1Send` (4p/5p x adj 4, 8,
+      9, real MySQL): tile in hand, no territory row left behind the civ ability.
+      NOTE: #246956 says "official adjusted rules"; if that is option 1 it is not this bug.
+
+- [ ] **Historians sending to Automa / Shadow Empire** - BGA #208143 (OPEN; #209034 by the same
+      reporter marked Duplicate of it) and #88718 (OPEN, 6 votes, solo, Historians gained midgame do
+      not give the tokens away; also a "negative score" complaint). Not triaged.
+
+- [ ] **Unblock in civAbility, follow-up of BGA #202072** - `action_unblock` (PGameXBody.php ~9420)
+      reads `$this->gamestate->state()["transitions"]` after `clearCurrentBenefit`; in state 14 that
+      reloads `argCivAbility`, which asserts "missing benefit" when the civ row was the last on the
+      stack (midgame civ gain, landmark trigger), so Unblock rolls back. Setup is safe (BE_RESUME
+      underneath). **CONFIRMED 2026-10-25**, pinned green in `tests/UtilitariansTest.php`
+      `testUnblockLastCivBenefitStillHitsMissingBenefit` (flips when fixed); safe case
+      `testUnblockSetupCivBenefitWithResumeRowBelow`. Proposed fix: a transitions accessor that does
+      not reload args, or always `jumpToState(18)` after clearing (every unblockable state returns
+      to 18). Low severity: only Unblock is affected; the normal civ action works since 283c361.
+      NOTE: unverified that the real framework's `isMultiactiveState()` does not reload args (the
+      stubs model it that way).
+      NOTE: unrelated lead, untested - on adj=8 `queueEraCivAbility` fires at income 2 for any
+      Utilitarians owner; a midgame owner has no landmark on `civilization_39`, so ~5488 would read
+      a null structure. Not checked whether the civ can be gained before income 2.
 
 ### Lower priority (deprecated adjustment options)
 
@@ -418,3 +360,26 @@ Short log of each run: date, reports touched, outcome.
   Historians state 36 (1 of 78 events on 1540; #252235's table alone has ~15 retries)
   and `Invalid historian token` (2 of 7 on 1540, unrelated to that tag's diff). Reports touched:
   #252235 and #138733 (Historians, tracked above). No status changes, no comments.
+- **2026-10-25 16:10 EDT** - Post-deploy check of `v261025-1948` (marker NOT bumped): no new error
+  on 1948 except 2 single-event `DatabaseTimeOutException` in untouched code (BGA side), state 36
+  silent since before the deploy, no report activity. Closed as Fixed (BGA default template):
+  #252057 with Lighthouse duplicates #151628 and #198766; #252235 with state 36 duplicates
+  #250595, #245071, #241249, #231672, #197005, #193285, #191870 (each quotes the error).
+  #138733 also Fixed (votes are the crash; its original no-tile claim is unverified). #210991 is a
+  reporter's own "you can close this", untouched. #202072 (27 votes) Fixed: 283c361 shipped in
+  v260826-2103 and every comment predates it; a regression-check agent is investigating. #252054
+  Fixed on a bet: no server error for its table, filed minutes before the v261024-2009 client
+  errors that v261025-0248 fixed - timing only, unproven.
+- **2026-10-25 16:40 EDT** - Historians consolidation, all open reports read (31 open, 33 already
+  auto-closed "not updated" left alone). Fixed (BGA default template): the double-transition send
+  crash in v261025-1948 landing on state 36, 20 or 29 - #199906, #244247, #235432, #213638, #190850,
+  #189334, #185663, #183478 (quote the error), and #245405, #220533, #183196, #203747, #197023,
+  #246816, #204760, #193742, #193415, #186281, #203142, #204833 (same send-time error, no exact
+  text); the midgame-benefits bug fixed in v260826-2103 - #203108, #220995, #200225, #191982.
+  English translations posted first on #244247, #235432, #213638. #209034 Duplicate of #208143.
+  #210890 Not a bug (late midgame Historians cannot be discarded; card text quoted). Left open:
+  the no-tile cluster and Automa/Shadow (tracked above), #223277 (no error, cannot pick a player -
+  maybe the undeployed client slot fix), #195898 (Coal Baron, state 20, no Historians mention).
+- **2026-10-25 16:55 EDT** - No-tile cluster proven by the investigation agent (tests cherry-picked
+  as aec06b3). #214486 set Confirmed (BGA default template) as canonical; #246956, #196736, #195672,
+  #193150, #177610, #171977, #160624 marked Duplicate of it.
