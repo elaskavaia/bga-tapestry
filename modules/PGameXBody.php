@@ -2963,27 +2963,24 @@ abstract class PGameXBody extends tapcommon {
     }
 
     /**
-     * AGE OF SAIL draws 3 territory tiles on every explore. A sampler's draws are keep rows that must
-     * resolve before the explore, so the explore goes back on the stack behind them, marked so it
-     * does not draw again. True when the explore was put back that way.
+     * AGE OF SAIL draws 3 territory tiles on every explore. The explore goes back on the stack marked
+     * so it does not draw again when re-entered: behind a sampler's keep rows, or after an ability
+     * used mid-explore such as the Lighthouse. True when the explore was put back that way.
      */
     function ageOfSailCheck($player_id, int $ben, int $count, string $reason): bool {
         $drawn_mark = "sail";
         if (!$this->isTapestryActive($player_id, TAP_AGE_OF_SAIL) || getReasonPart($reason, 3) === $drawn_mark) {
             return false;
         }
-        $sampled = $this->getSampleRow($player_id, CARD_TERRITORY) != 0;
-        if ($sampled) {
-            // straight back on the stack: effect_onQueueBenefit already saw this explore when it was queued
-            if ($count > 1) {
-                $this->interruptBenefit();
-                $this->benefitSingleEntry("standard", $ben, $player_id, $count - 1, $reason);
-            }
+        // straight back on the stack: effect_onQueueBenefit already saw this explore when it was queued
+        if ($count > 1) {
             $this->interruptBenefit();
-            $this->benefitSingleEntry("standard", $ben, $player_id, 1, $this->withReasonDataArg($reason, $drawn_mark));
+            $this->benefitSingleEntry("standard", $ben, $player_id, $count - 1, $reason);
         }
+        $this->interruptBenefit();
+        $this->benefitSingleEntry("standard", $ben, $player_id, 1, $this->withReasonDataArg($reason, $drawn_mark));
         $this->awardRandomCard($player_id, 3, CARD_TERRITORY, reason_tapestry(TAP_AGE_OF_SAIL));
-        return $sampled;
+        return true;
     }
 
     function pleaForAid() {

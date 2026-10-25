@@ -20,6 +20,11 @@ class PsionicsUT extends DiceUT {
         $this->upgraded[] = (int) $card_id;
     }
 
+    /** ROLLER is seat 1, the same id as PLAYER_AUTOMA, which would explore at random instead. */
+    function awardBenefitsAutoma($player_id, $ben, $count = 1, $reason = "") {
+        return false;
+    }
+
     function sample(int $player_id = self::ROLLER): void {
         $this->giveCiv($player_id, CIV_PSIONICS);
     }

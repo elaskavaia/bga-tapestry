@@ -13,11 +13,6 @@ class PsionicsAgeOfSailUT extends PsionicsUT {
             : null;
     }
 
-    /** ROLLER is seat 1, the same id as PLAYER_AUTOMA, which would explore at random instead. */
-    function awardBenefitsAutoma($player_id, $ben, $count = 1, $reason = "") {
-        return false;
-    }
-
     function getExplorationTargets($anywhere = false, $player_id = null) {
         return ["0_0"];
     }
