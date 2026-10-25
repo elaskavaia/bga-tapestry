@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-25 (v261025-1948)
+
+- Fixed Utilitarians Lighthouse usable many times per turn, together with Age of Sail (#252057)
+- Fixed Historians unable to send a historian at the start of an income turn (#252235)
+
 ## 2026-10-25 (v261025-1540)
 
 - Fixed game crashing after an undo in games started before the last update
