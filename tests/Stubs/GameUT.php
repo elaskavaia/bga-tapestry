@@ -117,6 +117,10 @@ class GameUT extends Tapestry {
         $this->stats[$player_id][$name] = $value;
     }
 
+    function getStat($name, $player_id = null): int {
+        return (int) ($this->stats[$player_id][$name] ?? 0);
+    }
+
     /** The framework stub reports no stats at all, so dbIncStatChecked would reject every one. */
     function getStatTypes() {
         static $stats_type = null;

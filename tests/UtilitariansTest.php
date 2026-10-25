@@ -135,4 +135,68 @@ final class UtilitariansTest extends TestCase {
             $this->assertEquals("civ_39_1", $game->getCivSlotWithValue(CIV_UTILITARIENS, "lm", 10));
         }
     }
+
+    /** Player 1 on their 3rd turn with an advance to take, Lighthouse active, 4 territory tiles in hand. */
+    private function lighthouseGame(): UtilitariansUT {
+        $game = $this->game(8);
+        $game->giveCiv(1, CIV_UTILITARIENS);
+        $game->addCubeAt(1, "civ_39_5");
+        for ($i = 0; $i < 4; $i++) {
+            $game->addCard(CARD_TERRITORY, "hand", 1);
+        }
+        $game->addCubeAt(1, "tech_spot_1_0");
+        $game->setResources(1, 5, 5, 5, 5);
+        $game->setStat(3, "turns_total", 1);
+        $game->gamestate->jumpToState(13);
+        return $game;
+    }
+
+    /** Use the Lighthouse and resolve its bonus by hand: discard 2 tiles, leaving the resume row. */
+    private function useLighthouse(GameUT $game): void {
+        $game->action_activatedAbility("civ_39_5", null);
+        $bonus = $game->benefitQueue()[0];
+        $this->assertEquals("bonus", $bonus["benefit_category"]);
+        foreach (array_slice(array_keys($game->getCardsInHand(1, CARD_TERRITORY)), 0, 2) as $card_id) {
+            $game->effect_discardCard($card_id, 1);
+        }
+        $game->benefitCashed($bonus["benefit_id"]);
+    }
+
+    /** BGA #252057: the Lighthouse is used once per turn, the confirm screen included. */
+    function testLighthouseOncePerTurn() {
+        $game = $this->lighthouseGame();
+        $this->useLighthouse($game);
+        $this->assertFalse($game->ownsLighthouseAndCanPlayIt(1));
+
+        $spot_marker = $game->addMarker(1, "tech_spot_1_1");
+        $game->effect_endOfTurn(1);
+        $this->assertEquals("hand", $game->getStructureInfoById($spot_marker)["card_location"]);
+        $this->assertFalse($game->ownsLighthouseAndCanPlayIt(1));
+
+        $game->effect_startOfTurn(1);
+        $this->assertTrue($game->ownsLighthouseAndCanPlayIt(1));
+    }
+
+    /** BGA #252057: the resume row re-enters playerTurn, which is not the start of a new turn. */
+    function testLighthouseResumeDoesNotStartTheTurnAgain() {
+        $game = $this->lighthouseGame();
+        $this->useLighthouse($game);
+        $game->stPlayerTurn();
+        $this->assertFalse($game->ownsLighthouseAndCanPlayIt(1));
+        $this->assertEquals(3, $game->getPlayerTurn(1));
+    }
+
+    /** BGA #252057: the turn starts once, in the transition to the player, which frees the Lighthouse. */
+    function testTransitionStartsTheNextTurnOnce() {
+        $game = $this->lighthouseGame();
+        $this->useLighthouse($game);
+        $game->setGameStateValue("current_player_turn", 2);
+        $game->stTransition();
+        $this->assertEquals(1, $game->getActivePlayerId());
+        $this->assertEquals(4, $game->getPlayerTurn(1));
+        $this->assertTrue($game->ownsLighthouseAndCanPlayIt(1));
+
+        $game->stPlayerTurn();
+        $this->assertEquals(4, $game->getPlayerTurn(1));
+    }
 }

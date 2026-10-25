@@ -11405,6 +11405,7 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("current_player_turn", $active_player);
         $this->setGameStateValue("starting_player", $active_player);
         $this->notifyWithName("message", clienttranslate('${player_name} is starting player'), [], $active_player);
+        $this->effect_startOfTurn($active_player);
         $this->prepareUndoSavepoint();
         $this->queueBenefitNormal(BE_RESUME, $active_player);
         $this->gamestate->nextState("next");
@@ -11884,6 +11885,7 @@ abstract class PGameXBody extends tapcommon {
         } else {
             $this->gamestate->changeActivePlayer($player_id);
             $this->giveExtraTime($player_id);
+            $this->effect_startOfTurn($player_id);
             $this->prepareUndoSavepoint(true);
             $this->notifyAllPlayers("ack", "", []);
             $this->gamestate->nextState("next");
@@ -12034,9 +12036,10 @@ abstract class PGameXBody extends tapcommon {
         return true;
     }
 
+    /** Also re-entered mid-turn by BE_RESUME, so the turn itself is started by stTransition and stFinishSetup. */
     function stPlayerTurn() {
         $player_id = $this->getActivePlayerId();
-        $turn = $this->effect_startOfTurn($player_id);
+        $turn = $this->getPlayerTurn($player_id);
         // If first turn, must take income
         if ($turn == 1) {
             $this->takeIncomeAuto(true); // Auto income for in first turn
