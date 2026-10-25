@@ -136,6 +136,16 @@ final class UtilitariansTest extends TestCase {
         }
     }
 
+    /** Only the Lighthouse slot is marked activatable in material; other civ slots and spots are not. */
+    function testActivatableSlot() {
+        $game = $this->game(8);
+        $this->assertTrue($game->isActivatableSlot("civ_39_5"));
+        $this->assertFalse($game->isActivatableSlot("civ_39_4"));
+        $this->assertFalse($game->isActivatableSlot("civilization_25"));
+        $this->assertFalse($game->isActivatableSlot("tech_spot_1_1"));
+        $this->assertFalse($game->isActivatableSlot("hand"));
+    }
+
     /** Player 1 on their 3rd turn with an advance to take, Lighthouse active, 4 territory tiles in hand. */
     private function lighthouseGame(): UtilitariansUT {
         $game = $this->game(8);

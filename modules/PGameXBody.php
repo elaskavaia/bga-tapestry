@@ -9442,6 +9442,23 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
+    /** A civ slot its owner clicks to use once per turn; a marker of the owner on it means used this turn. */
+    function isActivatableSlot(string $location): bool {
+        if (!str_starts_with($location, "civ_")) {
+            return false;
+        }
+        $slots = $this->getRulesCiv((int) getPart($location, 1), "slots", []);
+        return ($slots[(int) getPart($location, 2, true)]["cl"] ?? "") == "activatable";
+    }
+
+    function markAbilityUsed(int $player_id, string $slot): void {
+        $this->dbSetStructureLocation($this->addMarker($player_id, "hand"), $slot);
+    }
+
+    function isAbilityUsed(int $player_id, string $slot): bool {
+        return $this->getStructureInfoSearch(BUILDING_MARKER, null, $slot, $player_id) != null;
+    }
+
     function ownsLighthouseAndCanPlayIt($player_id, $bThrow = false) {
         if (!$this->hasCiv($player_id, CIV_UTILITARIENS)) {
             $this->systemAssertTrue("player does not have Utilitaties", $bThrow == false); // NON-I18N
@@ -9451,7 +9468,7 @@ abstract class PGameXBody extends tapcommon {
             $this->systemAssertTrue("player does not have Lighthouse ability activated", $bThrow == false); // NON-I18N
             return false;
         }
-        if ($this->getStructureInfoSearch(BUILDING_MARKER, null, "civ_39_5", $player_id)) {
+        if ($this->isAbilityUsed($player_id, "civ_39_5")) {
             $this->userAssertTrue(clienttranslate("Lighthouse has already been used this turn"), $bThrow == false);
             return false;
         }
@@ -9473,8 +9490,7 @@ abstract class PGameXBody extends tapcommon {
 
             // Lighthouse: Once on each of your advancement turns you may spend 2 [TERRITORY TILE] to gain [ANY RESOURCE]
             if ($this->ownsLighthouseAndCanPlayIt($player_id, true)) {
-                // effect_startOfTurn sends the marker back
-                $this->dbSetStructureLocation($this->addMarker($player_id, "hand"), "civ_39_5");
+                $this->markAbilityUsed($player_id, "civ_39_5");
                 $curr = $this->getCurrentBenefit();
                 $this->interruptBenefit();
                 $this->queueBonus(BE_TERRITORY, 2, BE_ANYRES, ORDER_NORMAL, $player_id);
@@ -12160,8 +12176,8 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("selected_space_tile", 0);
         $this->checkDictatorship($player_id);
         foreach ($this->structures->getCardsOfType(BUILDING_MARKER) as $marker) {
-            // the Lighthouse is still usable on the confirm screen, its marker waits for effect_startOfTurn
-            if ($marker["location"] != "hand" && $marker["location"] != "civ_39_5") {
+            // abilities are still usable on the confirm screen, so their markers wait for effect_startOfTurn
+            if ($marker["location"] != "hand" && !$this->isActivatableSlot($marker["location"])) {
                 $this->dbSetStructureLocation($marker["id"], "hand");
             }
         }
@@ -12176,9 +12192,10 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("cube_choice", -1);
         $this->setGameStateValue("coal_baron", 0);
         $this->setGameStateValue("selected_space_tile", 0);
-        $lighthouse = $this->getStructureInfoSearch(BUILDING_MARKER, null, "civ_39_5", $player_id);
-        if ($lighthouse) {
-            $this->dbSetStructureLocation($lighthouse["card_id"], "hand");
+        foreach ($this->structures->getCardsOfType(BUILDING_MARKER) as $marker) {
+            if ($marker["location_arg"] == $player_id && $this->isActivatableSlot($marker["location"])) {
+                $this->dbSetStructureLocation($marker["id"], "hand");
+            }
         }
         $turns = $this->getPlayerTurn($player_id);
         return $turns;
