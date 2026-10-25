@@ -5750,6 +5750,7 @@ $this->civilizations = [
                 "top" => 74,
                 "left" => 8,
                 "cl" => "activatable",
+                "once" => "turn",
                 "title" => clienttranslate(
                     "Lighthouse: Once on each of your advancement turns you may discard 2 [TERRITORY TILE] to gain [ANY RESOURCE]"
                 ),

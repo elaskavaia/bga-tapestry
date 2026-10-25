@@ -136,14 +136,14 @@ final class UtilitariansTest extends TestCase {
         }
     }
 
-    /** Only the Lighthouse slot is marked activatable in material; other civ slots and spots are not. */
-    function testActivatableSlot() {
+    /** Only the Lighthouse slot is marked once per turn in material; other civ slots and spots are not. */
+    function testOncePerTurnSlot() {
         $game = $this->game(8);
-        $this->assertTrue($game->isActivatableSlot("civ_39_5"));
-        $this->assertFalse($game->isActivatableSlot("civ_39_4"));
-        $this->assertFalse($game->isActivatableSlot("civilization_25"));
-        $this->assertFalse($game->isActivatableSlot("tech_spot_1_1"));
-        $this->assertFalse($game->isActivatableSlot("hand"));
+        $this->assertTrue($game->isOncePerTurnSlot("civ_39_5"));
+        $this->assertFalse($game->isOncePerTurnSlot("civ_39_4"));
+        $this->assertFalse($game->isOncePerTurnSlot("civilization_25"));
+        $this->assertFalse($game->isOncePerTurnSlot("tech_spot_1_1"));
+        $this->assertFalse($game->isOncePerTurnSlot("hand"));
     }
 
     /** Player 1 on their 3rd turn with an advance to take, Lighthouse active, 4 territory tiles in hand. */

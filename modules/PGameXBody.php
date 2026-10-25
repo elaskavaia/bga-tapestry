@@ -9446,12 +9446,12 @@ abstract class PGameXBody extends tapcommon {
     }
 
     /** A civ slot its owner clicks to use once per turn; a marker of the owner on it means used this turn. */
-    function isActivatableSlot(string $location): bool {
+    function isOncePerTurnSlot(string $location): bool {
         if (!str_starts_with($location, "civ_")) {
             return false;
         }
         $slots = $this->getRulesCiv((int) getPart($location, 1), "slots", []);
-        return ($slots[(int) getPart($location, 2, true)]["cl"] ?? "") == "activatable";
+        return ($slots[(int) getPart($location, 2, true)]["once"] ?? "") == "turn";
     }
 
     function markAbilityUsed(int $player_id, string $slot): void {
@@ -12179,7 +12179,7 @@ abstract class PGameXBody extends tapcommon {
         $this->checkDictatorship($player_id);
         foreach ($this->structures->getCardsOfType(BUILDING_MARKER) as $marker) {
             // abilities are still usable on the confirm screen, so their markers wait for effect_startOfTurn
-            if ($marker["location"] != "hand" && !$this->isActivatableSlot($marker["location"])) {
+            if ($marker["location"] != "hand" && !$this->isOncePerTurnSlot($marker["location"])) {
                 $this->dbSetStructureLocation($marker["id"], "hand");
             }
         }
@@ -12195,7 +12195,7 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("coal_baron", 0);
         $this->setGameStateValue("selected_space_tile", 0);
         foreach ($this->getStructuresSearch(BUILDING_MARKER, null, "civ\\_%", $player_id) as $marker) {
-            if ($this->isActivatableSlot($marker["card_location"])) {
+            if ($this->isOncePerTurnSlot($marker["card_location"])) {
                 $this->dbSetStructureLocation($marker["card_id"], "hand");
             }
         }
