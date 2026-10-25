@@ -6580,7 +6580,7 @@ define([
       var cube = "marker_" + token_id;
       var color = this.getPlayerColor(player_id);
       if ($(cube)) {
-        dojo.removeClass($(cube).parentNode, "used");
+        dojo.removeClass($(cube).parentNode, "ability_used");
         if (location == "hand") {
           dojo.destroy(cube);
           return;
@@ -6592,7 +6592,7 @@ define([
         }
         dojo.create("div", { id: cube, class: "marker" }, location);
       }
-      if (dojo.hasClass(location, "activatable")) dojo.addClass(location, "used");
+      if (dojo.hasClass(location, "activatable")) dojo.addClass(location, "ability_used");
       if (type_arg) {
         dojo.setAttr(cube, "data-type-arg", type_arg);
       } else {
