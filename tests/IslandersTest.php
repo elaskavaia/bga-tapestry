@@ -51,6 +51,8 @@ final class IslandersTest extends TestCase {
         $game->gamestate->jumpToState(18);
         $game->stBenefitManager();
         $this->assertEquals("playerTurn", $game->gamestate->state()["name"]);
+        $this->assertEquals(1, $game->getActivePlayerId());
+        $this->assertEquals(-1, $game->benefitPosition("standard", BE_RESUME, 1));
         $this->assertEquals(4, $game->getCardCountInHand(1, CARD_TERRITORY));
         $this->assertEquals(2, $game->getCardCountInHand(2, CARD_TERRITORY));
 

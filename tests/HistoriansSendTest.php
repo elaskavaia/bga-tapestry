@@ -116,6 +116,8 @@ final class HistoriansSendTest extends TestWithRealDb {
 
         $game->stBenefitManager();
         $this->assertEquals("playerTurn", $game->gamestate->state()["name"]);
+        $this->assertEquals(1, $game->getActivePlayerId());
+        $this->assertEquals(-1, $game->benefitPosition("standard", BE_RESUME, 1));
         $game->stPlayerTurn();
 
         $this->assertEquals(1, $game->getCurrentEra(1));
