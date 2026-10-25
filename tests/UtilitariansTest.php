@@ -126,6 +126,40 @@ final class UtilitariansTest extends TestCase {
     }
 
     /**
+     * Documents buggy behaviour for BGA #202072, flips when fixed: action_unblock reads the
+     * transitions with the deprecated gamestate->state() after clearing the civ row, so when that
+     * row was the last one (a midgame gain or landmark trigger) the args reload asserts and the
+     * unblock rolls back.
+     */
+    function testUnblockLastCivBenefitStillHitsMissingBenefit() {
+        $game = $this->game();
+        $this->queueCivBenefit($game, "triggered::10");
+
+        ob_start();
+        try {
+            $game->action_unblock();
+            $this->fail("expected the missing-benefit assert");
+        } catch (BgaUserException $e) {
+            $this->assertStringContainsString("missing benefit", $e->getMessage());
+        } finally {
+            ob_end_clean();
+        }
+        $this->assertEquals(1, $game->civ_arg_reloads);
+    }
+
+    /** At setup the BE_RESUME row sits under the civ row, so the same reload finds a benefit. */
+    function testUnblockSetupCivBenefitWithResumeRowBelow() {
+        $game = $this->game();
+        $this->queueCivBenefit($game, "triggered::10");
+        $game->benefits->insert("standard", BE_RESUME, 1, 1, "", 1);
+
+        $game->action_unblock();
+
+        $this->assertEquals(1, $game->civ_arg_reloads);
+        $this->assertEquals([BE_RESUME], array_column($game->benefitQueue(), "benefit_type"));
+    }
+
+    /**
      * The "triggered" branch is not gated on the Civilization Adjustments option: the slot
      * layout that drives it is identical for every adjustment value.
      */
