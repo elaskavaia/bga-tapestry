@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -70,6 +71,31 @@ final class HistoriansTest extends TestCase {
 
         $this->historians()->sendHistorianTokensMidGame();
         $this->assertEquals(0, count($this->game->queued));
+    }
+
+    public static function playerCountsAndAdjustments(): array {
+        $cases = [];
+        foreach ([1, 2, 4, 8, 9] as $adjustments) {
+            foreach ([1, 2, 3, 4, 5] as $players) {
+                $cases["{$players}p a$adjustments"] = [$players, $adjustments];
+            }
+        }
+        return $cases;
+    }
+
+    /**
+     * Only the a4/a8 card starts with a tile, and fires on income turn 1 only in a 4/5 player game:
+     * the games of the start tile ordering bug in HistoriansSendTest.
+     */
+    #[DataProvider("playerCountsAndAdjustments")]
+    function testStartTileAndFirstIncomeTrigger(int $players, int $adjustments) {
+        $game = new GameUT($players);
+        $game->doAdjustMaterial($players, $adjustments);
+        $civ = $game->civilizations[CIV_HISTORIANS];
+        $card = in_array($adjustments, [4, 8, 9]);
+        $this->assertEquals($card ? [BE_TERRITORY] : [], $civ["start_benefit"]);
+        $from = $card && $players >= 4 ? 1 : 2;
+        $this->assertEquals(["from" => $from, "to" => $from + 3], $civ["income_trigger"]);
     }
 
     /**
