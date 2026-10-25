@@ -93,9 +93,15 @@ class Tapestry extends PGameXBody {
     function upgradeTableDb($from_version) {
         // income buildings started carrying their spot in card_location_arg2; the sixth building
         // of each type never had a spot to sit on and goes
-        if ($from_version <= 2609091200) {
+        // only players with unassigned rows: a re-run would undo an Artificers slide
+        if ($from_version <= 2610242100) {
             foreach ($this->getObjectListFromDB("SELECT player_id FROM playerextra", true) as $player_id) {
-                $this->dbAssignIncomeSpots((int) $player_id);
+                $unassigned = $this->getUniqueValueFromDB(
+                    "SELECT COUNT(*) FROM structure WHERE card_location='income' AND card_location_arg='$player_id' AND card_location_arg2='0'"
+                );
+                if ($unassigned) {
+                    $this->dbAssignIncomeSpots((int) $player_id);
+                }
             }
             $this->DbQuery("DELETE FROM structure WHERE card_location='income' AND card_location_arg2='0'");
         }
