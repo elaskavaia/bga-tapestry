@@ -236,6 +236,25 @@ confirmed two are still OPEN on the tracker.
       (usable on an income turn?) - untested. (a) likely also fires for other mid-explore
       activated abilities - untested.
 
+- [x] **BGA #252235** - "Historians: 1st turn in 5 player game, unable to give any player any token
+      or tile". OPEN on BGA, 0 votes, `action`. Table 936744922, 5 players. Options: adj=8 (Pack),
+      set=7 (All), Marriage of State kept, Renaissance kept. Same crash as the later comments on
+      **#138733** (17 votes, adj=4, 4 players, tables 849662220, 916856312, 922955622, 929278523,
+      933059617, 936272901); #245071 is another. Likely duplicate of #138733 - not marked yet.
+      Studio error 725998 `This transition (benefit) is impossible at this state (36)` from
+      `sendHistorian`: 78 events / 14 users since 10/15, predates the Oct 24-25 deploys.
+      **FIXED 2026-10-25 (not deployed).** The action called `nextState('benefit')` twice, once in
+      `Historians::sendHistorian` and once in `PGameXBody::sendHistorian`; the second ran from
+      wherever state 18 had moved on to, 36 on an empty stack. The civ method no longer
+      transitions, matching `sendInventor`. Tested in `tests/HistoriansSendTest.php` (real local
+      MySQL): one transition to 18, token moved to the opponent, tile discarded.
+      NOTE: on income turns 2-4 the second call likely re-entered `playTapestryCard` (15) and ran
+      `stTapestryCard` twice instead of crashing - also gone now, but never reproduced.
+      NOTE: #138733's original claim (no territory tile at income turn 1) may be a separate
+      defect, possibly the #183142 setup stranding class - unverified.
+      NOTE: `Historians::sendHistorian` still throws untranslated `feException` for a bad token or
+      tile and never checks `$pid` - out of scope here.
+
 ### Lower priority (deprecated adjustment options)
 
 The highest-voted defects on the tracker, but every table cited on them ran a deprecated
@@ -384,6 +403,13 @@ Short log of each run: date, reports touched, outcome.
   on #252154, #252116, #252113, #252105. Left Open:
   #252057 (tapestry card + civ infinite loop, unrelated) and #252054 (thin, game abandoned).
   Unrelated burst seen: `NotificationTransportException` on the backend from ~16:23, BGA side.
+- **2026-10-25 13:42 EDT** - Post-deploy check of `v261025-1540`, scoped by Victoria to the last ~4
+  hours (marker NOT bumped). The deploy did not break anything: no studio error first seen today,
+  and none of yesterday's income spot JS errors have fired since 21:04 yesterday. Only 3 errors
+  fired in the window, all pre-existing: `Invalid territory tile` (2 of 80 events on 1540),
+  Historians state 36 (1 of 78 events on 1540; #252235's table alone has ~15 retries)
+  and `Invalid historian token` (2 of 7 on 1540, unrelated to that tag's diff). Reports touched:
+  #252235 and #138733 (Historians, tracked above). No status changes, no comments.
 
 ## Taptest (alpha) bugs
 

@@ -47,8 +47,6 @@ class Historians extends AbsCivilization {
         }
         $this->game->effect_discardCard($territory_id, $player_id);
         $this->sendHistorianToken($historian, $pid);
-        // APPLY BENEFITS
-        $this->game->gamestate->nextState('benefit');
     }
 
     function sendHistorianTokensMidGame() {
