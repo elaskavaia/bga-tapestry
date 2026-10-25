@@ -9471,7 +9471,7 @@ abstract class PGameXBody extends tapcommon {
             // Lighthouse
             $this->userAssertTrue(_("This is not your turn"), $this->getCurrentPlayerId() == $player_id);
 
-            // Lighthouse: Once on each of your advancement turns you may spend 2 [TERRITORY TILE] to gain [ANY REOURCE]
+            // Lighthouse: Once on each of your advancement turns you may spend 2 [TERRITORY TILE] to gain [ANY RESOURCE]
             if ($this->ownsLighthouseAndCanPlayIt($player_id, true)) {
                 // effect_startOfTurn sends the marker back
                 $this->dbSetStructureLocation($this->addMarker($player_id, "hand"), "civ_39_5");
