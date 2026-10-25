@@ -12156,8 +12156,7 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("coal_baron", 0);
         $this->setGameStateValue("selected_space_tile", 0);
         $this->checkDictatorship($player_id);
-        $turn_markers = $this->structures->getCardsOfType(BUILDING_CUBE, CUBE_MARKER) + $this->structures->getCardsOfType(BUILDING_MARKER);
-        foreach ($turn_markers as $marker) {
+        foreach ($this->structures->getCardsOfType(BUILDING_MARKER) as $marker) {
             // the Lighthouse is still usable on the confirm screen, its marker waits for effect_startOfTurn
             if ($marker["location"] != "hand" && $marker["location"] != "civ_39_5") {
                 $this->dbSetStructureLocation($marker["id"], "hand");
