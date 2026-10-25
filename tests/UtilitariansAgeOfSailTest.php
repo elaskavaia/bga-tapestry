@@ -63,6 +63,8 @@ final class UtilitariansAgeOfSailTest extends TestCase {
         $game->runManager();
         $this->assertEquals("explore", $game->stateName());
         $this->assertEquals(3, $this->handCount());
+        $this->assertEquals([[PsionicsUT::ROLLER, 17], [PsionicsUT::ROLLER, 17]], $game->rows());
+        $this->assertEquals([1, 1], array_map("intval", array_column($game->benefitQueue(), "benefit_quantity")));
 
         $game->subtractCurrentBenefit();
         $game->gamestate->jumpToState(18);

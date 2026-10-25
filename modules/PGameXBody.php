@@ -2965,7 +2965,7 @@ abstract class PGameXBody extends tapcommon {
     /**
      * AGE OF SAIL draws 3 territory tiles on every explore. The explore goes back on the stack marked
      * so it does not draw again when re-entered: behind a sampler's keep rows, or after an ability
-     * used mid-explore such as the Lighthouse. True when the explore was put back that way.
+     * used mid-explore such as the Lighthouse. True when Age of Sail drew; the marked explore is back on the stack.
      */
     function ageOfSailCheck($player_id, int $ben, int $count, string $reason): bool {
         $drawn_mark = "sail";
@@ -2973,12 +2973,11 @@ abstract class PGameXBody extends tapcommon {
             return false;
         }
         // straight back on the stack: effect_onQueueBenefit already saw this explore when it was queued
-        if ($count > 1) {
-            $this->interruptBenefit();
-            $this->benefitSingleEntry("standard", $ben, $player_id, $count - 1, $reason);
-        }
         $this->interruptBenefit();
         $this->benefitSingleEntry("standard", $ben, $player_id, 1, $this->withReasonDataArg($reason, $drawn_mark));
+        if ($count > 1) {
+            $this->benefitSingleEntry("standard", $ben, $player_id, $count - 1, $reason);
+        }
         $this->awardRandomCard($player_id, 3, CARD_TERRITORY, reason_tapestry(TAP_AGE_OF_SAIL));
         return true;
     }
