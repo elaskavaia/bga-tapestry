@@ -476,8 +476,8 @@ class GameUT extends Tapestry {
 
     // --------------------------------------------------------- benefit table
 
-    function benefitSingleEntry($cat, $type, $player_id, $quantity = 1, $data = "") {
-        $this->benefits->insert($cat, $type, 0, $quantity, $data, $player_id);
+    function benefitSingleEntry($cat, $type, $player_id, $quantity = 1, $data = "", $prerequisite = 0) {
+        $this->benefits->insert($cat, $type, $prerequisite, $quantity, $data, $player_id);
         $this->notifyBenefitQueue();
     }
 

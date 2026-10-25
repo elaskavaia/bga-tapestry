@@ -23,42 +23,40 @@ final class IslandersTest extends TestCase {
     }
 
     /**
-     * Documents current buggy behavior for BGA #183142 (5 players, Civilization Adjustments = 8);
-     * both "BUG:" assertions flip when the ordering is fixed.
+     * Verifies the fix for BGA #183142 (5 players, Civilization Adjustments = 8).
      *
      * stFinishSetup calls setupCiv() per player, and every call starts with interruptBenefit(),
      * so each player's start_benefit rows are pushed one prerequisite further back. The BE_RESUME
-     * row queued at the end of stFinishSetup lands at prerequisite 0, and awardBenefits case 201
-     * jumps to the player turn state - so the setup drain ends with the start_benefit rows of
-     * every player except the last one processed still on the stack. When such a player is the
-     * (randomly picked) starting player and opens with an income turn, queueIncomeTurn inserts the
-     * income turn 1 civ trigger at prerequisite 0, ahead of their own stranded start tiles.
+     * row that jumps to the first turn is queued last, so the setup drain grants the start tiles of
+     * every player before income turn 1 queues the Islanders explore prompt.
      */
-    function testIslandersIncomeTurn1TriggerJumpsAheadOfStartTiles() {
+    function testIslandersStartTilesArriveBeforeIncomeTurn1Trigger() {
         $game = $this->game;
         $game->doAdjustMaterial(5, 8);
+        // 4 for the Islanders, 2 for the Traders
+        for ($i = 1; $i <= 6; $i++) {
+            $game->addCard(CARD_TERRITORY, $game->card_types[CARD_TERRITORY]["deck"], 0, $i);
+        }
 
         // stFinishSetup: setupCiv per player, Islanders processed before another player
         $game->setupCiv(CIV_ISLANDERS, 1, true);
         $game->setupCiv(CIV_TRADERS, 2, true);
-        $game->queueBenefitNormal(BE_RESUME, 1);
+        $game->queueFirstTurn(1);
 
         $tiles = $game->benefitPosition("standard", BE_TERRITORY, 1);
         $resume = $game->benefitPosition("standard", BE_RESUME, 1);
         $this->assertTrue($tiles >= 0, "start tiles are queued at setup");
-        $this->assertTrue($resume >= 0, "BE_RESUME is queued at setup");
-        // BUG: BE_RESUME pops first and ends the drain, stranding the start tiles.
-        // Fixed version: $resume > $tiles.
-        $this->assertTrue($resume < $tiles, "BGA #183142: setup drain stops before the Islanders start tiles");
+        $this->assertTrue($resume > $tiles, "BGA #183142: setup drain reaches the Islanders start tiles");
+
+        $game->gamestate->jumpToState(18);
+        $game->stBenefitManager();
+        $this->assertEquals("playerTurn", $game->gamestate->state()["name"]);
+        $this->assertEquals(4, $game->getCardCountInHand(1, CARD_TERRITORY));
+        $this->assertEquals(2, $game->getCardCountInHand(2, CARD_TERRITORY));
 
         // First income turn of that player: queueIncomeTurn() -> queueEraCivAbilities()
         $game->queueEraCivAbility(CIV_ISLANDERS, 1, 1);
-
-        $tiles = $game->benefitPosition("standard", BE_TERRITORY, 1);
-        $trigger = $game->benefitPosition("civ", CIV_ISLANDERS, 1);
-        $this->assertTrue($trigger >= 0, "income turn 1 civ trigger is queued");
-        // BUG: the explore prompt is resolved before the 4 tiles are granted.
-        // Fixed version: $trigger > $tiles.
-        $this->assertTrue($trigger < $tiles, "BGA #183142: explore prompt precedes the start tiles");
+        $this->assertEquals(0, $game->benefitPosition("civ", CIV_ISLANDERS, 1));
+        $this->assertEquals(-1, $game->benefitPosition("standard", BE_TERRITORY, 1));
     }
 }

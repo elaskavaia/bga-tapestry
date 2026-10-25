@@ -6924,16 +6924,16 @@ abstract class PGameXBody extends tapcommon {
      * Add an entry to the benefit table.
      * $cat: category (or, choice, standard)
      * $type: type
-     * $after: prerequisite (other benefit id)
      * $quantity: quantity/value
+     * $prerequisite: pop order, lower pops first
      */
-    function benefitSingleEntry($cat, $type, $player_id, $quantity = 1, $data = "") {
+    function benefitSingleEntry($cat, $type, $player_id, $quantity = 1, $data = "", $prerequisite = 0) {
         // $this->debugConsole("bene $cat, $type, $after, $player_id, $quantity, $data");
         $this->systemAssertTrue("data is array", !is_array($data));
         $this->systemAssertTrue("ben is array", !is_array($type));
         $this->systemAssertTrue("playerid is array", !is_array($player_id));
         $this->DbQuery(
-            "INSERT INTO benefit (benefit_category, benefit_type, benefit_prerequisite, benefit_quantity, benefit_data, benefit_player_id) VALUES ('$cat', '$type', '0', '$quantity','$data','$player_id')"
+            "INSERT INTO benefit (benefit_category, benefit_type, benefit_prerequisite, benefit_quantity, benefit_data, benefit_player_id) VALUES ('$cat', '$type', '$prerequisite', '$quantity','$data','$player_id')"
         );
         $this->notifyBenefitQueue();
     }
@@ -11423,10 +11423,17 @@ abstract class PGameXBody extends tapcommon {
         $this->gamestate->changeActivePlayer($active_player);
         $this->setGameStateValue("starting_player", $active_player);
         $this->notifyWithName("message", clienttranslate('${player_name} is starting player'), [], $active_player);
-        $this->effect_startOfTurn($active_player);
-        $this->prepareUndoSavepoint();
-        $this->queueBenefitNormal(BE_RESUME, $active_player);
+        $this->queueFirstTurn($active_player);
         $this->gamestate->nextState("next");
+    }
+
+    /** The resume row goes below every setup row, so all civs' start benefits resolve before the first turn. */
+    function queueFirstTurn(int $player_id): void {
+        $this->effect_startOfTurn($player_id);
+        $this->prepareUndoSavepoint();
+        $rows = $this->dbGetBenefits();
+        $last = end($rows);
+        $this->benefitSingleEntry("standard", BE_RESUME, $player_id, 1, "", $last ? $last["benefit_prerequisite"] + 1 : 0);
     }
 
     function removeSomeComponents() {
