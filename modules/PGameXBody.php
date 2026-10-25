@@ -1989,7 +1989,10 @@ abstract class PGameXBody extends tapcommon {
             case 201:
                 // resume player turn
                 $this->clearCurrentBenefit($ben);
-
+                if ($this->getPlayerTurn($player_id) == 0) {
+                    // a table that was resolving its setup rows when stFinishSetup started taking the first turn
+                    $this->effect_startOfTurn($player_id);
+                }
                 $this->gamestate->jumpToState(13);
                 return false;
             case 202:
@@ -11418,7 +11421,6 @@ abstract class PGameXBody extends tapcommon {
         shuffle($ids);
         $active_player = array_shift($ids);
         $this->gamestate->changeActivePlayer($active_player);
-        $this->setGameStateValue("current_player_turn", $active_player);
         $this->setGameStateValue("starting_player", $active_player);
         $this->notifyWithName("message", clienttranslate('${player_name} is starting player'), [], $active_player);
         $this->effect_startOfTurn($active_player);
@@ -12192,9 +12194,9 @@ abstract class PGameXBody extends tapcommon {
         $this->setGameStateValue("cube_choice", -1);
         $this->setGameStateValue("coal_baron", 0);
         $this->setGameStateValue("selected_space_tile", 0);
-        foreach ($this->structures->getCardsOfType(BUILDING_MARKER) as $marker) {
-            if ($marker["location_arg"] == $player_id && $this->isActivatableSlot($marker["location"])) {
-                $this->dbSetStructureLocation($marker["id"], "hand");
+        foreach ($this->getStructuresSearch(BUILDING_MARKER, null, "civ\\_%", $player_id) as $marker) {
+            if ($this->isActivatableSlot($marker["card_location"])) {
+                $this->dbSetStructureLocation($marker["card_id"], "hand");
             }
         }
         $turns = $this->getPlayerTurn($player_id);

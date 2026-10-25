@@ -191,9 +191,21 @@ final class UtilitariansTest extends TestCase {
     function testLighthouseResumeDoesNotStartTheTurnAgain() {
         $game = $this->lighthouseGame();
         $this->useLighthouse($game);
+        $game->stBenefitManager();
+        $this->assertEquals("playerTurn", $game->gamestate->state()["name"]);
         $game->stPlayerTurn();
         $this->assertFalse($game->ownsLighthouseAndCanPlayIt(1));
         $this->assertEquals(3, $game->getPlayerTurn(1));
+    }
+
+    /** A table past stFinishSetup before it started the first turn gets it started by the setup resume row. */
+    function testResumeStartsAnUnstartedFirstTurn() {
+        $game = $this->lighthouseGame();
+        $game->setStat(0, "turns_total", 1);
+        $game->queueBenefitNormal(BE_RESUME, 1);
+        $game->stBenefitManager();
+        $this->assertEquals("playerTurn", $game->gamestate->state()["name"]);
+        $this->assertEquals(1, $game->getPlayerTurn(1));
     }
 
     /** BGA #252057: the turn starts once, in the transition to the player, which frees the Lighthouse. */

@@ -117,6 +117,7 @@ class GameUT extends Tapestry {
         $this->stats[$player_id][$name] = $value;
     }
 
+    /** The framework stub always returns 0; this reads back what incStat/setStat recorded. */
     function getStat($name, $player_id = null): int {
         return (int) ($this->stats[$player_id][$name] ?? 0);
     }
