@@ -2498,7 +2498,7 @@ abstract class PGameXBody extends tapcommon {
         $this->awardVP($player_id, $territory_count * $count, $reason, null, $ben);
     }
 
-    function debug_moveCard($card_type, $card_class, $location = null, $location_arg = 0) {
+    function debug_moveCard(int $card_type, int $card_class, ?string $location = null, int $location_arg = 0) {
         if (!$location) {
             $location = $this->card_types[$card_type]["deck"];
         }
