@@ -1264,8 +1264,10 @@ div[data-income="0"] #subtitle_bar {
 .activatable .cube {
   pointer-events: all;
 }
-.activatable.used .cube.active_slot {
+.activatable.used {
   cursor: default;
+}
+.activatable.used .cube.active_slot {
   box-shadow: none !important;
   pointer-events: none;
 }
