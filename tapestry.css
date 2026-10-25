@@ -1264,6 +1264,11 @@ div[data-income="0"] #subtitle_bar {
 .activatable .cube {
   pointer-events: all;
 }
+.activatable.used .cube.active_slot {
+  cursor: default;
+  box-shadow: none !important;
+  pointer-events: none;
+}
 .tech_card .cube[data-type-arg="3"] {
   /* position: absolute; */
   /* top: 12px; */
