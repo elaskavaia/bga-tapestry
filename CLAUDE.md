@@ -127,10 +127,10 @@ panel, not the chat box (see the `game-play-in-studio` skill).
 
 - The studio project is `tapestry`: manage page
   `studio.boardgamearena.com/studiogame?game=tapestry`, lobby game number `4009`.
-  `npm run sync:alpha` builds the renamed `taptest` copy with `misc/rename.sh` and pushes it to the
-  `~/Develop/bga/remote/taptest/` studio mount.
-- `main` is the production branch: its release tags deploy as `tapestry` (production), and it also
-  syncs to `taptest` (alpha). The `prod1`/`prod2` branches are inactive - ignore them.
+- On production boardgamearena.com the game id is `1446` (bug list `bugs?game=1446`). The studio
+  lobby number `4009` is not valid there.
+- `main` is the production branch: its release tags deploy as `tapestry` (production). The
+  `prod1`/`prod2` branches are inactive - ignore them.
 - `~/Develop/bga/remote/` is the sshfs mount of the studio filesystem, and
   `~/Develop/bga/remote/tapestry/` mirrors this working tree, so an edit here is live in the studio
   with no deploy step. `diff` a changed file against it to confirm before testing.

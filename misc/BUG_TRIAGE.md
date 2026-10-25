@@ -11,9 +11,7 @@ triage run.
 - **Single report:** https://boardgamearena.com/bug?id=<REPORT_ID>
 - **Studio error log:** https://studio.boardgamearena.com/studioissues?game=tapestry - studio short
   name is `tapestry`, not the numeric id above. Add `&tableId=<TABLE_ID>` for one table,
-  `&id=<ERROR_ID>` for one error, `&projects=frontend|backend` to filter. (`taptest` is the renamed
-  alpha copy produced by `misc/rename.sh`; its reports are triaged separately, see "Taptest (alpha)
-  bugs" at the end of this file.)
+  `&id=<ERROR_ID>` for one error, `&projects=frontend|backend` to filter.
 - **Designer:** Jamey Stegmaier designed Tapestry, and his playtest feedback is transcribed in
   [TODO.md](TODO.md). He does not really file bug reports, so unlike some sibling projects there is
   no standing "hands off the designer's reports" rule here. If one ever does appear under his name,
@@ -258,8 +256,9 @@ confirmed two are still OPEN on the tracker.
       came from `onCubeHolderClick` letting an empty Historians holder be clicked and never
       clearing earlier clicks, so `onSelectHistorian` sent the first, empty one. Reproduced in the
       studio both ways (empty slot alone; empty then full slot). Now empty holders ignore clicks and
-      only one holder stays selected. Client-only, no JS tests.
-      NOTE: please confirm on Studio: both repros give no error and the full slot sends.
+      only one holder stays selected. Client-only, no JS tests. Verified on Studio: an empty holder
+      does not select and nothing reaches the server; empty then full keeps only the full one,
+      which sends.
       NOTE: `onMystic` (~2427) collects global `.clicked`; an owner of both Historians and Mystics
       could send a leftover historian holder as a Mystics id. Should be scoped to
       `#civilization_13` - untested.
@@ -419,56 +418,3 @@ Short log of each run: date, reports touched, outcome.
   Historians state 36 (1 of 78 events on 1540; #252235's table alone has ~15 retries)
   and `Invalid historian token` (2 of 7 on 1540, unrelated to that tag's diff). Reports touched:
   #252235 and #138733 (Historians, tracked above). No status changes, no comments.
-
-## Taptest (alpha) bugs
-
-The alpha copy has its own bug tracker, marker and deploy model. Everything above (marker, tracked
-bugs, run log) is production only.
-
-- **BGA game id:** 1652 (Tapestry Test, studio short name `taptest`)
-- **Bug list:** https://boardgamearena.com/bugs?game=1652
-- **Studio error log:** https://studio.boardgamearena.com/studioissues?game=taptest
-- **Deploy model:** `main` deploys as taptest, so a fix is live when it is in the latest tag on
-  `main` (`git tag --merged main --sort=creatordate | tail -1`). Production deploys the same tags.
-
-**Taptest triage last checked:** 2026-10-18 10:24 EDT
-
-### Tracked bugs (taptest)
-
-- [x] **BGA #248010** - "Psionics + Age of Sail on E3 draws and plays every territory tile in the
-      game". CONFIRMED on BGA, `rules`. Table 925076357, 2 players. Options: adj=8, set=8 (FF only),
-      Marriage of State removed, Renaissance removed.
-      **FIXED 2026-10-18 (not deployed).** The explore entered the explore state before the 3
-      Psionics keep rows resolved, consumed a keep row instead of itself and re-ran Age of Sail in a
-      loop. `ageOfSailCheck` now, for a sampler, puts the explore back behind the keeps with a
-      `sail` reason mark so it does not draw again (a quantity > 1 row keeps the rest unmarked).
-      Tested in `tests/PsionicsAgeOfSailTest.php`: keeps before explore, next explore of the row
-      draws again, non-sampler explore anywhere unchanged.
-      NOTE: kept 3 x draw-2-keep-1, not one draw-4-keep-3. Backed by CIV.PSIONICS.1 in
-      [FORMAL_RULES.txt](FORMAL_RULES.txt): "the two tech cards of track space 7 are two separate
-      random draws" (co-designers, QUESTIONS.txt 18) - a gain of N is N samples; draw 4 keep 1 is
-      for a single pick. No clause names Age of Sail yet; add one if you agree.
-- [x] **BGA #248665** - "pscionic effect not triggering during the age of discovery tapestry roll".
-      CONFIRMED on BGA, `rules`. Table 927353515, 2 players, move 373. Options: adj=9, set=8 (FF
-      only), Marriage of State removed, Renaissance removed.
-      **FIXED 2026-10-18 (not deployed).** The second face was rolled but every advance was queued
-      from the first. When PSIONICS or EMPIRICISM rolls a different face, `effect_ageOfDiscovery`
-      now queues the research decision row with the AoD reason; `action_research_decision` refuses
-      Decline (unless no advance is offered) and queues the opponents on the picked track after the
-      roller. A zombie roller's pending pick still advances the opponents. The client hides Decline
-      via `argResearch` `decline`. Tested in `tests/PsionicsAgeOfDiscoveryTest.php` (7 tests).
-      Rules: PSIONICS "Whenever you roll a die, roll it twice and choose 1 of the 2 values that you
-      rolled." AGE OF DISCOVERY "Roll the science die. All players must advance on the resulting
-      track; only you gain the benefit".
-      NOTE: if the roller has no token on any rolled track they decline and the opponents advance on
-      the first face - the roller does not pick a track they cannot use. Rare (AI Singularity /
-      tech 12); veto if the pick should still apply to the opponents.
-      NOTE: the research prompt still reads "Advance (optional, benefits)" while Decline is hidden.
-      Client change not verified in Studio: please confirm Decline is gone on an AoD pick.
-
-### Triage run log (taptest)
-
-- **2026-10-18** - First taptest run, full sweep (188 reports; 4 open, 2 waiting for deploy).
-  Fixed (fix in a deployed `main` tag): #246785 (712bd3e), #245659 (bf2545b), #246528 and #245135
-  (3ad0867, Illuminati dice). Confirmed with tests: #248010, #248665. All posted with BGA default
-  templates.
