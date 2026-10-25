@@ -4,6 +4,30 @@ Triage 2026-09-13. Tags: [blocker] breaks or strands a table, [rules] wrong game
 or misleading client, [ui-temp] cosmetic, [debt] test gaps and cleanup, [feature] new content. Priority: P1 must fix before
 the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no action planned.
 
+OPEN FROM 2026-10-25 (income spot incident, BGA #252057) - review feedback on bd2f96d, 96f1439, c27b72e
+
+- [x] [blocker/P1] FIXED in tapestry.game.php: `upgradeTableDb` rewritten as a version-guarded
+      (`<= 2610250248`) set-based SQL repair through `applyDbUpgradeToAllDB` with `DBPREFIX_`, so
+      the undo copies are fixed too. Both earlier migrations (09f0e89, bd2f96d) used plain queries,
+      so an undo to a snapshot taken before the upgrade brings back `card_location_arg2 = 0` rows and
+      the client crash / ERR:game:04. Three statements: unplaced income rows get level+1.. in id
+      order (leftover sixth stays 0), delete income rows still at 0, cap every income level at 6.
+      Tested on studio 2026-10-25 (MySQL 8.0, no error 1093) with throwaway debug methods that put
+      the live and `zz_savepoint_` tables back to the old layout, ran the upgrade and compared
+      against a snapshot: exact match for both. The level 7 cap was not exercised.
+- [ ] [blocker/P1] The level 7 case (covered by the cap above): on an unmigrated table a level 6
+      track still held its leftover sixth building and v261024-2009 let it be claimed (claim,
+      Collectors, Traders, ben 110/144), leaving level 7 and ERR:game:04 on every income read.
+- [ ] [debt/P4] Damage from the broken window that no migration can undo: VPincomeStructure counted
+      one building short per type (negative at level 1), Traders read spot 0 (PHP warning, opponent
+      got nothing). Only tables that did those between v261024-2009 and v261025-0248.
+- [ ] [bug/P1] BGA #252057 fixes parked on branch `park/bga-252057`, not ready to deploy: 96f1439 (Age
+      of Sail redraws on every re-entered explore) and c27b72e (Lighthouse usable more than once per
+      turn). Their review follow-ups are in that branch's TODO.md. Rebase onto main, finish, then
+      set the report to Waiting for deploy.
+- [ ] [rules/P3] Typo in player-visible text: Lighthouse "[ANY REOURCE]" in the UTILITARIANS civ
+      description in material.inc.php.
+
 P1 - MUST FIX BEFORE THE FF DEPLOY
 
 - [x] [blocker/P1] FIXED. TYRANNY with 2 or more tapestry cards gained at once (Jamey's "it wouldn't
