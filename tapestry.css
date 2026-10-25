@@ -1265,11 +1265,11 @@ div[data-income="0"] #subtitle_bar {
   pointer-events: all;
 }
 .activatable.ability_used {
-  cursor: default;
+  cursor: not-allowed;
 }
 .activatable.ability_used .cube.active_slot {
   box-shadow: none !important;
-  pointer-events: none;
+  cursor: not-allowed;
 }
 .tech_card .cube[data-type-arg="3"] {
   /* position: absolute; */
