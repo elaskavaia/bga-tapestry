@@ -92,9 +92,9 @@ final class HistoriansTest extends TestCase {
         $game = new GameUT($players);
         $game->doAdjustMaterial($players, $adjustments);
         $civ = $game->civilizations[CIV_HISTORIANS];
-        $card = in_array($adjustments, [4, 8, 9]);
-        $this->assertEquals($card ? [BE_TERRITORY] : [], $civ["start_benefit"]);
-        $from = $card && $players >= 4 ? 1 : 2;
+        $adjustedCard = in_array($adjustments, [4, 8, 9]);
+        $this->assertEquals($adjustedCard ? [BE_TERRITORY] : [], $civ["start_benefit"]);
+        $from = $adjustedCard && $players >= 4 ? 1 : 2;
         $this->assertEquals(["from" => $from, "to" => $from + 3], $civ["income_trigger"]);
     }
 
