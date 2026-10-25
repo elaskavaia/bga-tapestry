@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-25 (v261025-1540)
+
+- Fixed game crashing after an undo in games started before the last update
+
 ## 2026-10-24 (v261025-0248)
 
 - Fixed game pieces (player tokens, income buildings) not showing in games started before the last update
