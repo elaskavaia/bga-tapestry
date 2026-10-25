@@ -213,6 +213,29 @@ confirmed two are still OPEN on the tracker.
       was taken after the incident. The reporter's own pointer is "before move #10".
       No fix commit.
 
+- [ ] **BGA #252057** - "A conflict appeared between my tapestry card and my civilisation, causing
+      an infinite loop of action". OPEN on BGA, 2 votes, `rules`. Table 935891363, 2 players, replay
+      move 235. Options: adj=8 (Pack), set=7 (All), Marriage of State removed, Renaissance removed.
+      UTILITARIANS with the Lighthouse slot (`civ_39_5`) plus AGE OF SAIL: using the Lighthouse
+      mid-explore redraws 3 tiles each time and can be repeated, so the player farmed every
+      resource to 8.
+      **CONFIRMED 2026-10-24.** Test `tests/AgeOfSailLighthouseLoopTest.php`, method
+      `testLighthouseDuringExploreRedrawsAgeOfSailAndRepeats` - green, pinning the buggy
+      behaviour (in-memory benefit stack; the Lighthouse bonus row is resolved by hand, not through
+      its UI handler). Two independent defects, both present in v260916-0116 and v261024-2009:
+      (a) `ageOfSailCheck` (PGameXBody.php ~2970) draws and leaves the explore row unmarked in the
+      non-sampler branch, so any interrupt that returns to the same row draws 3 again. Fix: put the
+      `sail` mark on the row on the first draw, as the sampler branch already does.
+      (b) Lighthouse once-per-turn is never tracked: `ownsLighthouseAndCanPlayIt` /
+      `action_activatedAbility` (~9449-9484) only check turn, cube on `civ_39_5` and 2 tiles. Fix:
+      record the use per turn and check it there.
+      Rules: card text only, no ruling in RULES.md or FORMAL_RULES.txt. Lighthouse
+      (material.inc.php civ text): "Once on each of your advancement turns you may discard 2
+      [TERRITORY TILE] to gain [ANY REOURCE]". AGE OF SAIL: "THIS ERA: Whenever you explore, draw a
+      total of 3 Territory tiles." Open: the "advancement turns" limit is not enforced either
+      (usable on an income turn?) - untested. (a) likely also fires for other mid-explore
+      activated abilities - untested.
+
 ### Lower priority (deprecated adjustment options)
 
 The highest-voted defects on the tracker, but every table cited on them ran a deprecated
@@ -348,6 +371,19 @@ Short log of each run: date, reports touched, outcome.
   now the convention, in CLAUDE.md); its predeploy-gate finding (FakeTestCase runs only `GameTest`)
   was declined by Victoria as legacy. Fix committed; entry flipped to fixed, studio check still
   pending before the tracker is touched.
+
+- **2026-10-24** - Incident run, scoped by Victoria to the last ~8 hours (marker NOT bumped: the
+  backlog since 2026-08-26 is still unswept). Deploy `v261024-2009` broke every in-flight prod
+  table: the income spot migration guard (`<= 2609091200`) sat below the previous prod version
+  2609160116, so old tables kept `card_location_arg2 = 0` on income buildings; the client aborted
+  setup (`ownerDocument` / `null.id` JS errors, no cubes or buildings drawn) and income reads hit
+  `ERR:game:04 ... uncovers 6 spots`. Hotfix bd2f96d (guard `<= 2610242100`, only players with
+  unassigned rows, so an Artificers slide survives) shipped as `v261025-0248`; verified live by
+  spectating tables 936813355 and 936879986. 36 reports in the window: 34 are this incident.
+  All 34 set to Fixed with the BGA default template (verified); English translations posted first
+  on #252154, #252116, #252113, #252105. Left Open:
+  #252057 (tapestry card + civ infinite loop, unrelated) and #252054 (thin, game abandoned).
+  Unrelated burst seen: `NotificationTransportException` on the backend from ~16:23, BGA side.
 
 ## Taptest (alpha) bugs
 
