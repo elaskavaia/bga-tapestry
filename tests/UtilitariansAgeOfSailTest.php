@@ -56,15 +56,15 @@ final class UtilitariansAgeOfSailTest extends TestCase {
         $this->assertEquals(1, $this->handCount());
     }
 
-    /** Splitting the row to fix BGA #252057 leaves each explore of a quantity 2 row its own three. */
+    /** Splitting the row to fix BGA #252057 leaves each explore of a quantity 3 row its own three. */
     function testAgeOfSailDrawsForEachExploreOfTheRow() {
         $game = $this->game;
-        $game->queueBenefitNormal(17, PsionicsUT::ROLLER, reason("be", 17), 2);
+        $game->queueBenefitNormal(17, PsionicsUT::ROLLER, reason("be", 17), 3);
         $game->runManager();
         $this->assertEquals("explore", $game->stateName());
         $this->assertEquals(3, $this->handCount());
         $this->assertEquals([[PsionicsUT::ROLLER, 17], [PsionicsUT::ROLLER, 17]], $game->rows());
-        $this->assertEquals([1, 1], array_map("intval", array_column($game->benefitQueue(), "benefit_quantity")));
+        $this->assertEquals([1, 2], array_map("intval", array_column($game->benefitQueue(), "benefit_quantity")));
 
         $game->subtractCurrentBenefit();
         $game->gamestate->jumpToState(18);
