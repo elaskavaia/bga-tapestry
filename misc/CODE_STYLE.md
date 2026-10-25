@@ -96,6 +96,11 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
   in-memory `GameUT` model bypasses the real SQL builders, so a test can exercise a different
   string than production does and pass either way. Stash the fix, run the test, confirm it fails,
   restore. Flag any new guard test that survives its own fix being reverted.
+- In-memory `GameUT` is the default. `TestWithRealDb` (MySQL) only when the subject is the SQL
+  itself; route just the methods under test back to production from an anonymous `GameUT` subclass
+  (`PGameXBody::benefitSingleEntry(...)`), as in
+  [SetupFirstTurnDbTest.php](../tests/SetupFirstTurnDbTest.php). Flag a MySQL test that the
+  in-memory model could cover.
 - A `GameUT` override that replaces production behaviour needs a docblock saying why the real one
   cannot run in tests.
 - Randomness is seeded through `seedRand()`; an unseeded `bgaRand` prints a warning, which now
