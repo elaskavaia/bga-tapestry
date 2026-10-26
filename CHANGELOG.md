@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-25 (v261026-0118)
+
+- Fixed start benefits (e.g. Islanders tiles) arriving after the first income turn civ ability (#214486 #183142)
+- Fixed "Invalid historian token" error when sending a historian
+- Used Lighthouse now shows why it can't be used again (#252057)
+
 ## 2026-10-25 (v261025-1948)
 
 - Fixed Utilitarians Lighthouse usable many times per turn, together with Age of Sail (#252057)
