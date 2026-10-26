@@ -148,47 +148,22 @@ confirmed two are still OPEN on the tracker.
 
 ### Priority: Adjustment Civilization Pack (adj=8), plus anything proven to hit it
 
-- [x] **BGA #183142** - "Islanders gained exploration tiles after the opportunity to use civ
-      ability". OPEN on BGA, 11 votes, `rules`. Table 726016713, 5 players, adj=8, set=7.
-      **FIXED 2026-10-25 (not deployed)** in 014fd29, together with #214486: the start rows of every
-      civ but the last one set up were stranded behind `BE_RESUME`, so a starting player with an
-      income turn 1 trigger got it before their start benefits. `stFinishSetup` now queues
-      `BE_RESUME` via `queueFirstTurn` one prerequisite below the deepest setup row; `setupCiv` and
-      `interruptBenefit` unchanged, setup prompt order unchanged. Tested in `tests/IslandersTest.php`
-      `testIslandersStartTilesArriveBeforeIncomeTurn1Trigger` (Islanders 4 tiles, Traders 2, trigger
-      on top). Also covers ADVISORS (`start_benefit` tapestry, `income_trigger@a8` from 1) - untested.
-      NOTE: visible change in every game: all players' start-benefit prompts now resolve before the
-      starting player's first turn, not only the last civ's. Not checked in Studio.
-      NOTE: rules half was never ruled ("Start with 4 territory tiles" read as setup-time).
-
-- [ ] **Historians client, no BGA id** - studio error 731839 `Invalid historian token`.
-      **FIXED 2026-10-25 (not deployed)** in 52459b2: `onCubeHolderClick` let an empty Historians
-      holder be clicked and never cleared earlier clicks, so `onSelectHistorian` sent the first,
-      empty one. Now empty holders ignore clicks and only one holder stays selected. Client-only,
-      no JS tests; verified on Studio (empty holder alone, empty then full).
-      NOTE: `onMystic` (~2427) collects global `.clicked`; an owner of both Historians and Mystics
-      could send a leftover historian holder as a Mystics id. Should be scoped to
-      `#civilization_13` - untested.
-      NOTE: `Historians::sendHistorian` still throws untranslated `feException` for a bad token or
-      tile and never checks `$pid`.
+- [ ] **Historians leads left over from the 52459b2 token fix** (shipped in v261026-0118):
+      `onMystic` (~2427) collects global `.clicked`; an owner of both Historians and Mystics could
+      send a leftover historian holder as a Mystics id. Should be scoped to `#civilization_13` -
+      untested. `Historians::sendHistorian` still throws untranslated `feException` for a bad token
+      or tile and never checks `$pid`.
 
 - [ ] **BGA #168202** - "Utilitarians are able to use the Lighthouse effect during their Income
       turn". OPEN on BGA, 1 vote, `rules`. Not triaged. The card says "Once on each of your
       advancement turns"; `ownsLighthouseAndCanPlayIt` checks once per turn (v261025-1948, #252057)
       but not the turn kind. Open rules question, no ruling in RULES.md or FORMAL_RULES.txt.
 
-- [x] **BGA #214486** - "Historians should start with a territory tile but it was not given to this
-      player". CONFIRMED on BGA 2026-10-25 as the canonical report; Duplicate of it: #246956, #196736,
-      #195672, #193150, #177610, #171977, #160624. 4-5 players, adj 8/9 (and removed 4), Historians
-      as starting player.
-      **FIXED 2026-10-25 (not deployed)** in 014fd29 - same fix as #183142 above. Tested in
-      `tests/HistoriansSendTest.php` `testStartTileArrivesBeforeTheIncomeTurn1Send` (4p/5p x adj 4, 8,
-      9, real MySQL): tile in hand, no territory row left behind the civ ability.
-      NOTE: #246956 says "official adjusted rules"; if that is option 1 it is not this bug.
-
 - [ ] **Historians sending to Automa / Shadow Empire** - BGA #208143 (OPEN; #209034 by the same
       reporter marked Duplicate of it) and #88718 (OPEN, 6 votes, solo, Historians gained midgame do
-      not give the tokens away; also a "negative score" complaint). Not triaged.
+      not give the tokens away; also a "negative score" complaint). Not triaged. Probably also
+      #223277 ("Unable to place historian token", era 2, cannot select a player; table 860658433,
+      adj=1, apparently solo; older than the error log retention) - unverified.
 
 - [ ] **Unblock in civAbility, follow-up of BGA #202072** - `action_unblock` (PGameXBody.php ~9420)
       reads `$this->gamestate->state()["transitions"]` after `clearCurrentBenefit`; in state 14 that
@@ -264,8 +239,8 @@ that window.
       location where the code expects one.
 - [ ] `feException: items do not belong to player` - 25 events / 12 users (plus 15 / 8 on an older
       id), last seen today.
-- [ ] `feException: Invalid historian token` - 7 events / 4 users. Possibly related to **#203108**
-      above (Historians), but that is a guess - the table lists were not cross-checked.
+- [ ] `feException: Invalid historian token` - 7 events / 4 users. Client cause fixed in 52459b2,
+      shipped in v261026-0118 - check the Release breakdown shows nothing on 0118 before closing.
 - [ ] `TypeError: Unsupported operand types: string + int` - 3 events / 3 users, twice.
 - [ ] `feException: Error: generated notifications are larger than 128k (142359)` - 4 events / 2
       users. A single turn producing >128k of notifications will hard-fail.
@@ -383,3 +358,11 @@ Short log of each run: date, reports touched, outcome.
 - **2026-10-25 16:55 EDT** - No-tile cluster proven by the investigation agent (tests cherry-picked
   as aec06b3). #214486 set Confirmed (BGA default template) as canonical; #246956, #196736, #195672,
   #193150, #177610, #171977, #160624 marked Duplicate of it.
+- **2026-10-25 20:21 EDT** - Close-out of `v261026-0118` (014fd29 start benefits order, 52459b2
+  historian token client), scoped by Victoria to Historians / Islanders (marker NOT bumped). Fixed
+  (BGA default template, verified): #214486, #183142 and the Islanders no-tiles-before-income-1
+  reports #251631, #227602, #223048, #215457, #208744, #198419, #193083; English translation
+  posted first on #208744. Duplicates of #214486 left as Duplicate (#246956 may be adj=1, not this
+  bug). #239039 (4p, adj=8, setup, no server error) also Fixed on Victoria's call - unproven.
+  Left open: #223277 (moved to Automa/Shadow).
+  Unrelated, untouched: #216213 and #223846, Utilitarians start landmark `missing benefit`.
