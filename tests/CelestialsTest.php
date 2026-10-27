@@ -119,7 +119,7 @@ final class CelestialsTest extends TestCase {
         $this->assertEquals(BUILDING_CUBE, $token["card_type"]);
         $this->assertEquals(CelestialsUT::OWNER, $token["card_location_arg"]);
         $this->assertEquals(0, $token["card_location_arg2"], "tokens are indistinguishable once placed");
-        $this->assertFalse($game->isControllingStructure($token));
+        $this->assertTrue($game->isFloatingCapital($token, CelestialsUT::OWNER));
         $this->assertEquals([$coord], array_keys($game->getControlHexes(CelestialsUT::OWNER)));
     }
 

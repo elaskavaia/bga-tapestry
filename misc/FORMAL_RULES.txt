@@ -82,10 +82,11 @@ Map
   the income mat.
 - Supply - a player's unplaced outposts and tiles, off to the side of the income mat.
 - Outpost - the hexagonal token placed by conquer. Upright - standing; toppled - tipped on its side.
-- Control - a territory on which your outpost is the only upright outpost.
+- Control - a territory has at most one controller: the owner of its upright outpost or, with no
+  upright outpost on it, the owner of a player token on it (MAP.2).
 - Item - anything on a territory: an outpost or a player token. A territory holding 2 items may not
   be conquered (MAP.1). Full territory - one holding 2 items.
-- Inert - an item that controls nothing: a player token placed as a token (MAP.2).
+- Inert - an item that controls nothing: only the CELESTIALS floating capital (MAP.2).
 - Starting territory - the territory matching the number of the capital city, where the 2 starting
   outposts go.
 - Floating capital - the CELESTIALS player token that replaces a starting outpost (CIV.CELESTIALS).
@@ -259,25 +260,31 @@ BUILDING.6 An income building leaving the mat is not gaining. Any income buildin
 MAP - territories and items
 MAP.1 Every outpost or player token on a territory is an item. A territory holding 2 items may not
     be conquered by anyone.
-MAP.2 An item is either upright, and controls the territory, or inert, and controls nothing. An
-    outpost is upright until it is toppled. A player token placed as an outpost (MILITANTS out of
-    outposts, adjustment variant 4) is an outpost in every respect; a player token placed as a
-    token (INFILTRATORS, ISOLATIONISTS, the CELESTIALS floating capital) is inert.
-MAP.3 An inert item is invisible to everything that reads control: conquer targeting and adjacency,
+MAP.2 A territory is controlled by the owner of its upright outpost or, with no upright outpost on
+    it, by the owner of a player token on it. An outpost is upright until it is toppled. The
+    CELESTIALS floating capital is the only inert item: it never controls (CIV.CELESTIALS.1).
+MAP.3 A player token cannot be seen upright or toppled, so its state follows the outposts on its
+    territory: it is toppled while an upright outpost shares the territory, upright otherwise. Of 2
+    player tokens with no upright outpost, one is upright and one toppled. Conquering the territory
+    of an upright player token (TREASURE HUNTERS, TRADERS) topples it this way.
+    A toppled player token is not a toppled outpost: it fires no topple effect, never counts toward
+    the topple achievement and is never the target of an effect on a toppled outpost.
+MAP.4 An inert item is invisible to everything that reads control: conquer targeting and adjacency,
     the controlled territory counts, the ISOLATIONISTS landmass, the central island achievement and
-    the MYSTICS controlled territory prediction. It is never toppled, never made upright and never
-    counts toward the topple achievement, and it stays on the territory when control of the
-    territory changes.
-MAP.4 Player tokens on the map are indistinguishable once placed, as in the physical game: a token
-    is its owner's for every count and every move, whatever civilization put it there.
-MAP.5 A token stays where it is, and keeps blocking, when its owner is finished, quits or is
+    the MYSTICS controlled territory prediction. It is never toppled, never made upright, and it
+    stays on the territory when control of the territory changes.
+MAP.5 Player tokens on the map are indistinguishable once placed, as in the physical game: a player
+    token is its owner's for every count and every move, whatever civilization put it there. The
+    CELESTIALS floating capital is the exception: it looks different and only ever moves as the
+    floating capital.
+MAP.6 A player token stays where it is, and keeps blocking, when its owner is finished, quits or is
     eliminated.
 
 CIV - civilization specific
 
 CIV.INFILTRATORS
 CIV.INFILTRATORS.1 The third token counts every player token of yours on that territory, whatever
-    placed it (MAP.4).
+    placed it (MAP.5).
 
 CIV.ALCHEMISTS
 CIV.ALCHEMISTS.1 BGA rule: Is not compatible with PSIONICS (CIV.PSIONICS.12).
@@ -312,8 +319,8 @@ CIV.CELESTIALS.1 The floating capital is an inert item (MAP.2). It grants no con
 CIV.CELESTIALS.2 The move is to an explored adjacent territory. With no explored adjacent territory
     the ability is void for that turn. A skipped move is not caught up.
     Ref. Chris Scaffidi and Mike Young (co-designers), QUESTIONS.txt 4 (2026-09).
-CIV.CELESTIALS.3 The move may float any inert token of the owner (MAP.4).
-    Impl. A zombie owner never moves it (MAP.5).
+CIV.CELESTIALS.3 The move floats only the floating capital, never another player token (MAP.5).
+    Impl. A zombie owner never moves it (MAP.6).
 CIV.CELESTIALS.4 The move is not a conquer: no "whenever you conquer" trigger, die pick, trap card,
     TRADERS leftover die, UTILITARIENS barracks or explore. Both dice pay, red then black; black
     face 1 pays the benefit of the territory moved into; a face with no benefit pays nothing.

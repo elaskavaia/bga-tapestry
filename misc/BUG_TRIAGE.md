@@ -154,6 +154,25 @@ confirmed two are still OPEN on the tracker.
       untested. `Historians::sendHistorian` still throws untranslated `feException` for a bad token
       or tile and never checks `$pid`.
 
+- [x] **BGA #252643** - "unable to play trap card or pass". FIXED, not deployed. Table 933811349,
+      3 players, adj=8. Conquering a territory held by a lone Treasure Hunters player token asserted
+      `conquer action can result only in one owner`: the conqueror's outpost and the player token
+      both controlled. FORMAL_RULES MAP.2-MAP.5 rewritten: a territory has at most one owner, its
+      upright outpost or else a player token on it; the floating capital is the only inert item.
+      `getMap` now derives the owner (`getTerritoryOwners`), `effect_conquer` topples outposts only,
+      `effect_trap` toggles outposts only (a player token with flag 2 used to become -1),
+      `isHexOwner` reads `getMap`. MapTest covers control, the conquer, the topple award and the
+      trap. NOTE: the stuck table should resume on retry, not verified on Studio. NOTE: on running
+      tables a base TRADERS token on an empty territory now controls it (MAP.2), it used to own
+      nothing. NOTE: the server does not check that an ISOLATIONISTS token goes on an empty
+      territory (only the client does), pre-existing.
+
+- [ ] **BGA #252596** - "Unable to select landmark to place". OPEN, 1 vote, `action`. Table
+      934388349, 4 players. Options: adj=8, set=7, Marriage of State removed, Renaissance removed.
+      Urban Planners: a landmark gained from a tech upgrade shows beside the outposts instead of on the
+      civ mat and cannot be selected on later turns; reporter does not know how it got there. Not
+      triaged.
+
 - [ ] **BGA #168202** - "Utilitarians are able to use the Lighthouse effect during their Income
       turn". OPEN on BGA, 1 vote, `rules`. Not triaged. The card says "Once on each of your
       advancement turns"; `ownsLighthouseAndCanPlayIt` checks once per turn (v261025-1948, #252057)
@@ -366,3 +385,8 @@ Short log of each run: date, reports touched, outcome.
   bug). #239039 (4p, adj=8, setup, no server error) also Fixed on Victoria's call - unproven.
   Left open: #223277 (moved to Automa/Shadow).
   Unrelated, untouched: #216213 and #223846, Utilitarians start landmark `missing benefit`.
+- **2026-10-26 18:20 EDT** - Last-24h check (marker NOT bumped). Only two new reports, both adj=8,
+  both tracked above: #252643 (`block`, Treasure Hunters conquer crash, regression from 47be951 by
+  code reading) and #252596 (Urban Planners landmark). The other 24h rows were the previous run's
+  own close-outs. Studio error log was down for maintenance, so no release breakdown. No status
+  changes, no comments.

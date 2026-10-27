@@ -9,7 +9,7 @@ declare(strict_types=1);
  * city by whether they hang off the side of the mat.
  *
  * The token is an ordinary inert player token on the map: it occupies a territory without
- * controlling it (isControllingStructure), so nothing beyond this class knows the civ is in play.
+ * controlling it (isFloatingCapital), so nothing beyond this class knows the civ is in play.
  * Once placed, tokens are indistinguishable (FORMAL_RULES CIV.INFILTRATORS.1), so the move offers every inert
  * cube of the owner on the map, an INFILTRATORS or ISOLATIONISTS one included.
  */

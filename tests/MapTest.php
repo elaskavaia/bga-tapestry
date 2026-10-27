@@ -11,8 +11,8 @@ require_once __DIR__ . "/Stubs/MapUT.php";
  * that read a structure on a territory as more than it is - the topple proxy of effect_endOfConquer
  * and the stand up toggle.
  *
- * An inert cube on a territory (an Infiltrators token today, the Celestials floating capital next)
- * occupies a territory without controlling it, which is what most of these pin.
+ * A territory has at most one owner (FORMAL_RULES MAP.2): its upright outpost, else a player token
+ * on it. The Celestials floating capital is the only player token that never controls.
  */
 final class MapTest extends TestCase {
     private MapUT $game;
@@ -111,18 +111,55 @@ final class MapTest extends TestCase {
         $this->assertEquals([MapUT::OPPONENT], $this->game->hexOwners("1_-1"));
     }
 
-    // ------------------------------------------------------- an inert token
+    // ------------------------------------------------------- a player token
 
-    function testAnInertTokenOccupiesATerritoryWithoutControllingIt() {
+    function testALonePlayerTokenControlsItsTerritory() {
         $this->game->addOutpostAt(MapUT::OWNER, "2_0");
         $this->game->addTokenAt(MapUT::OWNER, "3_0");
 
-        $this->assertEquals([], $this->game->hexOwners("3_0"));
+        $this->assertEquals([MapUT::OWNER], $this->game->hexOwners("3_0"));
         $this->assertEquals(1, $this->game->hexOccupancy("3_0"));
-        $this->assertFalse($this->game->isHexOwner(MapUT::OWNER, "3_0"));
-        $this->assertEquals(["2_0"], array_keys($this->game->getControlHexes(MapUT::OWNER)));
-        $this->assertEquals(1, $this->game->getNumberOfControlledTerritories(MapUT::OWNER));
+        $this->assertTrue($this->game->isHexOwner(MapUT::OWNER, "3_0"));
+        $this->assertEquals(["2_0", "3_0"], array_keys($this->game->getControlHexes(MapUT::OWNER)));
+        $this->assertEquals(2, $this->game->getNumberOfControlledTerritories(MapUT::OWNER));
+    }
+
+    function testATreasureHuntersTokenControlsItsTerritory() {
+        $this->game->addTreasureHuntersTokenAt(MapUT::OPPONENT, "3_0");
+
+        $this->assertEquals([MapUT::OPPONENT], $this->game->hexOwners("3_0"));
+    }
+
+    function testTheFloatingCapitalControlsNothing() {
+        $game = $this->game;
+        $game->giveCiv(MapUT::OWNER, CIV_CELESTIALS);
+        $game->addOutpostAt(MapUT::OWNER, "2_0");
+        $game->addTokenAt(MapUT::OWNER, "3_0");
+
+        $this->assertEquals([], $game->hexOwners("3_0"));
+        $this->assertEquals(["2_0"], array_keys($game->getControlHexes(MapUT::OWNER)));
         $this->assertContains("3_0", $this->targets(), "one item alone leaves the territory conquerable");
+    }
+
+    function testAnUprightOutpostOutranksAPlayerTokenOfAnotherPlayer() {
+        $this->game->addTreasureHuntersTokenAt(MapUT::OWNER, "3_0");
+        $this->game->addOutpostAt(MapUT::OPPONENT, "3_0");
+
+        $this->assertEquals([MapUT::OPPONENT], $this->game->hexOwners("3_0"));
+    }
+
+    /** Base TRADERS on an empty territory: the token used to own nothing, it now controls (MAP.2). */
+    function testATradersTokenOnAnEmptyTerritoryControlsItAndCanBeTrapped() {
+        $game = $this->game;
+        $game->addOutpostAt(MapUT::OWNER, "2_0");
+        $game->addCubeAt(MapUT::OPPONENT, "land_3_0", 1, reason_civ(CIV_TRADERS));
+
+        $this->assertEquals([MapUT::OPPONENT], $game->hexOwners("3_0"));
+
+        $this->conquer("3_0");
+
+        $this->assertEquals([MapUT::OWNER], $game->hexOwners("3_0"));
+        $this->assertGreaterThanOrEqual(0, $game->benefitPosition("standard", 140, MapUT::OPPONENT), "trap offered");
     }
 
     function testATokenSharingATerritoryWithAnOutpostBlocksIt() {
@@ -169,18 +206,51 @@ final class MapTest extends TestCase {
         $this->assertGreaterThanOrEqual(0, $this->game->benefitPosition("standard", 141, MapUT::OWNER));
     }
 
-    function testConqueringATerritoryHoldingOnlyATokenTopplesNobodyAndLeavesTheToken() {
-        $this->game->addOutpostAt(MapUT::OWNER, "2_0");
-        $token = $this->game->addTokenAt(MapUT::OPPONENT, "3_0");
+    /** BGA #252643: the conqueror and the player token both controlled, and the end of conquer asserted. */
+    function testConqueringALonePlayerTokenHandsControlToTheConqueror() {
+        $game = $this->game;
+        $game->addOutpostAt(MapUT::OWNER, "2_0");
+        $token = $game->addTreasureHuntersTokenAt(MapUT::OPPONENT, "3_0");
 
         $this->conquer("3_0");
 
-        $this->assertEquals(0, $this->game->getGameStateValue("toppled_player"));
-        $this->assertEquals("land_3_0", $this->game->structureLocation($token));
-        $this->assertEquals(1, $this->game->toppleFlag($token), "a token has no upright state");
-        $this->assertEquals([MapUT::OWNER], $this->game->hexOwners("3_0"));
-        $this->assertEquals(2, $this->game->hexOccupancy("3_0"), "now unconquerable at two items");
-        $this->assertEquals(-1, $this->game->benefitPosition("standard", 140, MapUT::OPPONENT), "no trap offered");
+        $this->assertEquals(MapUT::OPPONENT, $game->getGameStateValue("toppled_player"));
+        $this->assertEquals("land_3_0", $game->structureLocation($token));
+        $this->assertEquals(CUBE_CIV, $game->toppleFlag($token), "a player token stores no topple state");
+        $this->assertEquals([MapUT::OWNER], $game->hexOwners("3_0"));
+        $this->assertEquals(2, $game->hexOccupancy("3_0"), "now unconquerable at two items");
+        $this->assertGreaterThanOrEqual(0, $game->benefitPosition("standard", 140, MapUT::OPPONENT), "trap offered");
+
+        $game->effect_endOfConquer(MapUT::OWNER);
+
+        $this->assertEquals([MapUT::OWNER], $game->hexOwners("3_0"), "the end of conquer finds one owner");
+    }
+
+    function testTopplingAPlayerTokenDoesNotCountTowardTheToppleAward() {
+        $game = $this->game;
+        $game->addOutpostAt(MapUT::OWNER, "2_0");
+        $game->addOutpostAt(MapUT::OPPONENT, "2_0", 1);
+        $game->addTreasureHuntersTokenAt(MapUT::OPPONENT, "3_0");
+
+        $this->conquer("3_0");
+        $game->effect_endOfConquer(MapUT::OWNER);
+
+        $this->assertEquals(0, $game->dbGetScore(MapUT::OWNER), "one toppled outpost, not two");
+    }
+
+    function testATrapOnAConqueredPlayerTokenGivesItControlBack() {
+        $game = $this->game;
+        $game->addOutpostAt(MapUT::OWNER, "2_0");
+        $token = $game->addTreasureHuntersTokenAt(MapUT::OPPONENT, "3_0");
+        $this->conquer("3_0");
+        $outpost = $game->getStructureInfoSearch(BUILDING_OUTPOST, null, "land_3_0")["card_id"];
+        $trap = $game->addCard(CARD_TAPESTRY, "hand", MapUT::OPPONENT, 42);
+
+        $game->effect_trap($trap, MapUT::OPPONENT);
+
+        $this->assertEquals(1, $game->toppleFlag($outpost));
+        $this->assertEquals(CUBE_CIV, $game->toppleFlag($token), "only outposts toggle");
+        $this->assertEquals([MapUT::OPPONENT], $game->hexOwners("3_0"));
     }
 
     /** The token secures the territory as a second item; the outpost is what controls it. */
@@ -194,8 +264,7 @@ final class MapTest extends TestCase {
         $game->effect_conquer(MapUT::OWNER, "3_0", ["3_0"], true, null, "");
 
         $this->assertEquals("land_3_0", $game->structureLocation($token));
-        $this->assertEquals(1, $game->toppleFlag($token), "a player token never carries ownership");
-        $this->assertFalse($game->isControllingStructure($game->getStructureInfoById($token)));
+        $this->assertEquals(1, $game->toppleFlag($token));
         $this->assertEquals([MapUT::OWNER], $game->hexOwners("3_0"));
         $this->assertEquals(2, $game->hexOccupancy("3_0"), "secured at two items");
     }

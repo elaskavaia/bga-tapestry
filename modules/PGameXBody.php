@@ -6177,23 +6177,42 @@ abstract class PGameXBody extends tapcommon {
             $coords = substr($struc["card_location"], 5); // land_
             $map[$coords]["structures"][] = $struc;
             $map[$coords]["occupancy"] += 1;
-            if ($this->isControllingStructure($struc)) {
-                $map[$coords]["map_owners"][] = $struc["card_location_arg"];
-            }
             $map[$coords]["map_occupants"][] = $struc["card_location_arg"];
-            $map[$coords]["map_owners"] = array_values(array_unique($map[$coords]["map_owners"]));
             $map[$coords]["map_occupants"] = array_values(array_unique($map[$coords]["map_occupants"]));
+        }
+        $celestials_owner = (int) $this->getCivOwner(CIV_CELESTIALS);
+        foreach ($map as $coords => $info) {
+            $map[$coords]["map_owners"] = $this->getTerritoryOwners($info["structures"], $celestials_owner);
         }
 
         return $map;
     }
 
     /**
-     * Whether a structure on a territory takes control of it: card_type_arg 0 stands and controls
-     * (an outpost, or a cube placed as one), 1 is an inert item that only occupies the territory.
+     * At most one owner (FORMAL_RULES MAP.2): an upright structure decides, else a player token.
+     * A player token stores no upright state of its own (MAP.3).
      */
-    function isControllingStructure(array $structure): bool {
-        return (int) $structure["card_type_arg"] != 1;
+    function getTerritoryOwners(array $structures, int $celestials_owner): array {
+        $token_owner = null;
+        foreach ($structures as $struc) {
+            if ($struc["card_type"] != BUILDING_CUBE) {
+                if ((int) $struc["card_type_arg"] != 1) {
+                    return [$struc["card_location_arg"]];
+                }
+            } elseif ($token_owner === null && !$this->isFloatingCapital($struc, $celestials_owner)) {
+                $token_owner = $struc["card_location_arg"];
+            }
+        }
+        return $token_owner === null ? [] : [$token_owner];
+    }
+
+    /** The CELESTIALS floating capital: the only player token that never controls (CIV.CELESTIALS.1). */
+    function isFloatingCapital(array $structure, int $celestials_owner): bool {
+        return $celestials_owner &&
+            $structure["card_type"] == BUILDING_CUBE &&
+            $structure["card_location_arg"] == $celestials_owner &&
+            (int) $structure["card_type_arg"] == 1 &&
+            !$structure["card_location_arg2"];
     }
 
     function getMapHexData($xcoords, $map = null) {
@@ -6204,28 +6223,8 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function isHexOwner($player_id, $coords, $map = null) {
-        if ($map != null) {
-            $info = array_get($map, $coords);
-            if (!$info) {
-                return false;
-            }
-            $owners = array_get($info, "map_owners");
-            if (!$owners || count($owners) == 0) {
-                return false;
-            }
-            if (array_search($player_id, $owners) !== false) {
-                return true;
-            }
-            return false;
-        } else {
-            $structures = $this->getCollectionFromDB(
-                "SELECT * FROM structure WHERE card_location_arg = $player_id AND card_location = 'land_$coords' AND card_type_arg != 1"
-            );
-            if (count($structures) > 0) {
-                return true;
-            }
-            return false;
-        }
+        $info = array_get($map ?? $this->getMap($coords), $coords);
+        return $info && in_array($player_id, $info["map_owners"]);
     }
     function getControlHexes($player_id, $map = null) {
         if ($map == null) {
@@ -7839,11 +7838,8 @@ abstract class PGameXBody extends tapcommon {
             $u = getPart($land_coords, 1);
             $v = getPart($land_coords, 2);
             $coords = $u . "_" . $v;
-            // standing up topples the opponent outpost sharing the territory; a token there is not an outpost
-            $affected = $this->getStructuresSearch(BUILDING_OUTPOST, null, $land_coords);
-            foreach ($affected as $outpost) {
-                $this->dbSetStructureToppled($outpost["card_id"], 1 - (int) $outpost["card_type_arg"]);
-            }
+            // standing up topples the opponent outpost sharing the territory
+            $affected = $this->effect_toggleOutposts($land_coords);
             $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coords'");
             $this->notifyWithName("trap", clienttranslate('${player_name} stands up an outpost'), [
                 "outposts" => $affected,
@@ -8096,8 +8092,8 @@ abstract class PGameXBody extends tapcommon {
         $this->effect_placeOnMap($player_id, $outpost_id, $location);
         // ISOLATIONISTS MAY SECURE TERRITORY WITH A TOKEN
         if ($isol) {
-            // a player token on a territory never carries ownership: the outpost placed above is
-            // what controls, the token only secures it as a second item (FORMAL_RULES MAP.1)
+            // the outpost placed above is what controls, the token only secures the territory as a
+            // second item (FORMAL_RULES MAP.1)
             $this->effect_placeOnMap(
                 $player_id,
                 $isol_token,
@@ -8109,11 +8105,13 @@ abstract class PGameXBody extends tapcommon {
         }
         $this->setSelectedMapHex($coord);
         if ($owner_id) {
-            // TOPPLE...
-            $standing = $this->getStructureInfoSearch(null, 0, $location, $owner_id); // what made them the owner
-            $oid = $standing["card_id"];
-            $this->dbSetStructureToppled($oid, 1);
-            $this->notifyAllPlayers("topple", "", ["bid" => $oid]);
+            // no outpost to topple when a lone player token made them the owner (MAP.3)
+            $standing = $this->getStructureInfoSearch(BUILDING_OUTPOST, 0, $location, $owner_id);
+            if ($standing) {
+                $oid = $standing["card_id"];
+                $this->dbSetStructureToppled($oid, 1);
+                $this->notifyAllPlayers("topple", "", ["bid" => $oid]);
+            }
             $this->setGameStateValue("toppled_player", $owner_id);
             $this->setGameStateValue("toppled_by", $player_id);
             if (!$this->isTapestryActive($player_id, 30)) {
@@ -10004,19 +10002,20 @@ abstract class PGameXBody extends tapcommon {
 
     function effect_trap($card_id, $player_id) {
         $map_data = $this->getSelectedMapHex();
-        $card_data = $this->getObjectFromDB(
-            "SELECT card_id, card_type_arg FROM card WHERE card_id='$card_id' AND card_location='hand' AND card_location_arg='$player_id'"
-        );
+        $card_data = $this->getCardInfoById($card_id);
 
-        if ($card_data === null || $card_data["card_type_arg"] != 42) {
+        if (
+            $card_data === null ||
+            $card_data["card_location"] != "hand" ||
+            $card_data["card_location_arg"] != $player_id ||
+            $card_data["card_type_arg"] != 42
+        ) {
             throw new BgaUserException($this->_("You can only use a trap card"));
         }
 
         $coords = $map_data["map_coords"];
         $this->DbQuery("UPDATE map SET map_owner='$player_id' WHERE map_coords='$coords'");
-        $land_coords = "land_" . $coords;
-        $structure_data = $this->getCollectionFromDB("SELECT card_id FROM structure WHERE card_location='$land_coords'");
-        $this->DbQuery("UPDATE structure SET card_type_arg = 1-card_type_arg WHERE card_location='$land_coords'"); // toggle topple flag.
+        $structure_data = $this->effect_toggleOutposts("land_" . $coords);
         $this->notifyWithName(
             "trap",
             clienttranslate('${player_name} plays a trap card'),
@@ -11154,7 +11153,19 @@ abstract class PGameXBody extends tapcommon {
         return $cells;
     }
 
-    /** The one writer of the topple flag of a structure on a territory, paired with isControllingStructure. */
+    /**
+     * Swaps upright and toppled among the outposts of a territory. A player token there has no flag,
+     * so it controls again once no outpost stands (MAP.3).
+     */
+    function effect_toggleOutposts(string $land_coords): array {
+        $outposts = $this->getStructuresSearch(BUILDING_OUTPOST, null, $land_coords);
+        foreach ($outposts as $outpost) {
+            $this->dbSetStructureToppled($outpost["card_id"], 1 - (int) $outpost["card_type_arg"]);
+        }
+        return $outposts;
+    }
+
+    /** The one writer of the topple flag of a structure on a territory, read by getTerritoryOwners. */
     function dbSetStructureToppled($structure_id, $toppled) {
         $this->DbQuery("UPDATE structure SET card_type_arg='$toppled' WHERE card_id='$structure_id'");
     }

@@ -5865,7 +5865,7 @@ $this->civilizations = [
             clienttranslate(
                 "The move is to an explored adjacent territory. With no explored adjacent territory the ability is void for that turn. A skipped move is not caught up."
             ),
-            clienttranslate("The move may float any inert token of the owner."),
+            clienttranslate("The move floats only the floating capital, never another player token."),
             clienttranslate(
                 "The move is not a conquer: no \"whenever you conquer\" trigger, die pick, trap card, TRADERS leftover die, UTILITARIENS barracks or explore. Both dice pay, red then black; black face 1 pays the benefit of the territory moved into; a face with no benefit pays nothing."
             ),

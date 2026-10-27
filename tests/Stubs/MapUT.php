@@ -40,9 +40,14 @@ class MapUT extends GameUT {
         return $this->dbAddStructure($player_id, BUILDING_OUTPOST, $toppled, "land_$coord");
     }
 
-    /** A player token on a territory: a cube carrying the inert flag, the Infiltrators shape. */
+    /** A player token on a territory placed with flag 1, the Infiltrators and floating capital shape. */
     function addTokenAt(int $player_id, string $coord): int {
         return $this->addCubeAt($player_id, "land_$coord", 1);
+    }
+
+    /** A player token as it leaves a civ mat: CUBE_CIV and the civ reason both stay on it. */
+    function addTreasureHuntersTokenAt(int $player_id, string $coord): int {
+        return $this->addCubeAt($player_id, "land_$coord", CUBE_CIV, reason_civ(CIV_TREASURE_HUNTERS));
     }
 
     function giveOutposts(int $player_id, int $count): void {
@@ -64,7 +69,7 @@ class MapUT extends GameUT {
         return (int) $this->getMap()[$coord]["occupancy"];
     }
 
-    /** The topple flag of one structure: 0 stands and controls, 1 is toppled or inert. */
+    /** The topple flag of one structure: 0 stands, 1 is toppled; a player token ignores it for control. */
     function toppleFlag(int $structure_id): int {
         return (int) $this->getStructureInfoById($structure_id)["card_type_arg"];
     }

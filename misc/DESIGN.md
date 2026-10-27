@@ -77,7 +77,8 @@ The table contains outposts, cubes, landmarks and income buildings.
 - `card_id` - unique id, auto-increment
 - `card_type` - structure type, defined by constants such as `BUILDING_OUTPOST`
 - `card_location_arg` - player_id
-- `card_type_arg` - 1 when toppled on the map
+- `card_type_arg` - 1 when toppled on the map; ignored for control on a player token (FORMAL_RULES
+  MAP.3), except as part of the floating capital test
 
 #### Income buildings
 
