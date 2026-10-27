@@ -111,14 +111,14 @@ final class CelestialsTest extends TestCase {
         $this->assertEquals(1, $game->toppleFlag($this->tokens()[0]), "an item, not a structure that stands");
     }
 
-    function testTheTokenIsAPlainPlayerTokenWithNoCivilizationMarker() {
+    function testTheTokenCarriesTheCelestialsMarker() {
         $game = $this->game;
         $coord = $game->setupCelestials();
         $token = $game->getStructureInfoById($this->tokens()[0]);
 
         $this->assertEquals(BUILDING_CUBE, $token["card_type"]);
         $this->assertEquals(CelestialsUT::OWNER, $token["card_location_arg"]);
-        $this->assertEquals(0, $token["card_location_arg2"], "tokens are indistinguishable once placed");
+        $this->assertEquals(reason_civ(CIV_CELESTIALS), $token["card_location_arg2"]);
         $this->assertTrue($game->isFloatingCapital($token, CelestialsUT::OWNER));
         $this->assertEquals([$coord], array_keys($game->getControlHexes(CelestialsUT::OWNER)));
     }
@@ -171,18 +171,20 @@ final class CelestialsTest extends TestCase {
         $this->assertTrue($args["decline"], "the move is optional");
     }
 
-    function testEveryInertTokenOfTheOwnerIsOfferedAndAStandingCubeIsNot() {
+    /** Every other player token of the owner sits on the same territory, so only the marker filters it out. */
+    function testOnlyTheFloatingCapitalIsOffered() {
         $game = $this->game;
-        $celestial = $game->addTokenAt(CelestialsUT::OWNER, self::START);
-        $infiltrator = $game->addTokenAt(CelestialsUT::OWNER, "2_0");
-        $militant = $game->addCubeAt(CelestialsUT::OWNER, "land_0_0");
-        $isolationist = $game->addTokenAt(CelestialsUT::OWNER, "1_-1");
+        $celestial = $game->addCubeAt(CelestialsUT::OWNER, "land_" . self::START, 1, reason_civ(CIV_CELESTIALS));
+        $legacy = $game->addTokenAt(CelestialsUT::OWNER, "2_0");
+        $game->addCubeAt(CelestialsUT::OWNER, "land_" . self::START, 1, reason_civ(CIV_INFILTRATORS));
+        $game->addCubeAt(CelestialsUT::OWNER, "land_" . self::START, 1, reason_civ(CIV_ISOLATIONISTS));
+        $game->addCubeAt(CelestialsUT::OWNER, "land_" . self::START, CUBE_CIV, reason_civ(CIV_TREASURE_HUNTERS));
+        $game->addCubeAt(CelestialsUT::OWNER, "land_" . self::START); // a militant cube placed as an outpost
         $game->addTokenAt(CelestialsUT::OPPONENT, "1_2");
 
         $targets = $game->celestials()->getMoveTargets(CelestialsUT::OWNER);
 
-        $this->assertEquals([$celestial, $infiltrator, $isolationist], array_keys($targets), "tokens are indistinguishable");
-        $this->assertArrayNotHasKey($militant, $targets, "a cube placed as an outpost is an outpost");
+        $this->assertEquals([$celestial, $legacy], array_keys($targets), "a table from before the marker still moves its token");
     }
 
     function testATokenWithNoExploredNeighbourOffersDeclineOnly() {

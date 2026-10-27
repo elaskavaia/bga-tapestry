@@ -1,5 +1,10 @@
 # Plan: player token control and the floating capital
 
+Status: done (2026-10-26). Part A is commit 0e96db9. In part B, INFILTRATORS has one `addCube`
+call site, not two. The tooltip is skipped: map cubes have `pointer-events: none`, so a gold glow is
+the only marker. Remove the legacy fallback (TODO in `isFloatingCapital`, server and client) after
+2026-12.
+
 Rules: FORMAL_RULES MAP.2-MAP.5, CIV.CELESTIALS.1 and .3 (rewritten 2026-10-26).
 
 - A territory is controlled by the owner of its upright outpost or, with no upright outpost on it,

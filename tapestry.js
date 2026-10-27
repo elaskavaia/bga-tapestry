@@ -2435,6 +2435,15 @@ define([
       });
     },
 
+    /** Mirrors PGameXBody::isFloatingCapital, legacy unmarked token included. */
+    isFloatingCapital: function (card) {
+      if (!this.ownsCiv(this.CON.CIV_CELESTIALS, card.card_location_arg)) return false;
+      const marker = card.card_location_arg2;
+      if (marker == ":civ:" + this.CON.CIV_CELESTIALS) return true;
+      // TODO: remove after 2026-12 with the server fallback
+      return card.card_type_arg == 1 && (!marker || marker == "0");
+    },
+
     ownsCiv: function (civ_id, player_id = this.player_id) {
       var civ = dojo.byId("civilization_" + civ_id);
       if (civ != null) {
@@ -6559,6 +6568,7 @@ define([
           } else {
             dojo.removeClass(div, "dictator");
           }
+          dojo.toggleClass(div, "floating_capital", card.card_location.startsWith("land") && this.isFloatingCapital(card));
           if (type_arg) {
             dojo.setAttr(div, "data-type-arg", type_arg);
           }

@@ -141,6 +141,16 @@ final class MapTest extends TestCase {
         $this->assertContains("3_0", $this->targets(), "one item alone leaves the territory conquerable");
     }
 
+    function testOnlyTheMarkedFloatingCapitalOfACelestialsOwnerIsInert() {
+        $game = $this->game;
+        $game->giveCiv(MapUT::OWNER, CIV_CELESTIALS);
+        $game->addCubeAt(MapUT::OWNER, "land_3_0", 1, reason_civ(CIV_CELESTIALS));
+        $game->addCubeAt(MapUT::OWNER, "land_2_0", 1, reason_civ(CIV_INFILTRATORS));
+
+        $this->assertEquals([], $game->hexOwners("3_0"));
+        $this->assertEquals([MapUT::OWNER], $game->hexOwners("2_0"));
+    }
+
     function testAnUprightOutpostOutranksAPlayerTokenOfAnotherPlayer() {
         $this->game->addTreasureHuntersTokenAt(MapUT::OWNER, "3_0");
         $this->game->addOutpostAt(MapUT::OPPONENT, "3_0");

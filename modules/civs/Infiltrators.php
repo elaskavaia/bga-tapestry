@@ -134,7 +134,7 @@ class Infiltrators extends AbsCivilization {
         $start_info = $game->getStartingPosition($opponent_id);
         $location = $start_info['location'];
 
-        $structure_id = $game->addCube($player_id, 'hand');
+        $structure_id = $game->addCube($player_id, 'hand', 0, reason_civ(CIV_INFILTRATORS));
         $game->effect_placeOnMap($player_id, $structure_id, $location, '*', false);
     }
 }

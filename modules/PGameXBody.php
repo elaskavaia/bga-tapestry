@@ -6206,13 +6206,19 @@ abstract class PGameXBody extends tapcommon {
         return $token_owner === null ? [] : [$token_owner];
     }
 
-    /** The CELESTIALS floating capital: the only player token that never controls (CIV.CELESTIALS.1). */
+    /**
+     * The CELESTIALS floating capital: the only player token that never controls (CIV.CELESTIALS.1).
+     * Mirrored by isFloatingCapital in tapestry.js.
+     */
     function isFloatingCapital(array $structure, int $celestials_owner): bool {
-        return $celestials_owner &&
-            $structure["card_type"] == BUILDING_CUBE &&
-            $structure["card_location_arg"] == $celestials_owner &&
-            (int) $structure["card_type_arg"] == 1 &&
-            !$structure["card_location_arg2"];
+        if (!$celestials_owner || $structure["card_type"] != BUILDING_CUBE || $structure["card_location_arg"] != $celestials_owner) {
+            return false;
+        }
+        if ($structure["card_location_arg2"] == reason_civ(CIV_CELESTIALS)) {
+            return true;
+        }
+        // TODO: remove after 2026-12: tables set up before the marker carry an unmarked token, as did INFILTRATORS
+        return (int) $structure["card_type_arg"] == 1 && !$structure["card_location_arg2"];
     }
 
     function getMapHexData($xcoords, $map = null) {

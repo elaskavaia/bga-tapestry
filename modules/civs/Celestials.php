@@ -8,10 +8,9 @@ declare(strict_types=1);
  * 2-4 and rolls both conquer dice when it does. Income turn 5 scores the landmarks of the capital
  * city by whether they hang off the side of the mat.
  *
- * The token is an ordinary inert player token on the map: it occupies a territory without
- * controlling it (isFloatingCapital), so nothing beyond this class knows the civ is in play.
- * Once placed, tokens are indistinguishable (FORMAL_RULES CIV.INFILTRATORS.1), so the move offers every inert
- * cube of the owner on the map, an INFILTRATORS or ISOLATIONISTS one included.
+ * The token is the only inert item on the map (FORMAL_RULES MAP.2): it occupies a territory
+ * without controlling it. It carries the civ reason as its marker (isFloatingCapital), looks
+ * different on the client, and is the only token the move offers (CIV.CELESTIALS.3).
  */
 class Celestials extends AbsCivilization {
     const MOVE_LAST_TURN = 4;
@@ -42,7 +41,7 @@ class Celestials extends AbsCivilization {
                 $player_id
             );
         }
-        $token_id = (int) $game->addCube($player_id, "hand");
+        $token_id = (int) $game->addCube($player_id, "hand", 0, reason_civ($this->civ));
         $game->effect_placeOnMap(
             $player_id,
             $token_id,
@@ -101,14 +100,17 @@ class Celestials extends AbsCivilization {
     }
 
     /**
-     * Every inert token of the owner on the map, and the explored territories each of them may
-     * drift to. Occupancy is not a filter: the card allows moving onto a full territory.
+     * The floating capital, and the explored territories it may drift to. Occupancy is not a
+     * filter: the card allows moving onto a full territory.
      */
     function getMoveTargets(int $player_id): array {
         $game = $this->game;
         $map = $game->getMap();
         $targets = [];
-        foreach ($game->getStructuresSearch(BUILDING_CUBE, 1, "land\\_%", $player_id) as $token) {
+        foreach ($game->getStructuresSearch(BUILDING_CUBE, null, "land\\_%", $player_id) as $token) {
+            if (!$game->isFloatingCapital($token, $player_id)) {
+                continue;
+            }
             $coords = substr($token["card_location"], 5); // land_
             $neighbours = array_values(array_filter($game->getNeighbourHexes($coords, $map), fn($hex) => $map[$hex]["map_tile_id"] != 0));
             if ($neighbours) {

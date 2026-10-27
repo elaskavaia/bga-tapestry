@@ -1894,6 +1894,9 @@ div[data-income="0"] #subtitle_bar {
 .land_wrapper .cube ~ .cube {
   right: 38%;
 }
+.land > .cube.floating_capital {
+  filter: drop-shadow(0 0 2px gold) drop-shadow(0 0 3px gold) drop-shadow(2px 2px 3px #222);
+}
 
 .land_inner {
   pointer-events: auto;
