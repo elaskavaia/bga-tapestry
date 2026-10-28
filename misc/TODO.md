@@ -4,6 +4,34 @@ Triage 2026-09-13. Tags: [blocker] breaks or strands a table, [rules] wrong game
 or misleading client, [ui-temp] cosmetic, [debt] test gaps and cleanup, [feature] new content. Priority: P1 must fix before
 the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no action planned.
 
+OPEN FROM 2026-10-26 (player token control, BGA #252643) - commits 0e96db9, 57718b8, not deployed,
+not tried on Studio (Studio was down). Plan and rules: PLAN_PLAYER_TOKEN_CONTROL.md, FORMAL_RULES
+MAP.2-MAP.5.
+
+- [ ] [blocker/P1] Studio: the table stuck on BGA #252643 (933811349, adj=8) resumes on retry. The
+      retried `effect_endOfConquer` should find one owner, the conqueror.
+- [ ] [rules/P1] Studio: conquer a lone Treasure Hunters player token. The conqueror controls, the
+      TH owner is offered the trap, no topple award count. Play the trap: the TH owner controls
+      again and the conqueror's outpost is toppled.
+- [ ] [ux/P2] Studio: the floating capital shows the gold glow (`.floating_capital`), at setup,
+      after a move, after F5, and on a legacy table (unmarked token). The setup case depends on the
+      civ mat being drawn before the token (`ownsCiv`). On a legacy table where the owner also has
+      INFILTRATORS, those tokens glow too (accepted).
+- [ ] [rules/P2] Behaviour change on running tables, intended by MAP.2: a base TRADERS token placed
+      on an empty territory used to own nothing and now controls it. It counts as a controlled
+      territory (scoring, ISOLATIONISTS landmass, conquer adjacency), blocks its owner from
+      conquering it, and offers its owner the trap when an opponent conquers it. Variant 4 TRADERS
+      "share control" is dropped. Watch for bug reports.
+- [ ] [rules/P2] Behaviour change: the CELESTIALS move offers only the floating capital. Before, it
+      offered any inert token of the owner (INFILTRATORS, ISOLATIONISTS). On a legacy table every
+      unmarked token of the owner is still offered.
+- [ ] [debt/P3] After 2026-12: remove the legacy fallback in `isFloatingCapital` (PGameXBody and
+      tapestry.js, both marked TODO).
+- [ ] [debt/P4] The server does not check that an ISOLATIONISTS token goes on an empty territory,
+      only the client does (`effect_conquer` trusts `$isol`). Pre-existing.
+- [ ] [debt/P4] `modules/civs/Infiltrators.php` fails `prettier --check` (pre-existing), reformat in
+      its own commit.
+
 OPEN FROM 2026-10-25 (income spot incident, BGA #252057) - review feedback on bd2f96d, 96f1439, c27b72e
 
 - [x] [blocker/P1] FIXED in tapestry.game.php: `upgradeTableDb` rewritten as a version-guarded

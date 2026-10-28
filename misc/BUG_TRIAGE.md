@@ -154,18 +154,18 @@ confirmed two are still OPEN on the tracker.
       untested. `Historians::sendHistorian` still throws untranslated `feException` for a bad token
       or tile and never checks `$pid`.
 
-- [x] **BGA #252643** - "unable to play trap card or pass". FIXED, not deployed. Table 933811349,
-      3 players, adj=8. Conquering a territory held by a lone Treasure Hunters player token asserted
-      `conquer action can result only in one owner`: the conqueror's outpost and the player token
-      both controlled. FORMAL_RULES MAP.2-MAP.5 rewritten: a territory has at most one owner, its
-      upright outpost or else a player token on it; the floating capital is the only inert item.
-      `getMap` now derives the owner (`getTerritoryOwners`), `effect_conquer` topples outposts only,
-      `effect_trap` toggles outposts only (a player token with flag 2 used to become -1),
-      `isHexOwner` reads `getMap`. MapTest covers control, the conquer, the topple award and the
-      trap. NOTE: the stuck table should resume on retry, not verified on Studio. NOTE: on running
-      tables a base TRADERS token on an empty territory now controls it (MAP.2), it used to own
-      nothing. NOTE: the server does not check that an ISOLATIONISTS token goes on an empty
-      territory (only the client does), pre-existing.
+- [ ] **BGA #252974** - "Solo game error when starting due to something with SQL request". OPEN,
+      1 vote, `access`. Table 939097438, 1 player. Options: adj=8, set=7, Marriage of State removed,
+      Renaissance removed, Automa level 6. Setup fails with `UPDATE card SET card_location='limbo' ...
+      WHERE card_id IN ()` (quoted in the report). Cause: solo leaves TAP_MARRIAGE_OF_STATE out of
+      the tapestry deck (`setupNewGameTables`, `$atoma_tap_exclusions`), so with option 101 = Remove
+      `removeSomeComponents` passes `[]` to `dbMoveCards`. Regression from 9afe285 (live since
+      v260926-0320); the old raw UPDATE matched zero rows harmlessly. Every solo table with Marriage
+      of State removed cannot start. **FIXED 2026-10-28 (uncommitted)**: `dbMoveCards` returns early
+      on an empty list; guarded on real MySQL by `tests/GameOptionsDbTest.php`
+      `testRemovingCardAbsentFromDeckDoesNotCrashSetup` (fails without the guard). The "removed from
+      the game" message still posts in solo, as it did before 9afe285. Not from today's deploy; not
+      in the studio error log (setup failures do not land there).
 
 - [ ] **BGA #252596** - "Unable to select landmark to place". OPEN, 1 vote, `action`. Table
       934388349, 4 players. Options: adj=8, set=7, Marriage of State removed, Renaissance removed.
@@ -390,3 +390,21 @@ Short log of each run: date, reports touched, outcome.
   code reading) and #252596 (Urban Planners landmark). The other 24h rows were the previous run's
   own close-outs. Studio error log was down for maintenance, so no release breakdown. No status
   changes, no comments.
+- **2026-10-28** - Deploy v261028-1348 (fix 0e96db9). #252643 and #252781 (same Treasure Hunters
+  conquer crash, tables 938488147 and 938040949, matched by symptom only: the studio error log shows
+  no errors for either table, nor for 933811349) set to Fixed with a "should be fixed, press F5 and
+  pass again" comment. Resuming a stuck table not verified on Studio. Marker NOT bumped.
+- **2026-10-28 08:53 EDT** - Last-48h check (marker NOT bumped: the window does not cover the gap
+  since the marker). Cluster of the same Treasure Hunters conquer crash, all set to Fixed with the
+  same "press F5 and pass again" comment: #252679 and #252696 (table 930891813, 3p, adj=1, quote
+  the `one owner` assertion on an outpost plus a `:civ:38` token; English translation posted on
+  #252679), #252672 (938155847, 2p, adj=8, same assertion), #252685 (933811349, the #252643 table),
+  #252810 (935378358, 2p, adj=8, no error quoted, matched by symptom only). #252596 untouched.
+- **2026-10-28 17:35 EDT** - Post-deploy check of `v261028-1348`, last 48h (marker NOT bumped). No
+  Waiting for deploy reports exist. The Treasure Hunters cluster closed this morning has no player
+  replies. Two new reports since the deploy: #252974 (solo setup crash when Marriage of State is
+  removed, regression from 9afe285, NOT from this deploy, tracked above) and #252909 (BGA site will
+  not load, no server errors for table 938929744, not a game bug). Studio log: three error ids first
+  seen today (`Invalid territory tile` J4Y, `invalid map location` J4B, `items do not belong to
+  player` HS7) are the same throw sites as before, shifted +4/+5 lines by the deploy; the old ids
+  stopped before it. No new error class on 1348. No status changes, no comments.
