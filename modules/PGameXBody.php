@@ -5087,6 +5087,9 @@ abstract class PGameXBody extends tapcommon {
 
     /** Relocate cards without any notification, for callers that send their own. */
     function dbMoveCards(array $card_ids, string $location, int $location_arg): void {
+        if (!$card_ids) {
+            return;
+        }
         foreach ($card_ids as $card_id) {
             $this->checkNumber($card_id);
         }
