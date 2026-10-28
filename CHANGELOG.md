@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-28 (v261028-1348)
+
+- Fixed game stuck (can't pass or trap) after conquering a Treasure Hunters token (#252643)
+- A lone Traders token now controls its territory
+- Celestials floating capital is highlighted and is the only token the Celestials move can pick
+
 ## 2026-10-25 (v261026-0118)
 
 - Fixed start benefits (e.g. Islanders tiles) arriving after the first income turn civ ability (#214486 #183142)
