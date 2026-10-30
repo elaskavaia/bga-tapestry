@@ -245,8 +245,74 @@ retains back to **2026-07-27**. Nobody filed reports for these; they are for the
 prioritise, and per the skill no BGA report should be opened for them. Event/user counts are from
 that window.
 
-- [ ] `feException: Invalid territory tile` - **106 events / 75 users**, 2026-08-05 to today, still
+- [x] `feException: Invalid territory tile` - **106 events / 75 users**, 2026-08-05 to today, still
       firing. Biggest blast radius on the tracker by a wide margin.
+      **FIXED 2026-10-29 (not deployed):**
+      - Server: `effect_drawDecisionPair` reads `$card["id"]`; `dbPickCardsReshuffling` and
+        `dbDropIncompatibleCivs` merge picks with `array_merge` instead of `+=`. Test
+        `AutomaDecisionPairDbTest` (real MySQL), `IncompatibleCivsTest::
+        testTheReplacementIsKeptWhenTheForbiddenCivIsNotDrawnFirst`. Both fail without the fix.
+      - Stubs: `DeckInMem` and the shared `BgaFrameworkStubs.php` Deck now return pick results as
+        a list like production. Full suite still green.
+      - Client: explore `onTerritoryTileClick` ignores tiles outside `territory_tiles_<player_id>`,
+        `onLandClick` looks for the selected tile only there, `processExplore` clears
+        `selectedland`.
+      - NOTE: the reshuffle `+=` has no test (the discard-to-deck move is raw SQL the in-memory deck
+        cannot see). Client change is not test-covered: please check one explore in Studio (pick a
+        hand tile, place, rotate, confirm, and a second explore later).
+      - NOTE: pre-existing, not changed: clicking a map tile during Colonialism (bid 105) is
+        swallowed by `onTerritoryTileClick`, only the hex edge reaches `onLandClick`.
+      Investigation 2026-10-28:
+      - **Solo (verified in code):** `effect_drawDecisionPair` does
+        `foreach ($cards as $card_id => $card)` over `pickCardsForLocation` and updates
+        `WHERE card_id='$card_id'`. Production Deck returns a plain list (notifications carry
+        `"cards":[{...}]`), so the keys are 0 and 1: every Automa decision draw silently runs
+        `UPDATE card SET card_location_arg='1' WHERE card_id='1'`. Whatever card has id 1 (any type)
+        leaves its owner with no notification. Fix: use `$card["id"]`. The stub Deck keys results by
+        card id, so tests never see it - make the stub return a list like production.
+      - Same root, not verified: `dbPickCardsReshuffling` does `$cards += pickCardsForLocation(...)`;
+        with list results the post-reshuffle cards collide on keys 0.. and are dropped from the
+        result (moved in the DB, never notified). Audit every `foreach (... as $id => ...)` and `+=`
+        over Deck results.
+      - **Multiplayer (medium confidence, client):** tables 939101210 and 938291031 sent a tid that
+        was already explored on the map, then explored the same hex with a real hand tile 30-50 s
+        later. Two paths in tapestry.js: `onTerritoryTileClick` in explore state accepts any
+        territory tile div (map tiles too), and `onLandClick` takes
+        `document.querySelector(".territory_tile.selected")` from the whole page (map tiles can keep
+        `selected` from a click in another state, `cardsman.onClickOnItem`). Fix: limit both to the
+        hand stock `territory_tiles_<player_id>`. Not yet known which path fired.
+      - Undo is not a cause: in 939189679 the errors were at 22:55:35/44 UTC, around move 47 (not
+        105), before the undo at 96; in 938291031 the undo restored to after the explore.
+      - Logs: 939189679, 939101210 from the archive; 938291031 is in progress, public log via
+        `/14/tapestry/tapestry/notificationHistory.html?table=T&from=1`. 939188450 (solo, tid 27)
+        and 939161503 (tid 21) have no log file. Older solo hits in 726980: 938782857, 938095672,
+        937846440, 937156784. 726980 goes back to at least release 260916-0116, 5-10 a day.
+      Earlier notes from the same investigation:
+      - Error ids this week: 726980 (34 events / 29 users) and 752705 (6 / 5, release 261028-1348).
+        Each event's Request > Query has `tid`, `location`, `table` and a `user id:` tag.
+      - Proven on table 939189679 (752705, solo Automa, MERRYMAKERS, player 84397663): tile 4 is
+        card id 1, drawn at move 10 (SCOUTING). No later notification moves card id 1, so the
+        client keeps it in hand (replay at move 104 shows it). At move ~105 the client sent tid 4
+        for land_1_3, the server rejected it, the player then explored tile 18 there. STANDING ARMY
+        right after paid 3 VP while the client showed 4 tiles: the server really lost card 1
+        between moves 10 and 105 without notifying. Deck counters show it never went back to the
+        deck (48 -> 35 over 13 draws), it was not explored or discarded.
+      - Card 1 was taken by the Automa's decision draw at move 11 (see the Solo cause above), not by
+        the undo at move 96.
+      - Ruled out: Age of Sail (excluded from Automa decks), Historians (discard, notified),
+        Automa explore (draws from deck only), reshuffle, every `UPDATE card` site that notifies.
+        Undo savepoints: every territory draw goes through `dbPickCardsForLocation`, which saves.
+      - Client suspect not yet checked: `onLandClick` takes `document.querySelector(".territory_tile.selected")`
+        from the whole page, not the own hand (tapestry.js `onLandClick`).
+      - Player reports that match by symptom (text only, tables not checked): #184923 (canonical,
+        table 816840505), #185215, #214800, #173400, #221934, #189712. #249482 ("undo moves my
+        tile to the Automa") is a misreading: the Automa drew its own tile (log: "Automa draws 1 x
+        Territory (Benefit: Conquer)"); reply with that log line.
+      - Method: notification log of any table from a player's view, from a boardgamearena.com page:
+        `fetch('/archive/archive/logs.html?table=T&translated=true&player=P')`. Track the failing
+        card id from `newCards`, and `deckCounters` / `undoRestorePoint` / `explore` /
+        `discardCard` after it. No studio dump needed.
+      - Next: after deploy, reply on #184923 and mark the cluster as its duplicates.
 - [ ] `feException: This transition (benefit) is impossible at this state (20)` - **89 events / 11
       users** (plus `...3814642R`, 39 events / 7 users). Few users, many events - that is people stuck
       retrying, i.e. a block, and it deserves priority above its raw count. State 20 is a benefit state.
@@ -407,4 +473,5 @@ Short log of each run: date, reports touched, outcome.
   not load, no server errors for table 938929744, not a game bug). Studio log: three error ids first
   seen today (`Invalid territory tile` J4Y, `invalid map location` J4B, `items do not belong to
   player` HS7) are the same throw sites as before, shifted +4/+5 lines by the deploy; the old ids
-  stopped before it. No new error class on 1348. No status changes, no comments.
+  stopped before it. No new error class on 1348. Later the same evening #252909 was set to Works for
+  me (site/network issue, no game errors for its table), on Victoria's call.
