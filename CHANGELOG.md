@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-30 (v261030-1658)
+
+- Fixed solo game failing to start with Marriage of State removed (#252974)
+- Fixed "Invalid territory tile" error: the Automa could take a player's tile, and map tiles were clickable when exploring
+
 ## 2026-10-28 (v261028-1348)
 
 - Fixed game stuck (can't pass or trap) after conquering a Treasure Hunters token (#252643)
