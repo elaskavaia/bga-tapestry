@@ -2557,10 +2557,13 @@ abstract class PGameXBody extends tapcommon {
     private function dbPickCardsReshuffling($count, $card_type, $to_location, $location_arg, $deck, $discard, bool &$reshuffled): array {
         $cards = $this->cards->pickCardsForLocation($count, $deck, $to_location, $location_arg, true);
         if (count($cards) < $count) {
-            // resuffle discard into deck
+            // reshuffle discard into deck
             $this->DbQuery("UPDATE card SET card_location='$deck' WHERE card_type='$card_type' AND card_location='$discard'");
             $this->cards->shuffle($deck);
-            $cards += $this->cards->pickCardsForLocation($count - count($cards), $deck, $to_location, $location_arg, true);
+            $cards = array_merge(
+                $cards,
+                $this->cards->pickCardsForLocation($count - count($cards), $deck, $to_location, $location_arg, true)
+            );
             $reshuffled = true;
         }
         return $cards;
@@ -2604,7 +2607,7 @@ abstract class PGameXBody extends tapcommon {
             if (!$more) {
                 break;
             }
-            $cards += $more;
+            $cards = array_merge($cards, $more);
         }
         // discarded silently: the partner was filtered before the draw was shown, so it is hidden info
         foreach ($aside as $card_id) {
@@ -5841,7 +5844,8 @@ abstract class PGameXBody extends tapcommon {
         }
         $cards = $this->cards->pickCardsForLocation(2, "deck_decision", "decision_pair", 0, true);
         $index = 0;
-        foreach ($cards as $card_id => $card) {
+        foreach ($cards as $card) {
+            $card_id = $card["id"];
             $this->DbQuery("UPDATE card SET card_location_arg='$index',card_location_arg2=0 WHERE card_id='$card_id'");
             $index += 1;
         }

@@ -206,6 +206,7 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
         return $picked ? reset($picked) : null;
     }
 
+    /** A list, not keyed by card id, like the production Deck (getObjectListFromDB). */
     function pickCardsForLocation(
         int $nbr,
         string $from_location,
@@ -216,7 +217,7 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
         $picked = [];
         foreach ($this->getCardsOnTop($nbr, $from_location) as $card) {
             $this->moveCard((int) $card["id"], $to_location, $location_arg);
-            $picked[(int) $card["id"]] = $this->rows[(int) $card["id"]];
+            $picked[] = $this->rows[(int) $card["id"]];
         }
         return $picked;
     }
@@ -229,11 +230,7 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
     function getCardsOnTop(int $nbr, string $location): ?array {
         $rows = array_values($this->getCardsInLocation($location));
         usort($rows, fn($a, $b) => $b["location_arg"] <=> $a["location_arg"]);
-        $result = [];
-        foreach (array_slice($rows, 0, $nbr) as $row) {
-            $result[(int) $row["id"]] = $row;
-        }
-        return $result;
+        return array_slice($rows, 0, $nbr);
     }
 
     function reformDeckFromDiscard($from_location = "deck") {

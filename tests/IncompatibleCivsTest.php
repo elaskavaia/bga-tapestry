@@ -92,6 +92,24 @@ final class IncompatibleCivsTest extends TestCase {
         $this->assertEquals([CIV_PSIONICS], $this->discardedCivIds($game));
     }
 
+    /**
+     * The pick result is a list, so the replacement came back keyed 0 and the merge dropped it when
+     * the forbidden card was not the first one drawn.
+     */
+    function testTheReplacementIsKeptWhenTheForbiddenCivIsNotDrawnFirst() {
+        $game = $this->newGame();
+        $game->giveCiv(self::ROLLER, CIV_ALCHEMISTS);
+        $this->stockCiv($game, CIV_ARCHITECTS, 4);
+        $this->stockCiv($game, CIV_PSIONICS, 3);
+        $this->stockCiv($game, CIV_TRADERS, 2);
+        $this->stockCiv($game, CIV_CHOSEN, 1);
+
+        $this->assertFalse($game->resolveRow(172));
+
+        $this->assertEqualsCanonicalizing([CIV_ARCHITECTS, CIV_TRADERS, CIV_CHOSEN], $this->drawnCivIds($game));
+        $this->assertCount(3, $game->notificationsOfType("moveCard")[0]["args"]["cards"]);
+    }
+
     /** A PSIONICS owner drawing 2 to keep 1 (BE_PSIONICS_CIV) is never offered ALCHEMISTS. */
     function testAPsionicsOwnerIsNeverOfferedAlchemistsInADrawAndKeep() {
         $game = $this->newGame();

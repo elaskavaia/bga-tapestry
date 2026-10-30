@@ -2899,6 +2899,7 @@ define([
         outpost_id: outpost_id
       });
       this.selectedTile = 0;
+      this.selectedland = null;
       this.hideRotators();
     },
 
@@ -5110,7 +5111,7 @@ define([
               return;
             }
             this.selectedland = land_id;
-            var sel = document.querySelector(".territory_tile.selected");
+            var sel = $("territory_tiles_" + this.player_id).querySelector(".territory_tile.selected");
             dojo.query(".selected").removeClass("selected");
             dojo.addClass(land_id, "selected");
 
@@ -5371,6 +5372,8 @@ define([
           if (!this.checkAction("explore")) {
             return;
           }
+          // a tile already on the map is not explorable
+          if (!$("territory_tiles_" + this.player_id).contains(div)) return;
           const item = cardsman.getItemFromDiv(div);
 
           if (this.gamedatas.gamestate.args.ageOfSail) {
