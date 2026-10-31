@@ -196,13 +196,6 @@ player count, per the priority section above.
 The highest-voted defects on the tracker, but every table cited on them ran a deprecated
 Civilization Adjustments value, so they queue behind the Pack ones above. Still real reports.
 
-- [ ] **BGA #102790** - "Spies and Revolution tapestry". OPEN, 21 votes, `action`. Table 432621471,
-      2 players, Oct 2023. Options: adj=1 (with Adjustments), set=2 (a value the current option does not
-      define), Marriage of State kept, Renaissance kept, Shadow Empire off.
-      Using the Spies ability to copy the Revolution tapestry to stand up 3 outposts returned
-      `Internal Error ... [expecting tapestry 35 but it was none]`. Tapestry 35 is
-      REVOLUTION (`material.inc.php`, `"or" => [BE_ANYRES, BE_STANDUP_3_OUTPOSTS]`), so the error names
-      the right card and the copy path lost it. Unverified. No fix commit.
 - [ ] **BGA #58486** - "Age of Discovery does not work properly." OPEN, 15 votes, `rules`. Table
       237670282, 3 players, Jan 2022. Options: adj=1 (with Adjustments), set=1 (Original Only), Marriage
       of State kept, Renaissance kept.
@@ -214,6 +207,18 @@ Civilization Adjustments value, so they queue behind the Pack ones above. Still 
       token." That backs the reporter: either token is eligible, so the player picks. Note #62514 ("Not
       allowed to pick which cube on an Advancement Track to move", 9 votes, adj=1) looks like the same
       defect - check for duplicate before working either.
+      CONFIRMED (2026-10-31), test `tests/AgeOfDiscoveryTwoTokensTest.php`
+      `testStaleCubeChoiceMovesTheStartTokenWithoutAsking` (green, pins the bug). Cause: a non-track
+      pick earlier in the same turn (`action_first_benefit` / `action_choose_benefit`) stores its button
+      spot 0 into `cube_choice`; the next two-token advance in `trackMovementInteractive` reads it and
+      silently moves the token on the start space instead of going to `trackSelect`. Fix: store
+      `cube_choice` only for track benefits, else -1. #62514 (Entertainers) likely same path, untested.
+      Second bug in a comment (ukcody34, table 910048653, Sep 2026): an opponent with no token on the
+      Age of Discovery track (Tech completed) hits `systemAssertTrue("Has to be cubes on track ...")` in
+      `cubeChoiceForTrack`, so the game is stuck. CONFIRMED, test `tests/AgeOfDiscoveryNoTokenTest.php`
+      `testOpponentWithNoTokenOnRolledTrackIsNotSkipped`. Fix: void the advance in
+      `trackMovementInteractive` when the player has no token on the track (FORMAL_RULES MOVE.2: "or they
+      have no player token on that track").
 - [ ] **BGA #118067** - "Forced to play dystopia with no buildings remaining". OPEN, 12 votes,
       `block`. Table 487565028, 2 players, Mar 2024. Options: **adj=4** (experimental Nov 2022, removed
       from table creation), set=1 (Original Only), Marriage of State removed, Renaissance removed,
@@ -355,3 +360,10 @@ Older detail is in git history of this file.
   Fixed with "should be fixed, open a new report if it happens again": all three describe the tile
   moving to the Automa, the old card id 1 UPDATE. #252974 (solo setup crash, ed03125) set to Fixed
   with the BGA template. Marker not bumped (not a full sweep).
+- 2026-10-31: #102790 (Spies copying Revolution, "expecting tapestry 35") is Fixed by e74f344 (made
+  for #191475, Advisors with Revolution: drops the `isTapestryActive(35)` check in `action_standup`),
+  first in v260731-2000. Tracked entry removed. Scanned the title, details and comments of every
+  open/notupdated report for Spies AND Revolution: #135926, #115565, #110919, #133156 (Espionage
+  copying Revolution, same check) (all auto-closed `notupdated`) set to Duplicate of #102790.
+  #87819 (Militants cubes) is a different bug even though one comment there reports the Spies
+  error. Marker not bumped (not a full sweep).

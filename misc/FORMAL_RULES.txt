@@ -136,8 +136,9 @@ MOVE - advancing and regressing
 MOVE.1 Advance - moving, or intending to move, the player token up the track (one or more spaces).
     Exception: the FUTURISTS jump. Regress - moving, or intending to move, the player token down
     the track.
-MOVE.2 If a player "must" advance, the advance is void when: the player is finished, or all their
-    player tokens on that track are at the 12th space (and the advance carries no max-out bonus),
+MOVE.2 If a player "must" advance, the advance is void when: the player is finished, or they have no
+    player token on that track, or all their player tokens on that track are at the 12th space (and
+    the advance carries no max-out bonus),
     or the track is blocked by an earlier effect (not by the tapestry card being covered, per
     TAPESTRY.3).
 MOVE.3 If a player "must" regress, the regress is void when: the player is finished, or all their
