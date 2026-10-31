@@ -4,25 +4,15 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . "/Stubs/DiceUT.php";
-
-class TwoTokensOnTrackUT extends DiceUT {
-    public array $moved = [];
-
-    /** Records which token moved; the real move cascades into spot benefits the harness does not model. */
-    function trackMovementProper($track, $spot, $change, $flags, $mandatory, $player_id) {
-        $this->moved[] = [(int) $track, (int) $spot, (int) $change, (int) $player_id];
-        return true;
-    }
-}
+require_once __DIR__ . "/Stubs/TrackMoveUT.php";
 
 /** BGA #58486 (dup #62514): two player tokens on one track (AI SINGULARITY), the owner picks which one moves. */
 final class TwoTokensOnTrackTest extends TestCase {
-    private TwoTokensOnTrackUT $game;
+    private TrackMoveUT $game;
     private int $startToken;
 
     protected function setUp(): void {
-        $this->game = new TwoTokensOnTrackUT();
+        $this->game = new TrackMoveUT();
         $this->game->init();
         $this->game->setGameStateValue("cube_choice", -1);
         $this->startToken = (int) $this->game->dbAddStructure(DiceUT::ROLLER, BUILDING_CUBE, 0, "tech_spot_" . TRACK_SCIENCE . "_0");

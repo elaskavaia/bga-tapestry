@@ -196,39 +196,22 @@ player count, per the priority section above.
 The highest-voted defects on the tracker, but every table cited on them ran a deprecated
 Civilization Adjustments value, so they queue behind the Pack ones above. Still real reports.
 
-- [ ] **BGA #58486** - "Age of Discovery does not work properly." OPEN, 15 votes, `rules`. Table
-      237670282, 3 players, Jan 2022. Options: adj=1 (with Adjustments), set=1 (Original Only), Marriage
-      of State kept, Renaissance kept.
-      With two tokens on the science track (after finishing Technology and restarting on Science), an
-      Age of Discovery science roll advanced the lower token with no choice offered.
-      Rules: [RULES.md](RULES.md), "Other important notes", AI SINGULARITY - "This technology track
-      benefit may result in you having multiple player tokens on the same track. Either is eligible for
-      advance turns. When considering the relative position on a track, only look at your most advanced
-      token." That backs the reporter: either token is eligible, so the player picks. Note #62514 ("Not
-      allowed to pick which cube on an Advancement Track to move", 9 votes, adj=1) looks like the same
-      defect - check for duplicate before working either.
-      **FIXED 2026-10-31 (not deployed), stale `cube_choice` only:** a non-track pick earlier in the
-      turn left its button spot 0 in `cube_choice`, so the next two-token advance silently moved the
-      start token. `action_first_benefit` / `action_choose_benefit` now go through
-      `setCubeChoiceForBenefit`, which stores the spot only when the chosen benefit has a track
-      (`getBenefitTrack`, the same test `argAddTrackChoice` uses to make track buttons), else -1.
-      Tests `tests/TwoTokensOnTrackTest.php`: `testNonTrackFirstBenefit...` / `testNonTrackChooseBenefit...`
-      fail without the fix; characterization tests for track buttons (incl. spot 0 as a regress
-      destination), `trackSelect` spot/cube and research decision pass before and after.
-      #62514 (Entertainers) likely same path, untested.
-      - NOTE: pre-existing, not changed: `action_first_benefit` and `action_selectTrackSpot` store the
-        destination spot, and `cubeChoiceForTrack` matches `spot == choice` before
-        `spot + change == choice`, so with the other token on the destination (tokens at 0 and 1,
-        button to 1) the wrong token moves. `action_choose_benefit` subtracts `tracks_change` (the
-        last track option's `adv`, not the chosen one's). A jump clamped to 13 matches no token.
-      - NOTE: latent: research benefits (84-91, 97-100) have a track, so picking one from a composite
-        stores its spot, and a Decline in `action_research_decision` never clears it.
-      Second bug in a comment (ukcody34, table 910048653, Sep 2026): an opponent with no token on the
-      Age of Discovery track (Tech completed) hits `systemAssertTrue("Has to be cubes on track ...")` in
-      `cubeChoiceForTrack`, so the game is stuck. CONFIRMED, test `tests/AgeOfDiscoveryNoTokenTest.php`
-      `testOpponentWithNoTokenOnRolledTrackIsNotSkipped`. Fix: void the advance in
-      `trackMovementInteractive` when the player has no token on the track (FORMAL_RULES MOVE.2: "or they
-      have no player token on that track").
+- [x] **BGA #58486** - "Age of Discovery does not work properly." OPEN on BGA, 16 votes, `rules`.
+      Table 237670282, 3 players, Jan 2022, adj=1, set=1. Two bugs, both FIXED 2026-10-31, not
+      deployed. Rules: [RULES.md](RULES.md) AI SINGULARITY ("Either is eligible for advance turns"),
+      FORMAL_RULES MOVE.2, MOVE.3, MOVE.5.
+      1. Two tokens on a track, no choice offered (the report). A non-track pick earlier in the turn
+         left spot 0 in `cube_choice`; e9cf09f stores it only for track benefits
+         (`setCubeChoiceForBenefit`). Tests: `TwoTokensOnTrackTest`, `BenefitChoiceTest`. #62514
+         (Entertainers) may be the same or the adjacent-token bug in [TODO.md](TODO.md), untested.
+      2. Stuck game, comment by ukcody34 (table 910048653, Sep 2026): no token on the track Age of
+         Discovery rolled hit the "Has to be cubes on track" assert. The fix voids any move with no
+         token in `trackMovementInteractive` and consumes `cube_choice` before any early return.
+         Tests: `TrackMovementTest`.
+      - NOTE: how the player got zero tokens is unproven. Completing Tech keeps a virtual CUBE_AI cube
+        on 4_12; zero tokens needs benefit 55 resolving off spot 12, likely MARRIAGE OF STATE copying
+        the partner's tech 12. The fix covers both.
+      - Pre-existing issues found in review are in [TODO.md](TODO.md) (OPEN FROM 2026-10-31).
 - [ ] **BGA #118067** - "Forced to play dystopia with no buildings remaining". OPEN, 12 votes,
       `block`. Table 487565028, 2 players, Mar 2024. Options: **adj=4** (experimental Nov 2022, removed
       from table creation), set=1 (Original Only), Marriage of State removed, Renaissance removed,

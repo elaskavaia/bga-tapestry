@@ -8341,18 +8341,27 @@ abstract class PGameXBody extends tapcommon {
         }
         $jump = ($flags & FLAG_JUMP) != 0;
         $advance = $change > 0 && !$jump;
+        // consumed here even when the move turns out void, so it cannot choose the token of a later move
+        $choice = $spot == -1 ? $this->getGameStateValue("cube_choice", -1) : $spot;
+        $this->setGameStateValue("cube_choice", -1);
         if ($advance) {
             if ($this->triggerAdvanceCheck($player_id, $track, $mandatory)) {
                 return true;
             }
             // if advance is not allowed - it with throw an exception
         }
-        if ($spot == -1) {
-            $choice = $this->getGameStateValue("cube_choice", -1);
+        if (!$this->dbGetCubesOnTrack($player_id, $track)) {
+            // AI SINGULARITY moved the only token off this track, the move is void (FORMAL_RULES MOVE.2, MOVE.3)
+            $this->notifyWithTrack(
+                "message_error",
+                clienttranslate('${player_name} has no player token on the ${track_name} track'),
+                ["track" => $track],
+                $player_id
+            );
+            return true;
         }
         $spot = $this->spotChoiceForTrack($track, $player_id, $change, $choice);
         //$this->debugConsole("choice $track $choice => $spot");
-        $this->setGameStateValue("cube_choice", -1);
         if ($spot == -1) {
             if ($jump) {
                 return true; // skip
