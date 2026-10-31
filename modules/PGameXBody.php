@@ -8896,7 +8896,6 @@ abstract class PGameXBody extends tapcommon {
 
     function action_choose_benefit($bid, $spot) {
         $this->checkAction("choose_benefit");
-        $this->setGameStateValue("cube_choice", $spot);
         $benefit_data = $this->getCurrentBenefitWithInfo();
         $args = $this->argBenefitChoice();
         $comp = $this->getCompositeBenefit($benefit_data);
@@ -8920,7 +8919,7 @@ abstract class PGameXBody extends tapcommon {
         $this->systemAssertTrue("invalid benefit choice $bid", in_array($bid, $types));
 
         $change = array_get($args, "tracks_change", 0);
-        $this->setGameStateValue("cube_choice", $spot - $change);
+        $this->setCubeChoiceForBenefit($bid, $spot - $change);
 
         $this->reinjectCompositeBenefitWithChoiceRemoved($bid, $benefit_data, $count - 1);
         $this->queueBenefitInterrupt($bid, $player_id, $data);
@@ -8930,7 +8929,7 @@ abstract class PGameXBody extends tapcommon {
 
     function action_first_benefit($bid, $spot) {
         $this->checkAction("first_benefit");
-        $this->setGameStateValue("cube_choice", $spot);
+        $this->setCubeChoiceForBenefit($bid, $spot);
         $benefit_data = $this->getCurrentBenefit();
         $comp = $this->getCompositeBenefit($benefit_data);
         $op = $comp["op"];
@@ -8943,6 +8942,11 @@ abstract class PGameXBody extends tapcommon {
         $this->queueBenefitInterrupt($bid, $player_id, $data);
 
         $this->gamestate->nextState("next");
+    }
+
+    /** Spot 0 is a real spot, so the benefit type, not the spot, tells a track button from any other button */
+    function setCubeChoiceForBenefit(int $ben, int $spot): void {
+        $this->setGameStateValue("cube_choice", $this->getBenefitTrack($ben) ? $spot : -1);
     }
 
     function reinjectCompositeBenefitWithChoiceRemoved($selected_ben, $benefit_data, $count = 1) {
@@ -10518,10 +10522,15 @@ abstract class PGameXBody extends tapcommon {
         return $this->argBenefitChoice();
     }
 
+    function getBenefitTrack(int $ben): int {
+        $track = (int) $this->getRulesBenefit($ben, "t", 0);
+        return $track <= 4 ? $track : 0;
+    }
+
     function argAddTrackChoice($ben, &$res) {
         // $this->debugConsole("calling argAddTrackChoice $ben $oid");
-        $track = (int) $this->getRulesBenefit($ben, "t", 0);
-        if ($track && $track <= 4) {
+        $track = $this->getBenefitTrack($ben);
+        if ($track) {
             $change = (int) $this->getRulesBenefit($ben, "adv", 1);
             $res["tracks"][$ben]["cubes"] = [];
             $res["tracks"][$ben]["spots"] = $this->getPossibleTrackChoices($track, $change, $res["tracks"][$ben]["cubes"]);

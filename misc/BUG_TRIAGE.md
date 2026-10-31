@@ -207,12 +207,22 @@ Civilization Adjustments value, so they queue behind the Pack ones above. Still 
       token." That backs the reporter: either token is eligible, so the player picks. Note #62514 ("Not
       allowed to pick which cube on an Advancement Track to move", 9 votes, adj=1) looks like the same
       defect - check for duplicate before working either.
-      CONFIRMED (2026-10-31), test `tests/AgeOfDiscoveryTwoTokensTest.php`
-      `testStaleCubeChoiceMovesTheStartTokenWithoutAsking` (green, pins the bug). Cause: a non-track
-      pick earlier in the same turn (`action_first_benefit` / `action_choose_benefit`) stores its button
-      spot 0 into `cube_choice`; the next two-token advance in `trackMovementInteractive` reads it and
-      silently moves the token on the start space instead of going to `trackSelect`. Fix: store
-      `cube_choice` only for track benefits, else -1. #62514 (Entertainers) likely same path, untested.
+      **FIXED 2026-10-31 (not deployed), stale `cube_choice` only:** a non-track pick earlier in the
+      turn left its button spot 0 in `cube_choice`, so the next two-token advance silently moved the
+      start token. `action_first_benefit` / `action_choose_benefit` now go through
+      `setCubeChoiceForBenefit`, which stores the spot only when the chosen benefit has a track
+      (`getBenefitTrack`, the same test `argAddTrackChoice` uses to make track buttons), else -1.
+      Tests `tests/TwoTokensOnTrackTest.php`: `testNonTrackFirstBenefit...` / `testNonTrackChooseBenefit...`
+      fail without the fix; characterization tests for track buttons (incl. spot 0 as a regress
+      destination), `trackSelect` spot/cube and research decision pass before and after.
+      #62514 (Entertainers) likely same path, untested.
+      - NOTE: pre-existing, not changed: `action_first_benefit` and `action_selectTrackSpot` store the
+        destination spot, and `cubeChoiceForTrack` matches `spot == choice` before
+        `spot + change == choice`, so with the other token on the destination (tokens at 0 and 1,
+        button to 1) the wrong token moves. `action_choose_benefit` subtracts `tracks_change` (the
+        last track option's `adv`, not the chosen one's). A jump clamped to 13 matches no token.
+      - NOTE: latent: research benefits (84-91, 97-100) have a track, so picking one from a composite
+        stores its spot, and a Decline in `action_research_decision` never clears it.
       Second bug in a comment (ukcody34, table 910048653, Sep 2026): an opponent with no token on the
       Age of Discovery track (Tech completed) hits `systemAssertTrue("Has to be cubes on track ...")` in
       `cubeChoiceForTrack`, so the game is stuck. CONFIRMED, test `tests/AgeOfDiscoveryNoTokenTest.php`
