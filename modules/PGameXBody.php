@@ -4136,6 +4136,18 @@ abstract class PGameXBody extends tapcommon {
         $this->dbIncResourceCount(RES_CULTURE, "", $culture, 0, $player_id);
     }
 
+    /** Replaces the current player's tokens on a track, e.g. "0,5" for two tokens, "" for none; reload to see it */
+    function debug_setTrack(int $track, string $spots = "") {
+        $player_id = $this->getCurrentPlayerId();
+        $like = $this->getTrackLocationLike($track);
+        $this->DbQuery(
+            "DELETE FROM structure WHERE card_type='" . BUILDING_CUBE . "' AND card_location_arg='$player_id' AND card_location LIKE '$like'"
+        );
+        foreach (array_filter(explode(",", $spots), "strlen") as $spot) {
+            $this->dbAddStructure($player_id, BUILDING_CUBE, 0, "tech_spot_{$track}_" . (int) $spot);
+        }
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     ////////////
