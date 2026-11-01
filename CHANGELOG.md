@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-01 (v261101-2149)
+
+- Fixed AI Singularity: with 2 tokens on a track you now always choose which one advances (#58486)
+- Fixed game stuck when Age of Discovery rolls a track you have no token on (#58486)
+
 ## 2026-10-30 (v261030-1658)
 
 - Fixed solo game failing to start with Marriage of State removed (#252974)
