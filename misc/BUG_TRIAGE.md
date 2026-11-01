@@ -205,22 +205,6 @@ player count, per the priority section above.
 The highest-voted defects on the tracker, but every table cited on them ran a deprecated
 Civilization Adjustments value, so they queue behind the Pack ones above. Still real reports.
 
-- [x] **BGA #58486** - "Age of Discovery does not work properly." OPEN on BGA, 16 votes, `rules`.
-      Table 237670282, 3 players, Jan 2022, adj=1, set=1. Two bugs, both FIXED 2026-10-31, not
-      deployed. Rules: [RULES.md](RULES.md) AI SINGULARITY ("Either is eligible for advance turns"),
-      FORMAL_RULES MOVE.2, MOVE.3, MOVE.5.
-      1. Two tokens on a track, no choice offered (the report). A non-track pick earlier in the turn
-         left spot 0 in `cube_choice`; e9cf09f stores it only for track benefits
-         (`setCubeChoiceForBenefit`). Tests: `TwoTokensOnTrackTest`, `BenefitChoiceTest`. #62514
-         (Entertainers) may be the same or the adjacent-token bug in [TODO.md](TODO.md), untested.
-      2. Stuck game, comment by ukcody34 (table 910048653, Sep 2026): no token on the track Age of
-         Discovery rolled hit the "Has to be cubes on track" assert. The fix voids any move with no
-         token in `trackMovementInteractive` and consumes `cube_choice` before any early return.
-         Tests: `TrackMovementTest`.
-      - NOTE: how the player got zero tokens is unproven. Completing Tech keeps a virtual CUBE_AI cube
-        on 4_12; zero tokens needs benefit 55 resolving off spot 12, likely MARRIAGE OF STATE copying
-        the partner's tech 12. The fix covers both.
-      - Pre-existing issues found in review are in [TODO.md](TODO.md) (OPEN FROM 2026-10-31).
 - [ ] **BGA #118067** - "Forced to play dystopia with no buildings remaining". OPEN, 12 votes,
       `block`. Table 487565028, 2 players, Mar 2024. Options: **adj=4** (experimental Nov 2022, removed
       from table creation), set=1 (Original Only), Marriage of State removed, Renaissance removed,
@@ -375,3 +359,10 @@ Older detail is in git history of this file.
   auto-closed by BGA. Invalid territory tile recheck: no events after v261030-1658. New in the 7-day
   backend list: 756235 getUniqueValue `land_0_-1` card_type 7 (6 events / 1 user, 2026-10-30, a
   block), 756345 notifications >128k (1 event). Marker not bumped (not a full sweep).
+- 2026-11-01: `v261101-2149` deployed the BGA #58486 fixes (two tokens without a choice, stuck
+  move with no token on the track). #58486 Open -> Fixed, tracked entry removed. Duplicates of it set
+  to Duplicate: #115834, #155617, #165479 (French, translation posted) and #132130 (Renaissance,
+  same `trackMovementInteractive` guard) for the stuck move, #60561 for the silent spot-0 token.
+  Left alone, not proven to be the same: #236773 ("already at end of track", stuck), #85804 (real
+  token on the track yet the assert fired), #97814 / #111185 / #65573 (no token choice, but not the
+  start-space token), #64013 (adjacent-token bug, still open in TODO.md).
