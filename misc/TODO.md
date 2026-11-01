@@ -4,6 +4,37 @@ Triage 2026-09-13. Tags: [blocker] breaks or strands a table, [rules] wrong game
 or misleading client, [ui-temp] cosmetic, [debt] test gaps and cleanup, [feature] new content. Priority: P1 must fix before
 the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no action planned.
 
+OPEN FROM 2026-10-31 (track token choice, review of e9cf09f, BGA #58486) - all pre-existing,
+CONFIRMED by stub probes unless marked; probes in the session scratchpad, rewrite as real tests.
+
+- [ ] [rules/P2] Adjacent tokens: `action_first_benefit` and `selectTrackSpot` store the
+      DESTINATION spot as `cube_choice`, which is read as the token to move. Tokens at 0 and 1, button
+      to 1 moves the token already on 1. Fix: store `$spot - change` for the picked benefit. Possible
+      cause of BGA #62514 (Entertainers), untested.
+- [ ] [rules/P3] `action_choose_benefit` subtracts `tracks_change` (the LAST option's `adv`), not the
+      picked option's: `o,23,68` picking the advance stores destination+1 and the player is asked
+      again. Fix: `$args["tracks"][$bid]["change"]`.
+- [ ] [rules/P3] FUTURISTS jump clamped to 13 (`o,151..154,401`, token at 10): stored choice 9
+      matches no token and `trackMovementInteractive` returns for `FLAG_JUMP`, the jump is silently
+      lost.
+- [ ] [rules/P3] An advance blocked by THEOCRACY / BROKER OF PEACE / DICTATORSHIP leaks
+      `cube_choice` into the next advance of the turn. Half fixed by the no-token fix (BGA #58486):
+      `trackMovementInteractive` now consumes it before any early return. Still open:
+      `action_research_decision` stores `$spot - 1` then calls `trackMovementProper` directly, whose
+      `triggerAdvanceCheck` early return skips the reset at its end.
+- [ ] [rules/P4] Research option (84-91, 97-100) picked from a composite, then Decline in
+      `action_research_decision`: the spot is never cleared and leaks. The review says reachable, the
+      fix agent said those are never offered inside a choice - verify which first.
+- [ ] [rules/P2] FUTURISTS (adj 4/8) "advance on up to two different tracks": the second
+      `o,151..154,401` still offers the track jumped by the first, benefit 601 (meant to remove it,
+      `Futurists::setupCiv`) is a no-op in `awardBenefits`. Pinned by `BenefitChoiceTest`
+      `testFuturistsSecondChoiceStillOffersTheJumpedTrack`.
+- [x] [rules/P4] Open rules question: MARRIAGE OF STATE on technology copies the partner's tech 12
+      (AI SINGULARITY, benefit 55). The owner's token, not on 12, moves to another track with no
+      virtual CUBE_AI cube, leaving zero tokens on technology (the reachable case for the no-token
+      guard in `trackMovementInteractive`). Should MoS copy benefit 55 at all? No ruling in
+      FORMAL_RULES; ask the designer. - Yes it does copy, opponent who copied do not get inv cube, do not complete the track
+
 OPEN FROM 2026-10-26 (player token control, BGA #252643) - commits 0e96db9, 57718b8, not deployed,
 not tried on Studio (Studio was down). Plan and rules: PLAN_PLAYER_TOKEN_CONTROL.md, FORMAL_RULES
 MAP.2-MAP.5.
