@@ -133,7 +133,8 @@ panel, not the chat box (see the `game-play-in-studio` skill).
   `prod1`/`prod2` branches are inactive - ignore them.
 - `~/Develop/bga/remote/` is the sshfs mount of the studio filesystem, and
   `~/Develop/bga/remote/tapestry/` mirrors this working tree, so an edit here is live in the studio
-  with no deploy step. `diff` a changed file against it to confirm before testing.
+  with no deploy step. The sync lags about 2 seconds: wait before you `diff` a changed file against
+  it to confirm, and never copy files there by hand.
 - Test seats: `laskava0` = 2300662, `laskava1` = 2300663.
 - The FF pack is exercised with the Civilization Set option value "Fantasies & Futures Only - For
   Testing", which is preselected on a new table.
