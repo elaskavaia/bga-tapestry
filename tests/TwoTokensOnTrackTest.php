@@ -15,11 +15,11 @@ final class TwoTokensOnTrackTest extends TestCase {
         $this->game = new TrackMoveUT();
         $this->game->init();
         $this->game->setGameStateValue("cube_choice", -1);
-        $this->startToken = (int) $this->game->dbAddStructure(DiceUT::ROLLER, BUILDING_CUBE, 0, "tech_spot_" . TRACK_SCIENCE . "_0");
-        $this->game->dbAddStructure(DiceUT::ROLLER, BUILDING_CUBE, 0, "tech_spot_" . TRACK_SCIENCE . "_5");
-        $this->game->dbAddStructure(DiceUT::OTHER, BUILDING_CUBE, 0, "tech_spot_" . TRACK_SCIENCE . "_2");
-        $this->game->dbAddStructure(DiceUT::ROLLER, BUILDING_CUBE, 0, "tech_spot_" . TRACK_EXPLORATION . "_1");
-        $this->game->dbAddStructure(DiceUT::ROLLER, BUILDING_CUBE, 0, "tech_spot_" . TRACK_EXPLORATION . "_5");
+        $this->startToken = (int) $this->game->addCubeAt(DiceUT::ROLLER, "tech_spot_" . TRACK_SCIENCE . "_0");
+        $this->game->addCubeAt(DiceUT::ROLLER, "tech_spot_" . TRACK_SCIENCE . "_5");
+        $this->game->addCubeAt(DiceUT::OTHER, "tech_spot_" . TRACK_SCIENCE . "_2");
+        $this->game->addCubeAt(DiceUT::ROLLER, "tech_spot_" . TRACK_EXPLORATION . "_1");
+        $this->game->addCubeAt(DiceUT::ROLLER, "tech_spot_" . TRACK_EXPLORATION . "_5");
     }
 
     private function playAgeOfDiscoveryRollingScience(): void {
