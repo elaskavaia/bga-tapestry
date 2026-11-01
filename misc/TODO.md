@@ -4,6 +4,25 @@ Triage 2026-09-13. Tags: [blocker] breaks or strands a table, [rules] wrong game
 or misleading client, [ui-temp] cosmetic, [debt] test gaps and cleanup, [feature] new content. Priority: P1 must fix before
 the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no action planned.
 
+STUDIO BUILD WARNINGS (deploy 261101-2149, 12 warnings, all pre-existing framework deprecations)
+
+- [ ] [debt/P3] PHP: `gamestate->table_globals` (PGameXBody.php:11496-11497), use
+      `$this->bga->tableOptions->get()`; `gamestate->state()` (PGameXBody.php:9381, 9456, 13312,
+      tapcommon.php:62), use `getCurrentMainState` / `getCurrentState`.
+- [ ] [debt/P3] PHP: direct `player_score` / `player_score_aux` writes (tapcommon.php:130-139,
+      PGameXBody.php:11898-11925), use `$this->bga->playerScore` / `playerScoreAux`. Careful: the
+      `playerextra` mirror for bots is written alongside.
+- [ ] [debt/P3] PHP: `_()` / `self::_()` in about 30 exception messages (PGameXBody.php, e.g. 1171,
+      4374, 8318; civs/Renegades.php:93; civs/AbsCivilization.php:108; tapcommon.php:214), use
+      `clienttranslate` with exception args.
+- [ ] [debt/P3] JS: `ajaxcall` (tapestry.js:2240, 2413, 3275), use `this.bga.actions.performAction`;
+      direct preference controls (tapestry.js:3824-3851), use `this.bga.userPreferences`;
+      `scoreCtrl` (tapestry.js:6187-6188), use `this.bga.playerPanels.getScoreCounter`; direct player
+      panel elements (tapestry.js:322-364, 6629), use `this.bga.playerPanels.getElement`.
+- [ ] [debt/P4] Non-code: more than 20 image files (sprites); obsolete `tapestry.view.php` /
+      `tapestry_tapestry.tpl`; `stats.inc.php` to `stats.jsonc`; `exception_on_warning` not set in
+      gameinfos.
+
 OPEN FROM 2026-10-31 (track token choice, review of e9cf09f, BGA #58486) - all pre-existing,
 CONFIRMED by stub probes unless marked; probes in the session scratchpad, rewrite as real tests.
 
@@ -29,12 +48,6 @@ CONFIRMED by stub probes unless marked; probes in the session scratchpad, rewrit
       `o,151..154,401` still offers the track jumped by the first, benefit 601 (meant to remove it,
       `Futurists::setupCiv`) is a no-op in `awardBenefits`. Pinned by `BenefitChoiceTest`
       `testFuturistsSecondChoiceStillOffersTheJumpedTrack`.
-- [x] [rules/P4] Open rules question: MARRIAGE OF STATE on technology copies the partner's tech 12
-      (AI SINGULARITY, benefit 55). The owner's token, not on 12, moves to another track with no
-      virtual CUBE_AI cube, leaving zero tokens on technology (the reachable case for the no-token
-      guard in `trackMovementInteractive`). Should MoS copy benefit 55 at all? No ruling in
-      FORMAL_RULES; ask the designer. - Yes it does copy, opponent who copied do not get inv cube, do not
-      complete the track. Ruling recorded as TAPESTRY.7.
 
 OPEN FROM 2026-10-26 (player token control, BGA #252643) - commits 0e96db9, 57718b8, not deployed,
 not tried on Studio (Studio was down). Plan and rules: PLAN_PLAYER_TOKEN_CONTROL.md, FORMAL_RULES
@@ -66,27 +79,12 @@ MAP.2-MAP.5.
 
 OPEN FROM 2026-10-25 (income spot incident, BGA #252057) - review feedback on bd2f96d, 96f1439, c27b72e
 
-- [x] [blocker/P1] FIXED in tapestry.game.php: `upgradeTableDb` rewritten as a version-guarded
-      (`<= 2610250248`) set-based SQL repair through `applyDbUpgradeToAllDB` with `DBPREFIX_`, so
-      the undo copies are fixed too. Both earlier migrations (09f0e89, bd2f96d) used plain queries,
-      so an undo to a snapshot taken before the upgrade brings back `card_location_arg2 = 0` rows and
-      the client crash / ERR:game:04. Three statements: unplaced income rows get level+1.. in id
-      order (leftover sixth stays 0), delete income rows still at 0, cap every income level at 6.
-      Tested on studio 2026-10-25 (MySQL 8.0, no error 1093) with throwaway debug methods that put
-      the live and `zz_savepoint_` tables back to the old layout, ran the upgrade and compared
-      against a snapshot: exact match for both. The level 7 cap was not exercised.
 - [ ] [blocker/P1] The level 7 case (covered by the cap above): on an unmigrated table a level 6
       track still held its leftover sixth building and v261024-2009 let it be claimed (claim,
       Collectors, Traders, ben 110/144), leaving level 7 and ERR:game:04 on every income read.
 - [ ] [debt/P4] Damage from the broken window that no migration can undo: VPincomeStructure counted
       one building short per type (negative at level 1), Traders read spot 0 (PHP warning, opponent
       got nothing). Only tables that did those between v261024-2009 and v261025-0248.
-- [x] [bug/P1] BGA #252057 FIXED on main (a55c572..1e679bf), not deployed yet. Age of Sail no longer
-      redraws on a re-entered explore. The Lighthouse is once per turn: the turn now starts in
-      stTransition / stFinishSetup instead of on every entry into playerTurn (a BE_RESUME re-entry
-      also double counted turns_total, which Dictatorship and Relentless compare), and a marker on a
-      slot with material `"once" => "turn"` means used this turn, cleared at the owner's next turn
-      start. Set the report to Waiting for deploy, then Fixed after the release.
 - [ ] [ux/P2] Check the Lighthouse `ability_used` client change on Studio (not browser verified):
       after a use the cube is not highlighted or clickable, it comes back at the owner's next turn,
       and how the dashed marker looks on the slot.
@@ -94,27 +92,12 @@ OPEN FROM 2026-10-25 (income spot incident, BGA #252057) - review feedback on bd
       18; with an empty stack the turn seems to end without the advance/income choice. Unverified.
 - [ ] [rules/P4] Merfolk in extended play using the Lighthouse from state 13 would re-run
       startExtendedTurn through the BE_RESUME re-entry. Pre-existing, unverified combination.
-- [x] [ui-temp/P4] WONT FIX: the Lighthouse marker stays on a finished player's mat. Clearing it at
-      finish would make the dead player's Lighthouse look usable again; it correctly reads as used.
-- [x] [rules/P3] FIXED (db51a9a): Lighthouse "[ANY REOURCE]" typo. Existing translations of that
-      title are lost.
 - [ ] [debt/P3] Remove the deploy-transition branch in the BE_RESUME (201) handler from 1e679bf: it
       starts the turn when `getPlayerTurn == 0`, only for a table caught resolving setup rows by
       the deploy that moved the turn start into stTransition / stFinishSetup. Drop it one or two
       releases after that deploy, once no table can still be in setup.
 
 P1 - MUST FIX BEFORE THE FF DEPLOY
-
-- [x] [blocker/P1] FIXED. TYRANNY with 2 or more tapestry cards gained at once (Jamey's "it wouldn't
-      let the player play a card on top of it" and "prevented the game from continuing", JAMEY
-      below). A gain still queues one benefit 64 row per card, but argTapestryCard now offers the
-      whole gain at once (tyranny_cards, the cards of every pending TYRANNY row) instead of only the
-      card whose row popped first, and stTapestryCard voids a TYRANNY row that has nothing left to
-      offer, which is every other row of the gain once one card has covered TYRANNY. A TYRANNY row
-      is told apart from a HERALDS or MERFOLK benefit 64 by its data being a bare card id.
-      tests/TyrannyTest.php. The 5 VP on every overplay is a separate item under P2.
-      NOTE: the client half (tapestry.js, one button per gained card and only those cards clickable)
-      is not browser-verified, please confirm on Studio.
 
 - [ ] [blocker/P1] "generated notifications are larger than 128k" (seen at 331844 bytes) on a solo
       table while the Automa and Shadow Empire ran their end of game turns, studio 2026-09-08. The
@@ -145,57 +128,6 @@ P1 - MUST FIX BEFORE THE FF DEPLOY
 Designer answers of 2026-09 (misc/QUESTIONS.txt) overturned eight readings. FORMAL_RULES.txt and
 the material rulings are already updated; each item below is the code change for one clause.
 
-- [x] [bug/P1] Elder Ones: "Unknown player statistic: turns_era_5" on the first advance after
-      income turn 5 (bug report, GS1 18/09 05:34:33). action_advance counted turns_era_<era> and the
-      stat stopped at era 4. FIXED: turns_era_5 (id 50) added to stats.inc.php and initStat, and the
-      count goes through dbIncStatChecked so an in-flight table without the stat row logs instead of
-      throwing. GameUT.incStat now rejects an undefined stat like the framework does. Test:
-      ElderOnesTest testAdvanceTurnAtEra5WithArchitectsAsSecondCiv.
-
-- [x] [rules/P1] CIV.ELDER_ONES.1 (QUESTIONS 7): FIXED. getTapestryEra asks hasExtendedPlayCiv
-      rather than isExtendedPlay, so a player with an extended play civ reads era 4 from the start
-      of era 5, income turn 5 included; MERFOLK gets it for free. ElderOnes.onGainLandmark still
-      asks isExtendedPlay, so the 10 VP per landmark still starts only after the turn. Consequence
-      worth knowing: an overplay granted during their income turn 5 now has the era 4 card to cover
-      and lands there (TAPESTRY.5), where it used to be void. Tests: ElderOnesTest
-      testEra4TapestryStaysActiveThroughIncomeTurn5AndAfter,
-      testEra4TapestryStaysActiveDuringIncomeTurn5ForMerfolk,
-      testOverplayDuringIncomeTurn5LandsOnEra4, testOverplayIsStillRefusedForAPlayerWithoutTheCiv.
-
-- [x] [rules/P1] CIV.ELDER_ONES.2 (QUESTIONS 8): FIXED. The voluntary stop is gone: no
-      action_endMyGame, no entry in tapestry.action.php, no "endMyGame" in state 13, no client button
-      or handler, and an extended play player now simply has no button in that state. The end test is
-      getAvailableAdvances, which drops a track blocked by THEOCRACY, BROKER OF PEACE or an
-      opponent's DICTATORSHIP (isTrackBlocked, a silent mode on triggerAdvanceCheck), and it runs
-      ahead of the activated-ability and lighthouse returns so such a turn cannot stall.
-      NOTE the same test now also decides the ordinary auto-income, so a player whose only
-      affordable advance is blocked takes an income turn instead of a turn where every clickable
-      spot is refused. That is the same rule applied consistently, but it is base game behaviour,
-      not FF only - veto it if you want the filter scoped to extended play.
-      Tests: ElderOnesTest testThereIsNoVoluntaryStop, testABlockedTrackIsNotAnAdvanceTurn,
-      testABrokerOfPeaceBlockAlsoEndsExtendedPlay, testAnOpponentsDictatorshipAlsoEndsExtendedPlay,
-      testAnAdvanceOnAnUnblockedTrackStillContinues, testExtendedPlayEndsEvenWithAnActivatedAbilityPending,
-      testABlockedTrackBeforeExtendedPlayTakesAnIncomeTurnInstead.
-
-- [x] [rules/P1] CIV.ELDER_ONES.5 (QUESTIONS 9): FIXED. finalGameScoring is split into
-      finalCivScoring (the civ scoring) and finalGameCleanup (their DICTATORSHIP markers, a HERALDS
-      clone, final stats, aux score, the log line), and finalGameScoring itself is renamed
-      endPlayerGame since it may now do no scoring at all. effect_endOfIncome runs finalCivScoring at
-      the end of income turn 5 for an extended play player too, and endPlayerGame skips the scoring
-      for one still at era 5.
-      NOTE the cleanup deliberately stays at the real end of their game rather than moving to income
-      turn 5: a DICTATORSHIP of theirs should keep blocking opponents while they still take turns, a
-      HERALDS clone of theirs is still an active tapestry (CIV.ELDER_ONES.1), and the aux score is a
-      final resource count extended play keeps changing. Say so if you want any of the four at
-      income turn 5 instead.
-      NOTE the skip is judged on hasExtendedPlayCiv plus era 5, not isExtendedPlay: the income_turn
-      global stays set for the rest of the turn their income turn 5 was part of, so a quitter who
-      abandons the confirm there would have been scored twice.
-      Tests: ElderOnesTest testIncomeTurn5ScoresTheCivsButDoesNotFinishThePlayer,
-      testTheEndOfExtendedPlayDoesNotScoreASecondTime,
-      testQuittingRightAfterIncomeTurn5DoesNotScoreASecondTime, testAQuitterBeforeIncomeTurn5IsStillScored,
-      MerfolkTest testIncomeTurn5ScoresTheCivsButDoesNotFinishThePlayer.
-
 - [ ] [debt/P2] A player who quits in the middle of their own income turn 5 is never finally scored
       at all: effect_zombieBenefits deletes their pending 602 row so effect_endOfIncome never runs,
       canSkipConfirm is true for a zombie so the playerTurnEnd zombie branch never fires, and
@@ -205,58 +137,6 @@ the material rulings are already updated; each item below is the code change for
 - [ ] [debt/P4] finalIslandersScoring() ignores the player it is scoring and reads
       getActivePlayerId(). Correct at both call sites today, but finalCivScoring made it
       load-bearing in one more place; it should take the player_id its siblings take.
-
-- [x] [rules/P1] CIV.FAEFOLK.1 (QUESTIONS 10): FIXED. Benefit 342 BE_VP_ANY_BUILDING is now the
-      plain alias list of the four VP rows in misc/benefit_types.csv, so it scores every income
-      building type instead of offering a choose-one, and is renamed "Score every income building".
-      Row 54 got the BE_VP_MARKET constant it was missing. Tests: FaefolkTest
-      testScoreAnyBuildingScoresEveryType, testScoreAnyBuildingPaysTheSumOverAllFourMats.
-
-- [x] [rules/P1] CIV.GENIES.1 (QUESTIONS 11): FIXED. drawOpponent draws from every token, and a
-      drawn opponent who is finished or zombie has the wish handed back to the GENIES player as their
-      own civ ability row (queueWishForOwner), carrying the drawn opponent in the reason arg; the
-      owner clicks one of the ring's circles and scores it alone. grantRandomWish is gone and
-      zombieBenefit delegates the same way. NOTE the choice had to come back as a civ ability row
-      rather than an "or" row because effect_onQueueBenefit only offers interceptOpponentBenefit to
-      players other than the civ owner, so an owner's pick never reached grantWish. The "nobody left"
-      skip became ERR:Genies:22: the civ is not dealt in solo games, so a token always exists.
-      Tests: GeniesTest testFinishedOpponentStaysInTheBag, testFinishedOpponentHasTheOwnerChooseInTheirPlace,
-      testZombieOpponentDrawnHasTheOwnerChooseInTheirPlace, testOpponentQuittingAtThePromptHandsTheChoiceToTheOwner.
-
-- [x] [rules/P1] CIV.ILLUMINATI.5 (QUESTIONS 14): FIXED. onDieRolled now sends a non-alive owner
-      to awardFinishedOwnerVP, which puts each row of the face to the engine's own checkAliveForBenefit
-      and awards what it allows: a finished owner keeps the VP and the log names what was lost, a
-      zombie returns early with nothing. queueDieGain reads the rolled face rather than the die
-      global, so both paths are paid from the same face. Tests: IlluminatiTest, the four
-      testAFinishedOwner* cases and testAZombieOwnerGainsNothing.
-
-- [x] [rules/P1] CIV.MERFOLK.5 (QUESTIONS 17): FIXED, and no new material flag was needed after
-      all: tapestry_card_data already carries "type" => "now" for the WHEN PLAYED cards and "era" for
-      the THIS ERA ones, TRAP included, and isWhenPlayedTapestry already read it. Every one of the 44
-      real cards was checked: the type agrees with its description clause and none has both. So
-      CHOICE_PLAY is offered only when the hand holds a WHEN PLAYED card, the card must now be named
-      at the prompt (leaving it to stTapestryCard would have asked over the whole hand), and a named
-      card that is gone when the row pops voids the play instead of reopening the hand.
-      Which cards are playable deliberately does not travel in the state args: those are public, and
-      whether MERFOLK is holding a TRAP is not. The client tests the type it already has.
-      Tests: MerfolkTest testPlayOptionIsNotOfferedForAHandOfThisEraCards, testPlayOptionIsOfferedForATrap,
-      testPlayOptionRequiresASelection, testPlayOptionRefusesAThisEraCard,
-      testAThisEraCardCanStillBeDiscardedForVP, testSelectedCardGoneFromTheHandVoidsThePlay.
-      NOTE the clause's "a played card with both abilities keeps its THIS ERA ability" has nothing to
-      implement: no card in the game has both.
-      NOTE client-side halves of this and of the other seven are NOT browser-verified, there are no
-      JS tests. The MERFOLK selection check in tapestry.js is worth one studio pass.
-
-- [x] [rules/P1] CIV.WEEFOLK.4 (QUESTIONS 23): FIXED. getEligibleOpponents offers every real
-      opponent, and BE_WEEFOLK_PLOT carries 'auto' so checkAliveForBenefit lets the row reach a
-      recipient past income turn 5, who plants it themselves. A recipient who has left the table
-      (actionEliminate) or quit cannot be made active at all, so plantForZombie became
-      plantForAbsent and covers both. Tests: WeefolkTest testFinishedOpponentIsStillOffered,
-      testFinishedOpponentPlantsTheTokenThemselves, testATokenInAFinishedOpponentsCityStillScores,
-      testEliminatedOpponentHasTheTokenPlantedForThem.
-      NOTE not verified in a browser: a finished seat's client is greyed out by
-      updateEliminatedPlayer, which should only disable the player panel and not the capital mat.
-      Worth one studio check that an era 6 seat can actually click a plot when given a token.
 
 - [ ] [debt/P4] Weefolk and Genies both walk getOpponentsStartingFromLeft filtering on
       isRealPlayer, which is now the same loop in both. A getRealOpponents helper on PGameXBody
@@ -269,20 +149,6 @@ P2 - BEFORE THE DEPLOY, NARROWER OR CHEAPER
       decline=true; a decline cashes the row and the landmark sits on civilization_39 forever. Fix
       is a material line. The same block has a null-unsafe getObjectFromDB with no player filter
       (PGameXBody.php 5445).
-
-- [x] [blocker/ux/P2] FIXED place_structure now refuses a cell that is not in the options
-      argPlaceStructure computed for the requested rotation, before anything is written; a plot
-      token cannot go beside the mat either. Client: Confirm validates the cell first, Rotate drops a
-      cell the new rotation no longer allows, and a server refusal puts the structure and the
-      Confirm button back instead of leaving a dead state. Tests: CapitalMatTest
-      testPlacingOnACellOutsideTheOptionsIsRefused, testTheCellIsCheckedForTheRequestedRotation,
-      testPlacingOutsideTheMatIsAlwaysAccepted; WeefolkTest testForeignTokenCannotBePlacedBesideTheMat.
-      NOTE client side is NOT browser-verified, please confirm on Studio with a 2 by 2 landmark
-      (the 2026-09-08 case). The error toast itself is the framework's: the client only restores
-      the UI, so if the toast is still missing that is a framework-level question.
-      NOTE judgment call: an own building or landmark may still go beside the mat while legal
-      cells exist (the 12_12 cell the client always offers). BUILDING.3 reads as full-city only;
-      tightening it is a rules decision, not done here.
 
 - [ ] [rules/P2] TYRANNY awards 5 VP on every overplay (PGameXBody.php 3710); the card says "first
       and only time". Separate from the LIFO blocker under P1.
@@ -389,12 +255,6 @@ P3
       player resolves them. Queue BE_CIV_END once instead and clear the cubes in endCivAbility, the
       way Genies and Werefolk do. Check first whether BE_ALCHEMISTS_DIE in the level 9 branch relies
       on getRemainingDice() seeing an empty mat.
-
-- [x] [rules?/P3] Elder Ones: stPlayerTurn returned early for an activated ability or a playable
-      lighthouse before the "no affordable advance" test. RESOLVED with CIV.ELDER_ONES.2: the
-      extended play test now runs ahead of both returns, because the voluntary stop that used to be
-      the way out of that turn is gone. Neither a lighthouse play nor an activated ability is an
-      advance turn, so it does not keep the game alive.
 
 - [ ] [rules?/P3] The open "Questions for Jamey (orig dev)" block under JAMEY below. Blocked on the
       designer.
@@ -556,22 +416,6 @@ below were closed with no action.
       `effect_discardCard` rather than actually playing a trap, so it only covers half its name;
       `testEmptyHandFinishesThePlayerExactlyOnce` re-enters `playerTurn` at era 6, which exercises
       `takeIncomeAuto` rather than the `stTransition` skip the name implies.
-
-DONE
-
-- [x] Map, DONE: getMap deduped map_owners and map_occupants once after the structure loop, so only
-      whichever hex the last structure row happened to be on was cleaned. Two outposts of one player
-      on a hex made that player two owners of it, which effect_endOfConquer asserts against. Both
-      lines moved inside the loop, pinned by testTwoOutpostsOfOnePlayerAreOneOwnerOnEveryHex in the
-      new tests/MapTest.php.
-
-- [x] Weefolk: interaction with Celestials. Ruled in FORMAL_RULES CIV.CELESTIALS.7 and pinned by
-      testLandmarkHangingOffTheMatStillCountsInTheLinesItTouches: a landmark hanging off the side
-      still counts once per line it touches, and the lines outside the mat are never a token's row
-      or column.
-
-- [x] Jamey: OLYMPIC HOST first choice, first-to-pass bonus with a missing neighbour, "adjustments"
-      spelling, stacked starting outposts, "benefit" spelling in the science die text. All FIXED.
 
 JAMEY
 
