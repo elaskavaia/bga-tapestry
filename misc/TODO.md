@@ -33,7 +33,8 @@ CONFIRMED by stub probes unless marked; probes in the session scratchpad, rewrit
       (AI SINGULARITY, benefit 55). The owner's token, not on 12, moves to another track with no
       virtual CUBE_AI cube, leaving zero tokens on technology (the reachable case for the no-token
       guard in `trackMovementInteractive`). Should MoS copy benefit 55 at all? No ruling in
-      FORMAL_RULES; ask the designer. - Yes it does copy, opponent who copied do not get inv cube, do not complete the track
+      FORMAL_RULES; ask the designer. - Yes it does copy, opponent who copied do not get inv cube, do not
+      complete the track. Ruling recorded as TAPESTRY.7.
 
 OPEN FROM 2026-10-26 (player token control, BGA #252643) - commits 0e96db9, 57718b8, not deployed,
 not tried on Studio (Studio was down). Plan and rules: PLAN_PLAYER_TOKEN_CONTROL.md, FORMAL_RULES

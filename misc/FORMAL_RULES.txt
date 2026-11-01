@@ -131,6 +131,9 @@ TAPESTRY.6 An income turn 5 reminder placed by a tapestry card still pays out wh
     later covered by an overplay.
     Ref. Mike Young (co-designer), BGG thread 3147487 "Reserved reminder tokens and covering
     tapestry cards".
+TAPESTRY.7 MARRIAGE OF STATE copies AI SINGULARITY (technology 12): the copier moves one of their
+    tokens to the start of another track, gains no virtual token on technology 12 and does not
+    complete the technology track. They may end with no token on technology (MOVE.2, MOVE.3).
 
 MOVE - advancing and regressing
 MOVE.1 Advance - moving, or intending to move, the player token up the track (one or more spaces).
