@@ -157,7 +157,16 @@ player count, per the priority section above.
       934388349, 4 players. Options: adj=8, set=7, Marriage of State removed, Renaissance removed.
       Urban Planners: a landmark gained from a tech upgrade shows beside the outposts instead of on the
       civ mat and cannot be selected on later turns; reporter does not know how it got there. Not
-      triaged.
+      triaged. 2026-10-31 reporter: end of game said "you have 1 landmark in area 2", "Can close
+      this out". No server errors for the table. Left Open: the landmark being unplaceable is still
+      unexplained.
+
+- [ ] **BGA #253474** - "convert 2 tiles to 5 points". INFO NEEDED (2026-11-01), 1 vote, `action`.
+      Table 940371646, solo. Options: adj=8, set=1, Marriage of State removed, Renaissance removed,
+      Automa level 2. Confirm on the exploration track 8 bonus (discard 2 territory tiles for 5 VP)
+      "proceeds to error on server". No studio error for the table (token checked against the
+      whole-game list), so likely a user-facing exception, which is not logged. Asked for the exact
+      message, move, tile count, and whether F5 helped.
 
 - [ ] **BGA #168202** - "Utilitarians are able to use the Lighthouse effect during their Income
       turn". OPEN on BGA, 1 vote, `rules`. Not triaged. The card says "Once on each of your
@@ -308,8 +317,9 @@ that window.
         card id from `newCards`, and `deckCounters` / `undoRestorePoint` / `explore` /
         `discardCard` after it. No studio dump needed.
       - DEPLOYED in v261030-1658. #184923, #185215, #214800, #173400, #221934, #189712, #249482,
-        #89731, #95633 set to Fixed 2026-10-30. Recheck next run: the error's Release breakdown
-        has no events on 261030-1658.
+        #89731, #95633 set to Fixed 2026-10-30. Recheck 2026-11-01: 7-day list shows 752705 last
+        seen 2026-10-29 23:10Z and 726980 last seen 2026-10-28, both before the deploy; nothing
+        new on 261030-1658. Recheck once more after a week of traffic.
 - [ ] `feException: This transition (benefit) is impossible at this state (20)` - **89 events / 11
       users** (plus `...3814642R`, 39 events / 7 users). Few users, many events - that is people stuck
       retrying, i.e. a block, and it deserves priority above its raw count. State 20 is a benefit state.
@@ -360,3 +370,8 @@ Older detail is in git history of this file.
   copying Revolution, same check) (all auto-closed `notupdated`) set to Duplicate of #102790.
   #87819 (Militants cubes) is a different bug even though one comment there reports the Spies
   error. Marker not bumped (not a full sweep).
+- 2026-11-01: Scoped to reports updated in the last 2 days. #253474 Open -> Info needed (no server
+  error for the table). #252596 reporter comment recorded, left Open. #153921, #153927 were only
+  auto-closed by BGA. Invalid territory tile recheck: no events after v261030-1658. New in the 7-day
+  backend list: 756235 getUniqueValue `land_0_-1` card_type 7 (6 events / 1 user, 2026-10-30, a
+  block), 756345 notifications >128k (1 event). Marker not bumped (not a full sweep).
