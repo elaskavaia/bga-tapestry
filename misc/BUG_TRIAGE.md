@@ -147,6 +147,22 @@ player count, per the priority section above.
 
 ### Priority: Adjustment Civilization Pack (adj=8), plus anything proven to hit it
 
+- [x] **BGA #188139** - "Traders - Civilization ability not working". OPEN, 8 votes, `rules`.
+      Table 741511655, 4 players. Options: adj=8, set=7, Marriage of State removed, Renaissance
+      removed. Also tables 809070163, 827550338, plus Ondonande's 2026-11-02 comment.
+      **FIXED 2026-11-02 (not deployed):** `Traders::sendTrader` now gives the selected territory
+      tile to the opponent on both adj8 opponent options, and option 2 (income building) pays the
+      revealed benefit to both players instead of the adj4 opponent-only rule. The tile is validated
+      before any board change. "benfit" typo fixed in material (resets 2 translations). Client: the
+      "Select a tile to give first" hint now highlights the hand tiles. Test `tests/TradersTest.php`
+      (13 tests, 6 fail without the fix).
+      NOTE: design call - against the Shadow Empire the traded tile is discarded (a bot has no hand);
+      Automa receives it into its hand like BE_OPPONENTS_GAIN_TILE.
+      NOTE: declined - opponent hexes are not hidden from the targets when the player holds no tile,
+      a plain error is shown instead (hiding them could leave no way to decline the ability).
+      NOTE: please confirm on Studio: with no tile selected, pressing Trader/an income building on an
+      opponent hex lights up the hand tiles. Server side is unit tested only (2-player harness).
+
 - [ ] **Historians leads left over from the 52459b2 token fix** (shipped in v261026-0118):
       `onMystic` (~2427) collects global `.clicked`; an owner of both Historians and Mystics could
       send a leftover historian holder as a Mystics id. Should be scoped to `#civilization_13` -

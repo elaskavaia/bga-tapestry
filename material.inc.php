@@ -4429,7 +4429,7 @@ $this->civilizations = [
                 "<b>At the beginning of your income turns (2-5)</b>, you may place a player token on one of your or your opponent's tech cards. If that card is in the bottom or middle row, it is instantly upgraded, and it ignores top-row prerequisites*."
             ),
             clienttranslate(
-                "If it is an opponent's tech card, you may gain the benfit after they do (if it's your card, gain the benefit as normal)."
+                "If it is an opponent's tech card, you may gain the benefit after they do (if it's your card, gain the benefit as normal)."
             ),
             clienttranslate(
                 "Whenever an opponent's tech card with your token on it is upgraded to their top row (by your action or theirs), after the benefits have been resolved, you gain the tech card, placing it on your bottom row. All tokens remain on it. Landmarks on tech cards already gained by the opponent do nothing for you."
@@ -5121,7 +5121,7 @@ $this->civilizations = [
                 "At the beginning of your income turns (2-5), choose one of the following options. For the first two options, you must have a territory tile to give:"
             ),
             clienttranslate(
-                "<li>Place a player token on a territory with exactly 1 opponent outpost and nothing else: Give a territory tile to that opponent, then you gain both the benfit on the traded territory tile and the benefit of the territory (if any) on which you just placed a player token. The opponent controls the territory."
+                "<li>Place a player token on a territory with exactly 1 opponent outpost and nothing else: Give a territory tile to that opponent, then you gain both the benefit on the traded territory tile and the benefit of the territory (if any) on which you just placed a player token. The opponent controls the territory."
             ),
             clienttranslate(
                 "<li>Gain an income building and place it (toppled) on a territory with exactly 1 opponent outpost and nothing else: Give a territory tile to that opponent, then both you and your opponent gain the benefit revealed by the income building. The opponent controls the territory."

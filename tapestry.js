@@ -1195,9 +1195,7 @@ define([
           const tileNode = $(`territory_tiles_${this.player_id}`).querySelector(".selected");
           if (!tileNode) {
             this.showError(_("Select a tile to give first"));
-            $(`territory_tiles_${this.player_id}`)
-              .querySelectorAll(".territory")
-              .forEach((node) => dojo.addClass(node, "active_slot"));
+            dojo.query("#territory_tiles_" + this.player_id + " .card").addClass("active_slot");
             return;
           }
           tile = getPart(tileNode.id, 1);
