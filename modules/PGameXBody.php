@@ -115,7 +115,7 @@ abstract class PGameXBody extends tapcommon {
      * helper method to make testing easier
      */
     function getNewDeck(string $name): \Bga\GameFramework\Components\Deck {
-        return $this->deckFactory->createDeck($name);
+        return $this->bga->deckFactory->createDeck($name);
     }
 
     /**
@@ -11506,7 +11506,7 @@ abstract class PGameXBody extends tapcommon {
 
     function removeSomeComponents() {
         foreach ($this->option_removals as $gameoption_id => $removals) {
-            if ($this->tableOptions->get($gameoption_id) == 1) {
+            if ($this->bga->tableOptions->get($gameoption_id) == 1) {
                 foreach ($removals as $rem) {
                     list($card_type, $card_type_arg) = $rem;
                     $cards = $this->getCardsSearch($card_type, $card_type_arg);
@@ -12237,7 +12237,7 @@ abstract class PGameXBody extends tapcommon {
         if (!$this->isRealPlayer($player_id)) {
             return true;
         }
-        if ($this->userPreferences->get($player_id, PREF_AUTO_CONFIRM) == PREFVALUE_AUTO_CONFIRM_ON) {
+        if ($this->bga->userPreferences->get($player_id, PREF_AUTO_CONFIRM) == PREFVALUE_AUTO_CONFIRM_ON) {
             return true;
         }
         return false;
