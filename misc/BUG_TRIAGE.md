@@ -127,11 +127,11 @@ predates the last deploy and is therefore live.
 
 ## Bug triage last checked
 
-**2026-08-26 18:48 EDT** - only triage BGA reports created/updated after this time; bump this line
+**2026-11-03 08:29 EST** - only triage BGA reports created/updated after this time; bump this line
 to `date` at run start after each run.
 
-(The 2026-08-26 run was scoped to the top defects by vote, not a full sweep - the Open and Waiting
-for deploy status sweeps still have not been run. There are 2,624 reports on the tracker in total.)
+Reports untouched since before 2026-11-03 are grandfathered: skip the full Open sweep and do not ask
+about them. Still run the Waiting for deploy sweep.
 
 ## Tracked bugs
 
@@ -152,6 +152,11 @@ player count, per the priority section above.
       send a leftover historian holder as a Mystics id. Should be scoped to `#civilization_13` -
       untested. `Historians::sendHistorian` still throws untranslated `feException` for a bad token
       or tile and never checks `$pid`.
+
+- [ ] **BGA #245466** - "Traders income action". OPEN, 1 vote, `action`. Table 915804573. Options:
+      adj=8, set=7. Traders could not use the income ability although "there was a tile with 1
+      outpost on it"; a commenter says the log shows no civ income action at all. Not triaged; not
+      known whether the ability was skipped or just had no valid target (e.g. no tile in hand).
 
 - [ ] **BGA #252596** - "Unable to select landmark to place". OPEN, 1 vote, `action`. Table
       934388349, 4 players. Options: adj=8, set=7, Marriage of State removed, Renaissance removed.
@@ -228,82 +233,6 @@ retains back to **2026-07-27**. Nobody filed reports for these; they are for the
 prioritise, and per the skill no BGA report should be opened for them. Event/user counts are from
 that window.
 
-- [x] `feException: Invalid territory tile` - **106 events / 75 users**, 2026-08-05 to today, still
-      firing. Biggest blast radius on the tracker by a wide margin.
-      **FIXED 2026-10-29 (not deployed):**
-      - Server: `effect_drawDecisionPair` reads `$card["id"]`; `dbPickCardsReshuffling` and
-        `dbDropIncompatibleCivs` merge picks with `array_merge` instead of `+=`. Test
-        `AutomaDecisionPairDbTest` (real MySQL), `IncompatibleCivsTest::
-        testTheReplacementIsKeptWhenTheForbiddenCivIsNotDrawnFirst`. Both fail without the fix.
-      - Stubs: `DeckInMem` and the shared `BgaFrameworkStubs.php` Deck now return pick results as
-        a list like production. Full suite still green.
-      - Client: explore `onTerritoryTileClick` ignores tiles outside `territory_tiles_<player_id>`,
-        `onLandClick` looks for the selected tile only there, `processExplore` clears
-        `selectedland`.
-      - NOTE: the reshuffle `+=` has no test (the discard-to-deck move is raw SQL the in-memory deck
-        cannot see). Client change is not test-covered: please check one explore in Studio (pick a
-        hand tile, place, rotate, confirm, and a second explore later).
-      - NOTE: pre-existing, not changed: clicking a map tile during Colonialism (bid 105) is
-        swallowed by `onTerritoryTileClick`, only the hex edge reaches `onLandClick`.
-      Investigation 2026-10-28:
-      - **Solo (verified in code):** `effect_drawDecisionPair` does
-        `foreach ($cards as $card_id => $card)` over `pickCardsForLocation` and updates
-        `WHERE card_id='$card_id'`. Production Deck returns a plain list (notifications carry
-        `"cards":[{...}]`), so the keys are 0 and 1: every Automa decision draw silently runs
-        `UPDATE card SET card_location_arg='1' WHERE card_id='1'`. Whatever card has id 1 (any type)
-        leaves its owner with no notification. Fix: use `$card["id"]`. The stub Deck keys results by
-        card id, so tests never see it - make the stub return a list like production.
-      - Same root, not verified: `dbPickCardsReshuffling` does `$cards += pickCardsForLocation(...)`;
-        with list results the post-reshuffle cards collide on keys 0.. and are dropped from the
-        result (moved in the DB, never notified). Audit every `foreach (... as $id => ...)` and `+=`
-        over Deck results.
-      - **Multiplayer (medium confidence, client):** tables 939101210 and 938291031 sent a tid that
-        was already explored on the map, then explored the same hex with a real hand tile 30-50 s
-        later. Two paths in tapestry.js: `onTerritoryTileClick` in explore state accepts any
-        territory tile div (map tiles too), and `onLandClick` takes
-        `document.querySelector(".territory_tile.selected")` from the whole page (map tiles can keep
-        `selected` from a click in another state, `cardsman.onClickOnItem`). Fix: limit both to the
-        hand stock `territory_tiles_<player_id>`. Not yet known which path fired.
-      - Undo is not a cause: in 939189679 the errors were at 22:55:35/44 UTC, around move 47 (not
-        105), before the undo at 96; in 938291031 the undo restored to after the explore.
-      - Logs: 939189679, 939101210 from the archive; 938291031 is in progress, public log via
-        `/14/tapestry/tapestry/notificationHistory.html?table=T&from=1`. 939188450 (solo, tid 27)
-        and 939161503 (tid 21) have no log file. Older solo hits in 726980: 938782857, 938095672,
-        937846440, 937156784. 726980 goes back to at least release 260916-0116, 5-10 a day.
-      Earlier notes from the same investigation:
-      - Error ids this week: 726980 (34 events / 29 users) and 752705 (6 / 5, release 261028-1348).
-        Each event's Request > Query has `tid`, `location`, `table` and a `user id:` tag.
-      - Proven on table 939189679 (752705, solo Automa, MERRYMAKERS, player 84397663): tile 4 is
-        card id 1, drawn at move 10 (SCOUTING). No later notification moves card id 1, so the
-        client keeps it in hand (replay at move 104 shows it). At move ~105 the client sent tid 4
-        for land_1_3, the server rejected it, the player then explored tile 18 there. STANDING ARMY
-        right after paid 3 VP while the client showed 4 tiles: the server really lost card 1
-        between moves 10 and 105 without notifying. Deck counters show it never went back to the
-        deck (48 -> 35 over 13 draws), it was not explored or discarded.
-      - Card 1 was taken by the Automa's decision draw at move 11 (see the Solo cause above), not by
-        the undo at move 96.
-      - Ruled out: Age of Sail (excluded from Automa decks), Historians (discard, notified),
-        Automa explore (draws from deck only), reshuffle, every `UPDATE card` site that notifies.
-        Undo savepoints: every territory draw goes through `dbPickCardsForLocation`, which saves.
-      - Client suspect not yet checked: `onLandClick` takes `document.querySelector(".territory_tile.selected")`
-        from the whole page, not the own hand (tapestry.js `onLandClick`).
-      - Player reports that match by symptom (text only, tables not checked): #184923 (canonical,
-        table 816840505), #185215, #214800, #173400, #221934, #189712. #249482 ("undo moves my
-        tile to the Automa") is a misreading: the Automa drew its own tile (log: "Automa draws 1 x
-        Territory (Benefit: Conquer)"); reply with that log line.
-        Doubt on that verdict (2026-10-30): PLAYER_AUTOMA is 1, so the old UPDATE on card id 1
-        set `card_location_arg='1'`, i.e. moved the tile into the Automa's hand; an undo re-render
-        is when the player would see it. #89731 (2023, auto-closed `notupdated`, still commented
-        2026-06) says exactly that: "Invalid territory tile", then "the Automa had it instead".
-        #95633 is named there as similar. All six cluster tables are solo.
-      - Method: notification log of any table from a player's view, from a boardgamearena.com page:
-        `fetch('/archive/archive/logs.html?table=T&translated=true&player=P')`. Track the failing
-        card id from `newCards`, and `deckCounters` / `undoRestorePoint` / `explore` /
-        `discardCard` after it. No studio dump needed.
-      - DEPLOYED in v261030-1658. #184923, #185215, #214800, #173400, #221934, #189712, #249482,
-        #89731, #95633 set to Fixed 2026-10-30. Recheck 2026-11-01: 7-day list shows 752705 last
-        seen 2026-10-29 23:10Z and 726980 last seen 2026-10-28, both before the deploy; nothing
-        new on 261030-1658. Recheck once more after a week of traffic.
 - [ ] `feException: This transition (benefit) is impossible at this state (20)` - **89 events / 11
       users** (plus `...3814642R`, 39 events / 7 users). Few users, many events - that is people stuck
       retrying, i.e. a block, and it deserves priority above its raw count. State 20 is a benefit state.
@@ -318,15 +247,6 @@ that window.
 - [ ] `TypeError: Unsupported operand types: string + int` - 3 events / 3 users, twice.
 - [ ] `feException: Error: generated notifications are larger than 128k (142359)` - 4 events / 2
       users. A single turn producing >128k of notifications will hard-fail.
-
-- [x] JS `$(e).querySelectorAll is not a function` in `animSpinCounter` - 760051 (game
-      261101-2149) and 754591 (261028-1348), 1 event / 1 user each, WebKit wording. Not
-      reproduced: `getPlaceForReason` case `tapestry` fell through to `return res` with the empty
-      NodeList when no `.tapestry_<n>` element exists; `animScore` treats it as truthy and `$()`
-      passes it through. **FIXED 2026-11-03 (not deployed):** returns null there. Check the
-      Release breakdown after the next deploy.
-
-Not yet checked this run: the `projects=frontend` (browser/JS) half of the log.
 
 ## Triage run log
 
@@ -376,5 +296,12 @@ Older detail is in git history of this file.
 - 2026-11-03: `v261103-1426` deployed the BGA #188139 Traders fix; #188139 Open -> Fixed, tracked
   entry removed. Last 48h: no new reports (#154057 only auto-closed by BGA). Errors last seen in
   48h: 756796 "BGA main website do not respond" (4 / 4) and 760357 mysql timeout (1 / 1), both
-  BGA infrastructure; JS 760051 `animSpinCounter` recorded above. Invalid territory tile: still
-  nothing after 2026-10-29. Marker not bumped (not a full sweep).
+  BGA infrastructure. JS 760051 / 754591 `animSpinCounter` crash (empty NodeList from
+  `getPlaceForReason`) fixed in 5797337, not deployed: check its Release breakdown after the next
+  deploy. Invalid territory tile (Automa decision draw moved card id 1, plus client tile picks)
+  fixed in v261030-1658: no events after 2026-10-29, entry closed.
+- 2026-11-03: Traders sweep (titles matching trader in any language). Same bug as #188139, all
+  adj=8, set to Fixed with the BGA template: #196947 (tile kept, benefit twice), #207610 and
+  #244412 (income building paid only the opponent). Left Open: #245466 (adj=8, ability not offered
+  on income), #200844, #194201, #175503, #186079, #77549 (adj=4) and #156499 (adj=1), all different
+  claims. Marker bumped; older reports grandfathered.
