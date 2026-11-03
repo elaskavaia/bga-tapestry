@@ -52,7 +52,7 @@ PHP is invoked as `php8.4` everywhere. Prettier (with the PHP plugin, width 140,
 `Tapestry` ([tapestry.game.php](tapestry.game.php), a thin BGA entry point)
 -> `PGameXBody` ([modules/PGameXBody.php](modules/PGameXBody.php), ~12k lines, all the game logic)
 -> `tapcommon` ([modules/tapcommon.php](modules/tapcommon.php), framework overrides: undo savepoints,
-notification batching, zombie/eliminated helpers, argument validation, studio chat debug)
+notification helpers (`notifyWithName`), zombie/eliminated helpers, argument validation, studio chat debug)
 -> `Table` (BGA framework).
 
 `PGameXBody` is sectioned by banner comments: utilities, debug methods, player actions, state
