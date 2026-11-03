@@ -49,9 +49,8 @@ CONFIRMED by stub probes unless marked; probes in the session scratchpad, rewrit
       `Futurists::setupCiv`) is a no-op in `awardBenefits`. Pinned by `BenefitChoiceTest`
       `testFuturistsSecondChoiceStillOffersTheJumpedTrack`.
 
-OPEN FROM 2026-10-26 (player token control, BGA #252643) - commits 0e96db9, 57718b8, not deployed,
-not tried on Studio (Studio was down). Plan and rules: PLAN_PLAYER_TOKEN_CONTROL.md, FORMAL_RULES
-MAP.2-MAP.5.
+OPEN FROM 2026-10-26 (player token control, BGA #252643) - commits 0e96db9, 57718b8, deployed and
+tried (v261101-2149). Plan and rules: PLAN_PLAYER_TOKEN_CONTROL.md, FORMAL_RULES MAP.2-MAP.5.
 
 - [ ] [blocker/P1] Studio: the table stuck on BGA #252643 (933811349, adj=8) resumes on retry. The
       retried `effect_endOfConquer` should find one owner, the conqueror.
@@ -110,6 +109,21 @@ P1 - MUST FIX BEFORE THE FF DEPLOY
       scoring lines and only the reload showed the end screen. Two sightings at roughly the same
       size on different Automa rows points at the request that runs every remaining Automa turn in
       one go once the human is finished, not at one fat notification.
+      2026-11-01 prod: 4 error ids, all "larger than 128k" at 132-150 KB: 756345 (table 940136450,
+      actionConfirm, 261030-1658, solo Automa lvl 3, adj 9, Automa 29 turns vs human 21), 710144
+      (926267167, actionConfirm), 717806 (928474748, actionConfirm), 708861 (925641113, invent, 13
+      retries by one user, stuck); the last three on 260916-0116. No bug report on any of these tables,
+      so no clone. The stack ends in tapcommon::sendNotifications, no game frame. No unbounded loop found
+      (stTransition is capped by player count, stBenefitManager pops); sizes just over the limit look like
+      honest volume, unlike a runaway loop (wayfarers 62e53bc).
+      Suspect (unverified as the dominant type): notifyBenefitQueue sends the WHOLE stack to all players
+      on every benefitSingleEntry, queueBonus and benefitCashed, so a chain is quadratic. Measured in
+      GameUT: ~360 bytes per row, 10 inserts + 10 cashes = 37 KB. A dozen Automa turns in one request
+      reach 145 KB. Fix options: mark the queue dirty and send it once per request (flush in
+      tapcommon::sendNotifications, which the framework calls at the end of the action - check the client
+      does not rely on intermediate snapshots), or skip it while no real player is about to act. Verify
+      first: on studio, log json size per notification type in tapcommon::sendNotifications before the
+      parent call; a GameUT packet check (wayfarers ee06973) needs a state driver this repo lacks.
 
 - [-] [rules/P1] keepCard leaks hidden tapestry information to the whole table. arg_keepCard
       (PGameXBody around 10222) is a plain public state arg, so every opponent gets the full
