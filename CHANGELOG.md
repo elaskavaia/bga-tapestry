@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-03 (v261103-1426)
+
+- Fixed Traders (Adjustment Pack): trading now gives your territory tile to the opponent, and the income building option pays both players (#188139)
+
 ## 2026-11-01 (v261101-2149)
 
 - Fixed AI Singularity: with 2 tokens on a track you now always choose which one advances (#58486)
