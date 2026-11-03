@@ -6281,7 +6281,7 @@ define([
           if (res.length == 0) res = $("playerArea_wrapper").querySelectorAll(".tapestry_" + value);
           if (res.length > 0) return res[res.length - 1].id;
           //	if (res) return res[res.length - 1].id;
-          break;
+          return null;
 
         case "spot":
           var res = "tech_spot_" + value;
