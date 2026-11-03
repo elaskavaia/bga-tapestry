@@ -156,8 +156,8 @@ player count, per the priority section above.
       before any board change. "benfit" typo fixed in material (resets 2 translations). Client: the
       "Select a tile to give first" hint now highlights the hand tiles. Test `tests/TradersTest.php`
       (13 tests, 6 fail without the fix).
-      NOTE: design call - against the Shadow Empire the traded tile is discarded (a bot has no hand);
-      Automa receives it into its hand like BE_OPPONENTS_GAIN_TILE.
+      Against the Shadow Empire the traded tile is discarded (a bot has no hand), Victoria's call
+      2026-11-02; Automa receives it into its hand like BE_OPPONENTS_GAIN_TILE.
       NOTE: declined - opponent hexes are not hidden from the targets when the player holds no tile,
       a plain error is shown instead (hiding them could leave no way to decline the ability).
       NOTE: please confirm on Studio: with no tile selected, pressing Trader/an income building on an
