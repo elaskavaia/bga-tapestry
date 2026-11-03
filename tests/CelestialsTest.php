@@ -292,7 +292,7 @@ final class CelestialsTest extends TestCase {
         $token = $game->addTokenAt(CelestialsUT::OWNER, self::START);
 
         $game->openMovePrompt();
-        $game->zombieTurn();
+        $game->debug_zombie();
 
         $this->assertEquals("land_" . self::START, $game->structureLocation($token));
         $this->assertEquals([], $game->benefitLabels());

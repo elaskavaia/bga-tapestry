@@ -6,9 +6,11 @@ the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no act
 
 STUDIO BUILD WARNINGS (deploy 261101-2149, 12 warnings, all pre-existing framework deprecations)
 
-- [ ] [debt/P3] PHP: `gamestate->table_globals` (PGameXBody.php:11496-11497), use
-      `$this->bga->tableOptions->get()`; `gamestate->state()` (PGameXBody.php:9381, 9456, 13312,
-      tapcommon.php:62), use `getCurrentMainState` / `getCurrentState`.
+- [x] [debt/P3] PHP: `gamestate->table_globals` and `gamestate->state()` replaced by
+      `tableOptions->get()` and `gamestate->getCurrentMainState()`; `zombieTurn(array, int)` per the
+      Zombie Mode doc, new `debug_zombie`, `debug_state`. Verified in Studio 2026-11-03: `GameState`
+      has `name` / `transitions` filled and an enum `type`; `toArray()` gives the legacy keys with a
+      string `type`; `debug_zombie` in setupChoice drops the seat from multiactive.
 - [ ] [debt/P3] PHP: direct `player_score` / `player_score_aux` writes (tapcommon.php:130-139,
       PGameXBody.php:11898-11925), use `$this->bga->playerScore` / `playerScoreAux`. Careful: the
       `playerextra` mirror for bots is written alongside.

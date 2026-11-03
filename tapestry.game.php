@@ -73,7 +73,7 @@ class Tapestry extends PGameXBody {
      * You can do whatever you want in order to make sure the turn of this player ends appropriately
      * (ex: pass).
      */
-    function zombieTurn($state = null, $active_player = null) {
+    function zombieTurn(array $state, int $active_player): void {
         parent::zombieTurn($state, $active_player);
     }
 

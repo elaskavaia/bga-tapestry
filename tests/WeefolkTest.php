@@ -696,7 +696,7 @@ final class WeefolkTest extends TestCase {
         $this->game->makeZombie(WeefolkUT::OPPONENT);
         $this->game->seedRand(0);
 
-        $this->game->zombieTurn(null, WeefolkUT::OPPONENT);
+        $this->game->debug_zombie(WeefolkUT::OPPONENT);
 
         $this->assertNull($this->game->getPendingStructure(), "capital_structure is emptied");
         $this->assertEquals("capital_cell_" . WeefolkUT::OPPONENT . "_3_3", $this->game->structureLocation($pending));
@@ -710,7 +710,7 @@ final class WeefolkTest extends TestCase {
         $this->game->fillCity(WeefolkUT::OPPONENT);
         $this->game->makeZombie(WeefolkUT::OPPONENT);
 
-        $this->game->zombieTurn(null, WeefolkUT::OPPONENT);
+        $this->game->debug_zombie(WeefolkUT::OPPONENT);
 
         $this->assertNull($this->game->getPendingStructure());
         $this->assertEquals("hand", $this->game->structureLocation($pending));

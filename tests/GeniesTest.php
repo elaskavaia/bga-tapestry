@@ -397,7 +397,7 @@ final class GeniesTest extends TestCase {
         $this->game->makeZombie(GeniesUT::OPPONENT);
         $this->game->gamestate->jumpToState(19);
 
-        $this->game->zombieTurn(null, GeniesUT::OPPONENT);
+        $this->game->debug_zombie(GeniesUT::OPPONENT);
 
         $rows = $this->game->benefitQueue();
         $this->assertEquals(["civ"], $this->game->benefitLabels(), "only the owner's row survives");

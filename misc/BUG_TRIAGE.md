@@ -188,11 +188,10 @@ player count, per the priority section above.
       reads `$this->gamestate->state()["transitions"]` after `clearCurrentBenefit`; in state 14 that
       reloads `argCivAbility`, which asserts "missing benefit" when the civ row was the last on the
       stack (midgame civ gain, landmark trigger), so Unblock rolls back. Setup is safe (BE_RESUME
-      underneath). **CONFIRMED 2026-10-25**, pinned green in `tests/UtilitariansTest.php`
-      `testUnblockLastCivBenefitStillHitsMissingBenefit` (flips when fixed); safe case
-      `testUnblockSetupCivBenefitWithResumeRowBelow`. Proposed fix: a transitions accessor that does
-      not reload args, or always `jumpToState(18)` after clearing (every unblockable state returns
-      to 18). Low severity: only Unblock is affected; the normal civ action works since 283c361.
+      underneath). **CONFIRMED 2026-10-25**. **FIXED 2026-11-03 (not deployed)**: transitions now
+      read via `gamestate->getCurrentMainState()`, no args reload. Tests in
+      `tests/UtilitariansTest.php`: `testUnblockLastCivBenefit`, safe case
+      `testUnblockSetupCivBenefitWithResumeRowBelow`. Low severity: only Unblock was affected.
       NOTE: unverified that the real framework's `isMultiactiveState()` does not reload args (the
       stubs model it that way).
       NOTE: unrelated lead, untested - on adj=8 `queueEraCivAbility` fires at income 2 for any

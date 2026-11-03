@@ -126,28 +126,22 @@ final class UtilitariansTest extends TestCase {
     }
 
     /**
-     * Documents buggy behaviour for BGA #202072, flips when fixed: action_unblock reads the
-     * transitions with the deprecated gamestate->state() after clearing the civ row, so when that
-     * row was the last one (a midgame gain or landmark trigger) the args reload asserts and the
-     * unblock rolls back.
+     * BGA #202072 follow-up: action_unblock clears the civ row and then reads the transitions.
+     * With the deprecated gamestate->state() that reloaded argCivAbility, which asserted "missing
+     * benefit" when the row was the last one (a midgame gain or landmark trigger).
      */
-    function testUnblockLastCivBenefitStillHitsMissingBenefit() {
+    function testUnblockLastCivBenefit() {
         $game = $this->game();
         $this->queueCivBenefit($game, "triggered::10");
 
-        ob_start();
-        try {
-            $game->action_unblock();
-            $this->fail("expected the missing-benefit assert");
-        } catch (BgaUserException $e) {
-            $this->assertStringContainsString("missing benefit", $e->getMessage());
-        } finally {
-            ob_end_clean();
-        }
-        $this->assertEquals(1, $game->civ_arg_reloads);
+        $game->action_unblock();
+
+        $this->assertEquals(0, $game->civ_arg_reloads);
+        $this->assertEquals([], $game->benefitQueue());
+        $this->assertEquals(18, $game->gamestate->getCurrentMainStateId());
     }
 
-    /** At setup the BE_RESUME row sits under the civ row, so the same reload finds a benefit. */
+    /** At setup the BE_RESUME row sits under the civ row and survives the unblock. */
     function testUnblockSetupCivBenefitWithResumeRowBelow() {
         $game = $this->game();
         $this->queueCivBenefit($game, "triggered::10");
@@ -155,7 +149,7 @@ final class UtilitariansTest extends TestCase {
 
         $game->action_unblock();
 
-        $this->assertEquals(1, $game->civ_arg_reloads);
+        $this->assertEquals(0, $game->civ_arg_reloads);
         $this->assertEquals([BE_RESUME], array_column($game->benefitQueue(), "benefit_type"));
     }
 

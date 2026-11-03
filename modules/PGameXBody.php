@@ -5613,6 +5613,21 @@ abstract class PGameXBody extends tapcommon {
         }
     }
 
+    /** Plays one zombie turn for the given player, the active one by default */
+    function debug_zombie(int $player_id = 0): void {
+        if (!$player_id) {
+            $player_id = (int) $this->getActivePlayerId();
+        }
+        $this->zombieTurn($this->gamestate->getCurrentState($player_id)->toArray(), $player_id);
+    }
+
+    /** Logs the current GameState; print_r or json_encode of the object itself crashes the request */
+    function debug_state(): void {
+        $state = $this->gamestate->getCurrentMainState();
+        $info = ["type" => $state->type, "array" => $state->toArray()];
+        $this->debugConsole(nl2br(htmlspecialchars(print_r($info, true))));
+    }
+
     /**
      * Called before benefit is put in queue, some effects may intercept and modify that
      *
@@ -9377,9 +9392,8 @@ abstract class PGameXBody extends tapcommon {
         $this->notifyWithName("tech_refresh", clienttranslate('${player_name} refreshes the technology cards'), [], $player_id);
     }
 
-    public function getStateName() {
-        $state = $this->gamestate->state();
-        return $state["name"];
+    public function getStateName(): ?string {
+        return $this->gamestate->getCurrentMainState()?->name;
     }
 
     function action_decline() {
@@ -9453,7 +9467,7 @@ abstract class PGameXBody extends tapcommon {
             } else {
                 $this->clearCurrentBenefit();
             }
-            $trans = $this->gamestate->state()["transitions"];
+            $trans = $this->gamestate->getCurrentMainState()?->transitions ?? [];
             if (isset($trans["decline"])) {
                 $this->gamestate->nextState("decline");
             } elseif (isset($trans["next"])) {
@@ -11492,11 +11506,7 @@ abstract class PGameXBody extends tapcommon {
 
     function removeSomeComponents() {
         foreach ($this->option_removals as $gameoption_id => $removals) {
-            $value = 0;
-            if (array_key_exists($gameoption_id, $this->gamestate->table_globals)) {
-                $value = (int) $this->gamestate->table_globals[$gameoption_id];
-            }
-            if ($value == 1) {
+            if ($this->tableOptions->get($gameoption_id) == 1) {
                 foreach ($removals as $rem) {
                     list($card_type, $card_type_arg) = $rem;
                     $cards = $this->getCardsSearch($card_type, $card_type_arg);
@@ -13307,13 +13317,7 @@ abstract class PGameXBody extends tapcommon {
      * you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged"
      * error message.
      */
-    function zombieTurn($state = null, $active_player = null) {
-        if (!$state) {
-            $state = $this->gamestate->state();
-        }
-        if (!$active_player) {
-            $active_player = $this->getActivePlayerId();
-        }
+    function zombieTurn(array $state, int $active_player): void {
         $statename = $state["name"];
         $player_id = $active_player;
         if ($state["type"] === "activeplayer") {
