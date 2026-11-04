@@ -4,37 +4,14 @@ Triage 2026-09-13. Tags: [blocker] breaks or strands a table, [rules] wrong game
 or misleading client, [ui-temp] cosmetic, [debt] test gaps and cleanup, [feature] new content. Priority: P1 must fix before
 the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no action planned.
 
-STUDIO BUILD WARNINGS (deploy 261101-2149, 12 warnings, all pre-existing framework deprecations)
+STUDIO BUILD WARNINGS (dry run 2026-11-03, 6 warnings, all pre-existing framework deprecations)
 
-- [x] [debt/P3] PHP: `gamestate->table_globals` and `gamestate->state()` replaced by
-      `tableOptions->get()` and `gamestate->getCurrentMainState()`; `zombieTurn(array, int)` per the
-      Zombie Mode doc, new `debug_zombie`, `debug_state`. Verified in Studio 2026-11-03: `GameState`
-      has `name` / `transitions` filled and an enum `type`; `toArray()` gives the legacy keys with a
-      string `type`; `debug_zombie` in setupChoice drops the seat from multiactive.
-- [x] [debt/P3] PHP: direct `player` score writes in `dbSetScore` / `dbSetAuxScore` now go through
-      `$this->bga->playerScore` / `playerScoreAux` (no notif, as before); `playerextra` is still
-      written directly for every seat incl. bots. Verified in Studio 2026-11-03 with a temp debug fn:
-      a negative score (automa loss) lands in the `player` row, no range exception.
-- [x] [debt/P3] PHP: `_()` and `totranslate` replaced by `clienttranslate`, `BgaUserException` by
-      `UserException`; parameterized messages pass args via `NotificationMessage`.
-- [x] [debt/P2] Verify in Studio with a non-English seat that `UserException` messages arrive
-      translated, including the science die refusal in `action_research_decision`: its
-      `${track_names}` is an array with `i18n` + `separator`, which the Translations doc only shows
-      for notifications.
-- [x] [debt/P4] `feException` replaced by `VisibleSystemException` (same visible + logged
-      behaviour), `BgaSystemException` by `SystemException`, including the `catch` blocks.
-      Game-thrown error log entries change class name, so their BGA issue counts restart.
-      `systemAssertTrue` stays a `UserException` on purpose.
-- [x] [debt/P3] JS: `ajaxcall` replaced: all calls go through `axcallwrapper`, which now uses
-      `this.bga.actions.performAction` (own `checkAction` first, so a refused check does not count
-      toward the Unblock button). Verified in Studio 2026-11-03: works with the legacy action.php;
-      `null` / `undefined` args are omitted (dojo sent "null"), booleans go as "true" / "false".
-- [ ] [debt/P3] JS: direct preference controls (tapestry.js:3824-3851), use `this.bga.userPreferences`;
-      `scoreCtrl` (tapestry.js:6187-6188), use `this.bga.playerPanels.getScoreCounter`; direct player
-      panel elements (tapestry.js:322-364, 6629), use `this.bga.playerPanels.getElement`.
+- [ ] [debt/P3] JS: direct preference controls (tapestry.js:3780-3807), use `this.bga.userPreferences`;
+      direct player panel elements (tapestry.js:322-364, 6586), use `this.bga.playerPanels.getElement`.
+      The bot panels (322-364) are clones of a real panel; `this.bga.playerPanels.addAutomataPlayerPanel`
+      is the framework way, but it recommends ids <= 0 and the bots are 1 and 2.
 - [ ] [debt/P4] JS: deprecated `this.checkAction` (8 sites, not reported by the dry run), use
       `this.bga.actions.checkAction`, or drop it where `axcallwrapper` checks again anyway.
-- [x] [debt/P4] Non-code: `stats.inc.php` to `stats.jsonc`.
 - [ ] [debt/P4] JS: obsolete `tapestry.view.php` / `tapestry_tapestry.tpl` (415 lines, one
       `playerArea` block per player); the markup has to move into `setup()` in tapestry.js.
 - [ ] [debt/P4] Non-code: more than 20 image files (sprites); `exception_on_warning` not set in
