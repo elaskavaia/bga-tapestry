@@ -6140,8 +6140,9 @@ define([
       var player_id = notif.args.player_id;
       var increase = notif.args.increase;
 
-      this.scoreCtrl[player_id].incValue(increase);
-      if (!increase && notif.args.score) this.scoreCtrl[player_id].setValue(notif.args.score);
+      const scoreCounter = this.bga.playerPanels.getScoreCounter(Number(player_id));
+      scoreCounter.incValue(increase);
+      if (!increase && notif.args.score) scoreCounter.setValue(notif.args.score);
 
       if (increase) this.animScore(notif.args);
     },
