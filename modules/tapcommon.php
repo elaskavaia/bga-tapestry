@@ -130,14 +130,14 @@ abstract class tapcommon extends Table {
     function dbSetScore($player_id, $count) {
         $this->DbQuery("UPDATE playerextra SET player_score='$count' WHERE player_id='$player_id'");
         if ($this->isRealPlayer($player_id)) {
-            $this->DbQuery("UPDATE player SET player_score='$count' WHERE player_id='$player_id'");
+            $this->bga->playerScore->set((int) $player_id, (int) $count, null);
         }
     }
 
     function dbSetAuxScore($player_id, $score) {
         $this->DbQuery("UPDATE playerextra SET player_score_aux=$score WHERE player_id='$player_id'");
         if ($this->isRealPlayer($player_id)) {
-            $this->DbQuery("UPDATE player SET player_score_aux=$score WHERE player_id='$player_id'");
+            $this->bga->playerScoreAux->set((int) $player_id, (int) $score, null);
         }
     }
 
