@@ -22,8 +22,9 @@ markup moves into a new JS class so tapestry.js does not grow.
 - New `modules/taplayout.js`: a Dojo `declare("bgagame.taplayout", null, ...)` like `tapantistock.js`,
   added to the `define` list of tapestry.js. It holds:
   - the static page markup, placed into `this.bga.gameArea.getElement()`;
-  - a per player `playerArea` builder. Order from `gamedatas.players[id].no` (bots have it too),
-    rotated to start at the current player, spectators in plain `no` order;
+  - a per player `playerArea` builder. Order from `gamedatas.players[id].no` (bots have it too, same
+    `player_no` the view sorted by in `loadPlayersBasicInfosWithBots`), rotated to start at the current
+    player, spectators in plain `no` order. Sort explicitly: JS iterates numeric keys ascending;
   - the 25 `jstpl_*` snippets as properties (decision: option a, no globals);
   - loops instead of repeated markup: 33 limbo tech cards, 4x6 income track spaces, tapestry slots,
     landmark slots (class list), die faces.
