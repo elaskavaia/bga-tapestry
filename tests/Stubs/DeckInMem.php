@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\VisibleSystemException;
+
 /**
  * In memory replacement for the framework Deck.
  *
@@ -38,7 +40,7 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
     function setLocation($id, string $location, $location_arg2 = null): void {
         $id = (int) $id;
         if (!isset($this->rows[$id])) {
-            throw new feException("DeckInMem: no row $id in $this->table");
+            throw new VisibleSystemException("DeckInMem: no row $id in $this->table");
         }
         $this->rows[$id]["location"] = $location;
         if ($location_arg2 !== null) {
@@ -49,7 +51,7 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
     function setLocationArg($id, $location_arg): void {
         $id = (int) $id;
         if (!isset($this->rows[$id])) {
-            throw new feException("DeckInMem: no row $id in $this->table");
+            throw new VisibleSystemException("DeckInMem: no row $id in $this->table");
         }
         $this->rows[$id]["location_arg"] = (int) $location_arg;
     }
@@ -57,7 +59,7 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
     function setLocationArg2($id, $location_arg2): void {
         $id = (int) $id;
         if (!isset($this->rows[$id])) {
-            throw new feException("DeckInMem: no row $id in $this->table");
+            throw new VisibleSystemException("DeckInMem: no row $id in $this->table");
         }
         $this->rows[$id]["location_arg2"] = $location_arg2;
     }
@@ -65,7 +67,7 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
     function setTypeArg($id, $type_arg): void {
         $id = (int) $id;
         if (!isset($this->rows[$id])) {
-            throw new feException("DeckInMem: no row $id in $this->table");
+            throw new VisibleSystemException("DeckInMem: no row $id in $this->table");
         }
         $this->rows[$id]["type_arg"] = (int) $type_arg;
     }
@@ -339,10 +341,10 @@ class DeckInMem extends \Bga\GameFramework\Components\Deck {
             $id = (int) $id;
             $row = $this->rows[$id] ?? null;
             if (!$row || $row["location"] !== $location) {
-                throw new feException("card $id not in location $location");
+                throw new VisibleSystemException("card $id not in location $location");
             }
             if ($location_arg !== null && (int) $row["location_arg"] !== $location_arg) {
-                throw new feException("card $id not at location_arg $location_arg");
+                throw new VisibleSystemException("card $id not at location_arg $location_arg");
             }
             $result[$id] = $row;
         }

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\SystemException;
+
 require_once __DIR__ . "/../../tapestry.game.php";
 require_once __DIR__ . "/DeckInMem.php";
 require_once __DIR__ . "/BenefitsInMem.php";
@@ -108,7 +110,7 @@ class GameUT extends Tapestry {
     function incStat(int $inc, string $name, ?int $playerId = null, bool $bDoNotLoop = false): void {
         $kind = $playerId === null ? "table" : "player";
         if (!isset($this->getStatTypes()[$kind][$name])) {
-            throw new BgaSystemException("Unknown $kind statistic: $name");
+            throw new SystemException("Unknown $kind statistic: $name");
         }
         $this->stats[$playerId][$name] = ($this->stats[$playerId][$name] ?? 0) + $inc;
     }
@@ -142,7 +144,7 @@ class GameUT extends Tapestry {
                 return $notif;
             }
         }
-        throw new BgaSystemException("no notification containing $fragment");
+        throw new SystemException("no notification containing $fragment");
     }
 
     // ------------------------------------------------------------ card table
@@ -505,7 +507,7 @@ class GameUT extends Tapestry {
     function resolveBenefit(int $ben, int $player_id = 1): void {
         $row = $this->benefitQueue()[0] ?? null;
         if (!$row || $row["benefit_category"] != "standard" || $row["benefit_type"] != $ben || $row["benefit_player_id"] != $player_id) {
-            throw new BgaSystemException(
+            throw new SystemException(
                 "benefit $ben of player $player_id is not on top of the stack: " . implode(",", $this->benefitLabels())
             );
         }
@@ -531,7 +533,7 @@ class GameUT extends Tapestry {
             $this->resolveBenefit($ben, $player_id);
             return;
         }
-        throw new BgaSystemException("no pending choice offering benefit $ben");
+        throw new SystemException("no pending choice offering benefit $ben");
     }
 
     function getCurrentBenefit($ben = null, $cat = "standard") {

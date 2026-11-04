@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\VisibleSystemException;
+
 abstract class AbsCivilization {
     protected int $civ; // numeric civ type
     public PGameXBody $game; // game ref
@@ -9,7 +11,7 @@ abstract class AbsCivilization {
     public function __construct(int $civ, object $game) {
         $this->game = $game;
         if ($civ == 0) {
-            throw new feException("Invalid civ id 0");
+            throw new VisibleSystemException("Invalid civ id 0");
         }
         $this->civ = $civ;
     }

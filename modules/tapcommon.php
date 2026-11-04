@@ -2,6 +2,7 @@
 
 use Bga\GameFramework\Table;
 use Bga\GameFramework\UserException;
+use Bga\GameFramework\VisibleSystemException;
 
 require_once "taputils.php";
 
@@ -236,6 +237,7 @@ abstract class tapcommon extends Table {
         $move = $this->getGameStateValue("next_move_id");
         $this->error("Internal Error during move $move: $log|$logonly");
         $this->logStackTrace($log);
+        // UserException, not SystemException: players must see this text to report the bug
         throw new UserException("Internal Error. That should not have happened. Please raise a bug.[$log]"); // NOI18N
     }
 
@@ -384,13 +386,13 @@ abstract class tapcommon extends Table {
     final function checkNumber($info, $bThrow = true) {
         try {
             if ($info === null) {
-                throw new feException("item cannot be null");
+                throw new VisibleSystemException("item cannot be null");
             }
             if (!is_numeric($info)) {
-                throw new feException("item is not a number");
+                throw new VisibleSystemException("item is not a number");
             }
             return (int) $info;
-        } catch (feException $e) {
+        } catch (VisibleSystemException $e) {
             if ($bThrow) {
                 throw $e;
             }
@@ -400,26 +402,26 @@ abstract class tapcommon extends Table {
 
     final function checkKey($key, $like = false) {
         if ($key == null) {
-            throw new feException("key cannot be null");
+            throw new VisibleSystemException("key cannot be null");
         }
         if (!is_string($key) && !is_numeric($key)) {
-            throw new feException("key is not a string");
+            throw new VisibleSystemException("key is not a string");
         }
         $extra = "";
         if ($like) {
             $extra = "%";
         }
         if (preg_match("/^[A-Za-z_0-9{$extra}]+$/", $key) == 0) {
-            throw new feException("key must be alphanum and underscore non empty string '$key'");
+            throw new VisibleSystemException("key must be alphanum and underscore non empty string '$key'");
         }
     }
 
     final function checkValue($key, $like = false) {
         if ($key == null) {
-            throw new feException("value cannot be null");
+            throw new VisibleSystemException("value cannot be null");
         }
         if (!is_string($key) && !is_numeric($key)) {
-            throw new feException("value is not a string");
+            throw new VisibleSystemException("value is not a string");
         }
         $extra = "";
         $check = $key;
@@ -429,26 +431,26 @@ abstract class tapcommon extends Table {
             $check = preg_replace("/\\\\[_%]/", "", $key);
         }
         if (preg_match("/^[-A-Za-z_0-9 :,(){$extra}]+$/", $check) == 0) {
-            throw new feException("value must be alphanum and underscore non empty string '$key'");
+            throw new VisibleSystemException("value must be alphanum and underscore non empty string '$key'");
         }
     }
 
     final function checkArrayOfNumbers($token_arr, $bThrow = true) {
         try {
             if ($token_arr === null) {
-                throw new feException("token_arr cannot be null");
+                throw new VisibleSystemException("token_arr cannot be null");
             }
             if (!is_array($token_arr)) {
                 $debug = var_export($token_arr, true);
-                throw new feException("token_arr is not an array: $debug");
+                throw new VisibleSystemException("token_arr is not an array: $debug");
             }
             foreach ($token_arr as $key => $info) {
                 if (!is_numeric($info)) {
-                    throw new feException("token_arr item is not a number");
+                    throw new VisibleSystemException("token_arr item is not a number");
                 }
             }
             return count($token_arr);
-        } catch (feException $e) {
+        } catch (VisibleSystemException $e) {
             if ($bThrow) {
                 throw $e;
             }
@@ -459,18 +461,18 @@ abstract class tapcommon extends Table {
     final function checkArrayOfIds($token_arr, $like = false, $bThrow = true) {
         try {
             if ($token_arr === null) {
-                throw new feException("token_arr cannot be null");
+                throw new VisibleSystemException("token_arr cannot be null");
             }
             if (!is_array($token_arr)) {
                 $debug = var_export($token_arr, true);
-                throw new feException("token_arr is not an array: $debug");
+                throw new VisibleSystemException("token_arr is not an array: $debug");
             }
             foreach ($token_arr as $key => $info) {
                 $this->checkKey($key, false);
                 $this->checkKey($info, $like);
             }
             return count($token_arr);
-        } catch (feException $e) {
+        } catch (VisibleSystemException $e) {
             if ($bThrow) {
                 throw $e;
             }

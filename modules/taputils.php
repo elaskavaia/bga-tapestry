@@ -1,5 +1,7 @@
 <?php
 
+use Bga\GameFramework\VisibleSystemException;
+
 function shuffle_assoc($my_array) {
     $keys = array_keys($my_array);
     shuffle($keys);
@@ -100,9 +102,9 @@ function array_get_def($array, $key, $field, $default = null) {
 
 function array_inc(&$array, $key, $inc = 1) {
     if (is_null($key))
-        throw new feException("null key");
+        throw new VisibleSystemException("null key");
     if ( !is_array($array)) {
-        throw new feException("not array");
+        throw new VisibleSystemException("not array");
     }
     if (array_key_exists($key, $array)) {
         $array [$key] += $inc;

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\SystemException;
 use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
@@ -73,7 +74,7 @@ class WeefolkUT extends GameUT {
         $this->gamestate->jumpToState(18);
         $this->stBenefitManager();
         if ($this->getActivePlayerId() != $opponent_id) {
-            throw new BgaSystemException("the plot row did not make $opponent_id active");
+            throw new SystemException("the plot row did not make $opponent_id active");
         }
     }
 

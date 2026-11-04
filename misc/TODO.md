@@ -20,16 +20,18 @@ STUDIO BUILD WARNINGS (deploy 261101-2149, 12 warnings, all pre-existing framewo
       translated, including the science die refusal in `action_research_decision`: its
       `${track_names}` is an array with `i18n` + `separator`, which the Translations doc only shows
       for notifications.
-- [ ] [debt/P4] Remaining deprecated exceptions: `feException` (about 25 throws in PGameXBody,
-      tapcommon, taputils, AbsCivilization, Historians) and `BgaSystemException` (PGameXBody
-      `getCivilizationInstance`, GameUT, WeefolkTest). `systemAssertTrue` could become
-      `VisibleSystemException` (needs a check that tapestry.js "Internal Error" detection still works).
+- [x] [debt/P4] `feException` replaced by `VisibleSystemException` (same visible + logged
+      behaviour), `BgaSystemException` by `SystemException`, including the `catch` blocks.
+      Game-thrown error log entries change class name, so their BGA issue counts restart.
+      `systemAssertTrue` stays a `UserException` on purpose.
 - [ ] [debt/P3] JS: `ajaxcall` (tapestry.js:2240, 2413, 3275), use `this.bga.actions.performAction`;
       direct preference controls (tapestry.js:3824-3851), use `this.bga.userPreferences`;
       `scoreCtrl` (tapestry.js:6187-6188), use `this.bga.playerPanels.getScoreCounter`; direct player
       panel elements (tapestry.js:322-364, 6629), use `this.bga.playerPanels.getElement`.
-- [ ] [debt/P4] Non-code: more than 20 image files (sprites); obsolete `tapestry.view.php` /
-      `tapestry_tapestry.tpl`; `stats.inc.php` to `stats.jsonc`; `exception_on_warning` not set in
+- [x] [debt/P4] Non-code: `stats.inc.php` to `stats.jsonc`.
+- [ ] [debt/P4] JS: obsolete `tapestry.view.php` / `tapestry_tapestry.tpl` (415 lines, one
+      `playerArea` block per player); the markup has to move into `setup()` in tapestry.js.
+- [ ] [debt/P4] Non-code: more than 20 image files (sprites); `exception_on_warning` not set in
       gameinfos.
 
 OPEN FROM 2026-10-31 (track token choice, review of e9cf09f, BGA #58486) - all pre-existing,

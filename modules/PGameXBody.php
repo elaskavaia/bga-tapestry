@@ -18,7 +18,9 @@
  */
 
 use Bga\GameFramework\NotificationMessage;
+use Bga\GameFramework\SystemException;
 use Bga\GameFramework\UserException;
+use Bga\GameFramework\VisibleSystemException;
 
 require_once "tapcommon.php";
 require_once "civs/AbsCivilization.php";
@@ -4466,7 +4468,7 @@ abstract class PGameXBody extends tapcommon {
         switch ($benefit_data["benefit_type"]) {
             case BE_ANYRES:
                 if (sizeOf($resources) != $benefit_data["benefit_quantity"]) {
-                    throw new feException("Invalid resource quantity");
+                    throw new VisibleSystemException("Invalid resource quantity");
                 }
                 if ($data == reason_tapestry(TAP_MERCANTILISM)) {
                     // MERCANTILISM
@@ -4514,7 +4516,7 @@ abstract class PGameXBody extends tapcommon {
                 }
                 break;
             default:
-                throw new feException("Invalid benefit type");
+                throw new VisibleSystemException("Invalid benefit type");
         }
         $this->gamestate->nextState("next");
     }
@@ -4777,7 +4779,7 @@ abstract class PGameXBody extends tapcommon {
                 $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS, $current_benefit["benefit_data"]);
                 break;
             default:
-                throw new feException("Invalid benefit type for select_cube $ben");
+                throw new VisibleSystemException("Invalid benefit type for select_cube $ben");
         }
         $this->gamestate->nextState("next");
     }
@@ -7700,11 +7702,11 @@ abstract class PGameXBody extends tapcommon {
             return;
         }
         if (!in_array($location, $valid_locations)) {
-            throw new feException("invalid map location");
+            throw new VisibleSystemException("invalid map location");
         }
         $tile_data = $this->getObjectFromDB("SELECT * FROM card WHERE card_type='1' AND card_type_arg='$tile_type'");
         if ($tile_data == null || $tile_data["card_location"] != "hand" || $tile_data["card_location_arg"] != $player_id) {
-            throw new feException("Invalid territory tile");
+            throw new VisibleSystemException("Invalid territory tile");
         }
         $coal_baron = $args["coal_baron"];
         $tile_id = $tile_data["card_id"];
@@ -9056,7 +9058,7 @@ abstract class PGameXBody extends tapcommon {
         $this->checkAction("selectIncomeBuilding");
         $player_id = $this->getActivePlayerId();
         if (!$this->checkValidIncomeType($type)) {
-            throw new feException("Invalid Income type");
+            throw new VisibleSystemException("Invalid Income type");
         }
         $building_id = $this->dbGetIncomeBuildingOfType($type, true); // to check
         $current_benefit = $this->getCurrentBenefit();
@@ -9952,7 +9954,7 @@ abstract class PGameXBody extends tapcommon {
         $count = $args["pay_quantity"];
         $type = (int) $args["pay"];
         if ($count > 0 && sizeOf($params) != $count) {
-            throw new feException("Invalid quantity for bonus");
+            throw new VisibleSystemException("Invalid quantity for bonus");
         }
         if ($count < -1) {
             // a quantity below -1 is an upper bound, -1 stays unlimited
@@ -9981,7 +9983,7 @@ abstract class PGameXBody extends tapcommon {
             case BE_TERRITORY: // territory tiles.
                 $items = $this->getCardsInHand($player_id, CARD_TERRITORY, $params);
                 if (sizeOf($items) != sizeOf($params)) {
-                    throw new feException("items do not belong to player");
+                    throw new VisibleSystemException("items do not belong to player");
                 }
                 $this->effect_discardCard($items, $player_id);
                 break;
@@ -9990,7 +9992,7 @@ abstract class PGameXBody extends tapcommon {
             case 138:
                 $items = $this->getCardsInHand($player_id, CARD_TAPESTRY, null, $params);
                 if (sizeOf($items) != sizeOf($params)) {
-                    throw new feException("items do not belong to player");
+                    throw new VisibleSystemException("items do not belong to player");
                 }
                 $desttype = $this->getRulesBenefit($type, "dest", 0);
                 if ($desttype != 0) {
@@ -10008,7 +10010,7 @@ abstract class PGameXBody extends tapcommon {
             case BE_TECH_CARD: // tech cards.
                 $items = $this->getCardsInHand($player_id, CARD_TECHNOLOGY, $params);
                 if (sizeOf($items) != sizeOf($params)) {
-                    throw new feException("items do not belong to player");
+                    throw new VisibleSystemException("items do not belong to player");
                 }
                 $this->effect_discardCard($items, $player_id);
                 break;
@@ -12795,11 +12797,11 @@ abstract class PGameXBody extends tapcommon {
             }
         } catch (Throwable $e) {
             if ($strict) {
-                throw new BgaSystemException("Cannot instantiate $classname for $civ (error)");
+                throw new SystemException("Cannot instantiate $classname for $civ (error)");
             }
         }
         if ($strict) {
-            throw new BgaSystemException("Cannot instantiate $classname for $civ");
+            throw new SystemException("Cannot instantiate $classname for $civ");
         }
 
         $opinst = new BasicCivilization($civ, $this);
@@ -13381,7 +13383,7 @@ abstract class PGameXBody extends tapcommon {
             $this->gamestate->setPlayerNonMultiactive($active_player, "next");
             return;
         }
-        throw new feException("Zombie mode not supported at this game state: " . $statename);
+        throw new VisibleSystemException("Zombie mode not supported at this game state: " . $statename);
     }
 }
 

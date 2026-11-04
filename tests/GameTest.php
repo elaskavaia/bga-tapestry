@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\VisibleSystemException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -389,7 +390,7 @@ final class GameTest extends TestCase {
             try {
                 $game->checkValue($value, true);
                 $this->fail("should reject '$value'");
-            } catch (feException $e) {
+            } catch (VisibleSystemException $e) {
                 $this->assertStringContainsString("alphanum", $e->getMessage());
             }
         }
@@ -398,7 +399,7 @@ final class GameTest extends TestCase {
     /** Outside LIKE an escape has no meaning, so it stays rejected. */
     function testCheckValueRejectsEscapesWithoutLike() {
         $game = new GameUT();
-        $this->expectException(feException::class);
+        $this->expectException(VisibleSystemException::class);
         $game->checkValue("tech\\_spot\\_1", false);
     }
 

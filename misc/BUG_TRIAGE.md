@@ -150,7 +150,7 @@ player count, per the priority section above.
 - [ ] **Historians leads left over from the 52459b2 token fix** (shipped in v261026-0118):
       `onMystic` (~2427) collects global `.clicked`; an owner of both Historians and Mystics could
       send a leftover historian holder as a Mystics id. Should be scoped to `#civilization_13` -
-      untested. `Historians::sendHistorian` still throws untranslated `feException` for a bad token
+      untested. `Historians::sendHistorian` still throws untranslated `VisibleSystemException` for a bad token
       or tile and never checks `$pid`.
 
 - [ ] **BGA #245466** - "Traders income action". OPEN, 1 vote, `action`. Table 915804573. Options:
@@ -235,14 +235,15 @@ that window.
 - [ ] `feException: This transition (benefit) is impossible at this state (20)` - **89 events / 11
       users** (plus `...3814642R`, 39 events / 7 users). Few users, many events - that is people stuck
       retrying, i.e. a block, and it deserves priority above its raw count. State 20 is a benefit state.
-- [ ] `feException: invalid map location` - 46 events / 36 users, last seen today.
+- [ ] `feException: invalid map location` - 46 events / 36 users, last seen today. Logged as
+      `VisibleSystemException` after the exception migration, a new issue id, not a fix.
 - [ ] `DatabaseInvalidResultException` on `getUniqueValue` for
       `SELECT card_id FROM structure WHERE card_location='land_R_C' AND card_location_arg='1'` -
       fragmented across ~14 issue ids (35, 30, 20, 2, 2, then nine singletons) for `land_2_3`,
       `land_3_1`, `land_3_2`; summed it is ~95 events / ~50 users. Two structures share one map
       location where the code expects one.
 - [ ] `feException: items do not belong to player` - 25 events / 12 users (plus 15 / 8 on an older
-      id), last seen today.
+      id), last seen today. Logged as `VisibleSystemException` after the exception migration.
 - [ ] `TypeError: Unsupported operand types: string + int` - 3 events / 3 users, twice.
 - [ ] `feException: Error: generated notifications are larger than 128k (142359)` - 4 events / 2
       users. A single turn producing >128k of notifications will hard-fail.

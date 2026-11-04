@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\VisibleSystemException;
 
 class Historians extends AbsCivilization {
 
@@ -38,12 +39,12 @@ class Historians extends AbsCivilization {
         $token_location = 'civ_7_' . $token_id;
         $historian = $this->game->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_type='7' AND (card_location = '$token_location') AND card_location_arg='$player_id' LIMIT 1");
         if ($historian == null) {
-            throw new feException('Invalid historian token');
+            throw new VisibleSystemException('Invalid historian token');
         }
         // 2. Check owns the territory tile.
         $territory_id = $this->game->getUniqueValueFromDB("SELECT card_id FROM card WHERE card_type='1' AND card_type_arg='$tid' AND card_location='hand' AND card_location_arg='$player_id'");
         if ($territory_id == null) {
-            throw new feException('Invalid territory tile');
+            throw new VisibleSystemException('Invalid territory tile');
         }
         $this->game->effect_discardCard($territory_id, $player_id);
         $this->sendHistorianToken($historian, $pid);
