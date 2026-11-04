@@ -135,11 +135,11 @@ define([
 
         // Load correct board
         if (player_count > 3) {
-          this.dontPreloadImage("board_small.jpg");
+          this.bga.images.dontPreloadImage("board_small.jpg");
           this.board_side = "board_large";
           this.setupLand(4);
         } else {
-          this.dontPreloadImage("board_large.jpg");
+          this.bga.images.dontPreloadImage("board_large.jpg");
           this.board_side = "board_small";
           this.setupLand(3);
         }
@@ -691,7 +691,7 @@ define([
           dojo.query(".clicked").removeClass("clicked");
           this.extraMarkup();
           var slots = args.args.technology_updates;
-          dojo.query("#tech_holder_" + this.getActivePlayerId() + " .tech_card").removeClass("update_possible");
+          dojo.query("#tech_holder_" + this.bga.players.getActivePlayerId() + " .tech_card").removeClass("update_possible");
 
           for (var c in slots) {
             dojo.query(".tech_slot_1 #tech_card_" + slots[c]).addClass("update_possible");
@@ -726,7 +726,7 @@ define([
           dojo.removeClass("capital_helper", "income_placement");
           break;
         case "bonus":
-          if (this.isCurrentPlayerActive()) {
+          if (this.bga.players.isCurrentPlayerActive()) {
             this.territory[this.player_id].setSelectionMode(1);
             this.tapestry[this.player_id].setSelectionMode(1);
           }
@@ -766,7 +766,7 @@ define([
       dojo.query(".selected").removeClass("selected");
 
       //dojo.query(".clicked").removeClass('clicked');
-      if (!this.on_client_state) {
+      if (!this.bga.states.isOnClientState()) {
         dojo.query(".possible").removeClass("possible");
         this.disconnectAllTemp();
       }
@@ -775,7 +775,7 @@ define([
     setClientStateUpd: function (name, onUpdate, timeout, args) {
       this[`onUpdateActionButtons_${name}`] = onUpdate;
       if (!timeout) timeout = 0;
-      setTimeout(() => this.setClientState(name, args), timeout);
+      setTimeout(() => this.bga.states.setClientState(name, args), timeout);
     },
 
     onUpdateActionButtons_keepCard: function (args) {
@@ -939,7 +939,7 @@ define([
             break;
           case this.CON.CIV_ARCHITECTS:
             if (data == "midgame") {
-              this.setClientState("client_ArchitectsSwap", {
+              this.bga.states.setClientState("client_ArchitectsSwap", {
                 descriptionmyturn: _("ARCHITECTS: You may swap two Income buildings in your capital")
               });
             } else {
@@ -1239,7 +1239,7 @@ define([
       }
       // SETUP CHOICE - allow to change mind after selection whilst others thinking.
       if (stateName == "setupChoice") {
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
           this.addActionButton("button_confirm", _("Confirm"), "onSetupConfirm");
           var cap = document.querySelector("#capitals > *");
           if (cap) {
@@ -1251,7 +1251,7 @@ define([
         }
         return;
       }
-      if (!this.isCurrentPlayerActive()) return;
+      if (!this.bga.players.isCurrentPlayerActive()) return;
 
       if (stateName != "playerTurn" && stateName != "playerTurnEnd" && stateName != "playerTurnConfirm") {
         this.addActionButton("button_undo", _("Undo"), "onUndo", undefined, undefined, "red");
@@ -1428,7 +1428,7 @@ define([
             this.clientStateArgs.action = "standup";
             this.clientStateArgs.num = 3;
             this.clientStateArgs.choices = "";
-            this.setClientState("client_standup");
+            this.bga.states.setClientState("client_standup");
             return;
           }
           if (args.anywhere) this.setDescriptionOnMyTurn(_("CONQUER: ${You} must select a hex ANYWHERE"));
@@ -2362,7 +2362,7 @@ define([
 
     onIsolationistClick: function (event) {
       dojo.stopEvent(event);
-      if (!this.checkAction("conquer")) {
+      if (!this.bga.actions.checkAction("conquer")) {
         return;
       }
       var choice = event.currentTarget.id.split("_")[2] == "yes";
@@ -2605,7 +2605,7 @@ define([
     },
 
     scrollIntoViewAfter: function (node, delay) {
-      if (this.instantaneousMode || this.inSetup) {
+      if (this.isInstantaneousMode() || this.inSetup) {
         return;
       }
       if (typeof g_replayFrom != "undefined") {
@@ -2619,7 +2619,7 @@ define([
     },
 
     onConfirmBonus: function (event) {
-      if (!this.checkAction("acceptBonus")) {
+      if (!this.bga.actions.checkAction("acceptBonus")) {
         return;
       }
       let dest = 0;
@@ -2809,9 +2809,9 @@ define([
         return;
       }
       if (this.gamedatas.gamestate.args.militarism) {
-        this.setClientState("client_militarism");
+        this.bga.states.setClientState("client_militarism");
       } else if (this.gamedatas.gamestate.args.exploitation) {
-        this.setClientState("client_exploitation", {
+        this.bga.states.setClientState("client_exploitation", {
           descriptionmyturn: _("EXPLOITATION: ${you} can forgo the exploration VP for a doubled benefit")
         });
       } else {
@@ -2848,7 +2848,7 @@ define([
     },
 
     processExplore: function (militarism, exploitation) {
-      if (!this.checkAction("explore")) {
+      if (!this.bga.actions.checkAction("explore")) {
         return;
       }
       if (!this.selectedTile) {
@@ -2884,7 +2884,7 @@ define([
     showError: function (log, args) {
       if (log === undefined) {
         console.error("error message with undefined log");
-        this.showMessage("?", "error");
+        this.bga.dialogs.showMessage("?", "error");
         return;
       }
       if (args === undefined) {
@@ -2892,7 +2892,7 @@ define([
       }
       //args.you = this.divYou();
       var message = this.format_string_recursive(log, args);
-      this.showMessage(message, "error");
+      this.bga.dialogs.showMessage(message, "error");
       console.error(log, args, message);
       return;
     },
@@ -2908,7 +2908,7 @@ define([
     },
     checkActiveSlot: function (id) {
       if (!this.isActiveSlot(id)) {
-        this.showMoveUnauthorized();
+        this.bga.dialogs.showMoveUnauthorized();
         return false;
       }
       return true;
@@ -3037,7 +3037,7 @@ define([
      * new parent immediately, so parent is correct during animation
      */
     slideToObjectRelative: function (token, finalPlace, duration, delay, onEnd, relation) {
-      if (this.instantaneousMode) {
+      if (this.isInstantaneousMode()) {
         duration = 0;
       } else if (duration === undefined) {
         duration = this.defaultAnimationDuration;
@@ -3107,7 +3107,7 @@ define([
       if (typeof delay == "undefined") {
         delay = 0;
       }
-      if (this.instantaneousMode) {
+      if (this.isInstantaneousMode()) {
         delay = Math.min(1, delay);
         duration = Math.min(1, duration);
       }
@@ -3180,7 +3180,7 @@ define([
     },
 
     phantomMove: function (mobileId, newparentId, duration, delay, onEnd) {
-      if (this.instantaneousMode) {
+      if (this.isInstantaneousMode()) {
         duration = 0;
         delay = 0;
       } else {
@@ -3509,7 +3509,7 @@ define([
         return; // timer already running
       }
 
-      if (this.instantaneousMode || typeof g_replayFrom != "undefined" || this.inSetup) {
+      if (this.isInstantaneousMode() || typeof g_replayFrom != "undefined" || this.inSetup) {
         return;
       }
 
@@ -3692,7 +3692,7 @@ define([
       dojo.setAttr(die, "data-num", r);
       var tooltip = this.updateDieTooltip(color, r);
 
-      if (this.instantaneousMode || typeof g_replayFrom != "undefined" || this.inSetup) {
+      if (this.isInstantaneousMode() || typeof g_replayFrom != "undefined" || this.inSetup) {
         dojo.addClass(die, "rolled");
       } else {
         dojo.removeClass(die, "rolled");
@@ -3701,7 +3701,7 @@ define([
         setTimeout(() => {
           dojo.removeClass(die, "rolling");
           dojo.addClass(die, "rolled");
-          if (r != num) this.showMessage(_("You rolled a die for fun: ") + tooltip, "only_to_log");
+          if (r != num) this.bga.dialogs.showMessage(_("You rolled a die for fun: ") + tooltip, "only_to_log");
         }, 2000);
       }
     },
@@ -4815,7 +4815,7 @@ define([
 
       this.restoreResources();
 
-      this.restoreServerGameState();
+      this.bga.states.restoreServerGameState();
     },
 
     restoreResources: function () {
@@ -4936,7 +4936,7 @@ define([
 
     onIncomeTurn: function (event) {
       dojo.stopEvent(event);
-      if (!this.checkAction("takeIncome")) {
+      if (!this.bga.actions.checkAction("takeIncome")) {
         return;
       }
       if (this.gamedatas.gamestate.args.advances.length > 0) {
@@ -5034,7 +5034,7 @@ define([
           });
           break;
         default:
-          this.showMoveUnauthorized();
+          this.bga.dialogs.showMoveUnauthorized();
           return;
       }
     },
@@ -5053,7 +5053,7 @@ define([
               V: coords[2]
             });
           } else {
-            if (!dojo.hasClass(land_id, "active_slot") || !this.checkAction("explore")) {
+            if (!dojo.hasClass(land_id, "active_slot") || !this.bga.actions.checkAction("explore")) {
               return;
             }
             this.selectedland = land_id;
@@ -5088,7 +5088,7 @@ define([
 
           if (this.selectedCiv == this.CON.CIV_TRADERS) {
             if (this.getAdjustmentLevel() >= 4) {
-              this.setClientState("client_trader");
+              this.bga.states.setClientState("client_trader");
             } else {
               this.sendTrader(0);
             }
@@ -5098,16 +5098,16 @@ define([
           this.ajaxClientStateAction(); // who calls it?
           break;
         case "conquer":
-          if (!this.checkAction("conquer")) {
+          if (!this.bga.actions.checkAction("conquer")) {
             return;
           }
           this.conquerSlot = event.currentTarget.id + "_2";
           if (this.gamedatas.gamestate.args.bid == this.CON.BE_STANDUP_3_OUTPOSTS) {
-            this.showMoveUnauthorized();
+            this.bga.dialogs.showMoveUnauthorized();
             return;
           }
           if (this.ownsCiv(this.CON.CIV_ISOLATIONISTS) && this.emptyTerritory() && this.hasIsolationTokens()) {
-            this.setClientState("client_isolationist", {
+            this.bga.states.setClientState("client_isolationist", {
               descriptionmyturn: _("Do ${you} wish to place an isolationist token?")
             });
           } else {
@@ -5315,7 +5315,7 @@ define([
 
       switch (this.gamestate) {
         case "explore":
-          if (!this.checkAction("explore")) {
+          if (!this.bga.actions.checkAction("explore")) {
             return;
           }
           // a tile already on the map is not explorable
@@ -5375,7 +5375,7 @@ define([
       var cid = event.currentTarget.id;
       if (this.showHelp(cid)) return;
 
-      if (!this.checkPossibleActions("choose_die")) {
+      if (!this.bga.actions.checkPossibleActions("choose_die")) {
         // roll it for fun
         this.rolldie(getPart(cid, 0), -1);
         return;
@@ -5411,7 +5411,7 @@ define([
 
     onSetupConfirm: function (event) {
       dojo.stopEvent(event);
-      if (!this.checkPossibleActions("chooseCivilization")) {
+      if (!this.bga.actions.checkPossibleActions("chooseCivilization")) {
         return;
       }
 
@@ -5485,7 +5485,7 @@ define([
 
       switch (this.gamestate) {
         case "playerTurn":
-          if (!this.checkAction("advance")) {
+          if (!this.bga.actions.checkAction("advance")) {
             this.showHelp(tech_track, true);
             return;
           }
@@ -6582,7 +6582,7 @@ define([
 
       if (this.gamedatas.dice.empiricism > 0) {
         this.gamedatas.dice.empiricism = 0;
-        this.setClientState("civAbility", { descriptionmyturn: _("${you} may use your civilization ability") });
+        this.bga.states.setClientState("civAbility", { descriptionmyturn: _("${you} may use your civilization ability") });
       }
     },
     notif_trap: function (notif) {
@@ -6619,7 +6619,7 @@ define([
         if (!div) div = this.cardsman[this.CON.CARD_TAPESTRY].createDiv(card_type_arg, card_id, "tapestry_cards_" + player_id, notif.args);
         this.placeToken(div, dest);
       }
-      if (this.isCurrentPlayerActive()) this.tapestry[this.player_id].updateCounter();
+      if (this.bga.players.isCurrentPlayerActive()) this.tapestry[this.player_id].updateCounter();
       else this.updateTapestryCount(player_id, -1);
       this.extraMarkup();
     },
@@ -6647,7 +6647,7 @@ define([
       for (const key in list) {
         const card = list[key];
         this.moveCard(card, from, num * 100);
-        if (this.instantaneousMode || this.inSetup) {
+        if (this.isInstantaneousMode() || this.inSetup) {
           continue; // do not increase num
         }
         num++;
@@ -6894,19 +6894,23 @@ define([
     },
 
     isReadOnly: function () {
-      return this.isSpectator || typeof g_replayFrom != "undefined" || g_archive_mode;
+      return this.bga.players.isCurrentPlayerSpectator() || typeof g_replayFrom != "undefined" || g_archive_mode;
+    },
+
+    isInstantaneousMode: function () {
+      return !this.bga.gameui.bgaAnimationsActive();
     },
 
     notif_message_error: function (notif) {
       if (!this.isReadOnly()) {
         var message = this.format_string_recursive(notif.log, notif.args);
-        this.showMessage(_("Warning:") + " " + message, "warning");
+        this.bga.dialogs.showMessage(_("Warning:") + " " + message, "warning");
       }
     },
     notif_message_info: function (notif) {
       if (!this.isReadOnly()) {
         var message = this.format_string_recursive(notif.log, notif.args);
-        this.showMessage(_("Announcement:") + " " + message, "info");
+        this.bga.dialogs.showMessage(_("Announcement:") + " " + message, "info");
       }
     },
     /** @Override */

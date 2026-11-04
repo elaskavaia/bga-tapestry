@@ -10,8 +10,6 @@ STUDIO BUILD WARNINGS (dry run 2026-11-03, 6 warnings, all pre-existing framewor
       direct player panel elements (tapestry.js:322-364, 6586), use `this.bga.playerPanels.getElement`.
       The bot panels (322-364) are clones of a real panel; `this.bga.playerPanels.addAutomataPlayerPanel`
       is the framework way, but it recommends ids <= 0 and the bots are 1 and 2.
-- [ ] [debt/P4] JS: deprecated `this.checkAction` (8 sites, not reported by the dry run), use
-      `this.bga.actions.checkAction`, or drop it where `axcallwrapper` checks again anyway.
 - [ ] [debt/P4] JS: obsolete `tapestry.view.php` / `tapestry_tapestry.tpl` (415 lines, one
       `playerArea` block per player); the markup has to move into `setup()` in tapestry.js. Plan:
       [PLAN_VIEW_REMOVAL.md](PLAN_VIEW_REMOVAL.md).
