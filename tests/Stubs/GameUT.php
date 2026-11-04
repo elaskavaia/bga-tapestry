@@ -122,15 +122,6 @@ class GameUT extends Tapestry {
         return (int) ($this->stats[$player_id][$name] ?? 0);
     }
 
-    /** The framework stub reports no stats at all, so dbIncStatChecked would reject every one. */
-    function getStatTypes() {
-        static $stats_type = null;
-        if ($stats_type === null) {
-            include __DIR__ . "/../../stats.inc.php";
-        }
-        return $stats_type;
-    }
-
     /** Everything sent so far, as the framework stub collected it: type, log, args. */
     function notifications(): array {
         return $this->notify->_getNotifications();
@@ -432,7 +423,7 @@ class GameUT extends Tapestry {
         $row = $this->dbGetPlayerResources($player_id);
         if ($new_count === null) {
             $new_count = min($row[$field] + $increase, 8);
-            $this->userAssertTrue(totranslate("You cannot afford this payment combination"), $new_count >= 0);
+            $this->userAssertTrue(clienttranslate("You cannot afford this payment combination"), $new_count >= 0);
         }
         $increase = $new_count - $row[$field];
         $row[$field] = $new_count;

@@ -1,0 +1,343 @@
+{
+  "table": {
+    "turns_number": {
+      "id": 10,
+      "name": "Number of turns",
+      "type": "int"
+    },
+    "game_turns_total_1": {
+      "id": 110,
+      "name": "Number of turns (Automa)",
+      "type": "int"
+    },
+    "automa_score": {
+      "id": 111,
+      "name": "Automa score",
+      "type": "int"
+    },
+    "game_winner_score": {
+      "id": 112,
+      "name": "Best score",
+      "type": "int"
+    },
+    "game_loser_score": {
+      "id": 113,
+      "name": "Worst score",
+      "type": "int"
+    },
+    "automa_civ": {
+      "id": 114,
+      "name": "Automa civilization",
+      "type": "int"
+    }
+  },
+  "player": {
+    "turns_total": {
+      "id": 10,
+      "name": "Number of turns",
+      "type": "int"
+    },
+    "turns_era_1": {
+      "id": 11,
+      "name": "Number of advances (Era 1)",
+      "type": "int"
+    },
+    "turns_era_2": {
+      "id": 12,
+      "name": "Number of advances (Era 2)",
+      "type": "int"
+    },
+    "turns_era_3": {
+      "id": 13,
+      "name": "Number of advances (Era 3)",
+      "type": "int"
+    },
+    "turns_era_4": {
+      "id": 14,
+      "name": "Number of advances (Era 4)",
+      "type": "int"
+    },
+    "turns_era_5": {
+      "id": 50,
+      "name": "Number of advances (after income turn 5)",
+      "type": "int"
+    },
+    "bonuses": {
+      "id": 15,
+      "name": "Number of claimed bonuses",
+      "type": "int"
+    },
+    "track1": {
+      "id": 16,
+      "name": "Exploration track spaces",
+      "type": "int"
+    },
+    "track2": {
+      "id": 17,
+      "name": "Science track spaces",
+      "type": "int"
+    },
+    "track3": {
+      "id": 18,
+      "name": "Military track spaces",
+      "type": "int"
+    },
+    "track4": {
+      "id": 19,
+      "name": "Technology track spaces",
+      "type": "int"
+    },
+    "capital": {
+      "id": 20,
+      "name": "Starting capital mat",
+      "type": "int"
+    },
+    "civ": {
+      "id": 21,
+      "name": "Starting civilization",
+      "type": "int"
+    },
+    "game_income_1": {
+      "id": 22,
+      "name": "Income track Markets",
+      "type": "int"
+    },
+    "game_income_2": {
+      "id": 23,
+      "name": "Income track Houses",
+      "type": "int"
+    },
+    "game_income_3": {
+      "id": 24,
+      "name": "Income track Farms",
+      "type": "int"
+    },
+    "game_income_4": {
+      "id": 25,
+      "name": "Income track Armories",
+      "type": "int"
+    },
+    "game_resource_spent": {
+      "id": 30,
+      "name": "Resources spent",
+      "type": "int"
+    },
+    "game_building_income": {
+      "id": 31,
+      "name": "Placed income buildings",
+      "type": "int"
+    },
+    "game_building_landmark": {
+      "id": 32,
+      "name": "Claimed landmarks",
+      "type": "int"
+    },
+    "game_building_outpost": {
+      "id": 33,
+      "name": "Placed outposts",
+      "type": "int"
+    },
+    "game_card_civ": {
+      "id": 34,
+      "name": "Civilizations",
+      "type": "int"
+    },
+    "game_points_reason_spot": {
+      "id": 40,
+      "name": "Points from tracks",
+      "type": "int"
+    },
+    "game_points_reason_tech": {
+      "id": 41,
+      "name": "Points from tech cards",
+      "type": "int"
+    },
+    "game_points_reason_civ": {
+      "id": 42,
+      "name": "Points from civilizations",
+      "type": "int"
+    },
+    "game_points_reason_tapestry": {
+      "id": 43,
+      "name": "Points from tapestry cards",
+      "type": "int"
+    },
+    "game_points_reason_tile": {
+      "id": 44,
+      "name": "Points from exploring",
+      "type": "int"
+    },
+    "game_points_reason_space": {
+      "id": 45,
+      "name": "Points from space tiles",
+      "type": "int"
+    },
+    "game_points_reason_inspot": {
+      "id": 46,
+      "name": "Points from income mat",
+      "type": "int"
+    },
+    "game_points_reason_die": {
+      "id": 47,
+      "name": "Points from conquer die",
+      "type": "int"
+    },
+    "game_points_reason_achi": {
+      "id": 48,
+      "name": "Points from achievements",
+      "type": "int"
+    },
+    "game_points_reason_other": {
+      "id": 49,
+      "name": "Points from other sources",
+      "type": "int"
+    },
+    "game_points_be_27": {
+      "id": 63,
+      "name": "VP - Tech cards",
+      "type": "int"
+    },
+    "game_points_be_28": {
+      "id": 64,
+      "name": "VP - Capital score",
+      "type": "int"
+    },
+    "game_points_be_29": {
+      "id": 65,
+      "name": "VP - Controlled territories",
+      "type": "int"
+    },
+    "game_points_be_54": {
+      "id": 66,
+      "name": "VP - Markets",
+      "type": "int"
+    },
+    "game_points_be_63": {
+      "id": 67,
+      "name": "VP - Houses",
+      "type": "int"
+    },
+    "game_points_be_30": {
+      "id": 68,
+      "name": "VP - Farms",
+      "type": "int"
+    },
+    "game_points_be_31": {
+      "id": 69,
+      "name": "VP - Armories",
+      "type": "int"
+    },
+    "game_points_be_47": {
+      "id": 70,
+      "name": "VP - Exploration",
+      "type": "int"
+    },
+    "game_points_be_48": {
+      "id": 71,
+      "name": "VP - Science",
+      "type": "int"
+    },
+    "game_points_be_49": {
+      "id": 72,
+      "name": "VP - Military",
+      "type": "int"
+    },
+    "game_points_be_50": {
+      "id": 73,
+      "name": "VP - Technology",
+      "type": "int"
+    },
+    "game_points_be_66": {
+      "id": 74,
+      "name": "VP - Territory tiles",
+      "type": "int"
+    },
+    "game_points_be_71": {
+      "id": 75,
+      "name": "VP - Tapestry cards",
+      "type": "int"
+    },
+    "game_points_be_15": {
+      "id": 76,
+      "name": "VP - Plain",
+      "type": "int"
+    },
+    "game_points_be_113": {
+      "id": 77,
+      "name": "VP - Landmarks",
+      "type": "int"
+    },
+    "game_points_era_1": {
+      "id": 81,
+      "name": "Points during Income\/Era 1",
+      "type": "int"
+    },
+    "game_points_era_2": {
+      "id": 82,
+      "name": "Points during Income\/Era 2",
+      "type": "int"
+    },
+    "game_points_era_3": {
+      "id": 83,
+      "name": "Points during Income\/Era 3",
+      "type": "int"
+    },
+    "game_points_era_4": {
+      "id": 84,
+      "name": "Points during Income\/Era 4",
+      "type": "int"
+    },
+    "game_points_era_5": {
+      "id": 85,
+      "name": "Points during Income 5",
+      "type": "int"
+    },
+    "game_points_era_6": {
+      "id": 86,
+      "name": "Points after end of game",
+      "type": "int"
+    },
+    "game_points_total": {
+      "id": 87,
+      "name": "Points total",
+      "type": "int"
+    }
+  },
+  "value_labels": {
+    "21": {
+      "0": "None",
+      "1": "ALCHEMISTS",
+      "2": "ARCHITECTS",
+      "3": "CRAFTSMEN",
+      "4": "ENTERTAINERS",
+      "5": "FUTURISTS",
+      "6": "HERALDS",
+      "7": "HISTORIANS",
+      "8": "INVENTORS",
+      "9": "ISOLATIONISTS",
+      "10": "LEADERS",
+      "11": "MERRYMAKERS",
+      "12": "MILITANTS",
+      "13": "MYSTICS",
+      "14": "NOMADS",
+      "15": "THE CHOSEN",
+      "16": "TRADERS",
+      "21": "COLLECTORS",
+      "22": "GAMBLERS",
+      "23": "RELENTLESS",
+      "24": "RENEGADES",
+      "25": "URBAN PLANNERS",
+      "30": "ADVISORS",
+      "31": "ALIENS",
+      "32": "INFILTRATORS",
+      "33": "ISLANDERS",
+      "34": "RECYCLERS",
+      "35": "RIVERFOLK",
+      "36": "SPIES",
+      "37": "TINKERERS",
+      "38": "TREASUREHUNTERS",
+      "39": "UTILITARIANS"
+    },
+    "114": ["None", "Explorers", "Scientist", "Conquerors", "Engineers"]
+  }
+}
