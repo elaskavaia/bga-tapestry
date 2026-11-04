@@ -72,7 +72,6 @@ define([
 
       this.bonusdata = [];
       // Log
-      this.lastMoveId = null;
       this.rejectCount = 0;
     },
 
@@ -4396,15 +4395,6 @@ define([
       var html = this.getTooptipHtml(dyn, clone.outerHTML);
       this.addTooltipHtml(attachToNode.id, html, delay);
     },
-
-    addTooltipHtml: function (id, html, delay) {
-      //console.log( 'addTooltipHtml :' + id );
-      if (false) {
-        // for debugging
-      } else {
-        return this.inherited(arguments);
-      }
-    },
     getTooltipTitle: function (name) {
       return "<div class='tooltiptitle'>" + this.getTr(name) + "</div>";
     },
@@ -5864,7 +5854,6 @@ define([
       //this.notifqueue.setSynchronous("benefitQueue", 300);
 
       dojo.subscribe("income", this, "notif_income");
-      dojo.subscribe("undoMove", this, "notif_undoMove");
       dojo.subscribe("log", this, "notif_log");
       dojo.subscribe("message_error", this, "notif_message_error");
       dojo.subscribe("message_info", this, "notif_message_info");
@@ -6894,10 +6883,6 @@ define([
     notif_bonusPayment: function (notif) {
       //nothing, there is another call discardCard after
     },
-    notif_undoMove: function (notif) {
-      //['undoMove' => $move, 'partial_undo' => 1]
-      this.setUndoMove(notif.args.undo_move, notif.args.partial_undo, notif.args.player_id);
-    },
     notif_log: function (notif) {
       if (notif.log) console.log(notif.log, notif.args);
       else if (notif.args && notif.args.log) console.log(notif.args.log, notif.args);
@@ -6924,84 +6909,21 @@ define([
         this.showMessage(_("Announcement:") + " " + message, "info");
       }
     },
-    setUndoMove: function (undoMove, partial_undo, player_id) {
-      this.gamedatas.undo_move = undoMove;
-      this.gamedatas.partial_undo = partial_undo;
-      this.gamedatas.undo_player_id = player_id;
-      undoMove = parseInt(undoMove);
-      var moveNode = document.querySelector('.movestamp[data-move-id="' + undoMove + '"]');
-      var place = "after";
-      var placeNode = null;
-      if (!moveNode) {
-        undoMove++;
-        moveNode = document.querySelector('.movestamp[data-move-id="' + undoMove + '"]');
-      }
-      if (!moveNode) {
-        if (this.lastMoveId < this.gamedatas.undo_move) {
-          placeNode = document.querySelector("#logs > *");
-          place = "before";
-        }
-      } else {
-        placeNode = moveNode.parentNode;
-        place = "after";
-      }
-
-      var undoButId = "button_undo_y";
-      dojo.destroy(undoButId);
-      if (placeNode) {
-        var name = this.divPlayerName(player_id);
-        var messsage = this.format_string_recursive(_("${player} may undo up to this point"), {
-          player: name
-        });
-        var div = dojo.create("div", {
-          id: undoButId,
-          innerHTML: messsage,
-          class: "undomarker",
-          title: _("Click to undo your move up to this point"),
-          onclick: "return false"
-        });
-        dojo.place(div, placeNode, place);
-        dojo.connect(div, "onclick", this, "onUndo");
-        console.log("undo move connected #" + this.gamedatas.undo_move + " " + placeNode.id);
-      } else {
-        console.log("undo move not connected #" + this.gamedatas.undo_move);
-      }
-    },
     /** @Override */
     addMoveToLog: function (log_id, move_id) {
       this.inherited(arguments);
       //console.log("log",log_id, move_id);
       if (!move_id) return;
-      this.lastMoveId = move_id;
-
       //lognode.setAttribute('data-move-id', move_id);
-
-      var prevmove = document.querySelector('[data-move-id="' + move_id + '"]');
-      if (!prevmove) {
-        var lognode = $("log_" + log_id);
-        tsnode = document.createElement("div");
-        tsnode.classList.add("movestamp");
-        tsnode.innerHTML = _("Move #") + move_id;
-        lognode.appendChild(tsnode);
-
-        tsnode.setAttribute("data-move-id", move_id);
-      }
-    },
-    /*
-     * [Undocumented] Override BGA framework functions to call onLoadingLogsComplete when loading is done
-     */
-    setLoader: function (image_progress, logs_progress) {
-      this.inherited(arguments);
-      //console.log("loader", image_progress, logs_progress)
-      if (!this.isLoadingLogsComplete && logs_progress >= 100) {
-        this.isLoadingLogsComplete = true;
-        this.onLoadingLogsComplete();
-      }
-    },
-
-    onLoadingLogsComplete: function () {
-      console.log("Loading logs complete");
-      this.setUndoMove(this.gamedatas.undo_move, this.gamedatas.partial_undo, this.gamedatas.undo_player_id);
+      // framework also sets data-move-id on the log node itself
+      if (document.querySelector('.movestamp[data-move-id="' + move_id + '"]')) return;
+      const lognode = $("log_" + log_id);
+      if (!lognode) return;
+      const tsnode = document.createElement("div");
+      tsnode.classList.add("movestamp");
+      tsnode.innerHTML = _("Move #") + move_id;
+      tsnode.setAttribute("data-move-id", move_id);
+      lognode.appendChild(tsnode);
     }
   });
 });

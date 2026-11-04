@@ -936,8 +936,6 @@ abstract class PGameXBody extends tapcommon {
         $result["variants"]["variant_adjustments"] = $this->getAdjustmentVariant();
         $result["variants"]["automa_in_play"] = $this->isSolo();
         $result["variants"]["shadow_in_play"] = $this->isAutoma();
-        // undo
-        $result += $this->argUndo();
         //  $result['canceledNotifIds'] = $this->getCanceledNotifIds();
         $result["testenv"] = $this->isTestEnv();
         return $result;
@@ -10316,7 +10314,7 @@ abstract class PGameXBody extends tapcommon {
     }
 
     function argPlayerTurnEnd() {
-        return $this->argUndo();
+        return [];
     }
 
     function argUndo() {

@@ -3428,19 +3428,6 @@ div[data-income="0"] #subtitle_bar {
   background-color: transparent;
 }
 
-.undomarker {
-  text-decoration: underline;
-  position: relative;
-  width: 100%;
-  font-size: x-small;
-  order: 4;
-  text-align: center;
-  text-underline-position: auto;
-  color: black;
-  background-color: white;
-  display: block;
-  border-radius: 5px;
-}
 /*
 .undomarker::after {
     content: "";
