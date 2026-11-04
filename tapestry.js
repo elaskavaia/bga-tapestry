@@ -2230,21 +2230,7 @@ define([
 
     onAlliance: function (event) {
       dojo.stopEvent(event);
-      if (!this.checkAction("formAlliance")) {
-        return;
-      }
-      var pid = event.currentTarget.id.split("_")[2];
-
-      this.ajaxcall(
-        "/tapestry/tapestry/formAlliance.html",
-        {
-          lock: true,
-          pid: pid
-        },
-        this,
-        function (result) {},
-        function (is_error) {}
-      );
+      this.axcallwrapper("formAlliance", { pid: event.currentTarget.id.split("_")[2] });
     },
 
     onSelectHistorian: function (event) {
@@ -2405,18 +2391,7 @@ define([
 
     onTapDecline: function (event) {
       dojo.stopEvent(event);
-      if (!this.checkAction("decline_tapestry")) {
-        return;
-      }
-      this.ajaxcall(
-        "/tapestry/tapestry/decline_tapestry.html",
-        {
-          lock: true
-        },
-        this,
-        function (result) {},
-        function (is_error) {}
-      );
+      this.axcallwrapper("decline_tapestry");
     },
 
     onMystic: function (event) {
@@ -3253,31 +3228,14 @@ define([
     },
 
     axcallwrapper: function (action, args, handler, nocheck) {
-      if (!args) {
-        args = [];
-      }
-      if (nocheck === undefined) nocheck = false;
+      args ??= {};
+      handler ??= this.callbackErrorHandler;
       delete args.action;
-
-      if (typeof args.lock == "undefined" || args.lock !== false) {
-        args.lock = true;
-      } else {
-        delete args.lock;
-      }
-
-      if (handler == null) {
-        handler = "callbackErrorHandler";
-      }
-
-      if (nocheck || this.checkAction(action)) {
-        this.ajaxcall(
-          "/" + this.game_name + "/" + this.game_name + "/" + action + ".html",
-          args, // SUPPRESS args.lock
-          this,
-          (result) => {},
-          handler
-        );
-      }
+      if (!nocheck && !this.bga.actions.checkAction(action)) return;
+      this.bga.actions.performAction(action, args, { checkAction: false }).then(
+        () => handler.call(this, false),
+        () => handler.call(this, true)
+      );
     },
     callbackErrorHandler: function (err) {
       if (err) {
