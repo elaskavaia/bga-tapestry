@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/PsionicsUT.php";
@@ -178,7 +179,7 @@ final class PsionicsSeamTest extends TestCase {
         $game->seedRand(3, 1, 4, 2);
         $game->rollConquerDice(PsionicsUT::ROLLER);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->keepConquerDieFace("red", 4);
     }
 
@@ -351,7 +352,7 @@ final class PsionicsSeamTest extends TestCase {
 
         try {
             $game->action_research_decision(1, 1);
-        } catch (BgaUserException $e) {
+        } catch (UserException $e) {
             $this->assertStringNotContainsString("You can only select", $e->getMessage());
         }
 
@@ -366,7 +367,8 @@ final class PsionicsSeamTest extends TestCase {
         $game->queueBenefitNormal(BE_RESEARCH, PsionicsUT::ROLLER);
         $game->runManager();
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('You can only select ${track_names} track or Decline');
         $game->action_research_decision(4, 1);
     }
 

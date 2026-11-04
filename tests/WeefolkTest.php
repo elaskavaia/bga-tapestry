@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -402,7 +403,7 @@ final class WeefolkTest extends TestCase {
         $this->giveToken();
         $this->game->offerPlot(WeefolkUT::OPPONENT);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->place_structure(0, 6, 8);
     }
 
@@ -411,7 +412,7 @@ final class WeefolkTest extends TestCase {
         $this->game->putStructure(WeefolkUT::OPPONENT, BUILDING_MARKET, 6, 8);
         $house = $this->game->dbAddStructure(WeefolkUT::OPPONENT, BUILDING_HOUSE, 0, "capital_structure");
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->effect_placeOnCapitalMat($house, 6, 8, 0, WeefolkUT::OPPONENT);
     }
 
@@ -421,7 +422,7 @@ final class WeefolkTest extends TestCase {
         $this->giveToken();
         $this->game->offerPlot(WeefolkUT::OPPONENT);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->placeCraftsmen(1);
     }
 
@@ -431,7 +432,7 @@ final class WeefolkTest extends TestCase {
         $this->giveToken();
         $this->game->offerPlot(WeefolkUT::OPPONENT);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->conquer_structure(3, 3);
     }
 
@@ -441,7 +442,7 @@ final class WeefolkTest extends TestCase {
         $this->giveToken();
         $this->game->offerPlot(WeefolkUT::OPPONENT);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->place_structure(0, 100, 100);
     }
 
@@ -498,7 +499,7 @@ final class WeefolkTest extends TestCase {
         $this->giveToken();
         $this->game->benefitCashed($this->game->getCurrentBenefit(BE_WEEFOLK_PLOT));
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->useCivAbility(WeefolkUT::OWNER, Weefolk::CHOICE_BUILD, 7);
     }
 

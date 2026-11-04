@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -134,7 +135,7 @@ final class CapitalMatTest extends TestCase {
         $game->occupy(4, 4);
         $id = $game->pendingStructure(BUILDING_LANDMARK, CapitalMatUT::TECH_HUB);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->effect_placeOnCapitalMat($id, 3, 3, 0, CapitalMatUT::PLAYER);
     }
 
@@ -148,7 +149,7 @@ final class CapitalMatTest extends TestCase {
         $this->assertNotContains("0_0", $game->argPlaceStructure()["options"][0]);
 
         $this->expectOutputRegex("/Invalid structure placement cell 0_0 rotation 0/");
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->place_structure(0, 0, 0);
     }
 
@@ -165,7 +166,7 @@ final class CapitalMatTest extends TestCase {
         try {
             $game->place_structure(0, 3, 3);
             $this->fail("rotation 0 covers the occupied cell");
-        } catch (BgaUserException $e) {
+        } catch (UserException $e) {
         }
         $game->place_structure(1, 3, 3);
         $this->assertEquals("capital_cell_" . CapitalMatUT::PLAYER . "_3_3", $game->structureLocation($id));

@@ -85,7 +85,7 @@ class Traders extends AbsCivilization {
             $other_building = array_shift($tile_structs);
             $opponent_id = (int) $other_building["card_location_arg"];
             $game->userAssertTrue(
-                totranslate('TRADERS can only place income building on opponent\'s territory'),
+                clienttranslate('TRADERS can only place income building on opponent\'s territory'),
                 $opponent_id != $player_id
             );
             if ($game->isAdjustments8()) {
@@ -104,7 +104,7 @@ class Traders extends AbsCivilization {
         if (count($tile_structs) == 0) {
             // benefit is 1VP per adjacent opponent territory
             if ($game->isAdjustments4or8()) {
-                return $game->userAssertTrue(totranslate("Cannot place on empty territory"));
+                return $game->userAssertTrue(clienttranslate("Cannot place on empty territory"));
             }
 
             $neighbours = $game->getNeighbourHexes($coords);
@@ -123,7 +123,7 @@ class Traders extends AbsCivilization {
         }
         $other_building = array_shift($tile_structs);
         if ($other_building["card_type"] != "5") {
-            return $game->userAssertTrue(totranslate("TRADERS can only share hexes with outposts") . toJson($other_building));
+            return $game->userAssertTrue(clienttranslate("TRADERS can only share hexes with outposts"), false, toJson($other_building));
         }
 
         $map_tile_id = $hex["map_tile_id"];
@@ -133,7 +133,7 @@ class Traders extends AbsCivilization {
         $self_control = $other_building["card_location_arg"] == $player_id;
 
         if (!$game->isAdjustments4or8()) {
-            $game->userAssertTrue(totranslate('TRADERS can only place a cube on opponent\'s territory'), !$self_control);
+            $game->userAssertTrue(clienttranslate('TRADERS can only place a cube on opponent\'s territory'), !$self_control);
             if ($benefits) {
                 $game->queueBenefitInterrupt($benefits, $player_id, $reason);
             }

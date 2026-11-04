@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -82,6 +83,16 @@ final class TrackMovementTest extends TestCase {
         $this->assertEquals([], $game->moved);
         $this->assertNotEmpty($game->notificationLike("THEOCRACY"));
         $this->assertEquals(-1, $game->getGameStateValue("cube_choice"));
+    }
+
+    function testOpponentsDictatorshipRefusesACheckedAdvance() {
+        $game = $this->game;
+        $turn = $game->getPlayerTurn(DiceUT::OTHER);
+        $game->dbAddStructure(DiceUT::OTHER, BUILDING_CUBE, 0, "tech_spot_" . TRACK_EXPLORATION . "_4", "dic_{$turn}_1");
+
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage("DICTATORSHIP");
+        $game->triggerAdvanceCheck(DiceUT::ROLLER, TRACK_EXPLORATION, true);
     }
 
     /** Completing technology leaves a virtual cube on its last space, which still counts as a token (max-out bonus). */

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -160,7 +161,7 @@ final class WerefolkTest extends TestCase {
         $this->assertNotEquals(17, $marked["card_type_arg"], "the fixture must differ from the drawn tile");
 
         $this->game->queueBenefitInterrupt(BE_WEREFOLK_EXPLORE, 1, "");
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->expectExceptionMessage("You must explore with the space tile you just drew");
         $this->game->action_exploreSpace(17);
     }
@@ -357,7 +358,7 @@ final class WerefolkTest extends TestCase {
             $fn();
             ob_end_clean();
             $this->fail("expected $code");
-        } catch (BgaUserException $e) {
+        } catch (UserException $e) {
             ob_end_clean();
             $this->assertStringContainsString($code, $e->getMessage());
         }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/IncomeMatUT.php";
@@ -135,7 +136,7 @@ final class IncomeMatTest extends TestCase {
         $this->game->layoutTrack(IncomeMatUT::OWNER, BUILDING_FARM, [4, 5, 6]);
         $this->game->income[IncomeMatUT::OWNER][BUILDING_FARM] = 2;
         $this->expectOutputRegex("/Internal Error during move 0: ERR:game:04/");
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->getIncomeUncoveredSpots(IncomeMatUT::OWNER, BUILDING_FARM);
     }
 
@@ -184,7 +185,7 @@ final class IncomeMatTest extends TestCase {
 
     function testExhaustionWithThrowIsAUserError() {
         $this->game->layoutTrack(IncomeMatUT::OWNER, BUILDING_ARMORY, []);
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->dbGetIncomeBuildingOfType(BUILDING_ARMORY, true, true, IncomeMatUT::OWNER);
     }
 

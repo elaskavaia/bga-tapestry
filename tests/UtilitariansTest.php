@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -118,7 +119,7 @@ final class UtilitariansTest extends TestCase {
         try {
             $game->gamestate->state();
             $this->fail("expected the missing-benefit assert");
-        } catch (BgaUserException $e) {
+        } catch (UserException $e) {
             $this->assertStringContainsString("missing benefit", $e->getMessage());
         } finally {
             ob_end_clean();

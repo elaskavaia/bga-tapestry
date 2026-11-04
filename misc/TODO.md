@@ -14,9 +14,16 @@ STUDIO BUILD WARNINGS (deploy 261101-2149, 12 warnings, all pre-existing framewo
 - [ ] [debt/P3] PHP: direct `player_score` / `player_score_aux` writes (tapcommon.php:130-139,
       PGameXBody.php:11898-11925), use `$this->bga->playerScore` / `playerScoreAux`. Careful: the
       `playerextra` mirror for bots is written alongside.
-- [ ] [debt/P3] PHP: `_()` / `self::_()` in about 30 exception messages (PGameXBody.php, e.g. 1171,
-      4374, 8318; civs/Renegades.php:93; civs/AbsCivilization.php:108; tapcommon.php:214), use
-      `clienttranslate` with exception args.
+- [x] [debt/P3] PHP: `_()` and `totranslate` replaced by `clienttranslate`, `BgaUserException` by
+      `UserException`; parameterized messages pass args via `NotificationMessage`.
+- [x] [debt/P2] Verify in Studio with a non-English seat that `UserException` messages arrive
+      translated, including the science die refusal in `action_research_decision`: its
+      `${track_names}` is an array with `i18n` + `separator`, which the Translations doc only shows
+      for notifications.
+- [ ] [debt/P4] Remaining deprecated exceptions: `feException` (about 25 throws in PGameXBody,
+      tapcommon, taputils, AbsCivilization, Historians) and `BgaSystemException` (PGameXBody
+      `getCivilizationInstance`, GameUT, WeefolkTest). `systemAssertTrue` could become
+      `VisibleSystemException` (needs a check that tapestry.js "Internal Error" detection still works).
 - [ ] [debt/P3] JS: `ajaxcall` (tapestry.js:2240, 2413, 3275), use `this.bga.actions.performAction`;
       direct preference controls (tapestry.js:3824-3851), use `this.bga.userPreferences`;
       `scoreCtrl` (tapestry.js:6187-6188), use `this.bga.playerPanels.getScoreCounter`; direct player

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -67,7 +68,7 @@ final class TyrannyTest extends TestCase {
         $in_hand = array_key_first($this->game->getCardsSearch(CARD_TAPESTRY, TyrannyUT::IN_HAND, "hand", 1));
         $this->game->stTapestryCard();
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->expectExceptionMessage("You can only play a just drawn card");
         $this->game->playTapestryCard($in_hand, 1);
     }

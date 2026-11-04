@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -201,7 +202,7 @@ final class ElderOnesTest extends TestCase {
         $cards = $game->giveTapestryCards(ElderOnesUT::OWNER, 7);
         $game->queueEraCivAbility(CIV_ELDER_ONES, ElderOnesUT::OWNER, 5);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->acceptBonus(ElderOnesUT::OWNER, $cards);
     }
 
@@ -389,7 +390,7 @@ final class ElderOnesTest extends TestCase {
         $this->enterExtendedPlay();
         $game->gamestate->jumpToState(13);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->takeIncome();
     }
 

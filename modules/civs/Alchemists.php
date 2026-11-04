@@ -305,7 +305,7 @@ class Alchemists extends AbsCivilization {
         $civ = $this->civ;
         $game = $this->game;
         $token_data = $this->getAllCubesOnCiv();
-        $game->userAssertTrue(totranslate("You must Roll at least once"), count($token_data) > 0);
+        $game->userAssertTrue(clienttranslate("You must Roll at least once"), count($token_data) > 0);
 
         $tracks = [];
         foreach ($token_data as $tid => $token) {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/MapUT.php";
@@ -304,7 +305,7 @@ final class CelestialsTest extends TestCase {
 
         $game->openMovePrompt();
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->moveToken($token, "2_0");
     }
 

@@ -65,15 +65,18 @@ class Mystics extends AbsCivilization {
         // VALIDITY CHECKS
         $this->systemAssertTrue("user does not have mystics", $this->hasCiv($player_id, CIV_MYSTICS));
         $this->systemAssertTrue("ERR:Mystics:100", !$game->isAdjustments8());
-        $game->userAssertTrue(totranslate("You must make some predictions"), $ids && is_array($ids));
+        $game->userAssertTrue(clienttranslate("You must make some predictions"), $ids && is_array($ids));
         $era = $game->getCurrentEra($player_id);
         if ($era <= 1) {
-            $game->userAssertTrue(totranslate("You must choose a value from each row"), count($ids) == 4);
+            $game->userAssertTrue(clienttranslate("You must choose a value from each row"), count($ids) == 4);
         } elseif ($game->isAdjustments4()) {
             if ($era >= 5) {
                 return;
             }
-            $game->userAssertTrue(totranslate("Make a number of predictions equal to number of remaining eras"), count($ids) + $era == 5);
+            $game->userAssertTrue(
+                clienttranslate("Make a number of predictions equal to number of remaining eras"),
+                count($ids) + $era == 5
+            );
         } else {
             $this->systemAssertTrue("ERR:Mystics:500");
         }
@@ -82,7 +85,7 @@ class Mystics extends AbsCivilization {
         foreach ($ids as $id) {
             $index = floor(($id - 1) / 9);
             if ($index > 3 || array_key_exists((int) $index, $rows)) {
-                $game->userAssertTrue(totranslate("You must choose a value from each row"));
+                $game->userAssertTrue(clienttranslate("You must choose a value from each row"));
             }
             $pos = (($id - 1) % 9) + 1;
             $rows[$index] = $pos;

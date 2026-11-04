@@ -101,13 +101,6 @@ abstract class AbsCivilization {
     /** BE_CIV_END queued with this civ's reason has been reached: everything the ability queued before it is resolved. */
     function endCivAbility(int $player_id): void {}
 
-    /**
-     * Copy of translation function for conviniene, this can only be user for error message in exceptions
-     */
-    function _($str) {
-        return $this->game->_($str);
-    }
-
     function debugConsole($info, $args = [], $silent = false) {
         $this->game->debugConsole($info, $args, $silent);
     }

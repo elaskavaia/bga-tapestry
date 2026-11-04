@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -398,7 +399,7 @@ final class FaefolkTest extends TestCase {
         try {
             $fn();
             $this->fail("expected $code");
-        } catch (BgaUserException $e) {
+        } catch (UserException $e) {
             $this->assertStringContainsString($code, $e->getMessage());
         } finally {
             ob_end_clean();

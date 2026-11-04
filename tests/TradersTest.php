@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/IncomeMatUT.php";
@@ -98,7 +99,7 @@ final class TradersTest extends TestCase {
     function testATileThatIsNotYoursCannotBeGivenAway() {
         $tile = $this->giveTile(IncomeMatUT::OPPONENT);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->traders()->sendTrader(IncomeMatUT::OWNER, ["coords" => "land_2_0", "tile" => $tile]);
     }
 
@@ -106,25 +107,25 @@ final class TradersTest extends TestCase {
     function testATileOnTheMapCannotBeGivenAway() {
         $onmap = array_key_first($this->game->getCardsSearch(CARD_TERRITORY, null, "map", null, "2_0"));
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->traders()->sendTrader(IncomeMatUT::OWNER, ["coords" => "land_2_0", "tile" => $onmap]);
     }
 
     function testACardThatIsNotATerritoryTileCannotBeGivenAway() {
         $civ = $this->game->giveCiv(IncomeMatUT::OWNER, CIV_TRADERS);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->traders()->sendTrader(IncomeMatUT::OWNER, ["coords" => "land_2_0", "tile" => $civ]);
     }
 
     function testAnUnknownCardIdCannotBeGivenAway() {
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->traders()->sendTrader(IncomeMatUT::OWNER, ["coords" => "land_2_0", "tile" => 9999]);
     }
 
     /** An empty hand is a legal-but-wrong click, so it is a player error and nothing has moved yet. */
     function testTheTokenOptionCannotBeTakenWithoutATileToGive() {
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->game->traders()->sendTrader(IncomeMatUT::OWNER, ["coords" => "land_2_0"]);
     }
 
@@ -134,7 +135,7 @@ final class TradersTest extends TestCase {
         try {
             $this->game->traders()->sendTrader(IncomeMatUT::OWNER, ["coords" => "land_2_0", "bt" => BUILDING_ARMORY]);
             $this->fail("expected the missing tile to be refused");
-        } catch (BgaUserException $expected) {
+        } catch (UserException $expected) {
         }
         $this->assertEquals(1, $this->game->dbGetIncomeTrackLevel(BUILDING_ARMORY, IncomeMatUT::OWNER), "the mat was not touched");
         $this->assertEquals([], $this->game->benefitQueue());

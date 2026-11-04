@@ -18,7 +18,7 @@ class Craftsmen extends AbsCivilization {
             // normal move is place structure on craftment mat
             $this->systemAssertTrue("No civ CRAFTSMEN", $game->hasCiv($player_id, CIV_CRAFTSMEN));
             $slots = $this->getCraftsmenSlots($player_id);
-            $game->userAssertTrue(totranslate('Invalid slot'), in_array($spot, $slots));
+            $game->userAssertTrue(clienttranslate('Invalid slot'), in_array($spot, $slots));
             $civ_location = "civ_3_" . $spot;
             $curr = $game->getStructureInfoSearch(null, null, 'capital_structure');
             $structure_id = $curr['card_id'];
@@ -41,7 +41,7 @@ class Craftsmen extends AbsCivilization {
 
         $first = false;
         $slots = $this->getCraftsmenSlotsMidgame($player_id, $first);
-        $game->userAssertTrue(totranslate('Invalid slot'), in_array($spot, $slots));
+        $game->userAssertTrue(clienttranslate('Invalid slot'), in_array($spot, $slots));
 
         // UPDATE cube
         $this->placeCivCube($player_id, $spot, 0, $income_turn);

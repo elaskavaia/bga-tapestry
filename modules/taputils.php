@@ -44,18 +44,6 @@ function getReasonCiv($reason) {
     return 0;
 }
 
-function varsub($line, $keymap) {
-    if (strpos($line, "{") !== false) {
-        foreach ( $keymap as $key => $value ) {
-            $exkey = '${' . "$key}";
-            if (strpos($line, $exkey) !== false) {
-                $line = str_replace($exkey, $value, $line);
-            }
-        }
-    }
-    return $line;
-}
-
 function startsWith($haystack, $needle) {
     // search backwards starting from haystack length characters from the end
     return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== false;

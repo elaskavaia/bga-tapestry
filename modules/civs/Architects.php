@@ -44,7 +44,7 @@ class Architects extends AbsCivilization {
                 // place cube in the city
                 $structure_id = $this->game->addCube($player_id, 'capital_structure');
                 $district_info = $this->game->getDistrictInfo($spot, $extra, null, $player_id);
-                $this->game->userAssertTrue(totranslate("Cannot place cube in the same district"), array_get_def($district_info, 'build_types', BUILDING_CUBE, 0) == 0);
+                $this->game->userAssertTrue(clienttranslate("Cannot place cube in the same district"), array_get_def($district_info, 'build_types', BUILDING_CUBE, 0) == 0);
                 $this->game->effect_placeOnCapitalMat($structure_id, $spot, $extra);
                 return;
             }
@@ -54,10 +54,10 @@ class Architects extends AbsCivilization {
         $structure2 = $extra;
         $info1 = $this->game->getStructureInfoById($structure1, true);
         $this->game->systemAssertTrue("cannot find $structure1", $info1);
-        $this->game->userAssertTrue(totranslate('Can only swap income buildings'), $this->game->checkValidIncomeType($info1['type']));
+        $this->game->userAssertTrue(clienttranslate('Can only swap income buildings'), $this->game->checkValidIncomeType($info1['type']));
         $info2 = $this->game->getStructureInfoById($structure2, true);
         $this->game->systemAssertTrue("cannot find $structure2", $info2);
-        $this->game->userAssertTrue(totranslate('Can only swap income buildings'), $this->game->checkValidIncomeType($info2['type']));
+        $this->game->userAssertTrue(clienttranslate('Can only swap income buildings'), $this->game->checkValidIncomeType($info2['type']));
         $this->game->dbSetStructureLocation($structure1, $info2['location'], null, '', $player_id);
         $this->game->dbSetStructureLocation($structure2, $info1['location'], null, clienttranslate('${player_name} swapped two income buildings'), $player_id);
         $cubes = $this->game->getStructuresSearch(BUILDING_CUBE, null , "civilization_$civ");

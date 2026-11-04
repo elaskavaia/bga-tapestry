@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
+
 class Renegades extends AbsCivilization {
     public function __construct(object $game) {
         parent::__construct(CIV_RENEGADES, $game);
@@ -90,7 +92,7 @@ class Renegades extends AbsCivilization {
         $this->systemAssertTrue("ERR:Renegates:03", $cube_tier !== null);
         $this->systemAssertTrue("ERR:Renegates:03", $cube_tier >= 0);
         if ($cube_tier >= $tier) {
-            throw new BgaUserException($this->_("RENEGADES advance is not possible to this tier"));
+            throw new UserException(clienttranslate("RENEGADES advance is not possible to this tier"));
         }
         $cube_tier++;
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -322,7 +323,7 @@ final class InfiltratorsTest extends TestCase {
             $fn();
             ob_end_clean();
             $this->fail("expected $code");
-        } catch (BgaUserException $e) {
+        } catch (UserException $e) {
             ob_end_clean();
             $this->assertStringContainsString($code, $e->getMessage());
         }

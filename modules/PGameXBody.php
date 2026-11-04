@@ -16,6 +16,10 @@
  * In this PHP file, you are going to defines the rules of the game.
  *
  */
+
+use Bga\GameFramework\NotificationMessage;
+use Bga\GameFramework\UserException;
+
 require_once "tapcommon.php";
 require_once "civs/AbsCivilization.php";
 require_once "civs/BasicCivilization.php";
@@ -1167,11 +1171,7 @@ abstract class PGameXBody extends tapcommon {
 
     function notifyWithTrack($type, $message, $more_args = [], $player_id = -1) {
         $args = $this->notifArgsAddTrackSpot(null, null, $more_args);
-        if (isset($args["throw"])) {
-            throw new BgaUserException(varsub(self::_($message), $args));
-        } else {
-            $this->notifyWithName($type, $message, $args, $player_id);
-        }
+        $this->notifyWithName($type, $message, $args, $player_id);
     }
 
     function notifyMoveStructure($message, $id, $args = [], $player_id = null, $reason = null) {
@@ -2300,7 +2300,7 @@ abstract class PGameXBody extends tapcommon {
         if ($new_count === null) {
             $base_count = $this->getUniqueValueFromDB("SELECT $res_field FROM playerextra WHERE player_id='$player_id'");
             $new_count = min($base_count + $increase, 8);
-            $this->userAssertTrue(totranslate("You cannot afford this payment combination"), $new_count >= 0);
+            $this->userAssertTrue(clienttranslate("You cannot afford this payment combination"), $new_count >= 0);
             if ($base_count + $increase > $new_count) {
                 $this->notifyWithName("message_error", clienttranslate('${player_name} is maxed out on ${res_type}'), [
                     "i18n" => ["res_type"],
@@ -3215,7 +3215,7 @@ abstract class PGameXBody extends tapcommon {
         $rows = $this->getIncomeBuildingsOnTrack((int) $player_id, (int) $type);
         if (!$rows) {
             if ($throw) {
-                $this->userAssertTrue(totranslate("No more income buildings of this type"));
+                $this->userAssertTrue(clienttranslate("No more income buildings of this type"));
                 return null;
             }
             if ($notify) {
@@ -3721,7 +3721,7 @@ abstract class PGameXBody extends tapcommon {
         );
 
         if ($ben == 112) {
-            $this->userAssertTrue(totranslate("Cannot play tapestry card from hand, select a card to copy from the mat"));
+            $this->userAssertTrue(clienttranslate("Cannot play tapestry card from hand, select a card to copy from the mat"));
         }
         $this->clearCurrentBenefit($ben);
 
@@ -3739,7 +3739,7 @@ abstract class PGameXBody extends tapcommon {
                 } else {
                     $allowed = false;
                 }
-                $this->userAssertTrue(totranslate("HERALDS cannot play this type of card over Marker of Fire"), $allowed);
+                $this->userAssertTrue(clienttranslate("HERALDS cannot play this type of card over Maker of Fire"), $allowed);
                 $card_effect = null;
                 $message = clienttranslate('${player_name} plays a tapestry card ${card_name} over Maker Of Fire - no benefits');
             } else {
@@ -3912,14 +3912,14 @@ abstract class PGameXBody extends tapcommon {
         $count = count($cubes);
         if ($count == 0) {
             if ($flags & FLAG_SELF) {
-                $mess = totranslate("Cannot find a cube on this spot");
+                $mess = clienttranslate("Cannot find a cube on this spot");
             } else {
-                $mess = totranslate('Cannot find an opponent\'s cube on this spot');
+                $mess = clienttranslate('Cannot find an opponent\'s cube on this spot');
             }
             $this->userAssertTrue($mess);
         }
         if ($flags & FLAG_SINGLE && $count > 1 && $flags & FLAG_OPPONENT) {
-            $this->userAssertTrue(totranslate("Cannot determine which cube you are targeting, select the cube, not the spot"));
+            $this->userAssertTrue(clienttranslate("Cannot determine which cube you are targeting, select the cube, not the spot"));
         }
         $cube = reset($cubes);
         return $cube;
@@ -3929,7 +3929,7 @@ abstract class PGameXBody extends tapcommon {
         $arr = $this->cubeChoiceForTrack($track, $player_id, $change, $choice);
         $cube = reset($arr);
         if ($cube) {
-            $this->userAssertTrue(totranslate("Cannot select virtual cube"), !$cube["virtual"]);
+            $this->userAssertTrue(clienttranslate("Cannot select virtual cube"), !$cube["virtual"]);
         }
         return $cube;
     }
@@ -4141,7 +4141,9 @@ abstract class PGameXBody extends tapcommon {
         $player_id = $this->getCurrentPlayerId();
         $like = $this->getTrackLocationLike($track);
         $this->DbQuery(
-            "DELETE FROM structure WHERE card_type='" . BUILDING_CUBE . "' AND card_location_arg='$player_id' AND card_location LIKE '$like'"
+            "DELETE FROM structure WHERE card_type='" .
+                BUILDING_CUBE .
+                "' AND card_location_arg='$player_id' AND card_location LIKE '$like'"
         );
         foreach (array_filter(explode(",", $spots), "strlen") as $spot) {
             $this->dbAddStructure($player_id, BUILDING_CUBE, 0, "tech_spot_{$track}_" . (int) $spot);
@@ -4300,7 +4302,7 @@ abstract class PGameXBody extends tapcommon {
         $this->systemAssertTrue("invalid card selected $card_id not in era", $tap_card_data != null);
         $tap_type = $tap_card_data["card_type_arg"];
         $location = $tap_card_data["card_location"];
-        $this->userAssertTrue("Cannot select covered up tapestry card to copy", $location != "era_6");
+        $this->userAssertTrue(clienttranslate("Cannot select covered up tapestry card to copy"), $location != "era_6");
         if ($tap_type == TAP_ESPIONAGE) {
             $all_taps = $this->getCollectionFromDB("SELECT * FROM card WHERE card_type='3' AND card_location LIKE 'era%'");
             if (count($all_taps) == 1) {
@@ -4309,7 +4311,7 @@ abstract class PGameXBody extends tapcommon {
                 $this->gamestate->nextState("benefit");
                 return;
             }
-            $this->userAssertTrue(totranslate("Cannot copy itself"));
+            $this->userAssertTrue(clienttranslate("Cannot copy itself"));
             return;
         }
         $espionage = $this->isTapestryActive($player_id, TAP_ESPIONAGE, false);
@@ -4366,12 +4368,12 @@ abstract class PGameXBody extends tapcommon {
         $existing_token = $this->getUniqueValueFromDB(
             "SELECT card_id FROM structure WHERE card_type='7' AND (card_location = '$tapestry_id')"
         );
-        $this->userAssertTrue(totranslate("You cannot place a second HERALD token on a card"), $existing_token == null);
+        $this->userAssertTrue(clienttranslate("You cannot place a second HERALD token on a card"), $existing_token == null);
         // 4. Check WHEN PLAYED card
         $tap_type = $card_data["card_type_arg"];
         $card_data = $this->tapestry_card_data[$tap_type];
         if ($card_data["type"] != "now") {
-            throw new BgaUserException($this->_("Ability can only be used on WHEN PLAYED cards"));
+            throw new UserException(clienttranslate("Ability can only be used on WHEN PLAYED cards"));
         } // Check a WHEN PLAYED
         // PROCESS ACTION
         $this->DbQuery("UPDATE structure SET card_location='$tapestry_id' WHERE card_id='$herald_token'");
@@ -4505,7 +4507,7 @@ abstract class PGameXBody extends tapcommon {
                 } else {
                     // Gain res
                     if ($curScore < $vp) {
-                        throw new BgaUserException($this->_("You do not have that many victory points"));
+                        throw new UserException(clienttranslate("You do not have that many victory points"));
                     } else {
                         $this->awardVP($player_id, -$vp, $reason);
                     }
@@ -4619,13 +4621,13 @@ abstract class PGameXBody extends tapcommon {
         $this->interruptBenefit();
         $flags = $this->getRulesBenefit($ben, "sflags");
         if (!($flags & FLAG_VIRTUAL_ALLOWED)) {
-            $this->userAssertTrue(totranslate("Cannot select virtual cube"), $cube["card_type_arg"] != CUBE_AI);
+            $this->userAssertTrue(clienttranslate("Cannot select virtual cube"), $cube["card_type_arg"] != CUBE_AI);
         }
         switch ($ben) {
             case 106: // DARK AGES
                 // WHEN PLAYED: Regress once on 3 difference advancement tracks if possible,
                 // then advance three times on the remaining track. Do not gain any benefits or bonuses.
-                $this->userAssertTrue(totranslate("Can only select your own cube"), $owner == $player_id);
+                $this->userAssertTrue(clienttranslate("Can only select your own cube"), $owner == $player_id);
                 $reason = reason_tapestry(TAP_DARK_AGES);
                 for ($x = 1; $x <= 4; $x++) {
                     if ($track == $x) {
@@ -4650,7 +4652,7 @@ abstract class PGameXBody extends tapcommon {
                 $data = $owner . "_" . $track;
                 $tap_data = $this->isTapestryActive($player_id, TAP_MARRIAGE_OF_STATE);
                 $this->systemAssertTrue("Player does not have marriage of state", $tap_data);
-                $this->userAssertTrue(totranslate("Cannot select your own cube"), $owner != $player_id);
+                $this->userAssertTrue(clienttranslate("Cannot select your own cube"), $owner != $player_id);
                 $card_id = $tap_data["card_id"];
                 $this->DbQuery("UPDATE card SET card_location_arg2='$data' WHERE card_id='$card_id'");
                 $args = $this->notifArgsAddCardInfo($card_id);
@@ -4673,8 +4675,8 @@ abstract class PGameXBody extends tapcommon {
                 //  If there is a bonus, that opponent gains it for free.
                 // Check cube belongs to opponent
                 $owner = $cube_data["card_location_arg"];
-                $this->userAssertTrue(totranslate("Cannot select your own cube"), $owner != $player_id);
-                $this->userAssertTrue(totranslate("Cannot repeat virtual AI Singularity"), $cube_data["card_type_arg"] != CUBE_AI);
+                $this->userAssertTrue(clienttranslate("Cannot select your own cube"), $owner != $player_id);
+                $this->userAssertTrue(clienttranslate("Cannot repeat virtual AI Singularity"), $cube_data["card_type_arg"] != CUBE_AI);
                 $reason = reason_tapestry(TAP_TRADE_ECONOMY);
                 $this->notif()
                     ->withPlayer2($owner)
@@ -4693,8 +4695,8 @@ abstract class PGameXBody extends tapcommon {
                 // repeat neighbour's benefit
                 $owner = $cube_data["card_location_arg"];
                 $neight = $this->getPlayerNeighbours($player_id, false);
-                $this->userAssertTrue(totranslate("Cannot select your own cube"), $owner != $player_id);
-                $this->userAssertTrue(totranslate("Can only select a neighbour"), in_array($owner, $neight));
+                $this->userAssertTrue(clienttranslate("Cannot select your own cube"), $owner != $player_id);
+                $this->userAssertTrue(clienttranslate("Can only select a neighbour"), in_array($owner, $neight));
                 $this->notif()
                     ->withPlayer2($owner)
                     ->withTrackSpot($track, $spot)
@@ -4708,7 +4710,7 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case BE_TINKERERS_1: // 195
                 //  Gain resources equal to the cost of advancing into its current position
-                $this->userAssertTrue(totranslate("Can only select your own cube"), $owner == $player_id);
+                $this->userAssertTrue(clienttranslate("Can only select your own cube"), $owner == $player_id);
                 $this->notif()
                     ->withTrackSpot($track, $spot)
                     ->withReason($reason) /* */
@@ -4758,11 +4760,11 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case BE_TINKERERS_4:
                 //Advance to the next bonus on any track and gain that bonus for free. Do not gain the benefit or any landmarks you pass
-                $this->userAssertTrue(totranslate("Cannot select AI Singularity"), $cube_data["card_type_arg"] != CUBE_AI);
+                $this->userAssertTrue(clienttranslate("Cannot select AI Singularity"), $cube_data["card_type_arg"] != CUBE_AI);
                 $cubesmap = $this->getClosestBonus($player_id, $track, $cube_id);
-                $this->userAssertTrue(totranslate("Cannot determine bonus for this selection"), count($cubesmap) == 1);
+                $this->userAssertTrue(clienttranslate("Cannot determine bonus for this selection"), count($cubesmap) == 1);
                 $this->userAssertTrue(
-                    totranslate("Cannot determine bonus for this selection"),
+                    clienttranslate("Cannot determine bonus for this selection"),
                     getPart(array_key_first($cubesmap), 1) == $cube_id
                 );
                 $change = getPart($cubesmap["cube_$cube_id"], 1) - $spot;
@@ -4770,7 +4772,7 @@ abstract class PGameXBody extends tapcommon {
                 break;
             case 62: // repeater.
                 // Make sure player has token on that spot then repeat the bonus!
-                $this->userAssertTrue(totranslate("Cannot repeat virtual AI Singularity"), $cube["card_type_arg"] != CUBE_AI);
+                $this->userAssertTrue(clienttranslate("Cannot repeat virtual AI Singularity"), $cube["card_type_arg"] != CUBE_AI);
                 $this->assertCanUseBenefitOnTrackSpot($player_id, $track, $spot);
                 $this->processSpotBenefits($track, $spot, $player_id, FLAG_GAIN_BENEFIT | FLAG_PAY_BONUS, $current_benefit["benefit_data"]);
                 break;
@@ -4873,8 +4875,8 @@ abstract class PGameXBody extends tapcommon {
                 $opp_spots[] = $loc;
             }
         }
-        $this->userAssertTrue(totranslate("You must select the cube of nearest opponent"), in_array($spot, $opp_spots));
-        $this->userAssertTrue(totranslate("You do not have cubes on this track"), count($my_spots) > 0);
+        $this->userAssertTrue(clienttranslate("You must select the cube of nearest opponent"), in_array($spot, $opp_spots));
+        $this->userAssertTrue(clienttranslate("You do not have cubes on this track"), count($my_spots) > 0);
         $flags = (int) $flags;
         $advance = ($flags & FLAG_ADVANCE) != 0;
         $regress = ($flags & FLAG_REGRESS) != 0;
@@ -4908,7 +4910,7 @@ abstract class PGameXBody extends tapcommon {
                 break;
             }
         }
-        $this->userAssertTrue(totranslate("You must select the cube of nearest opponent"), !$invalid);
+        $this->userAssertTrue(clienttranslate("You must select the cube of nearest opponent"), !$invalid);
         return $start;
     }
 
@@ -4951,7 +4953,7 @@ abstract class PGameXBody extends tapcommon {
         $this->systemAssertTrue("Unexpected track choice action for $ben", $selectrule);
         if ($selectrule == "o") {
             // we target opponents not cubes per ce
-            $this->userAssertTrue(totranslate("You must select the cube not the spot"));
+            $this->userAssertTrue(clienttranslate("You must select the cube not the spot"));
             return;
         }
         if ($selectrule == "t") {
@@ -4998,14 +5000,14 @@ abstract class PGameXBody extends tapcommon {
             //Advance to the next bonus on any track and gain that bonus for free. Do not gain the benefit or any landmarks you pass
             if (!$cube_id) {
                 $cubesmap = $this->getClosestBonus($player_id, $track);
-                $this->userAssertTrue(totranslate("Cannot determine bonus for this selection"), count($cubesmap) > 0);
+                $this->userAssertTrue(clienttranslate("Cannot determine bonus for this selection"), count($cubesmap) > 0);
                 foreach ($cubesmap as $cube_iname => $pos) {
                     if ($pos == "{$track}_{$spot}") {
                         $cube_id = getPart($cube_iname, 1);
                         break;
                     }
                 }
-                $this->userAssertTrue(totranslate("Cannot determine bonus for this selection"), $cube_id);
+                $this->userAssertTrue(clienttranslate("Cannot determine bonus for this selection"), $cube_id);
             }
         }
         if (!$cube_id) {
@@ -5215,7 +5217,7 @@ abstract class PGameXBody extends tapcommon {
         $cube = $this->cubeChoiceForTrackSingle($track, $player_id, 0, $cube_spot);
         if (!$cube) {
             if (!$this->isStudio()) {
-                throw new BgaUserException($this->_("You may only advance by a single space"));
+                throw new UserException(clienttranslate("You may only advance by a single space"));
             }
             $cube = $this->cubeChoiceForTrackSingle($track, $player_id, ACTION_ADVANCE, -2);
             $cube_spot = $cube["spot"];
@@ -5312,14 +5314,14 @@ abstract class PGameXBody extends tapcommon {
                 "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'"
             );
             // CHECK SPOT VACANT
-            $this->userAssertTrue(totranslate("Outpost already placed on this spot"), !$token_data);
+            $this->userAssertTrue(clienttranslate("Outpost already placed on this spot"), !$token_data);
             // it has to be placed at right-most slot, so check the slot to the right - it has to have outpost (or be last)
             if ($spot != 4 && $spot != 8) {
                 $next_spot = $spot + 1;
                 $token_data = $this->getCollectionFromDB(
                     "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = 'civ_{$cid}_{$next_spot}'"
                 );
-                $this->userAssertTrue(totranslate("Outpost must be place on the right most spot in each row"), $token_data);
+                $this->userAssertTrue(clienttranslate("Outpost must be placed on the rightmost spot in each row"), $token_data);
             }
             // get new outpost from hand
             $tid = $this->getUniqueValueFromDB(
@@ -5345,7 +5347,7 @@ abstract class PGameXBody extends tapcommon {
                 "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'"
             );
             // CHECK SPOT VACANT
-            $this->userAssertTrue(totranslate("Token already placed on this spot"), $token_data == null);
+            $this->userAssertTrue(clienttranslate("Token already placed on this spot"), $token_data == null);
             $tid = $this->addCube($player_id, "hand");
             $this->queueBenefitNormal(79 + $spot, $player_id, reason_civ(CIV_LEADERS));
             $message = clienttranslate('${player_name} places a token on their civilization mat');
@@ -5379,7 +5381,7 @@ abstract class PGameXBody extends tapcommon {
                     if ($this->isAdjustments8() && $is_midgame) {
                         // no more than 2 benefit allowed midgame
                         if ($state >= 2) {
-                            $this->userAssertTrue(totranslate("Cannot use more than 2 benefits if gaining this civilization midgame"));
+                            $this->userAssertTrue(clienttranslate("Cannot use more than 2 benefits if gaining this civilization midgame"));
                         }
                     }
                     $state++;
@@ -5396,11 +5398,11 @@ abstract class PGameXBody extends tapcommon {
             return;
         }
         if ($cid == CIV_HERALDS) {
-            $this->userAssertTrue(totranslate("To use HERALDS ability click on tapestry card"));
+            $this->userAssertTrue(clienttranslate("To use HERALDS ability click on tapestry card"));
             return;
         }
         if ($cid == CIV_INVENTORS) {
-            $this->userAssertTrue(totranslate("To use INVENTORS ability click on tech card"));
+            $this->userAssertTrue(clienttranslate("To use INVENTORS ability click on tech card"));
             return;
         }
         if ($cid == CIV_MERRYMAKERS && $is_midgame && $this->isAdjustments4or8()) {
@@ -5408,18 +5410,18 @@ abstract class PGameXBody extends tapcommon {
             $token_data = $this->getCollectionFromDB(
                 "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_location = '$civ_token_string'"
             );
-            $this->userAssertTrue(totranslate("Token already placed on this spot"), $token_data == null);
+            $this->userAssertTrue(clienttranslate("Token already placed on this spot"), $token_data == null);
             $token_data = $this->getCollectionFromDB(
                 "SELECT * FROM structure WHERE card_location_arg='$player_id' AND card_type='$token_type' AND card_location LIKE 'civ_$cid\\_%' AND card_location_arg2 != $state"
             );
             $x = array_shift($token_data);
             $tid = $x["card_id"];
-            $this->userAssertTrue(totranslate("Cannot find a token to place"), $tid);
+            $this->userAssertTrue(clienttranslate("Cannot find a token to place"), $tid);
             $valid = false;
             if (!in_array($spot, [1, 5, 9])) {
                 $valid = true;
             }
-            $this->userAssertTrue(totranslate("Token cannot advance to this spot"), $valid);
+            $this->userAssertTrue(clienttranslate("Token cannot advance to this spot"), $valid);
             if (count($token_data) == 1) {
                 $this->benefitCivEntry($cid, $player_id, "midgame");
             }
@@ -5528,7 +5530,7 @@ abstract class PGameXBody extends tapcommon {
                 $valid = true;
             }
             $tid = array_key_first($token_data);
-            $this->userAssertTrue(totranslate("Cannot find a token to place"), $tid);
+            $this->userAssertTrue(clienttranslate("Cannot find a token to place"), $tid);
         } elseif ($slot_choice) {
             $valid = true;
         } else {
@@ -5541,13 +5543,16 @@ abstract class PGameXBody extends tapcommon {
                 }
             }
         }
-        $this->userAssertTrue(totranslate("Token cannot advance to this spottriggered power"), $valid);
+        $this->userAssertTrue(clienttranslate("Token cannot advance to this spot"), $valid);
         $token_info = $token_data[$tid];
         $state = $token_info["card_location_arg2"];
         if ($cid == CIV_MERRYMAKERS && $this->isAdjustments4or8()) {
-            $this->userAssertTrue(totranslate("Cannot move this token, it is already been moved during this era"), $state != $income_turn);
+            $this->userAssertTrue(
+                clienttranslate("Cannot move this token, it has already been moved during this era"),
+                $state != $income_turn
+            );
             $cube = $this->getStructureInfoSearch(BUILDING_CUBE, null, $civ_token_string);
-            $this->userAssertTrue(totranslate("Token already placed on this spot"), !$cube);
+            $this->userAssertTrue(clienttranslate("Token already placed on this spot"), !$cube);
         }
         $this->systemAssertTrue("Token cannot advance to this spot $spot $cid", isset($slot_data[$spot]));
         $benefit = $slot_data[$spot]["benefit"];
@@ -5626,6 +5631,32 @@ abstract class PGameXBody extends tapcommon {
         $state = $this->gamestate->getCurrentMainState();
         $info = ["type" => $state->type, "array" => $state->toArray()];
         $this->debugConsole(nl2br(htmlspecialchars(print_r($info, true))));
+    }
+
+    /** TEMP: how the client renders UserException shapes. 1 plain, 2 scalar i18n arg, 3 array i18n arg with separator */
+    function debug_throw(int $kind = 1): void {
+        if ($kind == 1) {
+            throw new UserException(clienttranslate("Nothing can be undone"));
+        }
+        if ($kind == 2) {
+            $args = $this->notifArgsAddTrackSpot(TRACK_SCIENCE, null, ["adv" => 1, "player_name" => "Bob"]);
+            throw new UserException(
+                new NotificationMessage(
+                    clienttranslate('${player_name} cannot ${advance_regress} on the ${track_name} track - no cubes'),
+                    $args
+                )
+            );
+        }
+        throw new UserException(
+            new NotificationMessage(clienttranslate('You can only select ${track_names} track or Decline'), [
+                "track_names" => [
+                    $this->tech_track_types[TRACK_SCIENCE]["description"],
+                    $this->tech_track_types[TRACK_MILITARY]["description"],
+                ],
+                "i18n" => ["track_names"],
+                "separator" => ["track_names" => ", "],
+            ])
+        );
     }
 
     /**
@@ -5826,7 +5857,7 @@ abstract class PGameXBody extends tapcommon {
                     // explore space
                     $space_tiles = $this->getCardsInHand($player_id, CARD_SPACE);
                     if (count($space_tiles) == 0) {
-                        $message = totranslate("Player has not tiles to explore space");
+                        $message = clienttranslate("Player has no tiles to explore space");
                     }
                     continue;
                 }
@@ -5834,13 +5865,13 @@ abstract class PGameXBody extends tapcommon {
                     // explore
                     $space_tiles = $this->getCardsInHand($player_id, CARD_TERRITORY);
                     if (count($space_tiles) == 0) {
-                        $message = totranslate("Player has not territoty tiles to explore");
+                        $message = clienttranslate("Player has no territory tiles to explore");
                     }
                 }
             } else {
                 $actual = $this->getPayResourceCount($ben, $player_id);
                 if ($actual == 0) {
-                    $message = totranslate("Player cannot pay for this");
+                    $message = clienttranslate("Player cannot pay for this");
                     continue;
                 }
             }
@@ -7047,7 +7078,7 @@ abstract class PGameXBody extends tapcommon {
             $card_data = $this->getCardInfoSearch(CARD_TECHNOLOGY, $card_type);
             $this->systemAssertTrue("invalid card selected $card_type", $card_data);
             $location = $card_data["card_location"];
-            $message = totranslate("This does not seems to be tech card from the face up display");
+            $message = clienttranslate("This does not seem to be a tech card from the face up display");
 
             $card_id = $card_data["card_id"];
             $this->dbSetCardLocation($card_id, "hand", 0, "", $player_id);
@@ -7057,13 +7088,13 @@ abstract class PGameXBody extends tapcommon {
             } elseif ($location == "discard") {
                 $this->userAssertTrue($message, $hasRecycles && $this->getAdjustmentVariant() >= 8);
             } elseif ($location == "deck_tech_vis") {
-                $this->userAssertTrue(totranslate("You may not invent a face up card at this time"), $flags & FLAG_FACE_UP);
+                $this->userAssertTrue(clienttranslate("You may not invent a face up card at this time"), $flags & FLAG_FACE_UP);
                 $this->drawTechCards(1); // replenish
             } else {
                 $this->userAssertTrue($message);
             }
         } else {
-            $this->userAssertTrue(totranslate("You may only invent a face up card at this time"), $flags & FLAG_FACE_DOWN);
+            $this->userAssertTrue(clienttranslate("You may only invent a face up card at this time"), $flags & FLAG_FACE_DOWN);
             if ($this->hasExtraOption($player_id)) {
                 // the top of the deck is a random gain, so the sample is a keep and the kept card
                 // comes into play from effect_keepCard rather than here
@@ -7125,8 +7156,8 @@ abstract class PGameXBody extends tapcommon {
         $this->checkAction("upgrade");
         $player_id = $this->getActivePlayerId();
         $card_data = $this->getCardInfoSearch(CARD_TECHNOLOGY, $card_type, "hand", $player_id, null);
-        $this->userAssertTrue(totranslate("Technology card must be in player's hand"), $card_data);
-        $this->userAssertTrue(totranslate("Prerequisite for this upgrade is not met"), $this->isUpgradePrereqMet($card_type));
+        $this->userAssertTrue(clienttranslate("Technology card must be in player's hand"), $card_data);
+        $this->userAssertTrue(clienttranslate("Prerequisite for this upgrade is not met"), $this->isUpgradePrereqMet($card_type));
         $b = $this->getCurrentBenefit();
         $this->systemAssertTrue("upgrade ben", $b);
         $type = $b["benefit_type"];
@@ -7191,7 +7222,7 @@ abstract class PGameXBody extends tapcommon {
         $recyclers = $this->hasCiv($player_id, CIV_RECYCLERS);
         if ($slot == 3) {
             if (!$recyclers) {
-                throw new BgaUserException($this->_("Cards from the upper row cannot be upgraded"));
+                throw new UserException(clienttranslate("Cards from the upper row cannot be upgraded"));
             }
             $slot = 0;
         }
@@ -7299,7 +7330,7 @@ abstract class PGameXBody extends tapcommon {
         $this->clearCurrentBenefit();
         $this->interruptBenefit();
         $ben = $this->queueTechBenefit($card_type, $args["slot"], $player_id);
-        $this->userAssertTrue(totranslate("Card benefit is already used this turn"), $ben);
+        $this->userAssertTrue(clienttranslate("Card benefit is already used this turn"), $ben);
         $this->gamestate->nextState("next");
     }
 
@@ -7349,7 +7380,7 @@ abstract class PGameXBody extends tapcommon {
         $current = $this->getStructureInfoSearch(BUILDING_MARKER, null, $loc, $player_id, null);
         if ($current != null) {
             if ($bThrow) {
-                $this->userAssertTrue(totranslate("Tech spot benefit or bonus is already used this turn"));
+                $this->userAssertTrue(clienttranslate("Tech spot benefit or bonus is already used this turn"));
             }
             $args = $this->notifArgsAddTrackSpot($track, $spot);
             $this->notifyWithName(
@@ -7678,7 +7709,7 @@ abstract class PGameXBody extends tapcommon {
         $coal_baron = $args["coal_baron"];
         $tile_id = $tile_data["card_id"];
         if ($coal_baron && $coal_baron["card_id"] != $tile_id) {
-            throw new BgaUserException($this->_("You must explore with the territory tile drawn by the Coal Baron"));
+            throw new UserException(clienttranslate("You must explore with the territory tile drawn by the Coal Baron"));
         }
         // 1. Update territory tile location.
         $u = getPart($location, 1);
@@ -7745,7 +7776,7 @@ abstract class PGameXBody extends tapcommon {
         $ben = $this->getCurrentBenefitType();
         $selected = $this->argSpaceExploration()["selected_space_tile"];
         $this->userAssertTrue(
-            totranslate("You must explore with the space tile you just drew"),
+            clienttranslate("You must explore with the space tile you just drew"),
             !$selected || $selected["card_type_arg"] == $sid
         );
         $this->clearCurrentBenefit();
@@ -7759,7 +7790,7 @@ abstract class PGameXBody extends tapcommon {
         $card_id = $this->getUniqueValueFromDB(
             "SELECT card_id FROM card WHERE card_type='2' AND card_location='hand' AND card_type_arg='$sid' AND card_location_arg='$player_id'"
         );
-        $this->userAssertTrue(totranslate("Select unexplored space tile that you own"), $card_id);
+        $this->userAssertTrue(clienttranslate("Select unexplored space tile that you own"), $card_id);
         $this->DbQuery("UPDATE card SET card_location='$location' WHERE card_id='$card_id'");
         // UPDATE
         $args = $this->notifArgsAddCardInfo($card_id);
@@ -7843,7 +7874,7 @@ abstract class PGameXBody extends tapcommon {
         $this->clearCurrentBenefit(105, true);
         $coord = $u . "_" . $v;
         if (!in_array($coord, $valid_targets)) {
-            throw new BgaUserException($this->_("Choose a territory tile that you control (not pre-printed)"));
+            throw new UserException(clienttranslate("Choose a territory tile that you control (not pre-printed)"));
         }
         $map = $this->getMap();
         $has_terrain = $map[$coord]["terrain_types"];
@@ -7865,7 +7896,10 @@ abstract class PGameXBody extends tapcommon {
         //$this->isTapestryActive($player_id, 35, true); // revolution DO NOT NEED this check
         $this->clearCurrentBenefit(BE_STANDUP_3_OUTPOSTS, true);
         $count = count($arr);
-        $this->userAssertTrue(totranslate("Select at least one outpost and at most 3 to stand up or Decline"), $count > 0 && $count <= 3);
+        $this->userAssertTrue(
+            clienttranslate("Select at least one outpost and at most 3 to stand up or Decline"),
+            $count > 0 && $count <= 3
+        );
         foreach ($arr as $card_id) {
             if ($card_id == 0) {
                 break;
@@ -7900,7 +7934,7 @@ abstract class PGameXBody extends tapcommon {
         $coord = $u . "_" . $v;
         $valid_locations = $this->getConquerTargets(true);
         if (!in_array($coord, $valid_locations)) {
-            $this->userAssertTrue(totranslate("Invalid conquer location"));
+            $this->userAssertTrue(clienttranslate("Invalid conquer location"));
         }
         $structure = $this->getObjectFromDB("SELECT card_id, card_type FROM structure WHERE card_location='capital_structure'");
         $location = "land_" . $coord;
@@ -7969,13 +8003,13 @@ abstract class PGameXBody extends tapcommon {
                     return $outpost_id;
                 }
                 if ($bThrow) {
-                    $this->userAssertTrue(totranslate("You must choose one of the leftmost outposts"));
+                    $this->userAssertTrue(clienttranslate("You must choose one of the leftmost outposts"));
                 }
                 $outpost_id = null;
             }
         }
         if ($bThrow) {
-            $this->userAssertTrue(totranslate("No more outposts"), $outpost_id);
+            $this->userAssertTrue(clienttranslate("No more outposts"), $outpost_id);
         }
         return $outpost_id;
     }
@@ -8119,7 +8153,7 @@ abstract class PGameXBody extends tapcommon {
             $this->systemAssertTrue("Isolation tokens not available", $isol_token);
         }
         if (!in_array($coord, $valid_locations)) {
-            $this->userAssertTrue(totranslate("Invalid conquer location"));
+            $this->userAssertTrue(clienttranslate("Invalid conquer location"));
         }
         $map = $this->getMapHexData($coord);
         $owners = $map["map_owners"];
@@ -8227,7 +8261,7 @@ abstract class PGameXBody extends tapcommon {
         if ($benefit != null) {
             $this->queueBenefitNormal($benefit, $player_id, reason("die", clienttranslate("Conquer die")));
         } elseif ($throw) {
-            $this->userAssertTrue(self::_("This die has net effect of zero. Want to try another one?"));
+            $this->userAssertTrue(clienttranslate("This die has net effect of zero. Want to try another one?"));
         }
     }
 
@@ -8286,7 +8320,7 @@ abstract class PGameXBody extends tapcommon {
         if (count($faces) < 2) {
             return;
         }
-        $this->userAssertTrue(self::_("This die was not rolled with that face"), in_array($face, $faces));
+        $this->userAssertTrue(clienttranslate("This die was not rolled with that face"), in_array($face, $faces));
         $this->setConquerDieFaces($die_color, [$face]);
         // the sample is resolved: repaint the die to the kept face and drop its "Sampled:" tooltip state
         $this->notifyAllPlayers("conquer_roll", "", [
@@ -8327,20 +8361,13 @@ abstract class PGameXBody extends tapcommon {
             $op3 = $this->getGameStateValue("science_die_psionics");
             $options = array_values(array_unique(array_filter([$op1, $op2, $op3])));
             if (!in_array($track, $options)) {
-                $message = "";
-                if ($op3 > 0) {
-                    $names = array_map(fn(int $option): string => $this->tech_track_types[$option]["description"], $options);
-                    $message = sprintf(self::_("You can only select one of these tracks: %s, or Decline"), implode(", ", $names));
-                } elseif ($op2 > 0) {
-                    $message = sprintf(
-                        self::_("You can only select %s track or %s track (EMPIRICISM) or Decline"),
-                        $this->tech_track_types[$op1]["description"], //
-                        $this->tech_track_types[$op2]["description"]
-                    );
-                } else {
-                    $message = sprintf(self::_("You can only select %s track or Decline"), $this->tech_track_types[$op1]["description"]);
-                }
-                $this->userAssertTrue($message);
+                throw new UserException(
+                    new NotificationMessage(clienttranslate('You can only select ${track_names} track or Decline'), [
+                        "track_names" => array_map(fn(int $option): string => $this->tech_track_types[$option]["description"], $options),
+                        "i18n" => ["track_names"],
+                        "separator" => ["track_names" => ", "],
+                    ])
+                );
             }
             $this->setGameStateValue("science_die", $track);
             $this->setGameStateValue("science_die_empiricism", 0);
@@ -8350,7 +8377,7 @@ abstract class PGameXBody extends tapcommon {
             }
             $this->setGameStateValue("cube_choice", $spot - 1);
             $cubes = $this->dbGetCubesOnTrack($player_id, $track, $spot - 1);
-            $this->userAssertTrue(totranslate("You may only advance by a single space"), count($cubes) >= 1);
+            $this->userAssertTrue(clienttranslate("You may only advance by a single space"), count($cubes) >= 1);
             $ben = $benefit_data["benefit_type"];
             $flags = (int) array_get_def($this->benefit_types, $ben, "flags", 0);
             $this->interruptBenefit();
@@ -8471,7 +8498,7 @@ abstract class PGameXBody extends tapcommon {
                 ];
                 if ($mandatory && $advance) {
                     $args = $this->notifArgsAddTrackSpot(null, null, $args);
-                    $this->userAssertTrue(varsub(self::_($message), $args));
+                    throw new UserException(new NotificationMessage($message, $args));
                 } else {
                     $this->notifyWithTrack("message_error", $message, $args);
                 }
@@ -8632,7 +8659,7 @@ abstract class PGameXBody extends tapcommon {
                 return true;
             }
             if ($check) {
-                throw new BgaUserException(self::_($message));
+                throw new UserException($message);
             } else {
                 $this->notifyWithName("message", $message);
             }
@@ -8645,7 +8672,7 @@ abstract class PGameXBody extends tapcommon {
                 return true;
             }
             if ($check) {
-                throw new BgaUserException(self::_($message));
+                throw new UserException($message);
             } else {
                 $this->notifyWithName("message", $message);
             }
@@ -8662,12 +8689,19 @@ abstract class PGameXBody extends tapcommon {
                 }
                 $dictName = $this->customGetPlayerNameById($dictator);
                 if ($check) {
-                    throw new BgaUserException($this->_("Cannot advance on this track this turn due to DICTATORSHIP") . " " . $dictName);
+                    throw new UserException(
+                        new NotificationMessage(
+                            clienttranslate('Cannot advance on this track this turn due to DICTATORSHIP of ${opp_name}'),
+                            [
+                                "opp_name" => $dictName,
+                            ]
+                        )
+                    );
                 }
-                $track_name = $this->tech_track_types[$track]["name"];
+                $track_name = $this->tech_track_types[$track]["description"];
                 $this->notifyWithName(
                     "message_error",
-                    _('${player_name} cannot advance on ${track_name} track this turn due to DICTATORSHIP of ${opp_name}'),
+                    clienttranslate('${player_name} cannot advance on ${track_name} track this turn due to DICTATORSHIP of ${opp_name}'),
                     [
                         "preserve" => ["track"],
                         "track" => $track,
@@ -9033,7 +9067,7 @@ abstract class PGameXBody extends tapcommon {
             $this->queueBenefitNormal([7 + $type], $player_id, reason("be", 110));
         } elseif ($ben == 144) {
             // discard
-            $this->userAssertTrue(self::_("No more buildings left"), $building_id);
+            $this->userAssertTrue(clienttranslate("No more buildings left"), $building_id);
             $this->claimIncomeStructure($type, null);
             $this->DbQuery("UPDATE structure SET card_location='hand', card_type_arg='0' WHERE card_id='$building_id'");
             $this->notif("moveStructure", $player_id)
@@ -9041,7 +9075,7 @@ abstract class PGameXBody extends tapcommon {
                 ->withReason(reason("be", $ben)) //
                 ->notifyAll(clienttranslate('${player_name} gains an income building - ${structure_name} ${reason}'));
         } else {
-            throw new BgaUserException($this->_("You cannot select an income building at this time"));
+            throw new UserException(clienttranslate("You cannot select an income building at this time"));
         }
         $this->gamestate->nextState("next");
     }
@@ -9049,12 +9083,12 @@ abstract class PGameXBody extends tapcommon {
     function selectLandmark($type) {
         $this->checkAction("selectBuilding");
         $player_id = $this->getActivePlayerId();
-        $this->userAssertTrue(totranslate("You should select a landmark on the landmark mat"), $type > 0 && $type <= 12);
+        $this->userAssertTrue(clienttranslate("You should select a landmark on the landmark mat"), $type > 0 && $type <= 12);
         // CHECK ON THE MAT...
         $current_benefit = $this->getCurrentBenefit();
         $location = "landmark_mat_slot" . $type;
         $structure = $this->getUniqueValueFromDB("SELECT card_id FROM structure WHERE card_location='$location'");
-        $this->userAssertTrue(totranslate("You should select a landmark on the landmark mat"), $structure);
+        $this->userAssertTrue(clienttranslate("You should select a landmark on the landmark mat"), $structure);
         $this->clearCurrentBenefit();
         $ben = $current_benefit["benefit_type"];
         switch ($ben) {
@@ -9083,7 +9117,7 @@ abstract class PGameXBody extends tapcommon {
                 }
                 break;
             default:
-                throw new BgaUserException($this->_("You cannot select a landmark at this time"));
+                throw new UserException(clienttranslate("You cannot select a landmark at this time"));
         }
         $this->gamestate->nextState("next");
     }
@@ -9265,7 +9299,7 @@ abstract class PGameXBody extends tapcommon {
                 } elseif ($city_full) {
                     $this->effect_setAsideCapitalBuilding($player_id, $cx, $cy);
                 } else {
-                    $this->userAssertTrue(totranslate("Invalid structure placement"));
+                    $this->userAssertTrue(clienttranslate("Invalid structure placement"));
                 }
                 $completed_block = false; // if we are on unpassable territory it does not complete a district
             }
@@ -9527,7 +9561,7 @@ abstract class PGameXBody extends tapcommon {
         }
         $items = $this->getCardsInHand($player_id, CARD_TERRITORY);
         if (count($items) < 2) {
-            $this->userAssertTrue(self::_("You do not have enough Territory Tiles"), $bThrow == false);
+            $this->userAssertTrue(clienttranslate("You do not have enough Territory Tiles"), $bThrow == false);
             return false;
         }
         return true;
@@ -9539,7 +9573,7 @@ abstract class PGameXBody extends tapcommon {
         // no check action it can be out of turn
         if ($ability == "civ_39_5") {
             // Lighthouse
-            $this->userAssertTrue(_("This is not your turn"), $this->getCurrentPlayerId() == $player_id);
+            $this->userAssertTrue(clienttranslate("This is not your turn"), $this->getCurrentPlayerId() == $player_id);
 
             // Lighthouse: Once on each of your advancement turns you may spend 2 [TERRITORY TILE] to gain [ANY RESOURCE]
             if ($this->ownsLighthouseAndCanPlayIt($player_id, true)) {
@@ -9602,7 +9636,7 @@ abstract class PGameXBody extends tapcommon {
             case 170:
                 $structure_id = $this->getOutpostId($structure_id, $player_id, true);
                 if (array_search($location, $args["targets"]) === false) {
-                    $this->userAssertTrue("Invalid location, misclicked?");
+                    $this->userAssertTrue(clienttranslate("Invalid location, misclicked?"));
                 }
                 $this->effect_placeOnMap(
                     $player_id,
@@ -9694,7 +9728,7 @@ abstract class PGameXBody extends tapcommon {
             $tap_type = $card["card_type_arg"];
             $card_benefit = $this->getRulesCard($card["card_type"], $tap_type, "benefit");
             $reason = reason($card["card_type"], $tap_type);
-            $this->userAssertTrue(self::_("This card does not have WHEN PLAYED benefit"), $card_benefit);
+            $this->userAssertTrue(clienttranslate("This card does not have WHEN PLAYED benefit"), $card_benefit);
             $this->queueBenefitNormal($card_benefit, $player_id, $reason);
             $this->queueBenefitNormal(["or" => [194, 401]], $player_id, $reason);
             return;
@@ -9713,7 +9747,7 @@ abstract class PGameXBody extends tapcommon {
                 foreach ($cards as $ocard_id => $ocard) {
                     if ($this->isWhenPlayedTapestry($ocard)) {
                         // other card has when played benefit
-                        $this->userAssertTrue(self::_("This card does not have WHEN PLAYED benefit"));
+                        $this->userAssertTrue(clienttranslate("This card does not have WHEN PLAYED benefit"));
                     }
                 }
             }
@@ -9826,7 +9860,7 @@ abstract class PGameXBody extends tapcommon {
         $tech_card = $this->getObjectFromDB(
             "SELECT card_id, card_location_arg player_id FROM card WHERE card_type='4' AND card_type_arg='$type' AND card_location='hand' AND (card_location_arg2 IS NULL OR card_location_arg2 <> 2)"
         );
-        $this->userAssertTrue(totranslate("Cannot use this tech card for inventor"), $tech_card != null);
+        $this->userAssertTrue(clienttranslate("Cannot use this tech card for inventor"), $tech_card != null);
         // Place token on tech card..
         $location = "tech_card_" . $type;
 
@@ -9856,7 +9890,7 @@ abstract class PGameXBody extends tapcommon {
         );
         $this->systemAssertTrue("Invalid territory tile", $territory_id != null);
         if ($tap_card_data["card_location_arg2"] == 1) {
-            throw new BgaUserException($this->_("You can only give away 1 territory card"));
+            throw new UserException(clienttranslate("You can only give away 1 territory card"));
         }
         $players = $this->loadPlayersBasicInfosWithBots();
         $this->systemAssertTrue("invalid player id for age of sail", array_key_exists($pid, $players));
@@ -9924,7 +9958,7 @@ abstract class PGameXBody extends tapcommon {
             // a quantity below -1 is an upper bound, -1 stays unlimited
             $this->userAssertTrue(clienttranslate("Too many items selected for this bonus"), sizeOf($params) <= -$count);
         }
-        $this->userAssertTrue(totranslate("Cannot accept bonus without payment, use Decline"), count($params) > 0);
+        $this->userAssertTrue(clienttranslate("Cannot accept bonus without payment, use Decline"), count($params) > 0);
         $is_bonus = $args["benefit_category"] == "bonus";
         $reason = $args["reason_data"];
         $this->interruptBenefit();
@@ -10062,7 +10096,7 @@ abstract class PGameXBody extends tapcommon {
             $card_data["card_location_arg"] != $player_id ||
             $card_data["card_type_arg"] != 42
         ) {
-            throw new BgaUserException($this->_("You can only use a trap card"));
+            throw new UserException(clienttranslate("You can only use a trap card"));
         }
 
         $coords = $map_data["map_coords"];
@@ -12278,11 +12312,11 @@ abstract class PGameXBody extends tapcommon {
         //self::checkAction('actionUndo');
         $undo_moves_player = self::getGameStateValue("undo_moves_player");
         if ($undo_moves_player != self::getCurrentPlayerId()) {
-            throw new BgaUserException(self::_("The stored UNDO corresponds to another player's turn : you cannot restore it"));
+            throw new UserException(clienttranslate("The stored UNDO corresponds to another player's turn : you cannot restore it"));
         }
         $args = $this->argUndo();
         if ($args["move"] == $args["undo_move"]) {
-            throw new BgaUserException(self::_("Nothing can be undone"));
+            throw new UserException(clienttranslate("Nothing can be undone"));
         }
         $this->undoRestorePoint();
         //$this->gamestate->reloadState();

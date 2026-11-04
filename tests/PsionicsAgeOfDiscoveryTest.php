@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/PsionicsUT.php";
@@ -56,7 +57,7 @@ final class PsionicsAgeOfDiscoveryTest extends TestCase {
         $this->playAgeOfDiscovery(3, 1);
         $game->runManager();
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->expectExceptionMessage("AGE OF DISCOVERY");
         $game->action_research_decision(0, 0);
     }

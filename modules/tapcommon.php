@@ -1,6 +1,7 @@
 <?php
 
 use Bga\GameFramework\Table;
+use Bga\GameFramework\UserException;
 
 require_once "taputils.php";
 
@@ -196,12 +197,12 @@ abstract class tapcommon extends Table {
      * The message should be translated and shown to the user.
      *
      * @param $message string
-     *            user side error message, translation is needed, use $this->_() when passing string to it
+     *            user side error message, translation is needed, wrap it in clienttranslate()
      * @param $cond boolean
      *            condition of assert
      * @param $log string
      *            optional log message, not need to translate
-     * @throws BgaUserException
+     * @throws UserException
      */
     function userAssertTrue($message, $cond = false, $log = "") {
         if ($cond) {
@@ -210,7 +211,7 @@ abstract class tapcommon extends Table {
         if ($log) {
             $this->warn("$message $log|");
         }
-        throw new BgaUserException(self::_($message));
+        throw new UserException($message);
     }
 
     /** Where we are, as a log line. Tests override it to a no-op: PHPUnit prints its own trace. */
@@ -226,7 +227,7 @@ abstract class tapcommon extends Table {
      *            server side log message, no translation needed
      * @param $cond boolean
      *            condition of assert
-     * @throws BgaUserException
+     * @throws UserException
      */
     function systemAssertTrue($log, $cond = false, $logonly = "") {
         if ($cond) {
@@ -235,7 +236,7 @@ abstract class tapcommon extends Table {
         $move = $this->getGameStateValue("next_move_id");
         $this->error("Internal Error during move $move: $log|$logonly");
         $this->logStackTrace($log);
-        throw new BgaUserException("Internal Error. That should not have happened. Please raise a bug.[$log]"); // NOI18N
+        throw new UserException("Internal Error. That should not have happened. Please raise a bug.[$log]"); // NOI18N
     }
 
     /**

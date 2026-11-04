@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -232,7 +233,7 @@ final class MerfolkTest extends TestCase {
         $cards = $game->giveTapestryCards(MerfolkUT::OWNER, 4);
         $game->useIncomeAbility(MerfolkUT::OWNER, 2);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_SELECT, array_slice($cards, 0, 3));
     }
 
@@ -243,7 +244,7 @@ final class MerfolkTest extends TestCase {
         $other = $game->giveTapestryCards(MerfolkUT::OPPONENT, 1);
         $game->useIncomeAbility(MerfolkUT::OWNER, 2);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_SELECT, [$cards[0], $other[0]]);
     }
 
@@ -425,7 +426,7 @@ final class MerfolkTest extends TestCase {
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_DISCARD, "");
     }
 
@@ -526,7 +527,7 @@ final class MerfolkTest extends TestCase {
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->expectExceptionMessage("Select a single tapestry card to play");
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY);
     }
@@ -539,7 +540,7 @@ final class MerfolkTest extends TestCase {
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->expectExceptionMessage("WHEN PLAYED");
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY, [$era_card]);
     }
@@ -551,7 +552,7 @@ final class MerfolkTest extends TestCase {
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $this->expectExceptionMessage("Select a single tapestry card to play");
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY, $cards);
     }
@@ -670,7 +671,7 @@ final class MerfolkTest extends TestCase {
         $game->playerTurn(MerfolkUT::OWNER);
         $game->gamestate->jumpToState(14);
 
-        $this->expectException(BgaUserException::class);
+        $this->expectException(UserException::class);
         $game->action_civDecline(CIV_MERFOLK);
     }
 
