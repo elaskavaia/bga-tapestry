@@ -101,9 +101,6 @@ class GameUT extends Tapestry {
         $this->action_civTokenAdvance($cid, $spot, $extra);
     }
 
-    /** PHPUnit prints the trace of anything that actually escapes, the manual dump is only noise. */
-    function logStackTrace($message) {}
-
     /** The framework stub drops every incStat, this keeps them per player so tests can assert on the buckets. */
     public array $stats = [];
 

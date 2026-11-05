@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\VisibleSystemException;
 use Bga\GameFramework\UserException;
 use PHPUnit\Framework\TestCase;
 
@@ -682,8 +683,8 @@ final class MerfolkTest extends TestCase {
         $game->eras[MerfolkUT::OWNER] = 5;
         $game->playerTurn(MerfolkUT::OWNER);
 
-        $this->expectOutputRegex("/Internal Error during move 0: ERR:Merfolk:21/");
-        $this->expectExceptionMessage("ERR:Merfolk:21");
+        $this->expectException(VisibleSystemException::class);
+        $this->expectExceptionMessage("[ERR:Merfolk:21]");
         $game->useCivAbility(MerfolkUT::OWNER, Merfolk::CHOICE_PLAY);
     }
 }

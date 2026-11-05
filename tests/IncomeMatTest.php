@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Bga\GameFramework\UserException;
+use Bga\GameFramework\VisibleSystemException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/IncomeMatUT.php";
@@ -135,8 +136,8 @@ final class IncomeMatTest extends TestCase {
     function testLevelDisagreeingWithTheRowsIsAnError() {
         $this->game->layoutTrack(IncomeMatUT::OWNER, BUILDING_FARM, [4, 5, 6]);
         $this->game->income[IncomeMatUT::OWNER][BUILDING_FARM] = 2;
-        $this->expectOutputRegex("/Internal Error during move 0: ERR:game:04/");
-        $this->expectException(UserException::class);
+        $this->expectExceptionMessage("[ERR:game:04 ");
+        $this->expectException(VisibleSystemException::class);
         $this->game->getIncomeUncoveredSpots(IncomeMatUT::OWNER, BUILDING_FARM);
     }
 

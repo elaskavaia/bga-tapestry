@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Bga\GameFramework\UserException;
+use Bga\GameFramework\VisibleSystemException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -265,9 +265,8 @@ final class GeniesTest extends TestCase {
         $this->game->eras[GeniesUT::OPPONENT] = 6;
         $this->summon();
 
-        $this->expectOutputRegex("/Internal Error during move 0: ERR:Genies:23/");
-        $this->expectException(UserException::class);
-        $this->expectExceptionMessage("ERR:Genies:23");
+        $this->expectExceptionMessage("[ERR:Genies:23]");
+        $this->expectException(VisibleSystemException::class);
         $this->game->civTokenAdvance(CIV_GENIES, GeniesUT::OWNER, 3);
     }
 
@@ -376,9 +375,8 @@ final class GeniesTest extends TestCase {
 
     function testSquaredBenefitWithNoTokenOnTheRingIsAnError() {
         $this->game->queueBenefitNormal(BE_GENIES_SQUARE, GeniesUT::OWNER, reason_civ(CIV_GENIES));
-        $this->expectOutputRegex("/Internal Error during move 0: ERR:Genies:20/");
-        $this->expectException(UserException::class);
-        $this->expectExceptionMessage("ERR:Genies:20");
+        $this->expectExceptionMessage("[ERR:Genies:20]");
+        $this->expectException(VisibleSystemException::class);
         $this->game->resolveBenefit(BE_GENIES_SQUARE, GeniesUT::OWNER);
     }
 

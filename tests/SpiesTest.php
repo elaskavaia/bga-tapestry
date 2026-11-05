@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\VisibleSystemException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/MapUT.php";
@@ -36,8 +37,8 @@ final class SpiesTest extends TestCase {
 
         $this->assertEquals(0, $game->toppleFlag($mine));
         // the guard e74f344 removed raised the exact error of the report
+        $this->expectException(VisibleSystemException::class);
         $this->expectExceptionMessage("expecting tapestry 35 but it was none");
-        $this->expectOutputRegex("/expecting tapestry 35 but it was none/");
         $game->isTapestryActive(MapUT::OWNER, 35, true);
     }
 }

@@ -215,30 +215,31 @@ abstract class tapcommon extends Table {
         throw new UserException($message);
     }
 
-    /** Where we are, as a log line. Tests override it to a no-op: PHPUnit prints its own trace. */
+    /** Where we are, as a log line. */
     function logStackTrace($message) {
         $this->error((new Exception($message))->getTraceAsString());
     }
 
     /**
-     * This will throw an exception if condition is false.
-     * This only can happened if user hacks the game, client must prevent this
+     * Throws if the condition is false. Only reachable if the client lets an illegal action through.
      *
-     * @param $log string
-     *            server side log message, no translation needed
-     * @param $cond boolean
-     *            condition of assert
-     * @throws UserException
+     * @param $log string shown to the player, no translation needed
+     * @param $logonly string server log only
+     * @throws VisibleSystemException
      */
-    function systemAssertTrue($log, $cond = false, $logonly = "") {
+    function systemAssertTrue(string $log, mixed $cond = false, string $logonly = ""): void {
         if ($cond) {
             return;
         }
+
+        $this->error("Internal Error: $log|$logonly|" . $this->getSystemAssertContext());
+        // Visible so players can quote it in a report, system so it reaches the studio error log
+        throw new VisibleSystemException("Internal Error. Please raise a bug.[$log]"); // NOI18N
+    }
+
+    function getSystemAssertContext(): string {
         $move = $this->getGameStateValue("next_move_id");
-        $this->error("Internal Error during move $move: $log|$logonly");
-        $this->logStackTrace($log);
-        // UserException, not SystemException: players must see this text to report the bug
-        throw new UserException("Internal Error. That should not have happened. Please raise a bug.[$log]"); // NOI18N
+        return "move$move state" . $this->gamestate->getCurrentMainStateId();
     }
 
     /**

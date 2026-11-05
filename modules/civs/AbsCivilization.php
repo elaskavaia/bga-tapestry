@@ -106,7 +106,7 @@ abstract class AbsCivilization {
     function debugConsole($info, $args = [], $silent = false) {
         $this->game->debugConsole($info, $args, $silent);
     }
-    function systemAssertTrue($log, $cond = false, $logonly = "") {
+    function systemAssertTrue(string $log, mixed $cond = false, string $logonly = ""): void {
         $this->game->systemAssertTrue($log, $cond, $logonly);
     }
 

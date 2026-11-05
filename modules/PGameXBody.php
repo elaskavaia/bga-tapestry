@@ -5633,8 +5633,11 @@ abstract class PGameXBody extends tapcommon {
         $this->debugConsole(nl2br(htmlspecialchars(print_r($info, true))));
     }
 
-    /** TEMP: how the client renders UserException shapes. 1 plain, 2 scalar i18n arg, 3 array i18n arg with separator */
+    /** TEMP: how the client renders exception shapes. 1 plain, 2 scalar i18n arg, 3 array i18n arg with separator, 4 systemAssertTrue */
     function debug_throw(int $kind = 1): void {
+        if ($kind == 4) {
+            $this->systemAssertTrue("debug_throw");
+        }
         if ($kind == 1) {
             throw new UserException(clienttranslate("Nothing can be undone"));
         }
@@ -10127,6 +10130,12 @@ abstract class PGameXBody extends tapcommon {
         } else {
             return $this->getObjectFromDB("SELECT * FROM benefit ORDER BY benefit_prerequisite, benefit_id LIMIT 1");
         } // should be current!
+    }
+
+    function getSystemAssertContext(): string {
+        $top = $this->getCurrentBenefit();
+        $bene = $top ? "b{$top["benefit_type"]}#{$top["benefit_id"]} {$top["benefit_data"]}" : "b-";
+        return parent::getSystemAssertContext() . " $bene";
     }
 
     function getCurrentBenefitWithInfo() {

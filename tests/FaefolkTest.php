@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Bga\GameFramework\UserException;
+use Bga\GameFramework\VisibleSystemException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -395,14 +395,11 @@ final class FaefolkTest extends TestCase {
     }
 
     private function assertAsserts(string $code, callable $fn): void {
-        ob_start(); // systemAssertTrue echoes the server log before throwing
         try {
             $fn();
             $this->fail("expected $code");
-        } catch (UserException $e) {
+        } catch (VisibleSystemException $e) {
             $this->assertStringContainsString($code, $e->getMessage());
-        } finally {
-            ob_end_clean();
         }
     }
 }

@@ -106,10 +106,11 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
 - Randomness is seeded through `seedRand()`; an unseeded `bgaRand` prints a warning, which now
   fails the test (see below), so a test that flips a coin without seeding cannot pass by luck.
 - **The suite is silent.** `phpunit.xml` sets `beStrictAboutOutputDuringTests` with `failOnRisky`,
-  so anything a test prints - `$this->error()` / `$this->warn()` from the game, a leftover
-  `var_dump` - fails it. A test whose subject is an error path declares what it expects with
-  `expectOutputRegex()`, which doubles as the assertion that the error was raised; never write to
-  `STDERR` from a test helper, since that escapes the capture.
+  so anything a test prints - `$this->warn()` from the game, a leftover `var_dump` - fails it.
+  The framework stub collects `$this->error()` instead of echoing it: tests do not check logging. A system-assert test expects
+  `VisibleSystemException` and matches the `[ERR:...]` code in its message; a `warn()` path still
+  declares its output with `expectOutputRegex()`. Never write to `STDERR` from a test helper, since
+  that escapes the capture.
 
 ## Formatting (all files)
 

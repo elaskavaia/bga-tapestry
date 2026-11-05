@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Bga\GameFramework\UserException;
+use Bga\GameFramework\VisibleSystemException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/Stubs/GameUT.php";
@@ -316,15 +316,11 @@ final class InfiltratorsTest extends TestCase {
         $this->assertAsserts("ERR:Infiltrators:01", fn() => $this->game->infiltrators()->moveCivCube(InfiltratorsUT::OWNER, 9, "", []));
     }
 
-    /** systemAssertTrue echoes the diagnostic before throwing, so swallow the output. */
     private function assertAsserts(string $code, callable $fn): void {
         try {
-            ob_start();
             $fn();
-            ob_end_clean();
             $this->fail("expected $code");
-        } catch (UserException $e) {
-            ob_end_clean();
+        } catch (VisibleSystemException $e) {
             $this->assertStringContainsString($code, $e->getMessage());
         }
     }
