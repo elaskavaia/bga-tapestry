@@ -213,15 +213,16 @@ Civilization Adjustments value, so they queue behind the Pack ones above. Still 
       adj=1, set=3, Marriage of State and Renaissance kept. Spies benefit during income fails with
       "Internal Error ... raise a bug". Server game log (from Victoria, v261103-1426, move 586, twice):
       `invalid card selected` in `effect_keepCard` via `action_keepCard`. UserException, so not in the
-      studio log. **FIXED 2026-11-04 (not deployed), client only, not browser-verified**: the keepCard
+      studio log. **FIXED 2026-11-04 (not deployed), client only**: the keepCard
       click handlers (tapestry, territory, space, tech) ignored `active_slot` and Confirm sent every
       page-wide `.selected`, so on 5 players a non-neighbour's or own card could be picked; the server
       offers neighbours only, as the civ text says ("from a neighboring player of your choice").
       `onKeepCardClick` now takes only offered cards (replacing the pick in single mode) and Confirm
       reads `.active_slot.selected`. Test `SpiesTest::testFivePlayersOffersOnlyNeighboursCards` pins
-      the neighbour-only offer and the rejection (passes either way: no JS tests). To check in the
-      studio: 5p Spies at income, and one draw N keep M benefit still selects. Unverified:
-      `getPlayerNeighbours` assumes `loadPlayersBasicInfos` is in seat order. Separate client bugs
+      the neighbour-only offer and the rejection (passes either way: no JS tests). Studio-verified on
+      5p table 994095: 191 and 193 offer only the seat neighbours, other cards are refused, single
+      pick moves, draw keeps 175 and 354 still select; 192 not tested. No benefit has keep > 1, so
+      multi-pick is unreachable. Separate client bugs
       seen, not fixed: a tech card invented this session has no `data-card-id` until F5;
       `getCardDivLocatonId` reassigns a `const slot`.
 
