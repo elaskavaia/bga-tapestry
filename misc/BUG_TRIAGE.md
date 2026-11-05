@@ -261,7 +261,15 @@ that window.
       location where the code expects one.
 - [ ] `feException: items do not belong to player` - 25 events / 12 users (plus 15 / 8 on an older
       id), last seen today. Logged as `VisibleSystemException` after the exception migration.
-- [ ] `TypeError: Unsupported operand types: string + int` - 3 events / 3 users, twice.
+- [ ] `TypeError: Unsupported operand types: string + int` - 3 events / 3 users, twice. Live again
+      as 761167 (v261103-1426, 3 / 3, tables 942004049, 942425068, 942695106): Treasure Hunters
+      (cid 38) mat-slot click sent `civTokenAdvance` with no hex, the server moved the token to
+      `land__` and `setSelectedMapHex` added "" + 50; any hex of any terrain was also accepted.
+      **FIXED 2026-11-04 (not deployed)**: the target must be one of the slot's offered territories
+      (systemAssertTrue `ERR:TreasureHunters:01`), and a mat-slot click starts the
+      normal territory choice. Tests `tests/TreasureHuntersTest.php`. Client not browser-verified:
+      check in the studio at a Treasure Hunters income, also with a second civ benefit pending.
+      After the deploy, check 761167 has no events on the new release.
 - [ ] `feException: Error: generated notifications are larger than 128k (142359)` - 4 events / 2
       users. A single turn producing >128k of notifications will hard-fail. Still live: 766267
       (161943 bytes, 3 events / 1 user, 2026-11-04) and 756345 (2 / 2, last 2026-11-04).

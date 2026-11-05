@@ -4976,6 +4976,11 @@ define([
               return;
             case 15:
               return;
+            case this.CON.CIV_TREASURE_HUNTERS:
+              // slot buttons are not civ-scoped and only the selected civ has them; the button asks for the territory first
+              if (this.selectedCiv != cid) this.selectCivAbility(cid);
+              if (this.selectedCiv == cid) document.getElementById("button_" + getPart(holder_id, 2))?.click();
+              return;
 
             default:
               // if (!this.checkActiveSlot(holder_id)) return;
@@ -5217,6 +5222,12 @@ define([
       }
     },
 
+    selectCivAbility: function (civ) {
+      this.selectedCiv = civ;
+      dojo.empty("generalactions");
+      this.onUpdateActionButtons("civAbility", this.gamedatas.gamestate.args);
+    },
+
     onCivilizationClick: function (event) {
       dojo.stopEvent(event);
       console.log("onCivilizationClick");
@@ -5224,9 +5235,7 @@ define([
       var id = event.currentTarget.id;
       if (this.showHelp(id)) return;
       if (this.getStateName() == "civAbility") {
-        this.selectedCiv = event.currentTarget.getAttribute("data-type-arg");
-        dojo.empty("generalactions");
-        this.onUpdateActionButtons("civAbility", this.gamedatas.gamestate.args);
+        this.selectCivAbility(event.currentTarget.getAttribute("data-type-arg"));
         return;
       }
 

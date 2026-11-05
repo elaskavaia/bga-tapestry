@@ -5454,6 +5454,11 @@ abstract class PGameXBody extends tapcommon {
         }
         if ($cid == CIV_TREASURE_HUNTERS) {
             $location = $extra;
+            $targets = array_get($slots_choice, "targets", []);
+            $this->systemAssertTrue(
+                "ERR:TreasureHunters:01",
+                in_array($location, array_map(fn($coord) => "land_$coord", $targets), true)
+            );
             $cube = $this->getStructureInfoSearch(BUILDING_CUBE, null, $civ_token_string);
             $this->effect_placeOnMap(
                 $player_id,
