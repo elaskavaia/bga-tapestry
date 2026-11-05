@@ -797,7 +797,7 @@ define([
       }
 
       this.addActionButton("button_confirm", _("Confirm"), () => {
-        const ids = Array.from(document.querySelectorAll(".selected")).map((node) => node.getAttribute("data-card-id"));
+        const ids = Array.from(document.querySelectorAll(".active_slot.selected")).map((node) => node.getAttribute("data-card-id"));
         if (ids.length == 0) {
           this.showError(_("Nothing is selected"));
           return;
@@ -5207,6 +5207,10 @@ define([
           this.axcallwrapper("sendInventor", { id: id });
           break;
 
+        case "keepCard":
+          this.onKeepCardClick(event);
+          break;
+
         default:
           dojo.toggleClass(card, "selected");
           break;
@@ -5288,8 +5292,7 @@ define([
           this.tapestry[this.player_id].onClickOnItem(event);
           break;
         case "keepCard":
-          const cardsman = this.cardsman[this.CON.CARD_TAPESTRY];
-          cardsman.onClickOnItem(event);
+          this.onKeepCardClick(event);
           break;
 
         default:
@@ -5346,10 +5349,24 @@ define([
           this.showTileRotators();
           break;
 
+        case "keepCard":
+          this.onKeepCardClick(event);
+          return;
+
         default:
           cardsman.onClickOnItem(event);
           return;
       }
+    },
+
+    // only the cards the server offered may be picked, see getKeepCards
+    onKeepCardClick: function (event) {
+      if (!this.bga.players.isCurrentPlayerActive()) return;
+      const card = event.currentTarget;
+      if (!this.checkActiveSlot(card)) return;
+      const selected = card.classList.contains("selected");
+      if (this.clientStateArgs.selmode == 1) dojo.query(".active_slot.selected").removeClass("selected");
+      card.classList.toggle("selected", !selected);
     },
 
     onSpaceTileClick: function (event) {
@@ -5359,8 +5376,7 @@ define([
       if (this.showHelp(id)) return;
       switch (this.clientStateArgs.action) {
         case "keepCard":
-          const cardsman = this.cardsman[this.CON.CARD_SPACE];
-          cardsman.onClickOnItem(event);
+          this.onKeepCardClick(event);
           return;
         default:
           const type_arg = dojo.getAttr($(id), "data-type-arg");
