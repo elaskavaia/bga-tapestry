@@ -127,7 +127,7 @@ predates the last deploy and is therefore live.
 
 ## Bug triage last checked
 
-**2026-11-03 08:29 EST** - only triage BGA reports created/updated after this time; bump this line
+**2026-11-04 20:15 EST** - only triage BGA reports created/updated after this time; bump this line
 to `date` at run start after each run.
 
 Reports untouched since before 2026-11-03 are grandfathered: skip the full Open sweep and do not ask
@@ -209,6 +209,16 @@ player count, per the priority section above.
 The highest-voted defects on the tracker, but every table cited on them ran a deprecated
 Civilization Adjustments value, so they queue behind the Pack ones above. Still real reports.
 
+- [ ] **BGA #254612** - "Spies". OPEN, 1 vote, `action`. Table 935978154, 5 players. Options:
+      adj=1, set=3, Marriage of State and Renaissance kept. Spies benefit during income fails with
+      "Internal Error ... raise a bug". Server game log (from Victoria, v261103-1426, move 586, twice):
+      `invalid card selected` in `effect_keepCard` via `action_keepCard`. UserException, so not in the
+      studio log. Lead, untested (no JS tests): the keepCard Confirm handler collects ids with a global
+      `document.querySelectorAll(".selected")` in `onUpdateActionButtons_keepCard`, so any other
+      `.selected` element on the page is sent as a card id. Second candidate: `getKeepCards` offers only
+      neighbours' cards (5 players), so a non-neighbour pick would also fail - not checked whether the
+      client lets one be selected.
+
 - [ ] **BGA #118067** - "Forced to play dystopia with no buildings remaining". OPEN, 12 votes,
       `block`. Table 487565028, 2 players, Mar 2024. Options: **adj=4** (experimental Nov 2022, removed
       from table creation), set=1 (Original Only), Marriage of State removed, Renaissance removed,
@@ -246,7 +256,12 @@ that window.
       id), last seen today. Logged as `VisibleSystemException` after the exception migration.
 - [ ] `TypeError: Unsupported operand types: string + int` - 3 events / 3 users, twice.
 - [ ] `feException: Error: generated notifications are larger than 128k (142359)` - 4 events / 2
-      users. A single turn producing >128k of notifications will hard-fail.
+      users. A single turn producing >128k of notifications will hard-fail. Still live: 766267
+      (161943 bytes, 3 events / 1 user, 2026-11-04) and 756345 (2 / 2, last 2026-11-04).
+- [ ] `Track resource 4 not found in payment` - `action_advance` tier II/III payment check, table
+      924389742, move 365, 2026-11-01, v261030-1658, twice in 2 s (from Victoria's server game log;
+      UserException, not in the studio log). Client sent a payment without the track's own resource.
+      No report matched yet.
 
 ## Triage run log
 
@@ -305,3 +320,10 @@ Older detail is in git history of this file.
   #244412 (income building paid only the opponent). Left Open: #245466 (adj=8, ability not offered
   on income), #200844, #194201, #175503, #186079, #77549 (adj=4) and #156499 (adj=1), all different
   claims. Marker bumped; older reports grandfathered.
+- 2026-11-04: No new tag since v261103-1426, nothing Waiting for deploy. One new report: #254612
+  (Spies, keepCard `invalid card selected`, cause from the server game log), left Open with a lead.
+  Not in the studio log: `systemAssertTrue` threw UserException, so its text only showed in the
+  server game log - ask Victoria for it instead of the reporter. Switched to VisibleSystemException
+  (not deployed yet): from the next tag these asserts should appear in the studio log - verify then.
+  7-day backend list: 761167 `string + int` (3 / 3, since 2026-11-03), 766267 notifications >128k.
+  Marker bumped.
