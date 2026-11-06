@@ -127,7 +127,7 @@ predates the last deploy and is therefore live.
 
 ## Bug triage last checked
 
-**2026-11-04 20:15 EST** - only triage BGA reports created/updated after this time; bump this line
+**2026-11-06 16:40 EST** - only triage BGA reports created/updated after this time; bump this line
 to `date` at run start after each run.
 
 Reports untouched since before 2026-11-03 are grandfathered: skip the full Open sweep and do not ask
@@ -146,6 +146,18 @@ hypothesis from reading code with no test behind it. Each entry records the cite
 player count, per the priority section above.
 
 ### Priority: Adjustment Civilization Pack (adj=8), plus anything proven to hit it
+
+- [x] **BGA #255108** - "Advisors changed the target of Espionage". CONFIRMED on BGA (2026-11-06),
+      1 vote, `rules`. Table 942104026, 2 players, dump move 216. Options: adj=8, set=7, Marriage of
+      State removed, Renaissance removed, Shadow Empire off. **FIXED 2026-11-06 (not deployed)**:
+      `copy_card` used to fall back to the opponent's ESPIONAGE and its clone replaced theirs. A
+      player without an active ESPIONAGE of their own now gets no clone, only a log line and a
+      WHEN PLAYED benefit; a THIS ERA target gives nothing (FORMAL_RULES TAPESTRY.8, Victoria's
+      ruling). Tests `tests/AdvisorsEspionageTest.php` (advisor keeps the spy clone, THIS ERA gives
+      nothing, owner still replaces own clone; real DB, skipped without local MySQL).
+      NOTE: not checked in the studio. The advisor gets no warning when picking a THIS ERA target.
+      Unrelated lead from the review, unverified: `notif_tapestrycard` (tapestry.js ~6647) lowers
+      non-active viewers' hand counter on every clone or overplay notif, Heralds included.
 
 - [ ] **Historians leads left over from the 52459b2 token fix** (shipped in v261026-0118):
       `onMystic` (~2427) collects global `.clicked`; an owner of both Historians and Mystics could
@@ -272,7 +284,12 @@ that window.
       After the deploy, check 761167 has no events on the new release.
 - [ ] `feException: Error: generated notifications are larger than 128k (142359)` - 4 events / 2
       users. A single turn producing >128k of notifications will hard-fail. Still live: 766267
-      (161943 bytes, 3 events / 1 user, 2026-11-04) and 756345 (2 / 2, last 2026-11-04).
+      (161943 bytes, 3 events / 1 user, 2026-11-04), 756345 (2 / 2, last 2026-11-04) and 769305
+      (147612 bytes, 1 / 1, 2026-11-05).
+- [ ] JS 767134 `Cannot read properties of null (reading 'className')` in `dojo.addClass` from
+      `onUpdateActionButtons_civAbility`, game v261103-1426, 1 event / 1 user, table 942986299,
+      2026-11-05. Lead, unproven: the Advisors adj=8 `targets` loop or the Traders `land_` loop
+      adds a class to an id that is not on the page.
 - [ ] `Track resource 4 not found in payment` - `action_advance` tier II/III payment check, table
       924389742, move 365, 2026-11-01, v261030-1658, twice in 2 s (from Victoria's server game log;
       UserException, not in the studio log). Client sent a payment without the track's own resource.
@@ -342,3 +359,7 @@ Older detail is in git history of this file.
   (not deployed yet): from the next tag these asserts should appear in the studio log - verify then.
   7-day backend list: 761167 `string + int` (3 / 3, since 2026-11-03), 766267 notifications >128k.
   Marker bumped.
+- 2026-11-06: No new tag (live 261103-1426 on the gamepanel), nothing Waiting for deploy. One new
+  report: #255108 (Advisors + Espionage, adj=8) Open -> Confirmed with the BGA template, test
+  `AdvisorsEspionageTest`. 7-day log: 761167 one more event (fix not deployed), new 769305
+  (>128k notifications) and JS 767134 (civAbility addClass on null) recorded. Marker bumped.

@@ -4314,25 +4314,30 @@ abstract class PGameXBody extends tapcommon {
             $this->userAssertTrue(clienttranslate("Cannot copy itself"));
             return;
         }
+        $message = clienttranslate('${player_name} uses ESPIONAGE to copy ${card_name}');
         $espionage = $this->isTapestryActive($player_id, TAP_ESPIONAGE, false);
-        if (!$espionage) {
-            $espionage = $this->getCardInfoSearch(CARD_TAPESTRY, TAP_ESPIONAGE, "era%");
-        }
-        $this->systemAssertTrue("cannot find ESPIONAGE", $espionage);
-        $eid = $espionage["card_id"];
-        $loc = $espionage["card_location"];
-        //$this->debugConsole("$loc", $espionage);
-        if ($loc == "civilization_6") {
-            // on heralds
-            $this->removeHeraldTapestryClone($player_id);
-            $clone_id = $this->addTapestryClone($player_id, "civilization_6", $tap_type, "clone");
+        if ($espionage) {
+            $eid = $espionage["card_id"];
+            $loc = $espionage["card_location"];
+            //$this->debugConsole("$loc", $espionage);
+            if ($loc == "civilization_6") {
+                // on heralds
+                $this->removeHeraldTapestryClone($player_id);
+                $clone_id = $this->addTapestryClone($player_id, "civilization_6", $tap_type, "clone");
+            } else {
+                $clone_id = $this->addTapestryClone($player_id, "tapestry_$eid", $tap_type, "clone");
+            }
+            $args = $this->notifArgsAddCardInfo($clone_id, ["espionage" => $espionage]);
+            $this->notifyWithName("tapestrycard", $message, $args);
         } else {
-            $clone_id = $this->addTapestryClone($player_id, "tapestry_$eid", $tap_type, "clone");
+            // FORMAL_RULES TAPESTRY.8: not your ESPIONAGE, so no clone and no THIS ERA copy
+            $owner = $this->getCardInfoSearch(CARD_TAPESTRY, TAP_ESPIONAGE, "era%");
+            $this->systemAssertTrue("ERR:copy_card:01", $owner && $owner["card_location_arg"] != $player_id);
+            $this->notifyWithName("message", $message, ["card_name" => $this->getTokenName(CARD_TAPESTRY, $tap_type)]);
         }
-        $args = $this->notifArgsAddCardInfo($clone_id, ["espionage" => $espionage]);
-        $this->notifyWithName("tapestrycard", clienttranslate('${player_name} uses ESPIONAGE to copy ${card_name}'), $args);
         $card_effect = array_get($this->tapestry_card_data[$tap_type], "benefit", null);
-        if ($card_effect) {
+        $when_played = $this->getRulesCard(CARD_TAPESTRY, $tap_type, "type") == "now";
+        if ($card_effect && ($espionage || $when_played)) {
             $this->queueBenefitInterrupt($card_effect, $player_id, reason_tapestry($tap_type));
         }
         $this->gamestate->nextState("benefit");

@@ -134,6 +134,11 @@ TAPESTRY.6 An income turn 5 reminder placed by a tapestry card still pays out wh
 TAPESTRY.7 MARRIAGE OF STATE copies AI SINGULARITY (technology 12): the copier moves one of their
     tokens to the start of another track, gains no virtual token on technology 12 and does not
     complete the technology track. They may end with no token on technology (MOVE.2, MOVE.3).
+TAPESTRY.8 A player without an active ESPIONAGE of their own who gains its benefit (ADVISORS,
+    adjustments 8) copies only a "when played" ability. A "this era" target gives them nothing, its
+    on-play choice included: the ability would live on their own ESPIONAGE. The ESPIONAGE owner's
+    own copy is unaffected.
+    Interpretation (Victoria, 2026-11, BGA #255108); the card texts do not cover it.
 
 MOVE - advancing and regressing
 MOVE.1 Advance - moving, or intending to move, the player token up the track (one or more spaces).
