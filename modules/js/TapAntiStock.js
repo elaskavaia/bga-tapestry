@@ -28,7 +28,7 @@ export class TapAntiStock {
   }
 
   fork() {
-    return Object.assign(Object.create(TapAntiStock.prototype), this);
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
   }
 
   setAttribute(key, value) {
