@@ -36,12 +36,12 @@ framework signature or `final` conflict breaks the build. The stubs expose test-
 - `npm run tests` - PHPUnit over [tests/](tests/). Config is [phpunit.xml](phpunit.xml), bootstrap is
   [tests/\_autoload.php](tests/_autoload.php), so a bare `phpunit` works too.
 - `npm run lint:php` - `php -l` sweep over `modules/` and `tests/`.
-- `npm run predeploy` - `lint:php` then `tests`. This is the pre-commit gate.
+- `npm run jstests` - mocha over `tests/js/*.spec.js`. Specs import `tests/js/setup.js` first: it
+  stubs the framework globals (jsdom, `$`, `_`, `importDojoLibs`) and builds the injected `bga` object.
+- `npm run predeploy` - `lint:php`, `tests`, then `jstests`. This is the pre-commit gate.
 - `npm run lint:phpstan` - PHPStan level 1 ([misc/phpstan.neon](misc/phpstan.neon)). Not part of the
   gate: it still reports findings on the pre-namespace code.
 - Single test method: `npm run tests -- --filter testCollectors`
-
-There are no JS tests.
 
 PHP is invoked as `php8.4` everywhere. Prettier (with the PHP plugin, width 140, 1tbs) formats on save.
 

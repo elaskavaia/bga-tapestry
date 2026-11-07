@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "main": "modules/js/Game.js",
+  "type": "module",
   "scripts": {
     "build": "npm run genmat",
     "tests": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --display-deprecations --display-warnings --colors=always",
+    "jstests": "NODE_OPTIONS=--disable-warning=DEP0040 mocha \"tests/js/**/*.spec.js\"",
     "tests:cov": "XDEBUG_MODE=coverage APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --coverage-text",
     "lint:php": "find modules/ tests/ -name '*.php' -exec php8.4 -l {} + && echo 'All PHP files OK'",
     "lint:phpstan": "phpstan analyse -c misc/phpstan.neon",
-    "predeploy": "npm run lint:php && npm run tests",
+    "predeploy": "npm run lint:php && npm run tests && npm run jstests",
     "sync:alpha": "misc/rename.sh taptest ~/Develop/bga/bga-git/games/tapestry/taptest && rsync -v -ltsrO --delete --ignore-errors --exclude-from=$HOME/Develop/bga/rsync.exclude ~/Develop/bga/bga-git/games/tapestry/taptest/ ~/Develop/bga/remote/taptest/",
     "genmat": "php8.4 ~/git/bga-sharedcode/misc/genmat.php misc/benefit_types.csv && prettier --write material.inc.php",
     "end": "echo The End"
