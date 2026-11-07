@@ -98,11 +98,13 @@ This plan landed first; PLAN_VIEW_REMOVAL step 2 now plans `modules/js/TapLayout
   original first, then the Game method (`showMessage` used to add the bug link before the message;
   `onScreenWidthChange` used to replace the original, which is an empty function on gamegui).
   Hooks are installed once: the framework re-runs `setup()` on the same Game after an undo restore.
-- String handlers are not rewritten at call sites: they reach gameui through ~10 game helpers
-  (`addImageActionButton`, `addPlayerActionButton`, `addCancelButton`, ...), so `Game0Basics`
-  resolves a string against the Game in its `addActionButton` / `connect` / `connectClass` proxies.
-- `getPart` / `getIntPart` / `reloadCss` are exported from Game0Basics.js, not TapAntiStock.js.
-  `reloadCss` is no longer a console global.
+- Action buttons use `this.bga.statusBar.addActionButton(label, callback, { id, color })` with arrow
+  callbacks (2026-11-07). The game helpers (`addImageActionButton`, `addPlayerActionButton`,
+  `addCancelButton`, ...) keep their signatures and only call the new API.
+- `connect` / `connectClass` string handlers are not rewritten at call sites: `Game0Basics`
+  resolves a string against the Game in its `connect` / `connectClass` proxies.
+- `getPart` / `getIntPart` are exported from Game0Basics.js, not TapAntiStock.js. `reloadCss` is
+  removed (2026-11-07): the studio has its own reload CSS button.
 - Antistock `slide`: prototype assignment (passing the game would break `fork()`, which
   `dojo.clone`s the instance).
 - `ebg/stock` via top-level `await importDojoLibs`; `cap_choice.create` gets `this.bga.gameui` as page
@@ -130,13 +132,22 @@ Checked:
   log line with "Move #2")
 - not checked: everything in the manual test plan below
 
-Decisions to review:
-- String handlers resolved in the `Game0Basics` proxies instead of arrows at the call sites (see
-  above). Arrows at the call sites would be more explicit, but every one missed is a button that
-  silently does nothing.
+Decided (2026-11-07):
+- `addActionButton`: deprecated, all calls moved to `this.bga.statusBar.addActionButton`, helpers
+  kept. Studio click check is in TODO.
+- `connect` / `connectClass` string handlers: keep `resolveHandler`. Arrows alone gain little while
+  `this.connect` stays; the real fix is the `bga-replace-dojo` migration (`addEventListener`). There
+  only the temp click handlers (`connectClickTemp` / `disconnectAllTemp`) and the cube re-hook
+  (`disconnect` + `connect` of `onCubeClick`) need a way to remove the listener, since a new arrow
+  cannot be passed to `removeEventListener`.
 - `showMessage` order: the bug report link now goes to the log after the error message, not before.
-- `reloadCss` no longer reachable from the browser console.
-- Antistock `slide` patched on the prototype, shared by all instances, as `dojo.extend` did.
+  Accepted, no change.
+- `reloadCss`: removed, the studio has its own reload CSS button.
+- Antistock `slide`: to do, replace the `TapAntiStock.prototype.slide` patch with an instance hook
+  like `onItemCreate`, set once on the 3 `cardsman` stocks with `this.cardsman.forEach` (sparse
+  array) before they are forked. Check first that `fork()` (`dojo.clone`) keeps function properties.
+
+Decisions to review:
 - Against the `bga-es6` skill rules, as this plan intended: Game extends a game-owned base class (the
   rule forbids `extends`/`super`, aimed at gameui), and the 4 hooks replace methods on gameui (the
   rule says not to monkey-patch gameui). No documented Game hook exists for those 4.
@@ -151,8 +162,8 @@ Found, not fixed (in TODO): `getCardDivLocatonId` reads undeclared `card_player_
 - `npm run predeploy` only covers PHP; there are no JS tests. Syntax check with
   `node --check modules/js/Game.js` (ES module: `node --input-type=module --check` or a .mjs copy).
 - Studio: run the manual test plan below.
-- Grep after conversion: no `this.inherited`, no `declare(`, no `define(`, no `bgagame.`, no string
-  handler left in `connect` / `addActionButton` / `connectClass`.
+- Grep after conversion: no `this.inherited`, no `declare(`, no `define(`, no `bgagame.`, no
+  uncommented `this.addActionButton(`.
 - Delete nothing else; the old `tapestry.js` path must not be recreated by any build step.
 
 ## Manual test plan (studio)
@@ -176,8 +187,8 @@ the run.
 - Conquer with a tapestry that asks (militarism / exploitation) when one is in hand (`debug_awardCard`).
 - One civ client state if cheap to set up (Traders `client_trader`, Architects `client_ArchitectsSwap`).
 - Income turn: "I confirm" dialog (`confirmationDialog`), `resourceChoice` payment boxes.
-- String-named handlers: click every action button reached above and the board/card clicks; nothing
-  silently does nothing.
+- String-named handlers (`connect` / `connectClass`): the board/card clicks; nothing silently does
+  nothing. Action buttons are covered by the studio click check in TODO.
 
 ### Undo
 - Take an action, Undo: board, resources, tracks and counters revert, log shows the undo.

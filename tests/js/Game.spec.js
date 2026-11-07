@@ -123,3 +123,70 @@ describe("Game.moveCard civilization", () => {
     expect(calls).to.deep.equal([["placeToken", "civilization_7", "civilizations"]]);
   });
 });
+
+describe("Game action button helpers", () => {
+  beforeEach(() => $("generalactions").replaceChildren());
+
+  const buttons = () => [...$("generalactions").children];
+
+  it("adds an image button with the default color, shadow and tooltip", () => {
+    let clicked = null;
+    const button = makeGame().addImageActionButton(
+      "button_die",
+      "<div class='die'></div>",
+      (event) => (clicked = event.currentTarget.id),
+      undefined,
+      "Roll"
+    );
+    expect(button.id).to.equal("button_die");
+    expect(button.dataset.color).to.equal("secondary");
+    expect(button.classList.contains("shadow")).to.be.true;
+    expect(button.classList.contains("bgaimagebutton")).to.be.true;
+    expect(button.getAttribute("title")).to.equal("Roll");
+    button.click();
+    expect(clicked).to.equal("button_die");
+  });
+
+  it("adds a player button with the player name and color", () => {
+    const button = makeGame().addPlayerActionButton(OTHER, () => {}, "button_historian_");
+    expect(button.id).to.equal("button_historian_" + OTHER);
+    expect(button.innerHTML).to.equal("Bob");
+    expect(button.style.getPropertyValue("color")).to.equal("rgb(0, 0, 255)");
+    expect(button.style.getPropertyValue("background-color")).to.equal("");
+  });
+
+  it("adds a player button with the player background color", () => {
+    const game = makeGame();
+    game.gamedatas.players[OTHER].color_back = "bbbbbb";
+    const button = game.addPlayerActionButton(OTHER, () => {});
+    expect(button.style.getPropertyValue("background-color")).to.equal("rgb(187, 187, 187)");
+  });
+
+  it("adds no player button for an unknown player", () => {
+    expect(makeGame().addPlayerActionButton(99, () => {})).to.be.undefined;
+    expect(buttons()).to.be.empty;
+  });
+
+  it("keeps a single cancel button, which cancels the local state by default", () => {
+    const game = makeGame();
+    let cancelled = false;
+    game.cancelLocalStateEffects = () => (cancelled = true);
+    game.addCancelButton("Back", () => {});
+    game.addCancelButton();
+    expect(buttons().map((button) => button.id)).to.deep.equal(["button_cancel"]);
+    expect($("button_cancel").innerHTML).to.equal("Cancel");
+    $("button_cancel").click();
+    expect(cancelled).to.be.true;
+  });
+
+  it("adds a track slot button, with a suffix when the id is taken", () => {
+    const game = makeGame();
+    game.tech_track_types = { 1: { description: "Exploration" } };
+    game.tech_track_data = { 1: { 3: { name: "Scout" } } };
+    game.addTrackSlotActionButton("1_3", "button_benefit", () => {});
+    game.addTrackSlotActionButton("1_3", "button_benefit", () => {});
+    expect(buttons().map((button) => button.id)).to.deep.equal(["button_benefit_1_3", "button_benefit_1_3_x"]);
+    expect($("button_benefit_1_3").innerHTML).to.contain("Scout/3");
+    expect($("button_benefit_1_3").classList.contains("bgaimagebutton")).to.be.true;
+  });
+});

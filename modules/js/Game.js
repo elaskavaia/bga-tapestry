@@ -780,23 +780,27 @@ export class Game extends Game0Basics {
       if (div) dojo.addClass(div, "active_slot");
     }
 
-    this.addActionButton("button_confirm", _("Confirm"), () => {
-      const ids = Array.from(document.querySelectorAll(".active_slot.selected")).map((node) => node.getAttribute("data-card-id"));
-      if (ids.length == 0) {
-        this.showError(_("Nothing is selected"));
-        return;
-      }
-      if (this.clientStateArgs.selmode == 1 && ids.length > 1) {
-        this.showError(_("You must select one or Decline"));
-        return;
-      }
-      this.axcallwrapper("keepCard", {
-        ids: ids.join(",")
-      });
-    });
+    this.bga.statusBar.addActionButton(
+      _("Confirm"),
+      () => {
+        const ids = Array.from(document.querySelectorAll(".active_slot.selected")).map((node) => node.getAttribute("data-card-id"));
+        if (ids.length == 0) {
+          this.showError(_("Nothing is selected"));
+          return;
+        }
+        if (this.clientStateArgs.selmode == 1 && ids.length > 1) {
+          this.showError(_("You must select one or Decline"));
+          return;
+        }
+        this.axcallwrapper("keepCard", {
+          ids: ids.join(",")
+        });
+      },
+      { id: "button_confirm" }
+    );
 
     if (args.decline) {
-      this.addActionButton("button_decline", _("Decline"), () => this.axcallwrapper("decline"));
+      this.bga.statusBar.addActionButton(_("Decline"), () => this.axcallwrapper("decline"), { id: "button_decline" });
     }
   }
 
@@ -811,8 +815,10 @@ export class Game extends Game0Basics {
       this.updateCivMilitiantAbility("");
     }
 
-    if (args.structures.length == 0) this.addActionButton("button_decline", _("Decline"), () => this.axcallwrapper("decline"));
-    else if (args.targets.length == 0) this.addActionButton("button_decline", _("No valid target"), () => this.axcallwrapper("decline"));
+    if (args.structures.length == 0)
+      this.bga.statusBar.addActionButton(_("Decline"), () => this.axcallwrapper("decline"), { id: "button_decline" });
+    else if (args.targets.length == 0)
+      this.bga.statusBar.addActionButton(_("No valid target"), () => this.axcallwrapper("decline"), { id: "button_decline" });
   }
 
   onUpdateActionButtons_celestialMove(args) {
@@ -831,7 +837,7 @@ export class Game extends Game0Basics {
       }
     }
     const label = tokens.length ? _("Decline") : _("No valid target");
-    this.addActionButton("button_decline", label, () => this.axcallwrapper("decline"));
+    this.bga.statusBar.addActionButton(label, () => this.axcallwrapper("decline"), { id: "button_decline" });
   }
 
   showCelestialTargets(coords) {
@@ -906,7 +912,7 @@ export class Game extends Game0Basics {
 
           const message = this.format_string_recursive(info.title, info);
 
-          this.addImageActionButton("button_" + slot, message, "onCivSpotHandler", undefined, info.tooltip);
+          this.addImageActionButton("button_" + slot, message, (event) => this.onCivSpotHandler(event), undefined, info.tooltip);
         }
       }
 
@@ -914,8 +920,12 @@ export class Game extends Game0Basics {
         case this.CON.CIV_ALCHEMISTS:
           if (this.getAdjustmentLevel() < 8) {
             this.setDescriptionOnMyTurn(_("ALCHEMISTS: Choose to roll or stop"));
-            this.addActionButton("button_alchemistroll", _("Roll"), () => this.axcallwrapper("civTokenAdvance", { spot: 1, cid: civ }));
-            this.addActionButton("button_alchemistrollstop", _("Stop"), () => this.axcallwrapper("civTokenAdvance", { spot: 0, cid: civ }));
+            this.bga.statusBar.addActionButton(_("Roll"), () => this.axcallwrapper("civTokenAdvance", { spot: 1, cid: civ }), {
+              id: "button_alchemistroll"
+            });
+            this.bga.statusBar.addActionButton(_("Stop"), () => this.axcallwrapper("civTokenAdvance", { spot: 0, cid: civ }), {
+              id: "button_alchemistrollstop"
+            });
           }
           decline = false;
           break;
@@ -949,7 +959,7 @@ export class Game extends Game0Basics {
           for (var pid in this.gamedatas.players) {
             var player = this.gamedatas.players[pid];
             if (pid != this.getPlayerId()) {
-              this.addPlayerActionButton(pid, "onSelectHistorian", "button_historian_");
+              this.addPlayerActionButton(pid, (event) => this.onSelectHistorian(event), "button_historian_");
             }
           }
 
@@ -1028,7 +1038,7 @@ export class Game extends Game0Basics {
           break;
         case this.CON.CIV_MYSTICS:
           this.setDescriptionOnMyTurn(_("MYSTICS: Place your bets"));
-          this.addActionButton("button_mystic", _("Confirm"), "onMystic");
+          this.bga.statusBar.addActionButton(_("Confirm"), (event) => this.onMystic(event), { id: "button_mystic" });
           decline = false;
           break;
         case this.CON.CIV_ENTERTAINERS:
@@ -1058,32 +1068,36 @@ export class Game extends Game0Basics {
             this.clientStateArgs.action = "civTokenAdvance";
             this.clientStateArgs.cid = civ;
             this.clientStateArgs.spot = 0;
-            this.addActionButton("button_confirm", _("Confirm"), () => {
-              const selected1 = document.querySelectorAll(".tapestry.selected");
-              const selected2 = document.querySelectorAll(".territory.selected");
-              if (selected1.length == 0 && selected2.length == 0) {
-                this.showError(_("Nothing is selected"));
-                return;
-              }
-              if (selected1.length > 1 || selected2.length > 1 || selected1.length + selected2.length > 2) {
-                this.showError(_("Too many cards are selected"));
-                return;
-              }
-              let tapId = 0;
-              if (selected1.length == 1) {
-                tapId = getPart(selected1[0].id, 1);
-              }
-              let cardId = 0;
-              if (selected2.length == 1) {
-                cardId = getPart(selected2[0].id, 1);
-              }
+            this.bga.statusBar.addActionButton(
+              _("Confirm"),
+              () => {
+                const selected1 = document.querySelectorAll(".tapestry.selected");
+                const selected2 = document.querySelectorAll(".territory.selected");
+                if (selected1.length == 0 && selected2.length == 0) {
+                  this.showError(_("Nothing is selected"));
+                  return;
+                }
+                if (selected1.length > 1 || selected2.length > 1 || selected1.length + selected2.length > 2) {
+                  this.showError(_("Too many cards are selected"));
+                  return;
+                }
+                let tapId = 0;
+                if (selected1.length == 1) {
+                  tapId = getPart(selected1[0].id, 1);
+                }
+                let cardId = 0;
+                if (selected2.length == 1) {
+                  cardId = getPart(selected2[0].id, 1);
+                }
 
-              this.axcallwrapper("civTokenAdvance", {
-                cid: civ,
-                spot: tapId,
-                extra: cardId
-              });
-            });
+                this.axcallwrapper("civTokenAdvance", {
+                  cid: civ,
+                  spot: tapId,
+                  extra: cardId
+                });
+              },
+              { id: "button_confirm" }
+            );
           }
           break;
         case this.CON.CIV_CHOSEN:
@@ -1102,10 +1116,10 @@ export class Game extends Game0Basics {
               "client_benvpchoice",
               () => {
                 this.setDescriptionOnMyTurn(_("CHOSEN: ${you} must choose to gain 5VP or benefit"));
-                this.addImageActionButton("button_5", this.getBenIcon(505), "ajaxClientStateHandler");
-                if (ben) this.addImageActionButton("button_1", this.getBenIcon(ben), "ajaxClientStateHandler");
+                this.addImageActionButton("button_5", this.getBenIcon(505), (event) => this.ajaxClientStateHandler(event));
+                if (ben) this.addImageActionButton("button_1", this.getBenIcon(ben), (event) => this.ajaxClientStateHandler(event));
                 if (data == "midgame") {
-                  this.addImageActionButton("button_0", _("Forfeit"), "ajaxClientStateHandler");
+                  this.addImageActionButton("button_0", _("Forfeit"), (event) => this.ajaxClientStateHandler(event));
                 }
                 //this.addCancelButton();
                 //this.addActionButton("button_civDecline", _("Decline"), "onCivDecline");
@@ -1117,7 +1131,7 @@ export class Game extends Game0Basics {
               "client_choosenorig",
               () => {
                 this.setDescriptionOnMyTurn(_("CHOSEN: ${you} must use civilization ability"));
-                this.addActionButton("button_1", _("Yes"), "ajaxClientStateHandler");
+                this.bga.statusBar.addActionButton(_("Yes"), (event) => this.ajaxClientStateHandler(event), { id: "button_1" });
                 this.addCancelButton();
               },
               300
@@ -1142,8 +1156,7 @@ export class Game extends Game0Basics {
 
       if (this.selectedCiv != civ) {
         dojo.addClass("civilization_" + civ, "active_slot");
-        this.addActionButton(
-          "button_" + civ,
+        this.bga.statusBar.addActionButton(
           _("Switch") + ": " + this.getTr(benefits[i].reason),
           () => {
             this.selectedCiv = civ;
@@ -1151,9 +1164,7 @@ export class Game extends Game0Basics {
             this.onUpdateActionButtons("civAbility", args);
             return;
           },
-          undefined,
-          undefined,
-          "gray"
+          { id: "button_" + civ, color: "secondary" }
         );
         continue;
       }
@@ -1163,7 +1174,7 @@ export class Game extends Game0Basics {
     }
 
     if (decline) {
-      this.addActionButton("button_civDecline", _("Decline"), "onCivDecline");
+      this.bga.statusBar.addActionButton(_("Decline"), (event) => this.onCivDecline(event), { id: "button_civDecline" });
     }
   }
 
@@ -1222,21 +1233,21 @@ export class Game extends Game0Basics {
     // SETUP CHOICE - allow to change mind after selection whilst others thinking.
     if (stateName == "setupChoice") {
       if (this.bga.players.isCurrentPlayerActive()) {
-        this.addActionButton("button_confirm", _("Confirm"), "onSetupConfirm");
+        this.bga.statusBar.addActionButton(_("Confirm"), (event) => this.onSetupConfirm(event), { id: "button_confirm" });
         var cap = document.querySelector("#capitals > *");
         if (cap) {
           this.setDescriptionOnMyTurn(_("${you} must choose a Civilization and a Capital mat"));
         }
         dojo.query("#civilizations > *").addClass("active_slot");
       } else {
-        this.addActionButton("button_confirm", _("Change"), "onSetupConfirm");
+        this.bga.statusBar.addActionButton(_("Change"), (event) => this.onSetupConfirm(event), { id: "button_confirm" });
       }
       return;
     }
     if (!this.bga.players.isCurrentPlayerActive()) return;
 
     if (stateName != "playerTurn" && stateName != "playerTurnEnd" && stateName != "playerTurnConfirm") {
-      this.addActionButton("button_undo", _("Undo"), "onUndo", undefined, undefined, "red");
+      this.bga.statusBar.addActionButton(_("Undo"), (event) => this.onUndo(event), { id: "button_undo", color: "alert" });
     }
 
     const upMethod = this[`onUpdateActionButtons_${stateName}`];
@@ -1255,23 +1266,24 @@ export class Game extends Game0Basics {
             dojo.addClass(spot, "active_slot");
             var track = getPart(adv, 0);
             var slot = getPart(adv, 1);
-            this.addTrackSlotActionButton(adv, "button_benefit", "onAdvance");
+            this.addTrackSlotActionButton(adv, "button_benefit", (event) => this.onAdvance(event));
           } else if (allowed == 0) dojo.addClass(spot, "illegal_slot");
           else if (allowed == -1) dojo.addClass(spot, "illegal_slot");
         }
         // in extended play there is no income turn left and no way to stop: advance or nothing
-        if (!args.extended_play) this.addActionButton("button_income", _("Income"), "onIncomeTurn");
+        if (!args.extended_play)
+          this.bga.statusBar.addActionButton(_("Income"), (event) => this.onIncomeTurn(event), { id: "button_income" });
 
         break;
       case "playerTurnEnd":
       case "playerTurnConfirm":
-        this.addActionButton("button_confirm", _("Confirm"), () => this.axcallwrapper("actionConfirm"));
-        this.addActionButton("button_undo_x", _("Undo"), "onUndo", undefined, undefined, "red");
+        this.bga.statusBar.addActionButton(_("Confirm"), () => this.axcallwrapper("actionConfirm"), { id: "button_confirm" });
+        this.bga.statusBar.addActionButton(_("Undo"), (event) => this.onUndo(event), { id: "button_undo_x", color: "alert" });
         //this.addButtonTimer('button_confirm', undefined, 20);
 
         break;
       case "startGameDebug":
-        this.addActionButton("button_confirm", _("Confirm"), () => this.axcallwrapper("actionConfirm"));
+        this.bga.statusBar.addActionButton(_("Confirm"), () => this.axcallwrapper("actionConfirm"), { id: "button_confirm" });
 
         this.addButtonTimer("button_confirm");
         break;
@@ -1284,16 +1296,20 @@ export class Game extends Game0Basics {
           for (var pid in this.gamedatas.players) {
             var player = this.gamedatas.players[pid];
             if (pid != this.getPlayerId()) {
-              this.addPlayerActionButton(pid, "onSelectHistorian", "button_aos_");
+              this.addPlayerActionButton(pid, (event) => this.onSelectHistorian(event), "button_aos_");
             }
           }
           this.territory[this.getPlayerId()].getChildrenDivs().forEach((node) => node.classList.add("active_slot"));
-          this.addActionButton("button_nope", _("Nobody"), () => {
-            this.setDescriptionOnMyTurn(_("EXPLORE: ${you} must select an unexplored hex adjacent to a territory you control"));
-            args.ageOfSail = 0;
-            dojo.empty("generalactions");
-            this.onUpdateActionButtons(stateName, args);
-          });
+          this.bga.statusBar.addActionButton(
+            _("Nobody"),
+            () => {
+              this.setDescriptionOnMyTurn(_("EXPLORE: ${you} must select an unexplored hex adjacent to a territory you control"));
+              args.ageOfSail = 0;
+              dojo.empty("generalactions");
+              this.onUpdateActionButtons(stateName, args);
+            },
+            { id: "button_nope" }
+          );
           break;
         } else {
           args.ageOfSail = 0;
@@ -1303,18 +1319,18 @@ export class Game extends Game0Basics {
           dojo.addClass(args.exploration_targets[cid], "active_slot");
         }
         if (args.exploration_targets.length == 0) {
-          this.addActionButton("button_decline", _("No valid targets"), () => this.axcallwrapper("decline"));
+          this.bga.statusBar.addActionButton(_("No valid targets"), () => this.axcallwrapper("decline"), { id: "button_decline" });
         } else if (noTiles) {
-          this.addActionButton("button_decline", _("No tiles"), () => this.axcallwrapper("decline"));
+          this.bga.statusBar.addActionButton(_("No tiles"), () => this.axcallwrapper("decline"), { id: "button_decline" });
         } else {
           if (this.ownsCiv(this.CON.CIV_MILITANTS) && this.gamedatas.gamestate.args.militarism) {
             this.updateCivMilitiantAbility("");
           }
-          this.addActionButton("button_tileconfirm", _("Confirm Tile"), "onTileConfirm");
+          this.bga.statusBar.addActionButton(_("Confirm Tile"), (event) => this.onTileConfirm(event), { id: "button_tileconfirm" });
         }
 
         if (args.decline && !$("button_decline")) {
-          this.addActionButton("button_decline", _("Decline"), () => this.axcallwrapper("decline"));
+          this.bga.statusBar.addActionButton(_("Decline"), () => this.axcallwrapper("decline"), { id: "button_decline" });
         }
 
         if (args.title) {
@@ -1329,7 +1345,7 @@ export class Game extends Game0Basics {
           }
         }
 
-        this.addCancelButton(undefined, "onTileCancel");
+        this.addCancelButton(undefined, (event) => this.onTileCancel(event));
 
         break;
       case "spaceExploration":
@@ -1345,7 +1361,7 @@ export class Game extends Game0Basics {
         const land = $(this.clientStateArgs.land_id);
         dojo.addClass(land.parentNode, "selected");
 
-        this.addActionButton("button_0", _("Trader"), () => this.sendTrader(0));
+        this.bga.statusBar.addActionButton(_("Trader"), () => this.sendTrader(0), { id: "button_0" });
         if (!dojo.hasClass(land, "own_land")) {
           var mat = $("income_mat_" + this.getPlayerId());
           for (i = 1; i <= 4; i++) {
@@ -1362,8 +1378,8 @@ export class Game extends Game0Basics {
         break;
 
       case "client_exploitation":
-        this.addActionButton("button_exploitation_yes", _("Yes"), "onExploitationClick");
-        this.addActionButton("button_exploitation_no", _("No"), "onExploitationClick");
+        this.bga.statusBar.addActionButton(_("Yes"), (event) => this.onExploitationClick(event), { id: "button_exploitation_yes" });
+        this.bga.statusBar.addActionButton(_("No"), (event) => this.onExploitationClick(event), { id: "button_exploitation_no" });
         this.addCancelButton();
         break;
 
@@ -1373,8 +1389,8 @@ export class Game extends Game0Basics {
         }
         this.setDescriptionOnMyTurn(_("MILITARISM: ${you} can also place an outpost"));
 
-        this.addActionButton("button_militarism_yes", _("Yes"), "onMilitarismClick");
-        this.addActionButton("button_militarism_no", _("No"), "onMilitarismClick");
+        this.bga.statusBar.addActionButton(_("Yes"), (event) => this.onMilitarismClick(event), { id: "button_militarism_yes" });
+        this.bga.statusBar.addActionButton(_("No"), (event) => this.onMilitarismClick(event), { id: "button_militarism_no" });
         this.addCancelButton();
         break;
       case "client_standup":
@@ -1387,22 +1403,22 @@ export class Game extends Game0Basics {
           this.connectClickTemp($(bnode), "onOutpost");
         }
 
-        this.addActionButton("button_done", _("Confirm"), () => {
-          var selected = document.querySelectorAll(".selected");
-          var outposts = Array.from(selected)
-            .map((node) => getPart(node.id, 1))
-            .join(",");
-          console.log(selected, outposts);
-          this.axcallwrapper("standup", { outposts: outposts });
-        });
-        this.addActionButton(
-          "button_decline",
-          _("Decline"),
-          () => this.axcallwrapper("standup", { outposts: "0" }),
-          undefined,
-          undefined,
-          "red"
+        this.bga.statusBar.addActionButton(
+          _("Confirm"),
+          () => {
+            var selected = document.querySelectorAll(".selected");
+            var outposts = Array.from(selected)
+              .map((node) => getPart(node.id, 1))
+              .join(",");
+            console.log(selected, outposts);
+            this.axcallwrapper("standup", { outposts: outposts });
+          },
+          { id: "button_done" }
         );
+        this.bga.statusBar.addActionButton(_("Decline"), () => this.axcallwrapper("standup", { outposts: "0" }), {
+          id: "button_decline",
+          color: "alert"
+        });
         this.addCancelButton();
         break;
       case "conquer":
@@ -1423,8 +1439,9 @@ export class Game extends Game0Basics {
         }
 
         if (args.decline) {
-          if (args.targets.length > 0) this.addActionButton("button_decline", _("No more outposts"), () => this.axcallwrapper("decline"));
-          else this.addActionButton("button_decline", _("No valid target"), () => this.axcallwrapper("decline"));
+          if (args.targets.length > 0)
+            this.bga.statusBar.addActionButton(_("No more outposts"), () => this.axcallwrapper("decline"), { id: "button_decline" });
+          else this.bga.statusBar.addActionButton(_("No valid target"), () => this.axcallwrapper("decline"), { id: "button_decline" });
         }
         break;
       case "conquer_roll":
@@ -1446,7 +1463,7 @@ export class Game extends Game0Basics {
             this.addImageActionButton(
               button,
               this.getConqDieDiv(color, face),
-              "onDieClick",
+              (event) => this.onDieClick(event),
               undefined,
               this.getTr(this.gamedatas.dice_names[color][face].name)
             );
@@ -1466,11 +1483,15 @@ export class Game extends Game0Basics {
           var spot = "tech_spot_" + adv;
           if (allowed == 1) {
             if ($(spot)) dojo.addClass(spot, "active_slot");
-            this.addTrackSlotActionButton(adv, "button_research_science", "onResearchDecision");
+            this.addTrackSlotActionButton(adv, "button_research_science", (event) => this.onResearchDecision(event));
           }
         }
 
-        if (args.decline) this.addActionButton("button_research_decline", _("Decline"), "onResearchDecision", undefined, undefined, "red");
+        if (args.decline)
+          this.bga.statusBar.addActionButton(_("Decline"), (event) => this.onResearchDecision(event), {
+            id: "button_research_decline",
+            color: "alert"
+          });
 
         // add roll
         var rolltemp = '<div class="research_icon"></div> ${verb}: ${roll}';
@@ -1505,7 +1526,7 @@ export class Game extends Game0Basics {
               }
             }
             document.querySelectorAll("#draw > .tech_card").forEach((node) => node.classList.add("active_slot"));
-            this.addActionButton("button_invent_decline", _("Decline"), () => this.axcallwrapper("decline"));
+            this.bga.statusBar.addActionButton(_("Decline"), () => this.axcallwrapper("decline"), { id: "button_invent_decline" });
             this.setDescriptionOnMyTurn("${you} may invent from top of discard");
             if (!args.discard) {
               this.setDescriptionOnMyTurn("${you} may invent from top of discard, but nothing is in discard");
@@ -1519,21 +1540,25 @@ export class Game extends Game0Basics {
           if (al < 8) {
             button = _("Inspect discard pile");
           }
-          this.addActionButton("button_discard", button, () => {
-            if (al < 8) {
-              this.axcallwrapper("invent", { id: -1 });
-            } else {
-              // show discard
-              if (args.discard) {
-                for (let i in args.discard) {
-                  const card = args.discard[i];
-                  card.card_location = "draw";
-                  this.moveCard(card, "discard");
+          this.bga.statusBar.addActionButton(
+            button,
+            () => {
+              if (al < 8) {
+                this.axcallwrapper("invent", { id: -1 });
+              } else {
+                // show discard
+                if (args.discard) {
+                  for (let i in args.discard) {
+                    const card = args.discard[i];
+                    card.card_location = "draw";
+                    this.moveCard(card, "discard");
+                  }
                 }
+                document.querySelectorAll("#draw > .tech_card").forEach((node) => node.classList.add("active_slot"));
               }
-              document.querySelectorAll("#draw > .tech_card").forEach((node) => node.classList.add("active_slot"));
-            }
-          });
+            },
+            { id: "button_discard" }
+          );
           this.addTooltip(
             "button_discard",
             "Inspect discard pile to Invent, you can still Invent from tech display if you don't like your choices",
@@ -1592,7 +1617,7 @@ export class Game extends Game0Basics {
         break;
 
       case "upgradeTechnology":
-        this.addActionButton("button_upgrade_decline", _("Decline"), () => this.axcallwrapper("decline"));
+        this.bga.statusBar.addActionButton(_("Decline"), () => this.axcallwrapper("decline"), { id: "button_upgrade_decline" });
         var slots = args.possible;
         dojo.query("#tech_holder_" + this.getPlayerId() + " .tech_card").addClass("illegal_slot");
 
@@ -1651,32 +1676,40 @@ export class Game extends Game0Basics {
 
         this.scrollIntoViewAfter(mat, this.defaultAnimationDuration);
 
-        this.addActionButton("button_reset", _("Reset"), "onCancelStructure", null, false, "gray");
+        this.bga.statusBar.addActionButton(_("Reset"), () => this.onCancelStructure(), { id: "button_reset", color: "secondary" });
         let rotlen = 0;
         for (var i = 0; i < 4; i++) {
           if (this.capitalRotOptions[i]) rotlen++;
         }
-        if (rotlen > 1) this.addActionButton("button_rotate", _("Rotate"), "onCapitalRotate");
-        this.addActionButton("button_confirm", _("Confirm"), "onConfirmStructure");
+        if (rotlen > 1) this.bga.statusBar.addActionButton(_("Rotate"), (event) => this.onCapitalRotate(event), { id: "button_rotate" });
+        this.bga.statusBar.addActionButton(_("Confirm"), () => this.onConfirmStructure(), { id: "button_confirm" });
         if (args.anyoptions == 0 || (rotlen == 1 && this.capitalRotOptions[0].length == 0))
-          this.addActionButton("button_out", _("Place outside of Capital Mat"), (e) => {
-            this.capitalx = 100;
-            this.capitaly = 100;
-            this.onConfirmStructure(e);
-          });
+          this.bga.statusBar.addActionButton(
+            _("Place outside of Capital Mat"),
+            (e) => {
+              this.capitalx = 100;
+              this.capitaly = 100;
+              this.onConfirmStructure(e);
+            },
+            { id: "button_out" }
+          );
         dojo.addClass("button_confirm", "disabled");
         break;
 
       case "conquer_trap":
-        this.addActionButton("button_trap_trap", _("Trap"), () => {
-          const div = this.tapestry[this.getPlayerId()].findDivByType(42);
-          if (!div) {
-            this.showError(_("Cannot find a Trap card"));
-            return;
-          }
-          this.axcallwrapper("trap", { card_id: this.tapestry[this.getPlayerId()].getIdFromDiv(div) });
-        });
-        this.addActionButton("button_trap_pass", _("Pass"), "onPassTrap");
+        this.bga.statusBar.addActionButton(
+          _("Trap"),
+          () => {
+            const div = this.tapestry[this.getPlayerId()].findDivByType(42);
+            if (!div) {
+              this.showError(_("Cannot find a Trap card"));
+              return;
+            }
+            this.axcallwrapper("trap", { card_id: this.tapestry[this.getPlayerId()].getIdFromDiv(div) });
+          },
+          { id: "button_trap_trap" }
+        );
+        this.bga.statusBar.addActionButton(_("Pass"), (event) => this.onPassTrap(event), { id: "button_trap_pass" });
 
         break;
 
@@ -1722,17 +1755,17 @@ export class Game extends Game0Basics {
         var bd = this.benefit_types[type];
 
         if (!bd.dest) {
-          this.addActionButton("button_confirm", _("Confirm"), "onConfirmBonus");
+          this.bga.statusBar.addActionButton(_("Confirm"), (event) => this.onConfirmBonus(event), { id: "button_confirm" });
         } else if (bd.dest == this.CON.FLAG_NEIGHBOUR) {
           const num = this.gamedatas.playerorder_withbots.length;
           const index = this.gamedatas.playerorder_withbots.findIndex((item) => item == this.getPlayerId());
           const left = (index - 1 + num) % num;
           const right = (index + 1) % num;
-          this.addPlayerActionButton(this.gamedatas.playerorder_withbots[left], "onConfirmBonus");
-          if (left != right) this.addPlayerActionButton(this.gamedatas.playerorder_withbots[right], "onConfirmBonus");
+          this.addPlayerActionButton(this.gamedatas.playerorder_withbots[left], (event) => this.onConfirmBonus(event));
+          if (left != right) this.addPlayerActionButton(this.gamedatas.playerorder_withbots[right], (event) => this.onConfirmBonus(event));
         } else if (bd.dest == this.CON.FLAG_TARGET) {
           const target_player_id = args.benefit_data.split(":")[3];
-          this.addPlayerActionButton(target_player_id, "onConfirmBonus");
+          this.addPlayerActionButton(target_player_id, (event) => this.onConfirmBonus(event));
         } else {
           this.showError("Unsupported player type");
         }
@@ -1753,7 +1786,11 @@ export class Game extends Game0Basics {
           this.setupResourceLine(false);
         }
 
-        if (cannotDecline == false) this.addActionButton("button_bonusDecline", _("Decline"), "onPassBonus", null, false, "red");
+        if (cannotDecline == false)
+          this.bga.statusBar.addActionButton(_("Decline"), (event) => this.onPassBonus(event), {
+            id: "button_bonusDecline",
+            color: "alert"
+          });
 
         break;
 
@@ -1762,12 +1799,15 @@ export class Game extends Game0Basics {
         switch (args.bid) {
           case "5":
             // Take X resources
-            this.addActionButton("button_confirm", _("Confirm"), "onResourceChoiceConfirm");
+            this.bga.statusBar.addActionButton(_("Confirm"), (event) => this.onResourceChoiceConfirm(event), { id: "button_confirm" });
             if (args.data == ":tapestry:24") {
               //mercantilism
               this.setDescriptionOnMyTurn(_("${you} may convert Food (up to ${count}) to other resources (for 2 VP each)"));
               this.setMainTitle(_(". Select Food if you want to keep it"), "after");
-              this.addActionButton("button_decline", _("Decline"), () => this.axcallwrapper("decline"), undefined, undefined, "red");
+              this.bga.statusBar.addActionButton(_("Decline"), () => this.axcallwrapper("decline"), {
+                id: "button_decline",
+                color: "alert"
+              });
             } else {
               this.setDescriptionOnMyTurn(_("${you} may choose your resources to gain"));
             }
@@ -1794,7 +1834,7 @@ export class Game extends Game0Basics {
         break;
       case "client_ArchitectsSwap":
         this.selectedCiv = this.CON.CIV_ARCHITECTS;
-        this.addActionButton("button_civDecline", _("Decline"), "onCivDecline");
+        this.bga.statusBar.addActionButton(_("Decline"), (event) => this.onCivDecline(event), { id: "button_civDecline" });
         //this.addActionButton('button_cancel', _('Cancel'), ()=>this.cancelLocalStateEffects());
         break;
       //onUpdateActionButtons
@@ -1840,12 +1880,14 @@ export class Game extends Game0Basics {
           const tap0name = this.getTr(this.tapestry_data[node1.dataset?.typeArg]?.name);
           const tap1name = this.getTr(this.tapestry_data[node2?.dataset?.typeArg]?.name);
 
-          this.addActionButton("button_1", _("Accept") + " " + tap1name, () => {
-            this.axcallwrapper("playCard", { card_id: tap1 });
+          this.bga.statusBar.addActionButton(_("Accept") + " " + tap1name, () => this.axcallwrapper("playCard", { card_id: tap1 }), {
+            id: "button_1"
           });
-          this.addActionButton("button_0", _("Decline") + ". " + _("Play") + " " + tap0name, () => {
-            this.axcallwrapper("playCard", { card_id: tap0 });
-          });
+          this.bga.statusBar.addActionButton(
+            _("Decline") + ". " + _("Play") + " " + tap0name,
+            () => this.axcallwrapper("playCard", { card_id: tap0 }),
+            { id: "button_0" }
+          );
         } else {
           dojo.query("#tapestry_cards_" + this.getPlayerId() + " > .tapestry_card").addClass("active_slot");
         }
@@ -1866,12 +1908,15 @@ export class Game extends Game0Basics {
             if (!tyranny_ids.includes(node.dataset.cardId)) node.classList.remove("active_slot");
           });
           tyranny_ids.forEach((card_id, i) => {
-            this.addActionButton("button_yes_" + card_id, tyranny_ids.length > 1 ? names[i] : _("Yes"), () => {
-              this.axcallwrapper("playCard", { card_id: parseInt(card_id) });
-            });
+            this.bga.statusBar.addActionButton(
+              tyranny_ids.length > 1 ? names[i] : _("Yes"),
+              () => this.axcallwrapper("playCard", { card_id: parseInt(card_id) }),
+              { id: "button_yes_" + card_id }
+            );
           });
         }
-        if (args.decline) this.addActionButton("button_tapDecline", _("Decline"), "onTapDecline");
+        if (args.decline)
+          this.bga.statusBar.addActionButton(_("Decline"), (event) => this.onTapDecline(event), { id: "button_tapDecline" });
         this.scrollIntoViewAfter("tapestry_cards_" + this.getPlayerId(), this.defaultAnimationDuration);
 
         break;
@@ -1908,8 +1953,8 @@ export class Game extends Game0Basics {
         break;
 
       case "client_isolationist":
-        this.addActionButton("button_isolationist_yes", _("Yes"), "onIsolationistClick");
-        this.addActionButton("button_isolationist_no", _("No"), "onIsolationistClick");
+        this.bga.statusBar.addActionButton(_("Yes"), (event) => this.onIsolationistClick(event), { id: "button_isolationist_yes" });
+        this.bga.statusBar.addActionButton(_("No"), (event) => this.onIsolationistClick(event), { id: "button_isolationist_no" });
         this.addCancelButton();
         break;
 
@@ -1968,7 +2013,8 @@ export class Game extends Game0Basics {
             this.setDescriptionOnMyTurn(_("With whom would ${you} like to form an alliance?"));
             for (var pid in this.gamedatas.players) {
               var player = this.gamedatas.players[pid];
-              if (pid != this.getPlayerId()) this.addActionButton("button_alliance_" + pid, player.name, "onAlliance");
+              if (pid != this.getPlayerId())
+                this.bga.statusBar.addActionButton(player.name, (event) => this.onAlliance(event), { id: "button_alliance_" + pid });
             }
             break;
           }
@@ -2008,7 +2054,7 @@ export class Game extends Game0Basics {
             break;
         }
         if (args.decline) {
-          this.addActionButton("button_decline", _("Decline"), () => this.axcallwrapper("decline"));
+          this.bga.statusBar.addActionButton(_("Decline"), () => this.axcallwrapper("decline"), { id: "button_decline" });
         }
         break; //trackSelect
     }
@@ -2110,7 +2156,7 @@ export class Game extends Game0Basics {
       for (var spot in spots) {
         var tspot = "tech_spot_" + spot;
 
-        this.addTrackSlotActionButton(spot, "button_benefit_" + ben, "onOptionBenefitClick");
+        this.addTrackSlotActionButton(spot, "button_benefit_" + ben, (event) => this.onOptionBenefitClick(event));
         if (!$(tspot)) continue;
         dojo.addClass(tspot, "active_slot");
       }
@@ -2124,7 +2170,7 @@ export class Game extends Game0Basics {
         id += "_x";
       }
       var div = this.getBenIcon(type);
-      this.addImageActionButton(id, div, "onOptionBenefitClick", undefined, name != div ? name : undefined);
+      this.addImageActionButton(id, div, (event) => this.onOptionBenefitClick(event), undefined, name != div ? name : undefined);
     }
     //				for (let i=1;i<=64;i++){
     //							var id = 'button_benefit_' + i + "_0_0";
@@ -2205,7 +2251,7 @@ export class Game extends Game0Basics {
     }
     this.setDescriptionOnMyTurn(_("Select payment for Advance"));
     this.addCancelButton();
-    this.addActionButton("button_confirm", _("Confirm"), "onPaymentConfirm");
+    this.bga.statusBar.addActionButton(_("Confirm"), (event) => this.onPaymentConfirm(event), { id: "button_confirm" });
   }
 
   onAlliance(event) {
@@ -2466,7 +2512,7 @@ export class Game extends Game0Basics {
     this.capitaly = null;
     if (this.structure_id) this.placeToken(this.structure_id, "capital_structure");
     dojo.destroy("button_confirm");
-    this.addActionButton("button_confirm", _("Confirm"), "onConfirmStructure");
+    this.bga.statusBar.addActionButton(_("Confirm"), () => this.onConfirmStructure(), { id: "button_confirm" });
     dojo.addClass("button_confirm", "disabled");
   }
 
@@ -2771,7 +2817,7 @@ export class Game extends Game0Basics {
     this.placeToken(this.structure_id, id);
 
     dojo.destroy("button_confirm");
-    this.addActionButton("button_confirm", _("Confirm"), "onConfirmStructure");
+    this.bga.statusBar.addActionButton(_("Confirm"), () => this.onConfirmStructure(), { id: "button_confirm" });
 
     if (!dojo.hasClass(id, "possible") && !dojo.hasClass(id, "active_slot")) {
       this.showError(_("Invalid structure placement"));
@@ -3222,17 +3268,14 @@ export class Game extends Game0Basics {
       this.errorCount++;
       if (this.errorCount >= 3) {
         if (!$("button_unblock"))
-          this.addActionButton(
-            "button_unblock",
+          this.bga.statusBar.addActionButton(
             _("Unblock"),
             (e) => {
               this.confirmationDialog(_("Are you sure you want to remove current benefit? Only use this to unblock stuck game"), () => {
                 this.axcallwrapper("unblock", {}, undefined, true);
               });
             },
-            undefined,
-            undefined,
-            "red"
+            { id: "button_unblock", color: "alert" }
           );
       }
     }
@@ -3254,11 +3297,8 @@ export class Game extends Game0Basics {
    * need to make a choice of resources or tokens.
    */
   addImageActionButton(id, div, handler, bcolor, tooltip) {
-    if (typeof bcolor == "undefined") {
-      bcolor = "gray";
-    }
     // this will actually make a transparent button
-    this.addActionButton(id, div, handler, "", false, bcolor);
+    this.bga.statusBar.addActionButton(div, handler, { id, color: bcolor ?? "secondary" });
     // remove boarder, for images it better without
     dojo.style(id, "border", "none");
     // but add shadow style (box-shadow, see css)
@@ -3275,11 +3315,11 @@ export class Game extends Game0Basics {
       console.error("Cannot find player matching " + player_id);
       return;
     }
-    this.addActionButton(id, player.name, handler, undefined, false, "gray");
+    this.bga.statusBar.addActionButton(player.name, handler, { id, color: "secondary" });
     dojo.style(id, "border", "none");
     dojo.addClass(id, "shadow bgaimagebutton");
     dojo.setStyle(id, "color", "#" + player.color);
-    if (player.background_color) dojo.setStyle(id, "background-color", "#" + player.color_back);
+    if (player.color_back) dojo.setStyle(id, "background-color", "#" + player.color_back);
     if (tooltip) dojo.attr(id, "title", tooltip);
     return $(id);
   }
@@ -3287,7 +3327,7 @@ export class Game extends Game0Basics {
     if (!name) name = _("Cancel");
     if (!handler) handler = () => this.cancelLocalStateEffects();
     if ($("button_cancel")) dojo.destroy("button_cancel");
-    this.addActionButton("button_cancel", name, handler, null, false, "gray");
+    this.bga.statusBar.addActionButton(name, handler, { id: "button_cancel", color: "secondary" });
   }
   addTradeActionButton(index, pay, payType, gain, gainType) {
     var div = this.divResourceCount(payType, pay);
@@ -3296,8 +3336,7 @@ export class Game extends Game0Basics {
 
     var button_id = "button_" + index;
 
-    this.addActionButton(
-      button_id,
+    this.bga.statusBar.addActionButton(
       div,
       () => {
         dojo.empty("generalactions");
@@ -3313,11 +3352,11 @@ export class Game extends Game0Basics {
         }
         let type = payType == this.CON.RES_ANY ? 1 : 0;
         this.addCancelButton();
-        this.addActionButton("button_confirm_0_" + type, _("Confirm"), "onResourceChoiceConfirm");
+        this.bga.statusBar.addActionButton(_("Confirm"), (event) => this.onResourceChoiceConfirm(event), {
+          id: "button_confirm_0_" + type
+        });
       },
-      undefined,
-      undefined,
-      "gray"
+      { id: button_id, color: "secondary" }
     );
     dojo.addClass(button_id, "bgaimagebutton");
   }
@@ -3330,7 +3369,7 @@ export class Game extends Game0Basics {
       div_id += "_x";
     }
 
-    this.addActionButton(div_id, div, handler, undefined, undefined, "gray");
+    this.bga.statusBar.addActionButton(div, handler, { id: div_id, color: "secondary" });
     dojo.addClass(div_id, "bgaimagebutton");
   }
   divTrackSlot(track_slot) {
@@ -5581,7 +5620,8 @@ export class Game extends Game0Basics {
     dojo.addClass(land.parentNode, "elevated");
     dojo.place("selected_tile", this.selectedland);
     this.applyRotationTile();
-    if (!$("button_rotate")) this.addActionButton("button_rotate", _("Rotate"), "onRotateTileRight");
+    if (!$("button_rotate"))
+      this.bga.statusBar.addActionButton(_("Rotate"), (event) => this.onRotateTileRight(event), { id: "button_rotate" });
   }
 
   hideRotators() {

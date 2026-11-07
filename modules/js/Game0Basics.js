@@ -9,24 +9,6 @@ export function getPart(word, i) {
   return arr[i];
 }
 
-export function reloadCss() {
-  var links = document.getElementsByTagName("link");
-  for (var cl in links) {
-    var link = links[cl];
-    if (link.rel === "stylesheet" && link.href.includes("99999")) {
-      var index = link.href.indexOf("?timestamp=");
-      var href = link.href;
-      if (index >= 0) {
-        href = href.substring(0, index);
-      }
-
-      link.href = href + "?timestamp=" + Date.now();
-
-      console.log("reloading " + link.href);
-    }
-  }
-}
-
 /** Non game specific base: proxies to gameui, which Game no longer extends */
 export class Game0Basics {
   constructor(bga) {
@@ -81,9 +63,6 @@ export class Game0Basics {
     if (typeof handler != "string") return handler;
     if (typeof this[handler] != "function") throw new Error("No handler " + handler);
     return (...args) => this[handler](...args);
-  }
-  addActionButton(id, label, handler, ...rest) {
-    return this.bga.gameui.addActionButton(id, label, this.resolveHandler(handler), ...rest);
   }
   connect(node, event, handler) {
     return this.bga.gameui.connect(node, event, this.resolveHandler(handler));
