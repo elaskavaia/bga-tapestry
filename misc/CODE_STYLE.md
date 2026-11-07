@@ -146,6 +146,8 @@ This is an old game; do not flag existing code for these, but hold new and rewri
 
 - Open bugs and open rules questions go in [TODO.md](TODO.md) as `- [ ]` items; finished ones
   become `- [x]`.
+- No line numbers in TODO.md, BUG_TRIAGE.md or `PLAN_*.md`: they go stale with the next edit. Point
+  at code by file and method (`PGameXBody playTapestryCard`, `Game.js setupSettings`).
 - A new rules interpretation goes in [FORMAL_RULES.txt](FORMAL_RULES.txt) as a coded clause
   (MOVE.2, CIV.WEEFOLK.3).
 - Check whether [DESIGN.md](DESIGN.md) needs updating for new schema semantics or location-string

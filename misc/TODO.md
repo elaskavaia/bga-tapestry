@@ -11,12 +11,12 @@ the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no act
 
 STUDIO BUILD WARNINGS (dry run 2026-11-03, 6 warnings, all pre-existing framework deprecations)
 
-- [ ] [debt/P3] JS: direct preference controls (tapestry.js:3780-3807), use `this.bga.userPreferences`;
-      direct player panel elements (tapestry.js:322-364, 6586), use `this.bga.playerPanels.getElement`.
-      The bot panels (322-364) are clones of a real panel; `this.bga.playerPanels.addAutomataPlayerPanel`
+- [ ] [debt/P3] JS: direct preference controls (Game.js `setupSettings`), use `this.bga.userPreferences`;
+      direct player panel elements (Game.js `setup`, `moveMarker`), use `this.bga.playerPanels.getElement`.
+      The bot panels (in `setup`) are clones of a real panel; `this.bga.playerPanels.addAutomataPlayerPanel`
       is the framework way (ids <= 0 only recommended, bots 1 and 2 cannot clash with real ids).
 - [ ] [debt/P4] JS: obsolete `tapestry.view.php` / `tapestry_tapestry.tpl` (415 lines, one
-      `playerArea` block per player); the markup has to move into `setup()` in tapestry.js. Plan:
+      `playerArea` block per player); the markup has to move into `setup()` in Game.js. Plan:
       [PLAN_VIEW_REMOVAL.md](PLAN_VIEW_REMOVAL.md).
 - [ ] [debt/P4] Non-code: more than 20 image files (sprites); `exception_on_warning` not set in
       gameinfos.
@@ -68,7 +68,7 @@ tried (v261101-2149). Plan and rules: PLAN_PLAYER_TOKEN_CONTROL.md, FORMAL_RULES
       offered any inert token of the owner (INFILTRATORS, ISOLATIONISTS). On a legacy table every
       unmarked token of the owner is still offered.
 - [ ] [debt/P3] After 2026-12: remove the legacy fallback in `isFloatingCapital` (PGameXBody and
-      tapestry.js, both marked TODO).
+      Game.js, both marked TODO).
 - [ ] [debt/P4] The server does not check that an ISOLATIONISTS token goes on an empty territory,
       only the client does (`effect_conquer` trusts `$isol`). Pre-existing.
 - [ ] [debt/P4] `modules/civs/Infiltrators.php` fails `prettier --check` (pre-existing), reformat in
@@ -124,9 +124,9 @@ P1 - MUST FIX BEFORE THE FF DEPLOY
       parent call; a GameUT packet check (wayfarers ee06973) needs a state driver this repo lacks.
 
 - [-] [rules/P1] keepCard leaks hidden tapestry information to the whole table. arg_keepCard
-      (PGameXBody around 10222) is a plain public state arg, so every opponent gets the full
+      is a plain public state arg, so every opponent gets the full
       candidate list and the client renders the cards face up; then effect_keepCard moves the kept
-      card with effect_moveCard, which logs '${player_name} gains ${card_name}' (PGameXBody 4958),
+      card with effect_moveCard, which logs '${player_name} gains ${card_name}',
       and drops the rejects through effect_discardCard, which logs '${player_name} discards
       ${card_type_name} ${card_name}' (4904). Seen live on table 965881: as laskava1 the two PSIONICS
       candidates arrived in gamestate.args and the log read "laskava0 gains PLEA FOR AID" /
@@ -157,15 +157,15 @@ the material rulings are already updated; each item below is the code change for
 P2 - BEFORE THE DEPLOY, NARROWER OR CHEAPER
 
 - [ ] [rules/P2] Utilitarians: no city when they place a landmark. The landmark row is declinable
-      and never returns: there is no income_trigger in material, so AbsCivilization.php 204 defaults
+      and never returns: there is no income_trigger in material, so AbsCivilization populateSlotChoiceForArgs defaults
       decline=true; a decline cashes the row and the landmark sits on civilization_39 forever. Fix
       is a material line. The same block has a null-unsafe getObjectFromDB with no player filter
-      (PGameXBody.php 5445).
+      (PGameXBody saction_civTokenAdvance).
 
-- [ ] [rules/P2] TYRANNY awards 5 VP on every overplay (PGameXBody.php 3710); the card says "first
+- [ ] [rules/P2] TYRANNY awards 5 VP on every overplay (PGameXBody playTapestryCard); the card says "first
       and only time". Separate from the LIFO blocker under P1.
 
-- [ ] [rules/P2] getDeckFor inside dbPickCardsForLocation (PGameXBody around 2489) silently changed
+- [ ] [rules/P2] getDeckFor inside dbPickCardsForLocation silently changed
       MYSTICS under adjustment 8: their draw-and-keep tapestry rows (BE_ILLUMINATI_DRAW, GAMBLERS 311
       and 319, anything through effect_drawFromBenefit) now draw from the private deck_13 instead of
       the public deck. It is coherent with effect_discardCard already sending their rejects to
@@ -196,12 +196,12 @@ P2 - BEFORE THE DEPLOY, NARROWER OR CHEAPER
       `getTileBenefit` against a missing hex.
 
 - [ ] [ux/P2] Board rotation (Jamey: "it frequently rotated without me asking it to ... it seemed to
-      be random"). tapestry.js 519-522 binds the four tech_age_N_0 corners to boardRotate, so
+      be random"). Game.js `setup` binds the four tech_age_N_0 corners to boardRotate, so
       clicking a tech deck to look at it rotates the board. Not random, just undiscoverable.
 
 - [ ] [ux/P2] Genies and Faefolk: clicking any holder on the mat during civAbility sends
-      civTokenAdvance with that spot (the checkActiveSlot guard in onCubeHolderClick, tapestry.js
-      around 4842, is commented out), so a legal-looking click on the ring or the token pile earns
+      civTokenAdvance with that spot (the checkActiveSlot guard in onCubeHolderClick in Game.js
+      is commented out), so a legal-looking click on the ring or the token pile earns
       an ERR:Genies:13 (ERR:Faefolk:13) system error toast; clicking spot 1 silently fires the
       ability like the button. Fix: either "case this.CON.CIV_GENIES: return;" beside
       "case 15: return;" in that handler, or restore the guard for every civ.
@@ -233,7 +233,7 @@ P2 - BEFORE THE DEPLOY, NARROWER OR CHEAPER
       the click in the replacement case, where the cell is occupied but marked possible.
 
 - [ ] [debt/P2] Deploy checklist: the income mat migration guard in upgradeTableDb
-      (`$from_version <= 2609091200`, tapestry.game.php 96) only has to sit above the last prod
+      (`$from_version <= 2609091200`) only has to sit above the last prod
       deploy version so in-flight tables migrate; the exact number does not matter and a re-run
       cannot happen since BGA bumps the table version after the upgrade. Too low and in-flight
       tables never get spots on their income rows and die on ERR:game:04 at the next income turn.
@@ -245,19 +245,19 @@ P3
       `checkAction` refuses (e.g. double click while locked) the handler never runs and the structure
       is not put back. Check before the null-out, then call with `nocheck`.
 - [ ] [rules/P3] Coal Baron + Spies (was "Coal baron reset when spies was using it"): argExplore
-      (PGameXBody.php 10034) gates the marker on isTapestryActive, which is false for the Spies
+      gates the marker on isTapestryActive, which is false for the Spies
       player, so they explore with any tile instead of the drawn one. Silent, in their favour.
-      There is a commented-out SPIES block at 3474-3478. Also a speculative stuck state if the
+      There is a commented-out SPIES block in isTapestryActive. Also a speculative stuck state if the
       global coal_baron is left set.
 
 - [ ] [rules/P3] Merfolk + Elder Ones on one player: FORMAL_RULES CIV.MERFOLK.6 (Mike Young, BGG
       3052380) lets the player pick a Merfolk turn or an Elder Ones advance turn each turn.
-      getExtendedPlayCiv (PGameXBody around 3386) takes the first civ found and warns ERR:game:03,
+      getExtendedPlayCiv takes the first civ found and warns ERR:game:03,
       so the second civ's turn type is never offered and the end condition (neither kind of turn
       possible) is not checked. Needs the per-turn choice, the combined end test and a test that
       gains the second civ via military 12 or tech card 23 before income turn 5.
 
-- [ ] [rules/P3] conquerDieBenefit (PGameXBody around 8066) refuses a die whose face pays nothing
+- [ ] [rules/P3] conquerDieBenefit refuses a die whose face pays nothing
       at all - "This die has net effect of zero. Want to try another one?" - and it is a hard server
       assert, not a warning. Harmless for a plain player, but PSIONICS makes it a real choice: the
       die the roller does not claim stays showing its second roll (CIV.PSIONICS.9) and that face is
@@ -279,7 +279,7 @@ P3
       "g". Nothing used it until Faefolk did, which is how it surfaced. Faefolk now uses BE_INVENT
       instead; row 26 is still a trap for the next caller.
 
-- [ ] [ux/P3] Celestials: onCelestialTokenClick (tapestry.js around 851) opens with
+- [ ] [ux/P3] Celestials: onCelestialTokenClick opens with
       disconnectAllTemp, which strips the handler and the active_slot class off every cube, so once
       a token is picked there is no way to pick a different one short of Undo. Only bites with two
       or more inert tokens on the map, which is Celestials plus an Infiltrators or Isolationists
@@ -294,7 +294,7 @@ P3
 
 - [ ] [ux/P3] A territory tile gained through effect_moveCard logs without its type: "laskava0
       gains 27", while the discard of the same tile reads "laskava0 discards Territory 30". The gain
-      message (PGameXBody 4958) uses ${card_name} alone where the discard (4904) uses
+      message (effect_moveCard) uses ${card_name} alone where the discard (effect_discardCard) uses
       ${card_type_name} ${card_name}. Territory tiles have no name, only a number, so the gain line
       is a bare integer. Same message serves every card type, so adding the type word fixes all of
       them at once.
@@ -312,8 +312,8 @@ P3
       answer it: mark such a spot 0 in getPossibleAdvances(false) so it renders illegal_slot like an
       unaffordable one, which would also make the client agree with the extended play end test.
 
-- [ ] [ui-temp/P3] The benefit stack tooltip prints a bonus row's raw quantity (tapestry.js around
-      4785), so the Elder Ones trade reads "Bonus:-6 x Tapestry" and the older unlimited row reads
+- [ ] [ui-temp/P3] The benefit stack tooltip prints a bonus row's raw quantity (Game.js showBenInBreadCrumbs),
+      so the Elder Ones trade reads "Bonus:-6 x Tapestry" and the older unlimited row reads
       "Bonus:-1 x". Render negatives as "up to 6" and "any number of" instead.
 
 - [ ] [ui-temp/P3] Elder Ones: during extended play updateCurrentEra finds no era 5 slot and drops
@@ -361,8 +361,8 @@ below were closed with no action.
 
 - [ ] [debt/P4] stBonus drops any bonus row the player holds zero of the payment for, not only a
       positive quantity they cannot cover (the "$actual == 0 ||" added for the Elder Ones trade,
-      PGameXBody.php around 10356). The one pre-existing producer that notices is DEMOCRACY's
-      unlimited row (democracy(), quantity -1, queued at PGameXBody.php:2690, discard any tapestry
+      PGameXBody stBonus). The one pre-existing producer that notices is DEMOCRACY's
+      unlimited row (democracy(), quantity -1, discard any tapestry
       for 2 VP each): a player whose hand is empty now gets "cannot pay for bonus" in the log
       instead of a Decline-only prompt. Same outcome, different log. Pinned by tests/BonusTest.php
       for the drop; ElderOnesTest covers the -6 case only, nothing pins the -1 case.
@@ -407,7 +407,7 @@ below were closed with no action.
 
 - [ ] [ui-temp/P4] Research state title names the advance row, not "Research". research() now
       queues the optional advance row of the rolled track (84-91, 97-100) instead of transitioning
-      with the research row on top, so argResearch's bid is that row and tapestry.js "research"
+      with the research row on top, so argResearch's bid is that row and Game.js "research"
       shows "Advance (optional, benefits) - Science: You must confirm"; the benefit queue panel
       shows the advance row too. The reason subtitle and the roll are unchanged. If the old wording
       is wanted: special-case the three families in the client research case, or carry the
@@ -420,7 +420,7 @@ below were closed with no action.
 - [ ] [ux/P4] Jamey: an indicator that the highlighted plots for landmark placement are the
       eligible upper left plots (untriaged, sits with the landmark items).
 
-- [ ] [ui-temp/P4] DARK AGES description (material.inc.php 3722) reads "Regress once on 3
+- [ ] [ui-temp/P4] DARK AGES description reads "Regress once on 3
       difference advancement tracks" - should be "different". (The earlier note about an unclosed
       "</b" is stale, the tag is closed.)
 

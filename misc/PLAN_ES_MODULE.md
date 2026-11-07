@@ -87,16 +87,16 @@ So git keeps the history; this commit alone does not load.
 
 ## Interaction with PLAN_VIEW_REMOVAL
 
-Its step 2 plans `modules/taplayout.js` as a Dojo `declare` added to the `define` list. If this plan
-lands first, make it `modules/js/TapLayout.js` with `export class` and an `import` instead. Decide the
-order before starting either.
+This plan landed first; PLAN_VIEW_REMOVAL step 2 now plans `modules/js/TapLayout.js` as an
+`export class` imported by Game.js.
 
 ## As implemented (differences from the steps above)
 
 - Framework check in studio (live gameui): only `setup`, the state callbacks and `bgaFormatText` are
   called on `gameui.GameModule`; `addMoveToLog`, `showMessage`, `updatePlayerOrdering`,
   `onScreenWidthChange` are called on gameui only, so they are hooked. Each hook runs the gameui
-  original first, then the Game method (`showMessage` used to add the bug link before the message).
+  original first, then the Game method (`showMessage` used to add the bug link before the message;
+  `onScreenWidthChange` used to replace the original, which is an empty function on gamegui).
   Hooks are installed once: the framework re-runs `setup()` on the same Game after an undo restore.
 - String handlers are not rewritten at call sites: they reach gameui through ~10 game helpers
   (`addImageActionButton`, `addPlayerActionButton`, `addCancelButton`, ...), so `Game0Basics`
@@ -112,6 +112,39 @@ order before starting either.
   `gameui` global.
 - Strict mode (modules): 10 implicit globals declared with `var`, found with
   `npx tsc --allowJs --checkJs --noEmit` (error TS2304, ignoring framework globals).
+
+## Review notes (2026-11-06)
+
+Commits:
+- c7e6d4e `bgaFormatText` instead of the `format_string_recursive` override (legacy file, studio checked)
+- e45353b renames only; does not load on its own (matters for bisect)
+- 3884f98 the conversion and `Game0Basics.js`
+- ed909ef docs
+
+Checked:
+- `npm run predeploy` passes (PHP only, no JS tests)
+- `node --check` on each module (as .mjs copies)
+- studio table 994817 (2 players, still open): load with no game console errors, Game on Game0Basics,
+  4 hooks installed, move stamps in the log, `player_board_config` panel first, layout class set,
+  450 tooltips registered; setup choice played (civ click, capital stock select, Confirm, formatted
+  log line with "Move #2")
+- not checked: everything in the manual test plan below
+
+Decisions to review:
+- String handlers resolved in the `Game0Basics` proxies instead of arrows at the call sites (see
+  above). Arrows at the call sites would be more explicit, but every one missed is a button that
+  silently does nothing.
+- `showMessage` order: the bug report link now goes to the log after the error message, not before.
+- `reloadCss` no longer reachable from the browser console.
+- Antistock `slide` patched on the prototype, shared by all instances, as `dojo.extend` did.
+- Against the `bga-es6` skill rules, as this plan intended: Game extends a game-owned base class (the
+  rule forbids `extends`/`super`, aimed at gameui), and the 4 hooks replace methods on gameui (the
+  rule says not to monkey-patch gameui). No documented Game hook exists for those 4.
+- Proxies in `Game0Basics` keep call sites untouched; the skill prefers explicit
+  `this.bga.gameui.x(...)` at each call site.
+
+Found, not fixed (in TODO): `getCardDivLocatonId` reads undeclared `card_player_id` and reassigns a
+`const slot`; both throw today as well.
 
 ## Risks / verify
 

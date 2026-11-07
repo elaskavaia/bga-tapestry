@@ -156,7 +156,7 @@ player count, per the priority section above.
       ruling). Tests `tests/AdvisorsEspionageTest.php` (advisor keeps the spy clone, THIS ERA gives
       nothing, owner still replaces own clone; real DB, skipped without local MySQL).
       NOTE: not checked in the studio. The advisor gets no warning when picking a THIS ERA target.
-      Unrelated lead from the review, unverified: `notif_tapestrycard` (tapestry.js ~6647) lowers
+      Unrelated lead from the review, unverified: `notif_tapestrycard` lowers
       non-active viewers' hand counter on every clone or overplay notif, Heralds included.
 
 - [ ] **Historians leads left over from the 52459b2 token fix** (shipped in v261026-0118):
@@ -196,7 +196,7 @@ player count, per the priority section above.
       #223277 ("Unable to place historian token", era 2, cannot select a player; table 860658433,
       adj=1, apparently solo; older than the error log retention) - unverified.
 
-- [ ] **Unblock in civAbility, follow-up of BGA #202072** - `action_unblock` (PGameXBody.php ~9420)
+- [ ] **Unblock in civAbility, follow-up of BGA #202072** - `action_unblock`
       reads `$this->gamestate->state()["transitions"]` after `clearCurrentBenefit`; in state 14 that
       reloads `argCivAbility`, which asserts "missing benefit" when the civ row was the last on the
       stack (midgame civ gain, landmark trigger), so Unblock rolls back. Setup is safe (BE_RESUME
