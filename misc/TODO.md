@@ -24,6 +24,24 @@ STUDIO BUILD WARNINGS (dry run 2026-11-03, 6 warnings, all pre-existing framewor
       [PLAN_VIEW_REMOVAL.md](PLAN_VIEW_REMOVAL.md).
 - [ ] [debt/P4] Non-code: more than 20 image files (sprites); `exception_on_warning` not set in
       gameinfos.
+- [ ] [debt/P4] PHP: build check (2026-11-07) still flags `player_score` text in `endOfGame` (local
+      var and Automa notif arg) and the `playerextra` SQL in `dbSetScore` / `dbSetAuxScore`. False
+      positive: the `player` row already goes through `playerScore`; renaming the var/arg silences
+      the first, the bot mirror has no counter.
+
+OPEN FROM 2026-11-07 (deprecated `addActionButton` moved to `this.bga.statusBar.addActionButton`)
+
+- [ ] [ux/P2] Studio: click every button kind once, no console error, each one does its action.
+      Direct: Undo and `button_undo_x` (red), Confirm / Decline, explore Nobody / Confirm Tile,
+      exploitation / militarism / isolationist Yes-No (handlers read the button id), Unblock (3rd error).
+      Helpers: conquer die (`addImageActionButton`), track slot benefit choice
+      (`addTrackSlotActionButton`), Historian / bonus player buttons (`addPlayerActionButton`, player
+      color kept), Traders trade buttons (`addTradeActionButton`), Cancel (`addCancelButton`). Capital
+      placement: `button_confirm` starts with the `disabled` class, check it looks and blocks as before
+      (clicking it early used to show "place the building on your capital mat first"; the framework
+      may now drop the click on `.bgabutton.disabled`).
+      Militants: the image buttons toggle `bgabutton_blue`, check the selection still shows.
+      `addButtonTimer`: the countdown label is read from `innerHTML`, check it has no doubled wrapper.
 
 OPEN FROM 2026-10-31 (track token choice, review of e9cf09f, BGA #58486) - all pre-existing,
 CONFIRMED by stub probes unless marked; probes in the session scratchpad, rewrite as real tests.

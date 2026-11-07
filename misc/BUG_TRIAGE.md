@@ -127,7 +127,7 @@ predates the last deploy and is therefore live.
 
 ## Bug triage last checked
 
-**2026-11-06 16:40 EST** - only triage BGA reports created/updated after this time; bump this line
+**2026-11-07 16:33 EST** - only triage BGA reports created/updated after this time; bump this line
 to `date` at run start after each run.
 
 Reports untouched since before 2026-11-03 are grandfathered: skip the full Open sweep and do not ask
@@ -147,17 +147,11 @@ player count, per the priority section above.
 
 ### Priority: Adjustment Civilization Pack (adj=8), plus anything proven to hit it
 
-- [x] **BGA #255108** - "Advisors changed the target of Espionage". CONFIRMED on BGA (2026-11-06),
-      1 vote, `rules`. Table 942104026, 2 players, dump move 216. Options: adj=8, set=7, Marriage of
-      State removed, Renaissance removed, Shadow Empire off. **FIXED 2026-11-06 (not deployed)**:
-      `copy_card` used to fall back to the opponent's ESPIONAGE and its clone replaced theirs. A
-      player without an active ESPIONAGE of their own now gets no clone, only a log line and a
-      WHEN PLAYED benefit; a THIS ERA target gives nothing (FORMAL_RULES TAPESTRY.8, Victoria's
-      ruling). Tests `tests/AdvisorsEspionageTest.php` (advisor keeps the spy clone, THIS ERA gives
-      nothing, owner still replaces own clone; real DB, skipped without local MySQL).
-      NOTE: not checked in the studio. The advisor gets no warning when picking a THIS ERA target.
-      Unrelated lead from the review, unverified: `notif_tapestrycard` lowers
-      non-active viewers' hand counter on every clone or overplay notif, Heralds included.
+- [ ] **Leads left over from #255108 / #254612** (both shipped in v261107-2229), unverified: the
+      Advisors fix was never checked in the studio, and the advisor gets no warning when picking a
+      THIS ERA Espionage target (it gives nothing); `notif_tapestrycard` lowers non-active viewers'
+      hand counter on every clone or overplay notif, Heralds included; a tech card invented this
+      session has no `data-card-id` until F5.
 
 - [ ] **Historians leads left over from the 52459b2 token fix** (shipped in v261026-0118):
       `onMystic` (~2427) collects global `.clicked`; an owner of both Historians and Mystics could
@@ -196,19 +190,10 @@ player count, per the priority section above.
       #223277 ("Unable to place historian token", era 2, cannot select a player; table 860658433,
       adj=1, apparently solo; older than the error log retention) - unverified.
 
-- [ ] **Unblock in civAbility, follow-up of BGA #202072** - `action_unblock`
-      reads `$this->gamestate->state()["transitions"]` after `clearCurrentBenefit`; in state 14 that
-      reloads `argCivAbility`, which asserts "missing benefit" when the civ row was the last on the
-      stack (midgame civ gain, landmark trigger), so Unblock rolls back. Setup is safe (BE_RESUME
-      underneath). **CONFIRMED 2026-10-25**. **FIXED 2026-11-03 (not deployed)**: transitions now
-      read via `gamestate->getCurrentMainState()`, no args reload. Tests in
-      `tests/UtilitariansTest.php`: `testUnblockLastCivBenefit`, safe case
-      `testUnblockSetupCivBenefitWithResumeRowBelow`. Low severity: only Unblock was affected.
-      NOTE: unverified that the real framework's `isMultiactiveState()` does not reload args (the
-      stubs model it that way).
-      NOTE: unrelated lead, untested - on adj=8 `queueEraCivAbility` fires at income 2 for any
-      Utilitarians owner; a midgame owner has no landmark on `civilization_39`, so ~5488 would read
-      a null structure. Not checked whether the civ can be gained before income 2.
+- [ ] **Utilitarians midgame owner lead** (from the #202072 Unblock follow-up, shipped in
+      v261107-2229), untested: on adj=8 `queueEraCivAbility` fires at income 2 for any Utilitarians
+      owner; a midgame owner has no landmark on `civilization_39`, so it would read a null
+      structure. Not checked whether the civ can be gained before income 2.
 
 - [ ] **BGA #216213, #223846** - Utilitarians start landmark `missing benefit`. Not triaged.
 
@@ -220,23 +205,6 @@ player count, per the priority section above.
 
 The highest-voted defects on the tracker, but every table cited on them ran a deprecated
 Civilization Adjustments value, so they queue behind the Pack ones above. Still real reports.
-
-- [ ] **BGA #254612** - "Spies". OPEN, 1 vote, `action`. Table 935978154, 5 players. Options:
-      adj=1, set=3, Marriage of State and Renaissance kept. Spies benefit during income fails with
-      "Internal Error ... raise a bug". Server game log (from Victoria, v261103-1426, move 586, twice):
-      `invalid card selected` in `effect_keepCard` via `action_keepCard`. UserException, so not in the
-      studio log. **FIXED 2026-11-04 (not deployed), client only**: the keepCard
-      click handlers (tapestry, territory, space, tech) ignored `active_slot` and Confirm sent every
-      page-wide `.selected`, so on 5 players a non-neighbour's or own card could be picked; the server
-      offers neighbours only, as the civ text says ("from a neighboring player of your choice").
-      `onKeepCardClick` now takes only offered cards (replacing the pick in single mode) and Confirm
-      reads `.active_slot.selected`. Test `SpiesTest::testFivePlayersOffersOnlyNeighboursCards` pins
-      the neighbour-only offer and the rejection (passes either way: no JS tests). Studio-verified on
-      5p table 994095: 191 and 193 offer only the seat neighbours, other cards are refused, single
-      pick moves, draw keeps 175 and 354 still select; 192 not tested. No benefit has keep > 1, so
-      multi-pick is unreachable. Separate client bugs
-      seen, not fixed: a tech card invented this session has no `data-card-id` until F5;
-      `getCardDivLocatonId` reassigns a `const slot`.
 
 - [ ] **BGA #118067** - "Forced to play dystopia with no buildings remaining". OPEN, 12 votes,
       `block`. Table 487565028, 2 players, Mar 2024. Options: **adj=4** (experimental Nov 2022, removed
@@ -277,7 +245,7 @@ that window.
       as 761167 (v261103-1426, 3 / 3, tables 942004049, 942425068, 942695106): Treasure Hunters
       (cid 38) mat-slot click sent `civTokenAdvance` with no hex, the server moved the token to
       `land__` and `setSelectedMapHex` added "" + 50; any hex of any terrain was also accepted.
-      **FIXED 2026-11-04 (not deployed)**: the target must be one of the slot's offered territories
+      **FIXED 2026-11-04, shipped in v261107-2229**: the target must be one of the slot's offered territories
       (systemAssertTrue `ERR:TreasureHunters:01`), and a mat-slot click starts the
       normal territory choice. Tests `tests/TreasureHuntersTest.php`. Client not browser-verified:
       check in the studio at a Treasure Hunters income, also with a second civ benefit pending.
@@ -363,3 +331,9 @@ Older detail is in git history of this file.
   report: #255108 (Advisors + Espionage, adj=8) Open -> Confirmed with the BGA template, test
   `AdvisorsEspionageTest`. 7-day log: 761167 one more event (fix not deployed), new 769305
   (>128k notifications) and JS 767134 (civAbility addClass on null) recorded. Marker bumped.
+- 2026-11-07: `v261107-2229` deployed (ES module client, framework API moves). #255108 Confirmed ->
+  Fixed and #254612 Open -> Fixed, BGA template; tracked entries removed, side leads kept. Also
+  shipped: Unblock civAbility fix (entry closed), Treasure Hunters 761167, `animSpinCounter`
+  760051 / 754591, `VisibleSystemException` asserts. No new reports, nothing Waiting for deploy.
+  Next run: check those error ids have no events on 261107-2229 and scan the frontend list for
+  new JS errors from the module conversion. Marker bumped.
