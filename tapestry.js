@@ -3440,8 +3440,7 @@ define([
     },
 
     /* Game Specific Utils */
-    /** @Override */
-    format_string_recursive: function (log, args) {
+    bgaFormatText: function (log, args) {
       try {
         //console.trace("format_string_recursive(" + log + ")", args);
         if (args.log_others !== undefined && this.getPlayerId() != args.player_id) {
@@ -3471,7 +3470,7 @@ define([
       } catch (e) {
         console.error(log, args, "Exception thrown", e.stack);
       }
-      return this.inherited(arguments);
+      return { log, args };
     },
     /** @Override */
     showMessage: function (msg, type) {
