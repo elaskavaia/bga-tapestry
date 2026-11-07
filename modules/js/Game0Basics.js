@@ -78,7 +78,9 @@ export class Game0Basics {
 
   // gameui resolves a string handler on itself, which is not the Game any more
   resolveHandler(handler) {
-    return typeof handler == "string" ? (...args) => this[handler](...args) : handler;
+    if (typeof handler != "string") return handler;
+    if (typeof this[handler] != "function") throw new Error("No handler " + handler);
+    return (...args) => this[handler](...args);
   }
   addActionButton(id, label, handler, ...rest) {
     return this.bga.gameui.addActionButton(id, label, this.resolveHandler(handler), ...rest);

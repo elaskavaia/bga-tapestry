@@ -239,7 +239,7 @@ export class Game extends Game0Basics {
       // card manager (hold antistocks per card type)
       this.cardsman = [];
 
-      var stock = this.cardsman[this.CON.CARD_TERRITORY] = new TapAntiStock("territory").setAttribute("discard", "territory_deck");
+      var stock = (this.cardsman[this.CON.CARD_TERRITORY] = new TapAntiStock("territory").setAttribute("discard", "territory_deck"));
       stock.onItemCreate = dojo.hitch(this, "setupNewTerritoryTile");
 
       stock = this.cardsman[this.CON.CARD_SPACE] = new TapAntiStock("space").setAttribute("discard", "space_deck");
@@ -296,16 +296,7 @@ export class Game extends Game0Basics {
         dojo.place('<div id="track_fav_' + ttid + '" class="track_fav"></div>', "tech_track_" + ttid);
       }
 
-      // TECH TRACK TOOLTIPS
-      for (var ttid in gamedatas.tech_track_types) {
-        for (var upgrade = 1; upgrade <= 12; upgrade++) {
-          var tech_track = "tech_upgrade_" + ttid + "_" + upgrade;
-          var save = this.bga.gameui.defaultTooltipPosition;
-          this.bga.gameui.defaultTooltipPosition = undefined;
-          this.addTooltipHtml(tech_track, this.getTechSpotTooltip(ttid, upgrade), 800);
-          this.bga.gameui.defaultTooltipPosition = save;
-        }
-      }
+      this.addTechSpotTooltips();
 
       // Setting up player boards
       let any_player_id = this.getPlayerId();
@@ -4441,6 +4432,19 @@ export class Game extends Game0Basics {
     return this.divTrackSlot(track + "_" + spot);
   }
 
+  addTechSpotTooltips() {
+    // gameui addTooltipHtml reads its defaultTooltipPosition, undefined lets the 800 wide tooltip pick its side
+    const gameui = this.bga.gameui;
+    const save = gameui.defaultTooltipPosition;
+    gameui.defaultTooltipPosition = undefined;
+    for (const ttid in this.gamedatas.tech_track_types) {
+      for (let upgrade = 1; upgrade <= 12; upgrade++) {
+        this.addTooltipHtml("tech_upgrade_" + ttid + "_" + upgrade, this.getTechSpotTooltip(ttid, upgrade), 800);
+      }
+    }
+    gameui.defaultTooltipPosition = save;
+  }
+
   getTechSpotTooltip(ttid, uid) {
     var info = this.tech_track_data[ttid][uid];
     var title = this.getTooltipTitle(this.getPrettyTrackSpotName(ttid, uid));
@@ -6478,16 +6482,7 @@ export class Game extends Game0Basics {
         this.placeToken(div, location);
 
         if (!newdiv && card_location_arg2 <= 12) {
-          // RE-GENERATE TECH TRACK TOOLTIPS
-          for (var ttid in this.gamedatas.tech_track_types) {
-            for (var upgrade = 1; upgrade <= 12; upgrade++) {
-              var tech_track = "tech_upgrade_" + ttid + "_" + upgrade;
-              var save = this.defaultTooltipPosition;
-              this.defaultTooltipPosition = undefined;
-              this.addTooltipHtml(tech_track, this.getTechSpotTooltip(ttid, upgrade), 800);
-              this.defaultTooltipPosition = save;
-            }
-          }
+          this.addTechSpotTooltips();
         }
 
         break;
