@@ -110,8 +110,13 @@ and track columns so bots (Automa, Shadow Empire) can live outside the real `pla
 
 ### Client
 
-[tapestry.js](tapestry.js) is a single Dojo `declare` of `bgagame.tapestry`, plus
-[modules/tapantistock.js](modules/tapantistock.js). Per-state UI is dispatched by convention:
+ES modules in [modules/js/](modules/js/): `Game` ([Game.js](modules/js/Game.js)) receives the
+injected `bga` object and extends `Game0Basics` ([Game0Basics.js](modules/js/Game0Basics.js)), not
+gamegui. `Game0Basics` holds the proxies to `this.bga.gameui` (gamedatas, inherited helpers, string
+handler resolution) and hooks the gameui methods the framework only calls on gameui (`addMoveToLog`,
+`showMessage`, `updatePlayerOrdering`, `onScreenWidthChange`). Modules are strict mode: an undeclared
+assignment throws. Framework controls (`ebg.stock`) take `this.bga.gameui` as their page, not the
+Game. [TapAntiStock.js](modules/js/TapAntiStock.js) is the card container. Per-state UI is dispatched by convention:
 `onUpdateActionButtons_<stateName>` is called from `onUpdateActionButtons` when present. Server
 notifications map to `notif_*` methods; `notif_benefitQueue` renders the pending benefit stack that
 the server engine described above maintains.

@@ -13,4 +13,4 @@ parameters:
         - ../_ide_helper.php
         - ../material.inc.php # generated blocks, see CLAUDE.md
     excludePaths:
-        - ../modules/tapantistock.js
+        - ../modules/js

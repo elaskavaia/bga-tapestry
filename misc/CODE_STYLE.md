@@ -74,7 +74,7 @@ The architecture is `PGameXBody` plus the benefit stack plus one class per civil
   inside the territory `action_explore`, say) is a symptom, not a fix - flag it and ask whether the
   global's lifetime is wrong instead.
 
-## States and client (`states.inc.php`, `tapestry.js`)
+## States and client (`states.inc.php`, `modules/js/Game.js`)
 
 - A state declaring `"args" => "argFoo"` needs `argFoo()` on `PGameXBody`; per-state UI is
   `onUpdateActionButtons_<stateName>` by convention.

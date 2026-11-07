@@ -6286,7 +6286,7 @@ abstract class PGameXBody extends tapcommon {
 
     /**
      * The CELESTIALS floating capital: the only player token that never controls (CIV.CELESTIALS.1).
-     * Mirrored by isFloatingCapital in tapestry.js.
+     * Mirrored by isFloatingCapital in Game.js.
      */
     function isFloatingCapital(array $structure, int $celestials_owner): bool {
         if (!$celestials_owner || $structure["card_type"] != BUILDING_CUBE || $structure["card_location_arg"] != $celestials_owner) {

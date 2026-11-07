@@ -2,7 +2,7 @@
   "name": "bga.tapestry",
   "version": "1.0.0",
   "description": "",
-  "main": "tapestry.js",
+  "main": "modules/js/Game.js",
   "scripts": {
     "build": "npm run genmat",
     "tests": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --display-deprecations --display-warnings --colors=always",

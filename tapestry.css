@@ -18,7 +18,7 @@
     
     Styles defined on this file will be applied to the HTML elements you define in your
     HTML template (tapestry_tapestry.tpl), and to HTML elements you create dynamically
-    (in tapestry.js).
+    (in modules/js/Game.js).
     
     Usually, you are using CSS to:
     

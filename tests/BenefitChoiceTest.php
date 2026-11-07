@@ -146,7 +146,7 @@ final class BenefitChoiceTest extends TestCase {
         $this->assertEquals([(string) BE_SPOT, (string) BE_CONFIRM], $this->game->benefitLabels());
     }
 
-    /** The shape argAddTrackChoice gives one track option, which tapestry.js turns into spot buttons. */
+    /** The shape argAddTrackChoice gives one track option, which Game.js turns into spot buttons. */
     private function trackOption(int $track, int $change, int $spot): array {
         return [
             "cubes" => ["cube_" . $this->tokens[$track]],
