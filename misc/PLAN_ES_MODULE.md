@@ -1,6 +1,7 @@
 # Plan: replace the AMD/Dojo module loading of the main JS file
 
-Status: not started (2026-11-06). Follows the `modernize-bga-game-project` workflow `bga-es6`, scoped
+Status: code done (2026-11-06), studio load and setup choice sanity checked, manual test plan below
+still to run. Follows the `modernize-bga-game-project` workflow `bga-es6`, scoped
 down: only the module loading changes. `dojo.*` calls, `$()`, ajaxcall, jstpl/tpl stay as they are
 (separate plans). No TypeScript. Reference implementation: bga-patchwork commits d511d94 and 267323e
 (patchwork also extracted PatchManager and moved to `this.bga.*` services; Tapestry skips that).
@@ -90,14 +91,77 @@ Its step 2 plans `modules/taplayout.js` as a Dojo `declare` added to the `define
 lands first, make it `modules/js/TapLayout.js` with `export class` and an `import` instead. Decide the
 order before starting either.
 
+## As implemented (differences from the steps above)
+
+- Framework check in studio (live gameui): only `setup`, the state callbacks and `bgaFormatText` are
+  called on `gameui.GameModule`; `addMoveToLog`, `showMessage`, `updatePlayerOrdering`,
+  `onScreenWidthChange` are called on gameui only, so they are hooked. Each hook runs the gameui
+  original first, then the Game method (`showMessage` used to add the bug link before the message).
+  Hooks are installed once: the framework re-runs `setup()` on the same Game after an undo restore.
+- String handlers are not rewritten at call sites: they reach gameui through ~10 game helpers
+  (`addImageActionButton`, `addPlayerActionButton`, `addCancelButton`, ...), so `Game0Basics`
+  resolves a string against the Game in its `addActionButton` / `connect` / `connectClass` proxies.
+- `getPart` / `getIntPart` / `reloadCss` are exported from Game0Basics.js, not TapAntiStock.js.
+  `reloadCss` is no longer a console global.
+- Antistock `slide`: prototype assignment (passing the game would break `fork()`, which
+  `dojo.clone`s the instance).
+- `ebg/stock` via top-level `await importDojoLibs`; `cap_choice.create` gets `this.bga.gameui` as page
+  (ebg controls call `registerEbgControl` on it). `ebg/counter` dropped (unused).
+- `defaultTooltipPosition` is read by gameui `addTooltipHtml`, so it is saved/restored on gameui.
+- Help mode: `onClickForHelp` / `closeCurrentTooltip` are arrow fields and use `this`, not the
+  `gameui` global.
+- Strict mode (modules): 10 implicit globals declared with `var`, found with
+  `npx tsc --allowJs --checkJs --noEmit` (error TS2304, ignoring framework globals).
+
 ## Risks / verify
 
 - `npm run predeploy` only covers PHP; there are no JS tests. Syntax check with
   `node --check modules/js/Game.js` (ES module: `node --input-type=module --check` or a .mjs copy).
-- Studio: load, F5, replay, spectator, Automa / Shadow Empire tables, every action button, tooltips
-  and help mode (`gameui._helpMode` paths), log formatting (`bgaFormatText`), move numbers in the log,
-  error message bug link (`showMessage`), player panel ordering (`player_board_config` first),
-  zoom / screen width change, capital choice stock, card antistocks sliding.
+- Studio: run the manual test plan below.
 - Grep after conversion: no `this.inherited`, no `declare(`, no `define(`, no `bgagame.`, no string
   handler left in `connect` / `addActionButton` / `connectClass`.
 - Delete nothing else; the old `tapestry.js` path must not be recreated by any build step.
+
+## Manual test plan (studio)
+
+Driven through the browser with the `game-play-in-studio` skill, 2 player table plus one Automa
+table. Run it once on the legacy code first as a baseline (note anything already broken), then
+after each commit that changes JS. Watch the browser console the whole time: any new error fails
+the run.
+
+### Load
+- Fresh table: setup finishes, board, player areas, capital mats, income mats render.
+- F5 mid game, as active player, as inactive player, as spectator.
+- Replay from the log and the archive view: no animations, no action buttons (`isReadOnly`).
+- Player panels: current player first, `player_board_config` panel first (`updatePlayerOrdering`).
+- Automa / Shadow Empire table: bot panels and bot areas present.
+
+### Client states
+- Advance with an "o," choice benefit: `client_benefitChoice` buttons, pick one, server accepts.
+- Same, then Cancel: back to the server state with its buttons, no stale selection highlight.
+- Place a territory tile on explore: tile selection, rotation, land click, confirm.
+- Conquer with a tapestry that asks (militarism / exploitation) when one is in hand (`debug_awardCard`).
+- One civ client state if cheap to set up (Traders `client_trader`, Architects `client_ArchitectsSwap`).
+- Income turn: "I confirm" dialog (`confirmationDialog`), `resourceChoice` payment boxes.
+- String-named handlers: click every action button reached above and the board/card clicks; nothing
+  silently does nothing.
+
+### Undo
+- Take an action, Undo: board, resources, tracks and counters revert, log shows the undo.
+- Undo from inside a client state and from a later benefit of the same turn (`button_undo_x`).
+- F5 after undo: state matches what was shown.
+
+### Logs
+- Log entries with player names, resource icons, card / tech / civ names, tooltips on log items
+  (`bgaFormatText`, formerly `format_string_recursive`).
+- `log_others` variant: the opponent sees the other text for a private action.
+- Move numbers next to log entries, also after F5 (`addMoveToLog` hook and replay of
+  `log_to_move_id`).
+- Illegal action (click something the server rejects): error message shows, with the bug link
+  (`showMessage`, `metasiteurl` + `table_id`).
+- Die roll "for fun" message goes to log only.
+
+### Zoom / scale
+- Zoom in / out buttons: board scales, stays aligned, value survives F5 (localStorage).
+- Resize the window narrow / wide: layout reflows (`onScreenWidthChange`).
+- Card antistocks slide to the right place at non-1 zoom; capital choice stock still works.

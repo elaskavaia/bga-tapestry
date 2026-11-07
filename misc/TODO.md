@@ -4,6 +4,11 @@ Triage 2026-09-13. Tags: [blocker] breaks or strands a table, [rules] wrong game
 or misleading client, [ui-temp] cosmetic, [debt] test gaps and cleanup, [feature] new content. Priority: P1 must fix before
 the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no action planned.
 
+- [ ] [debt/P3] JS `getCardDivLocatonId` (Game.js): civ card in "hand" reads undeclared
+      `card_player_id` (throws ReferenceError, probably meant `card.card_location_arg`); tech card in
+      "hand" with `card_location_arg2 > 2` reassigns `const slot` (throws TypeError). Both pre-existing,
+      found by tsc during the ES module conversion.
+
 STUDIO BUILD WARNINGS (dry run 2026-11-03, 6 warnings, all pre-existing framework deprecations)
 
 - [ ] [debt/P3] JS: direct preference controls (tapestry.js:3780-3807), use `this.bga.userPreferences`;
