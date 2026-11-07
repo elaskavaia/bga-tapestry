@@ -9,22 +9,25 @@ Object.assign(globalThis, {
   dojo: {
     addClass: (id, classes) => node(id).classList.add(...classes.split(" ")),
     attr: (id, name, value) => node(id).setAttribute(name, value),
-    // as dojo 1.x lang.clone: functions by reference, objects rebuilt with their constructor
-    clone(src) {
-      if (!src || typeof src != "object") return src;
-      if (src.nodeType) return src.cloneNode(true);
-      const copy = new src.constructor();
-      for (const name in src) copy[name] = this.clone(src[name]);
-      return copy;
-    },
     create: (tag, attributes) => Object.assign(document.createElement(tag), { className: attributes?.class ?? "" }),
     destroy: (id) => node(id)?.remove(),
+    disconnect: () => {},
     empty: (id) => node(id).replaceChildren(),
     hitch:
       (scope, method) =>
       (...args) =>
         scope[method](...args),
-    place: (mobile, parent) => node(parent).appendChild(node(mobile)),
+    connect: (target, event, scope, method) => {
+      const handler = (domEvent) => scope[method](domEvent);
+      node(target).addEventListener(event.replace(/^on/, ""), handler);
+      return [target, event, handler];
+    },
+    place: (mobile, parent) => {
+      const added = mobile.startsWith?.("<") ? document.createRange().createContextualFragment(mobile).firstChild : node(mobile);
+      return node(parent).appendChild(added);
+    },
+    string: { substitute: (template, values) => template.replace(/\$\{(\w+)\}/g, (_match, key) => values[key]) },
+    trim: (text) => text.trim(),
     setStyle: (id, property, value) => node(id).style.setProperty(property, value),
     style: (id, property, value) => node(id).style.setProperty(property, value)
   },

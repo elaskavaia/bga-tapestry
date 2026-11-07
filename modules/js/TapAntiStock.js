@@ -28,7 +28,7 @@ export class TapAntiStock {
   }
 
   fork() {
-    return dojo.clone(this);
+    return Object.assign(Object.create(TapAntiStock.prototype), this);
   }
 
   setAttribute(key, value) {
@@ -139,11 +139,12 @@ export class TapAntiStock {
     dojo.attr(item_div, this.getIdAttribute(), item_id);
     dojo.attr(item_div, this.getTypeAttribute(), item_type);
 
+    let clickHandle = null;
     if (this.onItemCreate) {
       if (this.onclickRemoveId) dojo.disconnect(this.onItemCreateConnectId);
-      this.onclickRemoveId = this.onItemCreate(item_div, item_type, item_div.id, item_id, extra);
+      clickHandle = this.onclickRemoveId = this.onItemCreate(item_div, item_type, item_div.id, item_id, extra);
     }
-    if (!this.onclickRemoveId) this.onclickRemoveId = dojo.connect(item_div, "onclick", this, "onClickOnItem");
+    if (!clickHandle) this.onclickRemoveId = dojo.connect(item_div, "onclick", this, "onClickOnItem");
     return item_div;
   }
 
