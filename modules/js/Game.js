@@ -6721,7 +6721,7 @@ export class Game extends Game0Basics {
         return card_location;
       case this.CON.CARD_TECHNOLOGY:
         if (card_location == "hand") {
-          const slot = card.card_location_arg2;
+          let slot = card.card_location_arg2;
           if (slot > 2) slot = 0;
           var holder = "tech_holder_" + card.card_location_arg + "_" + slot;
           return holder;
@@ -6732,7 +6732,7 @@ export class Game extends Game0Basics {
       case this.CON.CARD_CIVILIZATION: {
         let location = card_location;
 
-        if (location == "hand") location = "civilization_holder_" + card_player_id;
+        if (location == "hand") location = "civilization_holder_" + card.card_location_arg;
         else if (location == "choice") location = "civilizations";
         else if (location == "discard") location = "civilization_deck";
         return location;
@@ -6742,14 +6742,7 @@ export class Game extends Game0Basics {
   }
   moveCard(card, from, delay) {
     card = this.normCard(card);
-    const [card_id, card_type, card_type_arg, card_location, card_player_id, card_location_arg2] = [
-      card.card_id,
-      card.card_type,
-      card.card_type_arg,
-      card.card_location,
-      card.card_location_arg,
-      card.card_location_arg2
-    ];
+    const { card_id, card_type, card_type_arg } = card;
 
     switch (parseInt(card_type)) {
       case this.CON.CARD_TAPESTRY:
@@ -6773,11 +6766,7 @@ export class Game extends Game0Basics {
         return;
       case this.CON.CARD_CIVILIZATION:
         const div_id = `civilization_${card_type_arg}`;
-        let location = card_location;
-
-        if (location == "hand") location = "civilization_holder_" + card_player_id;
-        else if (location == "choice") location = "civilizations";
-        else if (location == "discard") location = "civilization_deck";
+        const location = this.getCardDivLocatonId(card);
 
         if (!$(div_id)) {
           this.setupCivCard(card, location);

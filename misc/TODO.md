@@ -4,10 +4,14 @@ Triage 2026-09-13. Tags: [blocker] breaks or strands a table, [rules] wrong game
 or misleading client, [ui-temp] cosmetic, [debt] test gaps and cleanup, [feature] new content. Priority: P1 must fix before
 the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no action planned.
 
-- [ ] [debt/P3] JS `getCardDivLocatonId` (Game.js): civ card in "hand" reads undeclared
+- [x] [debt/P3] JS `getCardDivLocatonId` (Game.js): civ card in "hand" reads undeclared
       `card_player_id` (throws ReferenceError, probably meant `card.card_location_arg`); tech card in
       "hand" with `card_location_arg2 > 2` reassigns `const slot` (throws TypeError). Both pre-existing,
-      found by tsc during the ES module conversion.
+      found by tsc during the ES module conversion. Fixed, `moveCard` civ case now reuses it, covered by
+      tests/js/Game.spec.js.
+- [ ] [debt/P4] JS `setupCivCard` (Game.js) keeps its own copy of the civ hand/choice location mapping;
+      could default to `this.getCardDivLocatonId(card)`. That also maps "discard" to `civilization_deck`
+      where today it returns early (no `#discard` div), so check it in studio.
 
 STUDIO BUILD WARNINGS (dry run 2026-11-03, 6 warnings, all pre-existing framework deprecations)
 
