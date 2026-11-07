@@ -234,19 +234,7 @@ export class Game extends Game0Basics {
         }
       }
 
-      TapAntiStock.prototype.slide = (...args) => this.placeToken(...args);
-
-      // card manager (hold antistocks per card type)
-      this.cardsman = [];
-
-      var stock = (this.cardsman[this.CON.CARD_TERRITORY] = new TapAntiStock("territory").setAttribute("discard", "territory_deck"));
-      stock.onItemCreate = dojo.hitch(this, "setupNewTerritoryTile");
-
-      stock = this.cardsman[this.CON.CARD_SPACE] = new TapAntiStock("space").setAttribute("discard", "space_deck");
-      stock.onItemCreate = dojo.hitch(this, "setupNewSpaceTile");
-
-      stock = this.cardsman[this.CON.CARD_TAPESTRY] = new TapAntiStock("tapestry").setAttribute("discard", "tapestry_deck");
-      stock.onItemCreate = dojo.hitch(this, "setupNewTapestryCard");
+      this.setupCardsman();
 
       // TECH CARDS
 
@@ -4240,6 +4228,22 @@ export class Game extends Game0Basics {
         }
       }
     }
+  }
+
+  /** Card manager: one antistock per card type, forked per player */
+  setupCardsman() {
+    this.cardsman = [];
+
+    var stock = (this.cardsman[this.CON.CARD_TERRITORY] = new TapAntiStock("territory").setAttribute("discard", "territory_deck"));
+    stock.onItemCreate = dojo.hitch(this, "setupNewTerritoryTile");
+
+    stock = this.cardsman[this.CON.CARD_SPACE] = new TapAntiStock("space").setAttribute("discard", "space_deck");
+    stock.onItemCreate = dojo.hitch(this, "setupNewSpaceTile");
+
+    stock = this.cardsman[this.CON.CARD_TAPESTRY] = new TapAntiStock("tapestry").setAttribute("discard", "tapestry_deck");
+    stock.onItemCreate = dojo.hitch(this, "setupNewTapestryCard");
+
+    this.cardsman.forEach((stock) => (stock.onSlide = (mobile, new_parent) => this.placeToken(mobile, new_parent)));
   }
 
   setupNewTapestryCard(card_div, card_type_id, div_card_id, real_id, card) {

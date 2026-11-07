@@ -105,8 +105,9 @@ This plan landed first; PLAN_VIEW_REMOVAL step 2 now plans `modules/js/TapLayout
   resolves a string against the Game in its `connect` / `connectClass` proxies.
 - `getPart` / `getIntPart` are exported from Game0Basics.js, not TapAntiStock.js. `reloadCss` is
   removed (2026-11-07): the studio has its own reload CSS button.
-- Antistock `slide`: prototype assignment (passing the game would break `fork()`, which
-  `dojo.clone`s the instance).
+- Antistock `slide`: an `onSlide` instance hook, set on the 3 `cardsman` stocks in `setupCardsman()`
+  (passing the game would break `fork()`, which `dojo.clone`s the instance; functions are copied by
+  reference, so the forks keep the hook).
 - `ebg/stock` via top-level `await importDojoLibs`; `cap_choice.create` gets `this.bga.gameui` as page
   (ebg controls call `registerEbgControl` on it). `ebg/counter` dropped (unused).
 - `defaultTooltipPosition` is read by gameui `addTooltipHtml`, so it is saved/restored on gameui.
@@ -143,16 +144,23 @@ Decided (2026-11-07):
 - `showMessage` order: the bug report link now goes to the log after the error message, not before.
   Accepted, no change.
 - `reloadCss`: removed, the studio has its own reload CSS button.
-- Antistock `slide`: to do, replace the `TapAntiStock.prototype.slide` patch with an instance hook
-  like `onItemCreate`, set once on the 3 `cardsman` stocks with `this.cardsman.forEach` (sparse
-  array) before they are forked. Check first that `fork()` (`dojo.clone`) keeps function properties.
+- Antistock `slide`: done, the `TapAntiStock.prototype.slide` patch is replaced by an `onSlide`
+  instance hook like `onItemCreate`, set with `this.cardsman.forEach` before the forks. Not checked
+  in the studio yet: cards slide to their places at a zoom other than 1.
+- `Game0Basics` proxies vs explicit `this.bga.gameui.x(...)`, decided per function:
+  - `confirmationDialog`: deprecated, move to `this.bga.dialogs.confirmation` (TODO item).
+  - `format_block`: goes with the jstpl step of [PLAN_VIEW_REMOVAL.md](PLAN_VIEW_REMOVAL.md).
+  - `disconnect`: goes with `connect` in the later `bga-replace-dojo` migration.
+  - `format_string_recursive`: keep. Its deprecation is about overriding it; calling `bgaFormatText`
+    is not the same as calling the formatter.
+  - the rest keep their proxy, no `bga.*` replacement exists: `addTooltip`, `addTooltipHtml`,
+    `removeTooltip`, `format_string`, `clienttranslate_string`, `placeOnObject`,
+    `slideTemporaryObject`, `slideToObjectAndDestroy`, `fadeOutAndDestroy`, `disablePlayerPanel`.
 
 Decisions to review:
 - Against the `bga-es6` skill rules, as this plan intended: Game extends a game-owned base class (the
   rule forbids `extends`/`super`, aimed at gameui), and the 4 hooks replace methods on gameui (the
   rule says not to monkey-patch gameui). No documented Game hook exists for those 4.
-- Proxies in `Game0Basics` keep call sites untouched; the skill prefers explicit
-  `this.bga.gameui.x(...)` at each call site.
 
 Found, not fixed (in TODO): `getCardDivLocatonId` reads undeclared `card_player_id` and reassigns a
 `const slot`; both throw today as well.

@@ -42,6 +42,16 @@ OPEN FROM 2026-11-07 (deprecated `addActionButton` moved to `this.bga.statusBar.
       may now drop the click on `.bgabutton.disabled`).
       Militants: the image buttons toggle `bgabutton_blue`, check the selection still shows.
       `addButtonTimer`: the countdown label is read from `innerHTML`, check it has no doubled wrapper.
+- [ ] [debt/P3] JS: `confirmationDialog` is deprecated, move the 7 calls in Game.js to
+      `this.bga.dialogs.confirmation(text)`, which returns a Promise of a boolean instead of taking
+      callbacks. Two calls pass a cancel callback (civ debug click reopens the tooltip, place
+      structure out of city bounds runs `onCancelStructure`): they become the `false` branch. Then
+      drop it from the `Game0Basics` proxy list.
+- [ ] [perf/P3] JS: `TapAntiStock.fork()` is `dojo.clone(this)`, which deep-copies `container_div`
+      with `cloneNode(true)`. At fork time that is `ebd-body`, the whole game area, copied 3 times per
+      player during setup and thrown away by `bind()`. Skip `container_div` in `fork()`.
+- [ ] [ux/P2] Studio: territory, space and tapestry cards still slide to their places at a zoom other
+      than 1 (antistock `slide` moved from a prototype patch to the `onSlide` hook).
 
 OPEN FROM 2026-10-31 (track token choice, review of e9cf09f, BGA #58486) - all pre-existing,
 CONFIRMED by stub probes unless marked; probes in the session scratchpad, rewrite as real tests.

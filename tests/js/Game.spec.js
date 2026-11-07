@@ -1,6 +1,7 @@
 import { makeBga } from "./setup.js";
 import { expect } from "chai";
 import { Game } from "../../modules/js/Game.js";
+import { TapAntiStock } from "../../modules/js/TapAntiStock.js";
 
 const ME = 10;
 const OTHER = 20;
@@ -188,5 +189,40 @@ describe("Game action button helpers", () => {
     expect(buttons().map((button) => button.id)).to.deep.equal(["button_benefit_1_3", "button_benefit_1_3_x"]);
     expect($("button_benefit_1_3").innerHTML).to.contain("Scout/3");
     expect($("button_benefit_1_3").classList.contains("bgaimagebutton")).to.be.true;
+  });
+});
+
+describe("Game.setupCardsman", () => {
+  const setup = () => {
+    const game = makeGame();
+    const calls = [];
+    game.placeToken = (...args) => calls.push(args);
+    game.setupCardsman();
+    return { game, calls };
+  };
+  afterEach(() => $("plain_parent")?.remove());
+
+  it("slides each card type stock and its per player fork through placeToken", () => {
+    const { game, calls } = setup();
+    for (const type of [TERRITORY, SPACE, TAPESTRY]) {
+      game.cardsman[type].slide("card_1", "place");
+      game.cardsman[type].fork().slide("card_2", "place");
+    }
+    expect(calls).to.deep.equal(
+      Array(3)
+        .fill([
+          ["card_1", "place"],
+          ["card_2", "place"]
+        ])
+        .flat()
+    );
+  });
+
+  it("leaves other antistocks on plain placement", () => {
+    const { calls } = setup();
+    document.body.insertAdjacentHTML("beforeend", "<div id='plain_parent'></div><div id='plain_card'></div>");
+    new TapAntiStock("territory").slide("plain_card", "plain_parent");
+    expect(calls).to.be.empty;
+    expect($("plain_card").parentNode.id).to.equal("plain_parent");
   });
 });

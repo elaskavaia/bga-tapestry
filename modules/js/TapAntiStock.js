@@ -10,6 +10,7 @@ export class TapAntiStock {
     this.unselectableClass = "unselectable";
     this.onItemCreate = null;
     this.onItemDelete = null;
+    this.onSlide = null;
     this.counter_id = null;
     this.from = null;
     this.discard = null;
@@ -249,8 +250,8 @@ export class TapAntiStock {
   }
 
   slide(mobile, new_parent) {
-    // it has to be bound to something, this is just placement
-    dojo.place(mobile, new_parent);
+    if (this.onSlide) this.onSlide(mobile, new_parent);
+    else dojo.place(mobile, new_parent);
   }
 
   slideIn(mobile) {
