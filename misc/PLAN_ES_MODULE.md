@@ -198,3 +198,26 @@ the run.
 - Zoom in / out buttons: board scales, stays aligned, value survives F5 (localStorage).
 - Resize the window narrow / wide: layout reflows (`onScreenWidthChange`).
 - Card antistocks slide to the right place at non-1 zoom; capital choice stock still works.
+
+### Run 2026-11-06 (table 994817, 2 players, Futurists vs Entertainers)
+
+No baseline run on the legacy code, the conversion was already in. No game errors in the console
+during the run except the replay item below (only autoplay sound rejections and BGA CSP noise).
+
+- Pass: load and F5 as active, inactive and spectator (read-only, no buttons); panel order with
+  `player_board_config` first; one move stamp per log entry, also after undo and F5.
+- Pass: `resourceChoice` (with auto confirm instant the resource click already submits, so a
+  scripted Confirm click shows "an action is already in progress", not a regression); advance
+  payment client state and its Cancel (no leftover payment line); `benefitOption` track choice;
+  conquer hex plus conquer dice; explore with the territory popup, rotate, Confirm Tile; invent from
+  the deck into `tech_holder_<p>_0`; Entertainers civ ability; income draws into hand areas.
+- Pass: Undo in a turn and `button_undo_x` from turn end, board and counters revert, F5 agrees.
+- Pass: logs with names, icons, reasons; `showMessage` "Internal Error" adds the bug link with
+  `metasiteurl` and `table_id`; server rejection message shows.
+- Pass: zoom out/in, scale and wrapper height, value survives F5; resizing the game iframe
+  switches `layout-l` / `layout-m` (`onScreenWidthChange`).
+- FAIL: "Replay last moves" (`/1/tapestry?replayLastTurn=1`) loads the legacy root `tapestry.js`
+  instead of `modules/js/Game.js`, gets ERR_BLOCKED_BY_ORB and falls back to the tableview. bga-euro
+  has no root js either, so likely a framework/studio replay path issue; check archive replay and
+  production before deploy.
+- Not run: `log_others` private text for the opponent, Automa / Shadow Empire table, archive view.
