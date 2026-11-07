@@ -47,9 +47,17 @@ OPEN FROM 2026-11-07 (deprecated `addActionButton` moved to `this.bga.statusBar.
       callbacks. Two calls pass a cancel callback (civ debug click reopens the tooltip, place
       structure out of city bounds runs `onCancelStructure`): they become the `false` branch. Then
       drop it from the `Game0Basics` proxy list.
-- [ ] [perf/P3] JS: `TapAntiStock.fork()` is `dojo.clone(this)`, which deep-copies `container_div`
+- [x] [perf/P3] JS: `TapAntiStock.fork()` was `dojo.clone(this)`, which deep-copies `container_div`
       with `cloneNode(true)`. At fork time that is `ebd-body`, the whole game area, copied 3 times per
-      player during setup and thrown away by `bind()`. Skip `container_div` in `fork()`.
+      player during setup and thrown away by `bind()`. FIXED 2026-11-07: shallow copy.
+- [ ] [bug/P2] Studio "Replay last moves" (`/1/tapestry?replayLastTurn=1`) loads the legacy root
+      `tapestry.js`, gets ERR_BLOCKED_BY_ORB and falls back to the tableview. Nothing in the repo
+      refers to it, so it looks like the framework. Check the same replay on bga-euro, and archive
+      replay on production after deploy; report to BGA if it is the framework.
+- [ ] [ux/P2] Studio, ES module client checks not run yet: `log_others` (the opponent sees the
+      other text for a private action), an Automa / Shadow Empire table (bot panels and areas),
+      archive view (no animations, no buttons), a Traders / Architects civ client state, die roll
+      "for fun" goes to the log only.
 - [ ] [ux/P2] Studio: territory, space and tapestry cards still slide to their places at a zoom other
       than 1 (antistock `slide` moved from a prototype patch to the `onSlide` hook).
 
