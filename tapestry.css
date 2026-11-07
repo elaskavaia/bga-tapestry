@@ -3632,6 +3632,18 @@ div[data-income="0"] #subtitle_bar {
   margin: 10px 0px;
 }
 
+/* mobile player boards are a grid, the config row spans it instead of taking a player cell */
+.mobile_version #player_board_config {
+  grid-column: 1 / -1;
+}
+/* the framework negative margin (mobile only) and the padded spectator panel overflow the screen */
+.mobile_version #player_boards {
+  margin-right: unset;
+}
+.player-board.spectator-mode {
+  box-sizing: border-box;
+}
+
 #player_config #player_config_row {
   display: flex;
   justify-content: space-around;

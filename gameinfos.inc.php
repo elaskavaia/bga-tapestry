@@ -80,7 +80,7 @@ $gameinfos = [
         //  default: 740
         //  maximum possible value: 740 (ie: your game interface should fit with a 740px width (correspond to a 1024px screen)
         //  minimum possible value: 320 (the lowest value you specify, the better the display is on mobile)
-        "min" => 1000,
+        "min" => 1010, // #board 1000 plus the rotator overflow, so #thething does not scroll
     ],
     "db_undo_support" => true,
 ];
