@@ -125,8 +125,8 @@ define([
           if (this.player_color === undefined) this.player_color = this.gamedatas.players[player_id].color;
         }
 
-        if (this.gamedatas.players[this.player_id]) {
-          this.player_color = this.gamedatas.players[this.player_id].color;
+        if (this.gamedatas.players[this.getPlayerId()]) {
+          this.player_color = this.gamedatas.players[this.getPlayerId()].color;
         }
 
         for (i in this.gamedatas.variants) {
@@ -254,7 +254,7 @@ define([
 
         // TECH CARDS
 
-        this.moveCards(this.player_id, gamedatas.tech_deck_visible);
+        this.moveCards(this.getPlayerId(), gamedatas.tech_deck_visible);
 
         // LANDMARKS
         try {
@@ -315,7 +315,7 @@ define([
         }
 
         // Setting up player boards
-        let any_player_id = this.player_id;
+        let any_player_id = this.getPlayerId();
         if (this.isReadOnly()) {
           for (var player_id in gamedatas.players) {
             var over = $("overall_player_board_" + player_id);
@@ -387,7 +387,7 @@ define([
             .bind(this, $("tapestry_cards_" + player_id))
             .setAttribute("counter_id", "counter_tapestry_" + player_id);
 
-          if (player_id == this.player_id) {
+          if (player_id == this.getPlayerId()) {
             this.moveCards(player_id, hand.tapestry);
           } else {
             dojo.addClass("tapestry_cards_" + player_id, "tapestry_deck");
@@ -727,8 +727,8 @@ define([
           break;
         case "bonus":
           if (this.bga.players.isCurrentPlayerActive()) {
-            this.territory[this.player_id].setSelectionMode(1);
-            this.tapestry[this.player_id].setSelectionMode(1);
+            this.territory[this.getPlayerId()].setSelectionMode(1);
+            this.tapestry[this.getPlayerId()].setSelectionMode(1);
           }
           break;
 
@@ -966,7 +966,7 @@ define([
             // add buttons for each player...
             for (var pid in this.gamedatas.players) {
               var player = this.gamedatas.players[pid];
-              if (pid != this.player_id) {
+              if (pid != this.getPlayerId()) {
                 this.addPlayerActionButton(pid, "onSelectHistorian", "button_historian_");
               }
             }
@@ -980,7 +980,7 @@ define([
             } else {
               this.setDescriptionOnMyTurn(_("MERFOLK: Select tapestry cards to discard for 5 VP each, or play one as a tapestry"));
             }
-            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot multi-select");
+            dojo.query("#tapestry_cards_" + this.getPlayerId() + " > .tapestry_card").addClass("active_slot multi-select");
             break;
           case this.CON.CIV_WEEFOLK:
             if (!bene.build) {
@@ -988,7 +988,7 @@ define([
               break;
             }
             this.setDescriptionOnMyTurn(_("WEEFOLK: You may discard a territory tile to gain an income building (select the tile first)"));
-            this.territory[this.player_id].getChildrenDivs().forEach((node) => node.classList.add("active_slot"));
+            this.territory[this.getPlayerId()].getChildrenDivs().forEach((node) => node.classList.add("active_slot"));
             break;
           case this.CON.CIV_HERALDS:
             this.setDescriptionOnMyTurn(_("HERALDS: You may place a player token to WHEN PLAYED tapestry card"));
@@ -1191,10 +1191,10 @@ define([
       const coords = this.clientStateArgs.land_id;
       if (al >= 8) {
         if (!dojo.hasClass(coords, "own_land")) {
-          const tileNode = $(`territory_tiles_${this.player_id}`).querySelector(".selected");
+          const tileNode = $(`territory_tiles_${this.getPlayerId()}`).querySelector(".selected");
           if (!tileNode) {
             this.showError(_("Select a tile to give first"));
-            dojo.query("#territory_tiles_" + this.player_id + " .card").addClass("active_slot");
+            dojo.query("#territory_tiles_" + this.getPlayerId() + " .card").addClass("active_slot");
             return;
           }
           tile = getPart(tileNode.id, 1);
@@ -1301,11 +1301,11 @@ define([
             this.setDescriptionOnMyTurn(_("AGE OF SAIL: Select an opponent to give a territory tile for 3 VP"));
             for (var pid in this.gamedatas.players) {
               var player = this.gamedatas.players[pid];
-              if (pid != this.player_id) {
+              if (pid != this.getPlayerId()) {
                 this.addPlayerActionButton(pid, "onSelectHistorian", "button_aos_");
               }
             }
-            this.territory[this.player_id].getChildrenDivs().forEach((node) => node.classList.add("active_slot"));
+            this.territory[this.getPlayerId()].getChildrenDivs().forEach((node) => node.classList.add("active_slot"));
             this.addActionButton("button_nope", _("Nobody"), () => {
               this.setDescriptionOnMyTurn(_("EXPLORE: ${you} must select an unexplored hex adjacent to a territory you control"));
               args.ageOfSail = 0;
@@ -1352,7 +1352,7 @@ define([
           break;
         case "spaceExploration":
           this.clientStateArgs.action = "explore_space";
-          dojo.query("#space_tiles_" + this.player_id + " .space_tile").forEach((tile) => {
+          dojo.query("#space_tiles_" + this.getPlayerId() + " .space_tile").forEach((tile) => {
             const selected = args.selected_space_tile;
             if (!selected || dojo.getAttr(tile, "data-type-arg") == selected.card_type_arg) {
               dojo.addClass(tile, "active_slot");
@@ -1365,7 +1365,7 @@ define([
 
           this.addActionButton("button_0", _("Trader"), () => this.sendTrader(0));
           if (!dojo.hasClass(land, "own_land")) {
-            var mat = $("income_mat_" + this.player_id);
+            var mat = $("income_mat_" + this.getPlayerId());
             for (i = 1; i <= 4; i++) {
               const type = i;
               var sel = mat.querySelector(".building" + type);
@@ -1613,19 +1613,19 @@ define([
         case "upgradeTechnology":
           this.addActionButton("button_upgrade_decline", _("Decline"), () => this.axcallwrapper("decline"));
           var slots = args.possible;
-          dojo.query("#tech_holder_" + this.player_id + " .tech_card").addClass("illegal_slot");
+          dojo.query("#tech_holder_" + this.getPlayerId() + " .tech_card").addClass("illegal_slot");
 
           for (var c in slots) {
             var type = slots[c];
             dojo.removeClass("tech_card_" + type, "illegal_slot");
             dojo.addClass("tech_card_" + type, "active_slot");
           }
-          this.scrollIntoViewAfter("tech_holder_" + this.player_id, this.defaultAnimationDuration);
+          this.scrollIntoViewAfter("tech_holder_" + this.getPlayerId(), this.defaultAnimationDuration);
           break;
 
         case "techBenefit":
           var slots = args.cards;
-          dojo.query("#tech_holder_" + this.player_id + " .tech_card").addClass("illegal_slot");
+          dojo.query("#tech_holder_" + this.getPlayerId() + " .tech_card").addClass("illegal_slot");
 
           for (var c in slots) {
             var type = slots[c];
@@ -1664,7 +1664,7 @@ define([
           if (res.length > 0) {
             dojo.addClass("capital_helper", "income_placement");
           }
-          var mat = "capital_mat_" + this.player_id;
+          var mat = "capital_mat_" + this.getPlayerId();
           dojo.place("capital_helper", mat);
           dojo.addClass($("capital_helper").parentNode, "tap_visible");
 
@@ -1688,12 +1688,12 @@ define([
 
         case "conquer_trap":
           this.addActionButton("button_trap_trap", _("Trap"), () => {
-            const div = this.tapestry[this.player_id].findDivByType(42);
+            const div = this.tapestry[this.getPlayerId()].findDivByType(42);
             if (!div) {
               this.showError(_("Cannot find a Trap card"));
               return;
             }
-            this.axcallwrapper("trap", { card_id: this.tapestry[this.player_id].getIdFromDiv(div) });
+            this.axcallwrapper("trap", { card_id: this.tapestry[this.getPlayerId()].getIdFromDiv(div) });
           });
           this.addActionButton("button_trap_pass", _("Pass"), "onPassTrap");
 
@@ -1744,7 +1744,7 @@ define([
             this.addActionButton("button_confirm", _("Confirm"), "onConfirmBonus");
           } else if (bd.dest == this.CON.FLAG_NEIGHBOUR) {
             const num = this.gamedatas.playerorder_withbots.length;
-            const index = this.gamedatas.playerorder_withbots.findIndex((item) => item == this.player_id);
+            const index = this.gamedatas.playerorder_withbots.findIndex((item) => item == this.getPlayerId());
             const left = (index - 1 + num) % num;
             const right = (index + 1) % num;
             this.addPlayerActionButton(this.gamedatas.playerorder_withbots[left], "onConfirmBonus");
@@ -1759,13 +1759,13 @@ define([
 
           if (bd.tt == "card") {
             if (bd.ct == this.CON.CARD_TAPESTRY) {
-              this.tapestry[this.player_id].setSelectionMode(this.resourceCount == 1 ? 1 : 2);
-              dojo.query("#tapestry_cards_" + this.player_id + " .tapestry_card").addClass("active_slot");
+              this.tapestry[this.getPlayerId()].setSelectionMode(this.resourceCount == 1 ? 1 : 2);
+              dojo.query("#tapestry_cards_" + this.getPlayerId() + " .tapestry_card").addClass("active_slot");
             } else if (bd.ct == this.CON.CARD_TERRITORY) {
-              this.territory[this.player_id].setSelectionMode(this.resourceCount == 1 ? 1 : 2);
-              dojo.query("#territory_tiles_" + this.player_id + " .card").addClass("active_slot");
+              this.territory[this.getPlayerId()].setSelectionMode(this.resourceCount == 1 ? 1 : 2);
+              dojo.query("#territory_tiles_" + this.getPlayerId() + " .card").addClass("active_slot");
             } else if (bd.ct == this.CON.CARD_TERRITORY) {
-              dojo.query("#tech_holder_" + this.player_id + " .tech_card").addClass("active_slot");
+              dojo.query("#tech_holder_" + this.getPlayerId() + " .tech_card").addClass("active_slot");
             }
           }
           if (type == this.CON.BE_ANYRES) {
@@ -1828,18 +1828,18 @@ define([
           } else if (args.bid == 64) {
             if (args.decline) this.setDescriptionOnMyTurn(_("${you} may choose a tapestry card to play over your current one"));
             else this.setDescriptionOnMyTurn(_("${you} must choose a tapestry card to play over your current one"));
-            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot");
+            dojo.query("#tapestry_cards_" + this.getPlayerId() + " > .tapestry_card").addClass("active_slot");
           } else if (args.bid == 128) {
             // income tapestry
-            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot");
+            dojo.query("#tapestry_cards_" + this.getPlayerId() + " > .tapestry_card").addClass("active_slot");
           } else if (args.bid == 181) {
             // discard
             this.setDescriptionOnMyTurn(_("${you} must discard a tapestry card from your hand"));
-            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot");
+            dojo.query("#tapestry_cards_" + this.getPlayerId() + " > .tapestry_card").addClass("active_slot");
           } else if (args.bid == 338) {
             //BE_ADVISORS_OVERTAKE_ADVISE
             this.setDescriptionOnMyTurn(_("${you} must select a when played tapesry card to give to opponent (ADVISORS)"));
-            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").forEach((node) => {
+            dojo.query("#tapestry_cards_" + this.getPlayerId() + " > .tapestry_card").forEach((node) => {
               const tap_type = node.dataset.typeArg;
               const info = this.tapestry_data[tap_type];
               if (info.type == "now") {
@@ -1866,7 +1866,7 @@ define([
               this.axcallwrapper("playCard", { card_id: tap0 });
             });
           } else {
-            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").addClass("active_slot");
+            dojo.query("#tapestry_cards_" + this.getPlayerId() + " > .tapestry_card").addClass("active_slot");
           }
           if (args.title) {
             this.setDescriptionOnMyTurn(this.getTr(args.title));
@@ -1881,7 +1881,7 @@ define([
             } else {
               this.setDescriptionOnMyTurn(_("TYRANNY: ${you} may choose one of the gained tapestry cards to play on top"));
             }
-            dojo.query("#tapestry_cards_" + this.player_id + " > .tapestry_card").forEach((node) => {
+            dojo.query("#tapestry_cards_" + this.getPlayerId() + " > .tapestry_card").forEach((node) => {
               if (!tyranny_ids.includes(node.dataset.cardId)) node.classList.remove("active_slot");
             });
             tyranny_ids.forEach((card_id, i) => {
@@ -1891,11 +1891,11 @@ define([
             });
           }
           if (args.decline) this.addActionButton("button_tapDecline", _("Decline"), "onTapDecline");
-          this.scrollIntoViewAfter("tapestry_cards_" + this.player_id, this.defaultAnimationDuration);
+          this.scrollIntoViewAfter("tapestry_cards_" + this.getPlayerId(), this.defaultAnimationDuration);
 
           break;
         case "buildingSelect":
-          var mat = $("income_mat_" + this.player_id);
+          var mat = $("income_mat_" + this.getPlayerId());
           for (var index in args.choices) {
             var building = args.choices[index];
 
@@ -1987,7 +1987,7 @@ define([
               this.setDescriptionOnMyTurn(_("With whom would ${you} like to form an alliance?"));
               for (var pid in this.gamedatas.players) {
                 var player = this.gamedatas.players[pid];
-                if (pid != this.player_id) this.addActionButton("button_alliance_" + pid, player.name, "onAlliance");
+                if (pid != this.getPlayerId()) this.addActionButton("button_alliance_" + pid, player.name, "onAlliance");
               }
               break;
             }
@@ -2176,10 +2176,10 @@ define([
           dojo.addClass(resdiv, "payment_resource");
           this.connect(resdiv, "onclick", handler);
 
-          var count = this.getResourceCounter(this.player_id, rtype);
+          var count = this.getResourceCounter(this.getPlayerId(), rtype);
           resdiv.innerHTML = count;
           if (!gain) {
-            var count = this.getResourceCounter(this.player_id, rtype);
+            var count = this.getResourceCounter(this.getPlayerId(), rtype);
             if (!count) {
               dojo.addClass(resdiv, "unchosen_resource");
             }
@@ -2256,7 +2256,7 @@ define([
           return;
       }
 
-      var tiles = this.territory[this.player_id].getSelectedItems();
+      var tiles = this.territory[this.getPlayerId()].getSelectedItems();
       if (tiles.length != 1) {
         this.showError(_("You must select a single territory tile first"));
         return;
@@ -2416,7 +2416,7 @@ define([
       return card.card_type_arg == 1 && (!marker || marker == "0");
     },
 
-    ownsCiv: function (civ_id, player_id = this.player_id) {
+    ownsCiv: function (civ_id, player_id = this.getPlayerId()) {
       var civ = dojo.byId("civilization_" + civ_id);
       if (civ != null) {
         var pid = civ.parentNode.id.split("_")[2];
@@ -2649,7 +2649,7 @@ define([
           break;
 
         case 6:
-          var stock_ids = this.territory[this.player_id].getSelectedItems().map((item) => item.type);
+          var stock_ids = this.territory[this.getPlayerId()].getSelectedItems().map((item) => item.type);
           if (stock_ids.length != count) {
             this.showError(_("Select the correct number of tiles ${count}"), { count: count });
             return;
@@ -2660,7 +2660,7 @@ define([
         case 7:
         case 137:
         case 138:
-          var stock_ids = this.tapestry[this.player_id].getSelectedItems().map((item) => item.id);
+          var stock_ids = this.tapestry[this.getPlayerId()].getSelectedItems().map((item) => item.id);
           if (count > 0 && stock_ids.length != count) {
             this.showError(_("Select the correct number of cards ${count}"), { count: count });
             return;
@@ -2837,7 +2837,7 @@ define([
       if (this.selectedTile) {
         // move back to stock
         var tile = this.cardsman[this.CON.CARD_TERRITORY].findDivByType(this.selectedTile);
-        this.attachToStock(tile.id, this.territory[this.player_id], 0);
+        this.attachToStock(tile.id, this.territory[this.getPlayerId()], 0);
       }
       this.selectedTile = null;
       this.selectedRot = 0;
@@ -3394,7 +3394,7 @@ define([
           color_bg = "background-color:#" + basic.color_back + ";";
         }
         if (name === undefined) {
-          if (player_id == this.player_id) name = __("lang_mainsite", "You");
+          if (player_id == this.getPlayerId()) name = __("lang_mainsite", "You");
           else name = basic.name;
         }
       } else {
@@ -3405,7 +3405,7 @@ define([
       return you;
     },
     divYou: function () {
-      return this.divPlayerName(this.player_id);
+      return this.divPlayerName(this.getPlayerId());
     },
 
     setDescriptionOnMyTurn: function (text, moreargs) {
@@ -3444,7 +3444,7 @@ define([
     format_string_recursive: function (log, args) {
       try {
         //console.trace("format_string_recursive(" + log + ")", args);
-        if (args.log_others !== undefined && this.player_id != args.player_id) {
+        if (args.log_others !== undefined && this.getPlayerId() != args.player_id) {
           log = args.log_others;
         }
 
@@ -3603,9 +3603,9 @@ define([
       var rot_data = this.capitalRotOptions[this.capitalRot];
       for (var c in rot_data) {
         var coord = rot_data[c];
-        dojo.addClass("capital_cell_" + this.player_id + "_" + coord, "possible");
+        dojo.addClass("capital_cell_" + this.getPlayerId() + "_" + coord, "possible");
       }
-      if (!this.isForeignTokenPending()) dojo.addClass("capital_cell_" + this.player_id + "_12_12", "possible"); //out of bounds
+      if (!this.isForeignTokenPending()) dojo.addClass("capital_cell_" + this.getPlayerId() + "_12_12", "possible"); //out of bounds
     },
 
     addCapitalGrid: function (player_id) {
@@ -4825,9 +4825,9 @@ define([
         var gain = div.getAttribute("data-gain");
         var rtype = div.getAttribute("data-restype");
         var increase = gain == "true" ? 1 : -1;
-        //var count = this.getResourceCounter(this.player_id, rtype);
+        //var count = this.getResourceCounter(this.getPlayerId(), rtype);
 
-        this.incResourceCounter(this.player_id, rtype, -increase); // return resource back
+        this.incResourceCounter(this.getPlayerId(), rtype, -increase); // return resource back
       });
 
       dojo.destroy("resource_line");
@@ -5062,14 +5062,14 @@ define([
               return;
             }
             this.selectedland = land_id;
-            var sel = $("territory_tiles_" + this.player_id).querySelector(".territory_tile.selected");
+            var sel = $("territory_tiles_" + this.getPlayerId()).querySelector(".territory_tile.selected");
             dojo.query(".selected").removeClass("selected");
             dojo.addClass(land_id, "selected");
 
             if (this.selectedTile) {
               // move back to stock
               var tile = this.cardsman[this.CON.CARD_TERRITORY].findDivByType(this.selectedTile);
-              sel = this.attachToStock(tile.id, this.territory[this.player_id], 0);
+              sel = this.attachToStock(tile.id, this.territory[this.getPlayerId()], 0);
               this.selectedTile = null;
             }
 
@@ -5077,7 +5077,7 @@ define([
               this.selectedTile = dojo.getAttr(sel, "data-type-arg");
               const card_id = dojo.getAttr(sel, "data-card-id");
 
-              this.playTerritoryTile(this.player_id, this.selectedTile, card_id, this.selectedRot, land_id);
+              this.playTerritoryTile(this.getPlayerId(), this.selectedTile, card_id, this.selectedRot, land_id);
 
               if (this.territoryPopup != null) this.resetTerritoryPopup();
               this.showTileRotators();
@@ -5298,7 +5298,7 @@ define([
           this.axcallwrapper("trap", { card_id: id });
           break;
         case "bonus":
-          this.tapestry[this.player_id].onClickOnItem(event);
+          this.tapestry[this.getPlayerId()].onClickOnItem(event);
           break;
         case "keepCard":
           this.onKeepCardClick(event);
@@ -5331,12 +5331,12 @@ define([
             return;
           }
           // a tile already on the map is not explorable
-          if (!$("territory_tiles_" + this.player_id).contains(div)) return;
+          if (!$("territory_tiles_" + this.getPlayerId()).contains(div)) return;
           const item = cardsman.getItemFromDiv(div);
 
           if (this.gamedatas.gamestate.args.ageOfSail) {
-            this.territory[this.player_id].unselectAll();
-            this.territory[this.player_id].selectItem(item.id);
+            this.territory[this.getPlayerId()].unselectAll();
+            this.territory[this.getPlayerId()].selectItem(item.id);
             return;
           }
 
@@ -5345,7 +5345,7 @@ define([
           if (this.selectedTile) {
             // move back to stock
             var tile = cardsman.findDivByType(this.selectedTile);
-            this.territory[this.player_id].slideIn(tile);
+            this.territory[this.getPlayerId()].slideIn(tile);
           }
 
           this.selectedTile = item.type;
@@ -5620,11 +5620,11 @@ define([
         closable: true
       });
 
-      $("territory_select").appendChild($("territory_tiles_" + this.player_id));
+      $("territory_select").appendChild($("territory_tiles_" + this.getPlayerId()));
       $("territory_cancel").innerHTML = _("Cancel");
       dojo.connect($("territory_cancel"), "onclick", this, "onTerritoryCancel");
 
-      //this.territory[this.player_id].updateDisplay();
+      //this.territory[this.getPlayerId()].updateDisplay();
     },
 
     onTerritoryCancel: function (event) {
@@ -5634,11 +5634,11 @@ define([
     },
 
     resetTerritoryPopup: function () {
-      $("tapestry_cards_" + this.player_id).after($("territory_tiles_" + this.player_id));
+      $("tapestry_cards_" + this.getPlayerId()).after($("territory_tiles_" + this.getPlayerId()));
       dijit.popup.close(this.territoryPopup);
       dijit.byId("territoryPopup").destroy();
       this.territoryPopup = null;
-      this.territory[this.player_id].updateCounter();
+      this.territory[this.getPlayerId()].updateCounter();
     },
 
     cancelConfirmTimer() {},
@@ -5689,7 +5689,7 @@ define([
         switch (this.clientStateArgs.cid) {
           case this.CON.CIV_MERFOLK: {
             const bene = this.gamedatas.gamestate.args.benefits[bid];
-            const cards = this.tapestry[this.player_id].getSelectedItems();
+            const cards = this.tapestry[this.getPlayerId()].getSelectedItems();
             if (bene.slots_choice[id].play) {
               // the card has to be named: only those with a WHEN PLAYED ability can be played
               if (cards.length != 1) {
@@ -5713,7 +5713,7 @@ define([
           }
           case this.CON.CIV_WEEFOLK:
             if (!this.gamedatas.gamestate.args.benefits[bid].build) break;
-            const tiles = this.territory[this.player_id].getSelectedItems();
+            const tiles = this.territory[this.getPlayerId()].getSelectedItems();
             if (tiles.length != 1) {
               this.showError(_("You must select a single territory tile first"));
               return;
@@ -5758,14 +5758,14 @@ define([
       var gain = div.getAttribute("data-gain");
       var rtype = div.getAttribute("data-restype");
       var increase = gain == "true" ? 1 : -1;
-      var count = this.getResourceCounter(this.player_id, rtype);
+      var count = this.getResourceCounter(this.getPlayerId(), rtype);
 
       if (check == false) {
         var needres = increase == -1 || count;
         dojo.addClass(div, "unchosen_resource");
         if (dojo.hasClass(div, "chosen_resource") && needres) {
           dojo.removeClass(div, "chosen_resource");
-          this.incResourceCounter(this.player_id, rtype, -increase);
+          this.incResourceCounter(this.getPlayerId(), rtype, -increase);
           return true;
         }
       } else {
@@ -5773,7 +5773,7 @@ define([
         if (!dojo.hasClass(div, "chosen_resource") && needres) {
           dojo.addClass(div, "chosen_resource");
           dojo.removeClass(div, "unchosen_resource");
-          this.incResourceCounter(this.player_id, rtype, increase);
+          this.incResourceCounter(this.getPlayerId(), rtype, increase);
           dojo.addClass(div.parentNode, "complete");
           return true;
         }
@@ -5945,7 +5945,7 @@ define([
           return;
 
         case 3: // tapestry
-          if (this.player_id != player_id) {
+          if (this.getPlayerId() != player_id) {
             for (var a = 0; a < count; a++) {
               this.slideTemporaryObject(
                 '<div class="tapestry_deck"></div>',
@@ -6021,7 +6021,7 @@ define([
       var card_type = parseInt(card.card_type) || parseInt(card.type);
       var notif = {
         args: {
-          player_id: player_id || this.player_id,
+          player_id: player_id || this.getPlayerId(),
           cards: [card],
           count: 1,
           type: card_type
@@ -6180,7 +6180,7 @@ define([
     },
     updateEliminatedPlayer: function (player_id) {
       this.disablePlayerPanel(player_id);
-      if (this.player_id == player_id && !$("button_elim")) {
+      if (this.getPlayerId() == player_id && !$("button_elim")) {
         var player_data = this.gamedatas.players[player_id];
         if (!player_data || player_data.eliminated) return;
         var div = dojo.create(
@@ -6530,7 +6530,7 @@ define([
               this.connect(div, "onclick", "onCubeClick");
             }
           }
-          if (dojo.hasClass(location, "activatable") && this.player_id == player_id) {
+          if (dojo.hasClass(location, "activatable") && this.getPlayerId() == player_id) {
             this.disconnect(div, "onclick", "onCubeClick");
             this.connect(div, "onclick", "onCubeClick");
             dojo.addClass(div, "active_slot");
@@ -6644,7 +6644,7 @@ define([
         if (!div) div = this.cardsman[this.CON.CARD_TAPESTRY].createDiv(card_type_arg, card_id, "tapestry_cards_" + player_id, notif.args);
         this.placeToken(div, dest);
       }
-      if (this.bga.players.isCurrentPlayerActive()) this.tapestry[this.player_id].updateCounter();
+      if (this.bga.players.isCurrentPlayerActive()) this.tapestry[this.getPlayerId()].updateCounter();
       else this.updateTapestryCount(player_id, -1);
       this.extraMarkup();
     },
@@ -6886,7 +6886,7 @@ define([
     notif_moveCardsHidden: function (notif) {
       console.log("notif_moveCardsHidden", notif.args);
       const player_id = notif.args.player_id;
-      if (notif.args.hidden && player_id == this.player_id) return;
+      if (notif.args.hidden && player_id == this.getPlayerId()) return;
       for (const key in notif.args.cards) {
         const card = this.normCard(notif.args.cards[key]);
         if (notif.args.hidden && card.card_location != "submerged") {
@@ -6920,6 +6920,10 @@ define([
 
     isReadOnly: function () {
       return this.bga.players.isCurrentPlayerSpectator() || typeof g_replayFrom != "undefined" || g_archive_mode;
+    },
+
+    getPlayerId: function () {
+      return this.bga.players.getCurrentPlayerId();
     },
 
     isInstantaneousMode: function () {
