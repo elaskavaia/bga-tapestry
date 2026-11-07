@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-07 (v261107-2229)
+
+- Fixed Advisors changing the target of Espionage (#255108)
+- Fixed Spies income error "invalid card selected" (#254612)
+- Fixed tech spot tooltips and narrow window layout
+- Game client moved to the new BGA framework
+
 ## 2026-11-03 (v261103-1426)
 
 - Fixed Traders (Adjustment Pack): trading now gives your territory tile to the opponent, and the income building option pays both players (#188139)
