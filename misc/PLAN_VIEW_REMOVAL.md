@@ -15,7 +15,8 @@ Two steps, one commit each.
   (bots included): the current player first, then the players after them in turn order, then the ones
   before. A spectator gets turn order. Variables: `{X}` player id, `{C}` color, `{PLAYER_NAME}`.
 - 32 `this.format_block("jstpl_x", args)` calls in modules/js/*.js, no dynamically
-  built template names. `format_block` is not in bga-framework.d.ts, it is legacy too.
+  built template names (recounted after the ES module conversion). `format_block` is not in
+  bga-framework.d.ts, it is legacy too; Game.js reaches it through the `Game0Basics` proxy list.
 - `setup()` in Game.js moves template elements around for the bots (`shadow_in_play`,
   `automa_in_play`) and `setZoom` needs `zoom-wrapper`, so the markup must exist first.
 
@@ -28,12 +29,13 @@ fallback and no snippet strings kept as properties.
   income_wrapper, cancel.
 - One call site, inline a template literal at the call (11): tech_track, tech_age, tech_upgrade,
   civilization, land, land_other, territory_panel, capital_cell, resource_zone, decision, automa_civ.
-- Several call sites, one method returning a template literal on `bgagame.tapestry`, all calls go
+- Several call sites, one method returning a template literal on `Game` (Game.js), all calls go
   through it (7): building (8), cube (3), tech_spot, resource_token, cube_holder, outpost,
   resource_line (2 each).
 - Per call: evaluate each argument once (an arg used twice in the template goes into a local first),
   keep ids, classes, whitespace and escaping as they are.
 - Delete the `<script>` block from the tpl.
+- Remove `format_block` from the `Game0Basics` proxy list once no caller is left.
 - Verify: no `jstpl_` and no `format_block` left in maintained JS.
 
 ## Step 2: layout into JS (workflow `bga-remove-view-tpl`)
@@ -59,6 +61,9 @@ fallback and no snippet strings kept as properties.
 
 - CSS that depends on the exact nesting of the old template: diff the DOM of `game_play_area` before
   and after on the same table (2 players, solo Automa, Shadow Empire, spectator).
+- Keep the ids `player_board_config` and `player_boards` targets intact: the mobile grid and
+  overflow rules in tapestry.css (PANEL section) select `#player_board_config`, and `setupSettings`
+  moves it into `#player_boards`. Check the mobile layout (412px) and a spectator after step 2.
 - Search for leftover `{VAR}` placeholders, `BEGIN`/`END` markers and references to the deleted files.
 - After each step play a few turns in Studio (`game-play-in-studio`). After step 2 run the Studio dry
   run: the view/tpl warning is gone.
