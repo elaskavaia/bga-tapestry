@@ -291,62 +291,37 @@ export class Game extends Game0Basics {
       this.addTechSpotTooltips();
 
       // Setting up player boards
-      let any_player_id = this.getPlayerId();
-      if (this.isReadOnly()) {
-        for (var player_id in gamedatas.players) {
-          var over = $("overall_player_board_" + player_id);
-          if (over) {
-            any_player_id = player_id;
-            break;
-          }
-        }
-      }
-
       for (var player_id in gamedatas.players) {
         var player_data = gamedatas.players[player_id];
         player_id = parseInt(player_id);
         var player = player_data["basic"];
         if (!player) continue;
         var hand = player_data["hand"];
-        var over = $("overall_player_board_" + player_id);
 
-        if (player_id <= 2) {
-          // bot non exitsing bot panel
-          if (over) dojo.destroy(over);
-
-          let active_id = any_player_id; // real player
-          let active_info = gamedatas.players[active_id];
-
-          var xclone = $("overall_player_board_" + active_id).outerHTML;
-          xclone = xclone.replaceAll(String(active_id), player_id);
-
-          xclone = xclone.replaceAll(active_info.name, player.name);
-          xclone = xclone.replaceAll(active_info.color, player.color);
-          let div = dojo.place(xclone, "player_boards");
+        const isAutoma = player_id <= 2;
+        if (isAutoma) {
+          this.bga.playerPanels.addAutomataPlayerPanel(player_id, player.name, { color: player.color, score: Number(player.score) });
           dojo.destroy("avatar_" + player_id);
-          let avatar_color = player.color;
           dojo.place(
-            `<div class='avatar fa fa-solid fa-heart' style='font-size: xx-large;color: #${avatar_color}' />`,
-            `avatarwrap_${player_id}`,
+            `<div class='avatar fa fa-solid fa-heart' style='font-size: xx-large;color: #${player.color}' />`,
+            `avatar_active_wrap_${player_id}`,
             "first"
           );
-          dojo.addClass(div, "player_bot");
-
           dojo.place(`<div id='counter_fav_${player_id}' class='fav_track trackicon'  />`, `counter_era_${player_id}`, "after");
-          over = $("overall_player_board_" + player_id);
         }
 
-        var playerBoardDiv = dojo.byId("player_board_" + player_id);
+        const playerPanel = this.bga.playerPanels.getElement(player_id);
+        if (isAutoma) playerPanel.classList.add("player_automa");
 
         if (player_id == gamedatas.starting_player) {
           const no = 1;
-          dojo.place(`<div id='pno_${player_id}' data-player-no="${no}" class='player_no'></div>`, over);
+          dojo.place(`<div id='pno_${player_id}' data-player-no="${no}" class='player_no'></div>`, playerPanel);
           this.addTooltip(`pno_${player_id}`, _("First player"), "");
         }
 
         if (!player_data["alive"]) this.updateEliminatedPlayer(player_id);
 
-        dojo.place("miniboard_" + player_id, playerBoardDiv);
+        dojo.place("miniboard_" + player_id, playerPanel);
 
         // CIVILIZATION(S) MAT
         if (player_data.civilizations != null) {
@@ -6602,7 +6577,7 @@ export class Game extends Game0Basics {
     if (token_id == -1) {
       for (var tid in tokens) {
         var token = tokens[tid];
-        this.slideToObjectAndDestroy("cube_" + token.card_id, "overall_player_board_" + player_id);
+        this.slideToObjectAndDestroy("cube_" + token.card_id, this.bga.playerPanels.getElement(player_id));
       }
     } else {
       var color = this.gamedatas.players[player_id]["basic"].color;

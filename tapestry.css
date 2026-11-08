@@ -4060,9 +4060,9 @@ div[data-income="0"] #subtitle_bar {
   background-size: 150px;
 }
 
-.player-board.player_bot .counter_resource,
-.player-board.player_bot .icon_terra,
-.player-board.player_bot .icon_space {
+.player_automa .counter_resource,
+.player_automa .icon_terra,
+.player_automa .icon_space {
   display: none;
 }
 
