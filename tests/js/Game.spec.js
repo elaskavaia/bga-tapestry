@@ -48,6 +48,29 @@ describe("Game.bgaFormatText", () => {
   });
 });
 
+describe("Game.getOrderedPlayerIds", () => {
+  const AUTOMA = 1;
+  const SHADOW = 2;
+  const orderAs = (viewer, order = [SHADOW, ME, OTHER, AUTOMA]) =>
+    new Game(makeBga({ playerorder_withbots: order }, viewer)).getOrderedPlayerIds();
+
+  it("starts at the current player and wraps around", () => {
+    expect(orderAs(ME)).to.deep.equal([ME, OTHER, AUTOMA, SHADOW]);
+  });
+
+  it("keeps the order when the current player is first", () => {
+    expect(orderAs(SHADOW)).to.deep.equal([SHADOW, ME, OTHER, AUTOMA]);
+  });
+
+  it("keeps the order for a spectator", () => {
+    expect(orderAs(99)).to.deep.equal([SHADOW, ME, OTHER, AUTOMA]);
+  });
+
+  it("matches string ids against a numeric current player", () => {
+    expect(orderAs(ME, ["2", "10", "20", "1"])).to.deep.equal([ME, OTHER, AUTOMA, SHADOW]);
+  });
+});
+
 describe("Game.getCardDivLocatonId", () => {
   const game = makeGame();
   const locate = (card_type, card_location, card_location_arg = ME, card_location_arg2 = 0) =>

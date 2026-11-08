@@ -16,9 +16,8 @@
 /*
     This is the CSS stylesheet of your game User Interface.
     
-    Styles defined on this file will be applied to the HTML elements you define in your
-    HTML template (tapestry_tapestry.tpl), and to HTML elements you create dynamically
-    (in modules/js/Game.js).
+    Styles defined on this file will be applied to the HTML elements built in
+    modules/js/TapLayout.js and to HTML elements you create dynamically (in modules/js/Game.js).
     
     Usually, you are using CSS to:
     

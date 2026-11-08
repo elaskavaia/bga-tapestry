@@ -16,6 +16,7 @@
  */
 import { Game0Basics, getPart, getIntPart } from "./Game0Basics.js";
 import { TapAntiStock } from "./TapAntiStock.js";
+import * as TapLayout from "./TapLayout.js";
 
 const [Stock] = await globalThis.importDojoLibs(["ebg/stock"]);
 
@@ -91,6 +92,12 @@ export class Game extends Game0Basics {
     this.inSetup = true;
     this.hookGameui(["showMessage", "updatePlayerOrdering", "addMoveToLog", "onScreenWidthChange"]);
     try {
+      // setup runs again after a server-side undo
+      ["setup_choices", "breadcrumbs", "zoom-wrapper"].forEach((id) => $(id)?.remove());
+      this.bga.gameArea
+        .getElement()
+        .insertAdjacentHTML("beforeend", TapLayout.getGameAreaHtml(this.getOrderedPlayerIds().map((id) => gamedatas.players[id])));
+
       var strzoom = localStorage.getItem("tapestry_zoom");
       if (!strzoom) strzoom = 1;
       this.zoom = Number(strzoom);
@@ -177,7 +184,7 @@ export class Game extends Game0Basics {
           var hand = player_data["hand"];
 
           var civ = player_data["automa_civ"];
-          var div = dojo.place(this.format_block("jstpl_automa_civ", { cid: civ }), "slot_automa_civ");
+          var div = dojo.place(TapLayout.getAutomaCivHtml(civ), "slot_automa_civ");
           this.addTooltipForToken("automaciv", civ, div.id);
           dojo.place("pb_1", "slot_automa_landmark", "after");
         } else {
@@ -244,7 +251,7 @@ export class Game extends Game0Basics {
       try {
         for (var lid in gamedatas.landmarks) {
           var landmark = gamedatas.landmarks[lid];
-          dojo.place(this.format_block("jstpl_building", { type: landmark.card_type, bid: landmark.card_id }), landmark.card_location);
+          dojo.place(TapLayout.getBuildingHtml(landmark.card_type, landmark.card_id), landmark.card_location);
           dojo.addClass("building_" + landmark.card_id, "landmark landmark" + landmark.card_location_arg2);
           this.addTooltipForToken("landmark", landmark.card_location_arg2, "building_" + landmark.card_id);
         }
@@ -256,25 +263,22 @@ export class Game extends Game0Basics {
       for (var ttid in gamedatas.tech_track_types) {
         this.tech_track[ttid] = [];
         var tech_track = gamedatas.tech_track_types[ttid];
-        dojo.place(
-          this.format_block("jstpl_tech_track", { ttid: ttid, top: tech_track.top, left: tech_track.left, rot: tech_track.rot }),
-          "board"
-        );
+        dojo.place(TapLayout.getTechTrackHtml(ttid, tech_track), "board");
         for (var age = 0; age < 5; age++) {
           var w = age == 0 ? 10.85 : 22.25;
-          dojo.place(this.format_block("jstpl_tech_age", { ttid: ttid, aid: age, width: w }), "tech_track_" + ttid);
+          dojo.place(TapLayout.getTechAgeHtml(ttid, age, w), "tech_track_" + ttid);
         }
-        dojo.place(this.format_block("jstpl_tech_spot", { ttid: ttid, sid: 0, width: 40, height: 35, top: 60 }), "tech_age_" + ttid + "_0");
+        dojo.place(TapLayout.getTechSpotHtml(ttid, 0), "tech_age_" + ttid + "_0");
         dojo.connect($("tech_spot_" + ttid + "_0"), "onclick", this, "onAdvance");
 
         for (var upgrade = 1; upgrade <= 12; upgrade++) {
           var aid = Math.floor((upgrade + 2) / 3);
           var inage = (upgrade - 1) % 3;
-          dojo.place(this.format_block("jstpl_tech_upgrade", { ttid: ttid, uid: upgrade }), "tech_age_" + ttid + "_" + aid);
+          dojo.place(TapLayout.getTechUpgradeHtml(ttid, upgrade), "tech_age_" + ttid + "_" + aid);
 
           var tech_track = "tech_upgrade_" + ttid + "_" + upgrade;
 
-          var div = dojo.place(this.format_block("jstpl_tech_spot", { ttid: ttid, sid: upgrade }), tech_track);
+          var div = dojo.place(TapLayout.getTechSpotHtml(ttid, upgrade), tech_track);
           if (inage == 0 && aid != 1) {
             dojo.addClass(div, "withlandmark");
           }
@@ -397,14 +401,11 @@ export class Game extends Game0Basics {
 
         // Income mat resource zones
         for (var a = 0; a < 9; a++) {
-          dojo.place(this.format_block("jstpl_resource_zone", { rzid: player_id + "_" + a }), "resource_track_" + player_id);
+          dojo.place(TapLayout.getResourceZoneHtml(player_id + "_" + a), "resource_track_" + player_id);
         }
         for (var a = 1; a < 5; a++) {
           var v = player["res" + a];
-          dojo.place(
-            this.format_block("jstpl_resource_token", { type: a, rid: player_id + "_" + a }),
-            "resource_holder_" + player_id + "_" + v + "_" + a
-          );
+          dojo.place(TapLayout.getResourceTokenHtml(a, player_id + "_" + a), "resource_holder_" + player_id + "_" + v + "_" + a);
           this.updateResourceCounter(player_id, a, v);
         }
 
@@ -1357,7 +1358,7 @@ export class Game extends Game0Basics {
             var sel = mat.querySelector(".building" + type);
             if (sel) {
               dojo.addClass(sel.parentNode, "active_slot");
-              var div = this.format_block("jstpl_building", { type: type, bid: "x" });
+              var div = TapLayout.getBuildingHtml(type, "x");
               this.addImageActionButton("button_" + type, div, () => this.sendTrader(type));
             }
           }
@@ -1918,7 +1919,7 @@ export class Game extends Game0Basics {
             var sel = mat.querySelector(".building" + type);
             if (sel) {
               dojo.addClass(sel.parentNode, "active_slot");
-              var div = this.format_block("jstpl_building", { type: type, bid: "x" });
+              var div = TapLayout.getBuildingHtml(type, "x");
               this.addImageActionButton("button_" + type, div, (node) => {
                 this.axcallwrapper("selectIncomeBuilding", { type: type });
               });
@@ -2186,7 +2187,7 @@ export class Game extends Game0Basics {
     for (var rtype = 1; rtype <= 4; rtype++) {
       var rid = "payment_" + boxNum + "_" + rtype;
       if (rtype == resourceNum || resourceNum == this.CON.RES_ANY) {
-        var resdiv = dojo.place(this.format_block("jstpl_resource_token", { type: rtype, rid: rid }), box);
+        var resdiv = dojo.place(TapLayout.getResourceTokenHtml(rtype, rid), box);
         resdiv.setAttribute("data-gain", gain);
         dojo.addClass(resdiv, "payment_resource");
         this.connect(resdiv, "onclick", handler);
@@ -2213,7 +2214,7 @@ export class Game extends Game0Basics {
     var butt = $("button_confirm");
     if (butt) butt.dataTimerCounter = 0;
 
-    dojo.place(this.format_block("jstpl_resource_line", {}), "generalactions", "first");
+    dojo.place(TapLayout.getResourceLineHtml(), "generalactions", "first");
     for (var a = 0; a < this.resourceCount; a++) {
       var box = this.createPaymentBox(a, 5, undefined, gain);
       dojo.place(box, $("resource_line"));
@@ -2226,7 +2227,7 @@ export class Game extends Game0Basics {
     }
     dojo.empty("generalactions");
 
-    dojo.place(this.format_block("jstpl_resource_line", {}), "generalactions", "first");
+    dojo.place(TapLayout.getResourceLineHtml(), "generalactions", "first");
 
     var level = 1 + Math.floor((this.clientStateArgs.spot - 1) / 3);
     var boxes = level > 3 ? 2 : level;
@@ -3618,14 +3619,7 @@ export class Game extends Game0Basics {
     var cell = 26;
     for (var a = 0; a < 15; a++) {
       for (var b = 0; b < 15; b++) {
-        var div = dojo.place(
-          this.format_block("jstpl_capital_cell", {
-            cid: player_id + "_" + a + "_" + b,
-            left: b * cell,
-            top: a * cell
-          }),
-          "capital_grid_" + player_id
-        );
+        var div = dojo.place(TapLayout.getCapitalCellHtml(player_id + "_" + a + "_" + b, b * cell, a * cell), "capital_grid_" + player_id);
         this.connect(div, "onclick", "onCapitalCellClick");
       }
     }
@@ -4018,7 +4012,7 @@ export class Game extends Game0Basics {
       dojo.destroy(card_div);
     }
 
-    var card_div = dojo.place(this.format_block("jstpl_civilization", { cid: civ_id }), location);
+    var card_div = dojo.place(TapLayout.getCivilizationHtml(civ_id), location);
     dojo.addClass(card_div, "exp_" + this.civilizations[civ_id]["exp"]);
     dojo.addClass(card_div, "card");
     dojo.setAttr(card_div, "data-card-id", card_id);
@@ -4041,8 +4035,7 @@ export class Game extends Game0Basics {
       for (var sid in slots) {
         var slot = slots[sid];
         var chid = "civa_" + civ_id + "_" + sid;
-        var divs = this.format_block("jstpl_cube_holder", { chid: chid });
-        var div = dojo.place(divs, card_div);
+        var div = dojo.place(TapLayout.getCubeHolderHtml(chid), card_div);
         if (slot.top) div.style.top = slot.top + "%";
         if (slot.left) div.style.left = slot.left + "%";
         if (slot.w) div.style.width = slot.w + "%";
@@ -4078,7 +4071,7 @@ export class Game extends Game0Basics {
     const civ = "civilization_" + civ_id;
     var chid = "civ_" + civ_id + "_" + sid;
 
-    const div = dojo.place(this.format_block("jstpl_cube_holder", { chid: chid }), civ);
+    const div = dojo.place(TapLayout.getCubeHolderHtml(chid), civ);
     if (slot.top) div.style.top = slot.top + "%";
     if (slot.left) div.style.left = slot.left + "%";
     if (slot.w) div.style.width = slot.w + "%";
@@ -4115,10 +4108,7 @@ export class Game extends Game0Basics {
     for (var a = -size; a <= size; a++) {
       for (var b = -size; b <= size; b++) {
         if (Math.abs(a - b) <= size) {
-          dojo.place(
-            this.format_block("jstpl_land", { lid: a + "_" + b, top: 50 + 3.885 * (a + b - 1), left: 50.5 + 6.75 * (b - a - 0.75) }),
-            "board"
-          );
+          dojo.place(TapLayout.getLandHtml(a + "_" + b, 50 + 3.885 * (a + b - 1), 50.5 + 6.75 * (b - a - 0.75)), "board");
           dojo.connect($("land_" + a + "_" + b), "onclick", this, "onLandClick");
         }
       }
@@ -4141,15 +4131,7 @@ export class Game extends Game0Basics {
           const coord = a + "_" + b;
           const x = dx * (b - a - 0.75);
           const y = dy * (b + a - 1);
-          dojo.place(
-            this.format_block("jstpl_land_other", {
-              type: type,
-              lid: coord,
-              top: 3 * dy + y,
-              left: 1.75 * dx + x //
-            }),
-            location
-          );
+          dojo.place(TapLayout.getLandOtherHtml(type, coord, 3 * dy + y, 1.75 * dx + x), location);
           dojo.connect($(`${type}_${coord}`), "onclick", this, "onLandClick");
         }
       }
@@ -5638,7 +5620,7 @@ export class Game extends Game0Basics {
     this.hideRotators();
     if (this.territoryPopup != null) this.resetTerritoryPopup();
 
-    var html = '<div id="territoryPopup">' + this.format_block("jstpl_territory_panel", { title: _("Select a territory tile") }) + "</div>";
+    var html = TapLayout.getTerritoryPopupHtml();
 
     this.territoryPopup = new dijit.TooltipDialog({
       id: "territoryPopup",
@@ -6018,7 +6000,7 @@ export class Game extends Game0Basics {
           var divid = "decision_" + type_arg;
           var location = card.location;
           if (!$(divid)) {
-            var div = dojo.place(this.format_block("jstpl_decision", { cid: type_arg }), "deck_decision");
+            var div = dojo.place(TapLayout.getDecisionHtml(type_arg), "deck_decision");
             this.addTooltipForToken("decision", type_arg, divid);
           }
           this.placeToken(divid, location);
@@ -6481,7 +6463,7 @@ export class Game extends Game0Basics {
         }
         var div = $("building_" + token_id);
         if (div == null) {
-          div = dojo.place(this.format_block("jstpl_building", { type: type, bid: token_id }), location);
+          div = dojo.place(TapLayout.getBuildingHtml(type, token_id), location);
           dojo.addClass(div, "income_building");
           if (card.card_location == "income") this.connect(div, "onmouseover", "onRaiseBuilding");
         } else {
@@ -6496,7 +6478,7 @@ export class Game extends Game0Basics {
         var div = $(id);
 
         if (!div) {
-          div = dojo.place(this.format_block("jstpl_outpost", { type: color, oid: token_id }), location);
+          div = dojo.place(TapLayout.getOutpostHtml(color, token_id), location);
           if (location.startsWith("civ")) this.connect(div, "mouseover", "onRaiseBuilding");
         }
 
@@ -6508,7 +6490,7 @@ export class Game extends Game0Basics {
         var div = $("building_" + token_id);
         let newdiv = true;
         if (!div) {
-          div = dojo.place(this.format_block("jstpl_building", { type: type, bid: token_id }), location);
+          div = dojo.place(TapLayout.getBuildingHtml(type, token_id), location);
           dojo.addClass(div, "landmark landmark" + card_location_arg2);
           this.addTooltipForToken("landmark", card_location_arg2, div.id);
         } else {
@@ -6547,7 +6529,7 @@ export class Game extends Game0Basics {
           this.placeToken(div, location);
         } else if (token_id) {
           if (card.card_location == "hand") break;
-          div = dojo.place(this.format_block("jstpl_cube", { type: color, cid: token_id }), location);
+          div = dojo.place(TapLayout.getCubeHtml(color, token_id), location);
           if (location.startsWith("civ")) this.connect(div, "mouseover", "onRaiseBuilding");
           if (location.startsWith("tech_spot")) {
             this.connect(div, "onclick", "onCubeClick");
@@ -6625,7 +6607,7 @@ export class Game extends Game0Basics {
     } else {
       var color = this.gamedatas.players[player_id]["basic"].color;
       var location = "civ_1_" + die;
-      dojo.place(this.format_block("jstpl_cube", { type: color, cid: token_id }), location);
+      dojo.place(TapLayout.getCubeHtml(color, token_id), location);
     }
 
     if (this.gamedatas.dice.empiricism > 0) {

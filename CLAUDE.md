@@ -116,7 +116,9 @@ gamegui. `Game0Basics` holds the proxies to `this.bga.gameui` (gamedatas, inheri
 handler resolution) and hooks the gameui methods the framework only calls on gameui (`addMoveToLog`,
 `showMessage`, `updatePlayerOrdering`, `onScreenWidthChange`). Modules are strict mode: an undeclared
 assignment throws. Framework controls (`ebg.stock`) take `this.bga.gameui` as their page, not the
-Game. [TapAntiStock.js](modules/js/TapAntiStock.js) is the card container. Per-state UI is dispatched by convention:
+Game. [TapAntiStock.js](modules/js/TapAntiStock.js) is the card container. There is no view or tpl:
+[TapLayout.js](modules/js/TapLayout.js) holds all markup, the game area (built first thing in `setup()`)
+and the `get...Html()` snippets. Per-state UI is dispatched by convention:
 `onUpdateActionButtons_<stateName>` is called from `onUpdateActionButtons` when present. Server
 notifications map to `notif_*` methods; `notif_benefitQueue` renders the pending benefit stack that
 the server engine described above maintains.

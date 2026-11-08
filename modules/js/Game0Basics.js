@@ -75,6 +75,14 @@ export class Game0Basics {
     return this.bga.players.getCurrentPlayerId();
   }
 
+  /** Turn order (with bots when the game sends them), rotated to start at the current player, unrotated for a spectator */
+  getOrderedPlayerIds() {
+    const ids = (this.gamedatas.playerorder_withbots ?? this.gamedatas.playerorder).map(Number);
+    const index = ids.indexOf(Number(this.getPlayerId()));
+    if (index <= 0) return ids;
+    return ids.slice(index).concat(ids.slice(0, index));
+  }
+
   isReadOnly() {
     return this.bga.players.isCurrentPlayerSpectator() || typeof g_replayFrom != "undefined" || g_archive_mode;
   }
@@ -92,7 +100,6 @@ for (const name of [
   "disablePlayerPanel",
   "disconnect",
   "fadeOutAndDestroy",
-  "format_block",
   "format_string",
   "format_string_recursive",
   "placeOnObject",
