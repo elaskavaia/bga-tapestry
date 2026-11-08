@@ -24,10 +24,6 @@ STUDIO BUILD WARNINGS (dry run 2026-11-03, 6 warnings, all pre-existing framewor
       layout at 412px, and that the dry run no longer warns. Plan: [PLAN_VIEW_REMOVAL.md](PLAN_VIEW_REMOVAL.md).
 - [ ] [debt/P4] Non-code: more than 20 image files (sprites); `exception_on_warning` not set in
       gameinfos.
-- [ ] [debt/P4] PHP: build check (2026-11-07) still flags `player_score` text in `endOfGame` (local
-      var and Automa notif arg) and the `playerextra` SQL in `dbSetScore` / `dbSetAuxScore`. False
-      positive: the `player` row already goes through `playerScore`; renaming the var/arg silences
-      the first, the bot mirror has no counter.
 
 OPEN FROM 2026-11-07 (deprecated `addActionButton` moved to `this.bga.statusBar.addActionButton`)
 

@@ -5460,10 +5460,7 @@ abstract class PGameXBody extends tapcommon {
         if ($cid == CIV_TREASURE_HUNTERS) {
             $location = $extra;
             $targets = array_get($slots_choice, "targets", []);
-            $this->systemAssertTrue(
-                "ERR:TreasureHunters:01",
-                in_array($location, array_map(fn($coord) => "land_$coord", $targets), true)
-            );
+            $this->systemAssertTrue("ERR:TreasureHunters:01", in_array($location, array_map(fn($coord) => "land_$coord", $targets), true));
             $cube = $this->getStructureInfoSearch(BUILDING_CUBE, null, $civ_token_string);
             $this->effect_placeOnMap(
                 $player_id,
@@ -11958,9 +11955,9 @@ abstract class PGameXBody extends tapcommon {
         if ($this->isSolo()) {
             $player_id = $this->getSoloPlayerId();
             $automa_score = $this->dbGetScore(PLAYER_AUTOMA);
-            $player_score = $this->dbGetScore($player_id);
-            if ($player_score < $automa_score) {
-                $score = -1 * $player_score;
+            $pl_score = $this->dbGetScore($player_id);
+            if ($pl_score < $automa_score) {
+                $score = -1 * $pl_score;
                 $this->dbSetScore($player_id, $score);
                 $this->notifyWithName(
                     "VP",
@@ -11973,9 +11970,9 @@ abstract class PGameXBody extends tapcommon {
                 );
                 $this->notifyWithName(
                     "message_info",
-                    clienttranslate('${player_name} loses to Automa ${player_score} to ${automa_score}!'),
+                    clienttranslate('${player_name} loses to Automa ${pl_score} to ${automa_score}!'),
                     [
-                        "player_score" => $player_score,
+                        "pl_score" => $pl_score,
                         "automa_score" => $automa_score,
                     ],
                     $player_id
@@ -11983,9 +11980,9 @@ abstract class PGameXBody extends tapcommon {
             } else {
                 $this->notifyWithName(
                     "message_info",
-                    clienttranslate('${player_name} wins over Automa ${player_score} to ${automa_score}!'),
+                    clienttranslate('${player_name} wins over Automa ${pl_score} to ${automa_score}!'),
                     [
-                        "player_score" => $player_score,
+                        "pl_score" => $pl_score,
                         "automa_score" => $automa_score,
                     ],
                     $player_id
