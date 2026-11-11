@@ -127,7 +127,7 @@ predates the last deploy and is therefore live.
 
 ## Bug triage last checked
 
-**2026-11-07 16:33 EST** - only triage BGA reports created/updated after this time; bump this line
+**2026-11-10 22:01 EST** - only triage BGA reports created/updated after this time; bump this line
 to `date` at run start after each run.
 
 Reports untouched since before 2026-11-03 are grandfathered: skip the full Open sweep and do not ask
@@ -178,6 +178,11 @@ player count, per the priority section above.
       "proceeds to error on server". No studio error for the table (token checked against the
       whole-game list), so likely a user-facing exception, which is not logged. Asked for the exact
       message, move, tile count, and whether F5 helped.
+
+- [ ] **BGA #255522** - "civ card was not activated". INFO NEEDED (2026-11-10), 1 vote, `block`.
+      Table 943979891, 2 players, iPhone Safari, dump state 13 (playerTurn), move 195. Options: adj=8,
+      set=1, Marriage of State keep, Renaissance keep, Shadow Empire off. Report text is only "during";
+      no studio errors for the table. Asked which civ, when it should have fired, what was seen, F5.
 
 - [ ] **BGA #168202** - "Utilitarians are able to use the Lighthouse effect during their Income
       turn". OPEN on BGA, 1 vote, `rules`. Not triaged. The card says "Once on each of your
@@ -261,7 +266,23 @@ that window.
 - [ ] `Track resource 4 not found in payment` - `action_advance` tier II/III payment check, table
       924389742, move 365, 2026-11-01, v261030-1658, twice in 2 s (from Victoria's server game log;
       UserException, not in the studio log). Client sent a payment without the track's own resource.
-      No report matched yet.
+      No report matched yet. Now in the studio log as 783316 `Track resource 3 not found in payment 0`
+      (3 events / 1 user, 2026-11-10).
+- [ ] **Asserts newly visible since v261107-2229** (`VisibleSystemException`, shown as `Internal
+      Error. Please raise a bug.[...]`), 7-day list on 2026-11-10. Not proven regressions, they were
+      just invisible before: 777189 `Invalid resource count found 3 required 1` (25 / 10, still
+      firing; the issue groups every count mismatch, samples: track 2 spot 4 payment `1,2,2` with
+      stale cid 11 / bid 303, track 3 spot 4 payment `3`, track 4 spot 1 payment `2,1,4`; mostly
+      Android / iOS). **FIXED 2026-11-10, not deployed**: reproduced in studio table 997979,
+      `onAdvance` stored the clicked track/spot before rejecting the click, so a tap on a space out
+      of reach or unaffordable while paying changed the spot Confirm sent. Now
+      `setupResourceLineForAdvance(track, spot)` stores them only when the advance starts. Tests
+      `Game.onAdvance` in tests/js/Game.spec.js; studio re-check sends the original spot and a real
+      advance resolves. Likely also explains `Track resource N not found in payment` below. After
+      the deploy, check 777189 and 783316 have no events on the new release. 777259 `Outpost is not toppled` (8 / 5), 780189 `unexpected benefit on stack 209`
+      (4 / 1), 777405 `invalid spot -1` (4 / 1), 777253 `Unknown action` (4 / 3), 776892 `Unathorized
+      move` (4 / 2), 777307 `ERR:Infiltrators:01` (2 / 1), 778052 `missing cube`, 776947
+      `ERR:Genies:13` (1 / 1 each). No player report matched yet.
 
 ## Triage run log
 
@@ -337,3 +358,13 @@ Older detail is in git history of this file.
   760051 / 754591, `VisibleSystemException` asserts. No new reports, nothing Waiting for deploy.
   Next run: check those error ids have no events on 261107-2229 and scan the frontend list for
   new JS errors from the module conversion. Marker bumped.
+- 2026-11-10: No new tag (9 refactor/docs commits after v261107-2229, no fixes), nothing Waiting
+  for deploy. Two new adj=8 reports. #255596 (Nanotechnology square benefit refuses Lithium-Ion
+  Battery after it was just upgraded) Open -> Not a bug: card text "Use at most 1x/turn" (RULES.md
+  reference guide, tech card 7), enforced on purpose in `queueTechBenefit` (card 7 slot 2). UX lead:
+  the client only says "This move is not authorized now". Doc question, unresolved: RULES.md
+  labels each guide pair "circle / square", but material has the opposite order for every card checked
+  (Bakery, Barn, Lithium-Ion), so one of the two labels is wrong. #255522 Open -> Info needed. Post-deploy
+  recheck: 761167, 760051 / 754591 have no events after the deploy. JS 771958 (3078 / 2050) and
+  19387 "failed to fetch dynamically imported module" are BGA-wide (the failing file was another
+  game's Game.js, site release 261106-1745, before our deploy), skipped. Marker bumped.

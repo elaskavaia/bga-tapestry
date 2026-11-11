@@ -13,6 +13,12 @@ the FF deploy, P2 before the deploy but narrower or cheaper, P3 after, P4 no act
       could default to `this.getCardDivLocatonId(card)`. That also maps "discard" to `civilization_deck`
       where today it returns early (no `#discard` div), so check it in studio.
 
+- [ ] [ux/P2] JS `onAdvance` (Game.js), found 2026-11-10 while fixing studio error 777189: after 3
+      rejected taps on a track space out of reach, production players get the untranslated
+      dialog "This is testing feature allowing to advance out or order. Cheat now?". Not checked
+      whether the server refuses the out-of-order advance (`action_advance` validates payment, the
+      spot check was not traced). Decide: gate it behind `isStudio` or remove it.
+
 STUDIO BUILD WARNINGS (dry run 2026-11-03, 6 warnings, all pre-existing framework deprecations)
 
 - [ ] [debt/P3] JS: direct preference controls (Game.js `setupSettings`), use `this.bga.userPreferences`;
