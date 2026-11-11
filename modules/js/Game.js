@@ -2196,7 +2196,9 @@ export class Game extends Game0Basics {
     }
     // XXX timer?
   }
-  setupResourceLineForAdvance() {
+  setupResourceLineForAdvance(track, spot) {
+    this.clientStateArgs.track = track;
+    this.clientStateArgs.spot = spot;
     if ($("resource_line")) {
       this.restoreResources();
     }
@@ -5492,8 +5494,8 @@ export class Game extends Game0Basics {
     var id = event.currentTarget.id;
 
     var coords = id.split("_");
-    var track = (this.clientStateArgs.track = coords[2]);
-    var spot = (this.clientStateArgs.spot = coords[3]);
+    var track = coords[2];
+    var spot = coords[3];
     var tech_track = "tech_upgrade_" + track + "_" + spot;
     if (this.showHelp(tech_track)) return;
 
@@ -5517,27 +5519,24 @@ export class Game extends Game0Basics {
             return;
           }
           this.confirmationDialog("This is testing feature allowing to advance out or order. Cheat now?", () => {
-            this.setupResourceLineForAdvance();
+            this.setupResourceLineForAdvance(track, spot);
           });
           return;
         } else {
           this.rejectCount = 0;
         }
 
-        this.setupResourceLineForAdvance();
+        this.setupResourceLineForAdvance(track, spot);
         break;
 
       case "trackSelect":
         if (!this.checkActiveSlot(id)) return;
 
-        this.axcallwrapper("selectTrackSpot", {
-          track: this.clientStateArgs.track,
-          spot: this.clientStateArgs.spot
-        });
+        this.axcallwrapper("selectTrackSpot", { track, spot });
 
         break;
       case "research":
-        this.axcallwrapper("research_decision", { decision: this.clientStateArgs.track, spot: this.clientStateArgs.spot });
+        this.axcallwrapper("research_decision", { decision: track, spot });
         break;
       case "benefitOption":
       case "benefitChoice":
@@ -5549,11 +5548,7 @@ export class Game extends Game0Basics {
             break;
           }
         }
-        this.axcallwrapper(this.clientStateArgs.action, {
-          bid: bid,
-          track: this.clientStateArgs.track,
-          spot: this.clientStateArgs.spot
-        });
+        this.axcallwrapper(this.clientStateArgs.action, { bid, track, spot });
 
         break;
       default:

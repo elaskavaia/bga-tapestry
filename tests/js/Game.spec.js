@@ -249,3 +249,48 @@ describe("Game.setupCardsman", () => {
     expect($("plain_card").parentNode.id).to.equal("plain_parent");
   });
 });
+
+describe("Game.onAdvance", () => {
+  const SPOTS = ["tech_spot_1_1", "tech_spot_1_2", "tech_spot_1_4"];
+  afterEach(() => SPOTS.forEach((id) => $(id)?.remove()));
+
+  /** Studio error 777189: a rejected track click must not change the advance being paid for */
+  function advanceInProgress() {
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      "<div id='tech_spot_1_1' class='active_slot'></div><div id='tech_spot_1_2' class='illegal_slot'></div><div id='tech_spot_1_4'></div>"
+    );
+    const game = makeGame();
+    const errors = [];
+    const started = [];
+    game.gamestate = "playerTurn";
+    game.bga.actions = { checkAction: () => true };
+    game.showError = (message) => errors.push(message);
+    game.setupResourceLineForAdvance = (...args) => started.push(args);
+    game.clientStateArgs = { action: "advance", track: "1", spot: "1" };
+    game.onAdvance({ currentTarget: $("tech_spot_1_1") });
+    return { game, errors, started };
+  }
+
+  it("starts the advance on an active spot", () => {
+    const { errors, started } = advanceInProgress();
+    expect(errors).to.be.empty;
+    expect(started).to.deep.equal([["1", "1"]]);
+  });
+
+  it("keeps the spot being paid for after a click on a spot out of reach", () => {
+    const { game, errors, started } = advanceInProgress();
+    game.onAdvance({ currentTarget: $("tech_spot_1_4") });
+    expect(errors).to.have.length(1);
+    expect(started).to.have.length(1);
+    expect(game.clientStateArgs).to.include({ track: "1", spot: "1" });
+  });
+
+  it("keeps the spot being paid for after a click on an unaffordable spot", () => {
+    const { game, errors, started } = advanceInProgress();
+    game.onAdvance({ currentTarget: $("tech_spot_1_2") });
+    expect(errors).to.have.length(1);
+    expect(started).to.have.length(1);
+    expect(game.clientStateArgs).to.include({ track: "1", spot: "1" });
+  });
+});

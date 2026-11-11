@@ -13,6 +13,8 @@ Object.assign(globalThis, {
     destroy: (id) => node(id)?.remove(),
     disconnect: () => {},
     empty: (id) => node(id).replaceChildren(),
+    hasClass: (id, className) => node(id).classList.contains(className),
+    stopEvent: (event) => event?.preventDefault?.(),
     hitch:
       (scope, method) =>
       (...args) =>
