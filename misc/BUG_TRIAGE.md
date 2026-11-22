@@ -214,12 +214,13 @@ player count, per the priority section above.
       token, table 920358718). Not option-9 specific: #245160 (Militants midgame decline, same
       table 917631772).
 
-- [x] **BGA #251908** - Advisors + Espionage copying Marriage of State, internal error, table
-      936569986. FIXED by 26dbe27 (#255108, TAPESTRY.8), deployed in v261107-2229: the advisor no
-      longer gets the 118 choice that failed "Player does not have marriage of state". Tests
-      `testAdvisorCopyOfMarriageOfStateGivesNothing`, `testOwnerCopyOfMarriageOfStateIsActive` in
-      AdvisorsEspionageTest. NOTE: the table's error log was not checked; BGA status still Open,
-      flip it to Fixed on the next triage run.
+- [ ] **BGA #218648** - "using my spies ability to copy marriage of state but wouldn't let me
+      select a cube". OPEN, 1 vote, `action`. Table 836555771. Error "did not have marriage of
+      state card" = the 118 owner assert. Lead, untested: the Spies tapestry benefit (193, in the
+      neighbour card pick) only checks the card has a `benefit`, not `type == "now"`, so a THIS
+      ERA card with an on-play choice (MARRIAGE OF STATE 118, ALLIANCE 122) is queued for a
+      non-owner. Proposed fix: same rule as TAPESTRY.8. Related, rules call: #159559 (Info
+      needed, Spies -> Espionage -> Wartime Economy expects free bonuses; TAPESTRY.8 says nothing).
 
 - [ ] **BGA #255898** - "Tinkerers blocked S2 for free bonus". OPEN, 1 vote, `action`. Table
       946332928, solo, Automa level 6. Options: adj=8, set=7, Marriage of State removed,
@@ -449,3 +450,12 @@ Older detail is in git history of this file.
   removed. Fix verified in studio table 1003166 (adj=9); not proven the reporters clicked the board
   die. No reports Waiting for deploy; only #257131 changed since the marker (our own Info needed).
   Next run: check the Release breakdown of 777189, 783316, 792134, 802389. Marker bumped.
+- 2026-11-21: #251908 (Advisors copying Marriage of State through an opponent's Espionage,
+  internal error) Open -> Fixed, BGA template. Report text matches the pre-26dbe27 path (the
+  advisor got the 118 choice and failed its owner assert); fixed by 26dbe27 in v261107-2229,
+  pinned by 05701d0. Table error log not checked (older than the ~30 day retention). Marker not
+  bumped (not a full sweep).
+- 2026-11-21: same family as #255108: #192451 and #239479 (Spies copying an opponent's Espionage
+  that copied Wartime Economy, the owner lost the effect) Open -> Fixed, BGA template; the clone
+  replacement is what 26dbe27 removed. #218648 recorded as a lead (Spies 193 path). Marker not
+  bumped.
