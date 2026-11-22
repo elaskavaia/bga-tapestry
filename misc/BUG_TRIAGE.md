@@ -212,8 +212,14 @@ player count, per the priority section above.
       v261122-0217, see the run log), #245157 (science die advance
       gave no bonus payment, table 917631772 move 180), #245924 (exploration die did not move the
       token, table 920358718). Not option-9 specific: #245160 (Militants midgame decline, same
-      table 917631772), #251908 (Advisors + Espionage copying Marriage of State, internal error,
-      table 936569986).
+      table 917631772).
+
+- [x] **BGA #251908** - Advisors + Espionage copying Marriage of State, internal error, table
+      936569986. FIXED by 26dbe27 (#255108, TAPESTRY.8), deployed in v261107-2229: the advisor no
+      longer gets the 118 choice that failed "Player does not have marriage of state". Tests
+      `testAdvisorCopyOfMarriageOfStateGivesNothing`, `testOwnerCopyOfMarriageOfStateIsActive` in
+      AdvisorsEspionageTest. NOTE: the table's error log was not checked; BGA status still Open,
+      flip it to Fixed on the next triage run.
 
 - [ ] **BGA #255898** - "Tinkerers blocked S2 for free bonus". OPEN, 1 vote, `action`. Table
       946332928, solo, Automa level 6. Options: adj=8, set=7, Marriage of State removed,

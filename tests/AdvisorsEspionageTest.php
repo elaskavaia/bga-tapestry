@@ -18,6 +18,7 @@ final class AdvisorsEspionageTest extends TestWithRealDb {
     const WHEN_PLAYED_BENEFIT = 101;
     const ALLIANCE = 5;
     const ALLIANCE_CHOICE = 122;
+    const MARRIAGE_CHOICE = 118;
 
     private GameUT $game;
     private int $espionage;
@@ -84,6 +85,24 @@ final class AdvisorsEspionageTest extends TestWithRealDb {
 
         $this->assertSpyCloneKept();
         $this->assertNull($this->game->getCurrentBenefit(self::ALLIANCE_CHOICE));
+    }
+
+    /** BGA #251908: the MARRIAGE OF STATE choice was queued for the advisor and failed its owner assert. */
+    function testAdvisorCopyOfMarriageOfStateGivesNothing() {
+        $this->copies(self::ADVISOR, TAP_MARRIAGE_OF_STATE);
+
+        $this->assertSpyCloneKept();
+        $this->assertNull($this->game->getCurrentBenefit(self::MARRIAGE_CHOICE));
+    }
+
+    /** The ESPIONAGE owner's MARRIAGE OF STATE copy is active, which the choice asserts. */
+    function testOwnerCopyOfMarriageOfStateIsActive() {
+        $this->copies(self::SPY, TAP_MARRIAGE_OF_STATE);
+
+        $this->assertEquals(self::SPY, (int) $this->game->getCurrentBenefit(self::MARRIAGE_CHOICE)["benefit_player_id"]);
+        // the discard of the old clone only reached the in-memory model
+        $this->game->DbQuery("DELETE FROM card WHERE card_id={$this->spy_clone}");
+        $this->assertEquals(TAP_MARRIAGE_OF_STATE, (int) $this->game->isTapestryActive(self::SPY, TAP_MARRIAGE_OF_STATE)["card_type_arg"]);
     }
 
     /** The ESPIONAGE owner still replaces their own clone and gets the THIS ERA choice. */
