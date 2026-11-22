@@ -128,7 +128,7 @@ predates the last deploy and is therefore live.
 
 ## Bug triage last checked
 
-**2026-11-21 19:27 EST** - only triage BGA reports created/updated after this time; bump this line
+**2026-11-21 20:22 EST** - only triage BGA reports created/updated after this time; bump this line
 to `date` at run start after each run.
 
 Reports untouched since before 2026-11-03 are grandfathered: skip the full Open sweep and do not ask
@@ -207,22 +207,9 @@ player count, per the priority section above.
       don't work with each other". No studio errors. Asked what happened on that turn, error text,
       move, F5.
 
-- [ ] **BGA #226930, #242269** - Alchemists die choice "changed on me". OPEN, 1 vote each, `rules`,
-      same reporter. #226930 table 870107629 adj=8 set=7; #242269 adj=9 set=7 (follow-up table
-      925066800). **FIXED 2026-11-21, not deployed** (client): a board die click outside
-      `choose_die` used to "roll for fun" and repaint the die to a random face the keep buttons and
-      server never used. While an Alchemists keep choice is pending for the active player,
-      `onDieClick` in modules/js/Game.js no longer fake-rolls (`getAlchemistsKeepChoices()`). With
-      Alchemists selected, a die that has a keep choice clicks its `button_<spot>`. Test:
-      `tests/js/AlchemistsDieClick.spec.js`. NOTE: during the prompt, a kept die, any die in the
-      "Roll all dice" step, and any die while another pending civ is selected now do nothing. Veto if
-      you want it otherwise. NOTE: please confirm in Studio that clicking a board die during the
-      adj=9 keep prompt keeps that die. Not proven that the reporters clicked the board die. After
-      the deploy, mark both Fixed on BGA.
-
 - [ ] **adj=9 (reworked Alchemists) reports, open, never triaged** (all set=7, all predate the
-      Alchemists fixes c784b00 / 207e8ef first shipped in v260926-0320): #242269 (triaged and fixed,
-      see the #226930 / #242269 entry), #245157 (science die advance
+      Alchemists fixes c784b00 / 207e8ef first shipped in v260926-0320): #242269 (Fixed in
+      v261122-0217, see the run log), #245157 (science die advance
       gave no bonus payment, table 917631772 move 180), #245924 (exploration die did not move the
       token, table 920358718). Not option-9 specific: #245160 (Militants midgame decline, same
       table 917631772), #251908 (Advisors + Espionage copying Marriage of State, internal error,
@@ -324,13 +311,13 @@ that window.
       just invisible before: 777189 `Invalid resource count found 3 required 1` (25 / 10, still
       firing; the issue groups every count mismatch, samples: track 2 spot 4 payment `1,2,2` with
       stale cid 11 / bid 303, track 3 spot 4 payment `3`, track 4 spot 1 payment `2,1,4`; mostly
-      Android / iOS). **FIXED 2026-11-10, not deployed**: reproduced in studio table 997979,
+      Android / iOS). **FIXED 2026-11-10, shipped in v261122-0217**: reproduced in studio table 997979,
       `onAdvance` stored the clicked track/spot before rejecting the click, so a tap on a space out
       of reach or unaffordable while paying changed the spot Confirm sent. Now
       `setupResourceLineForAdvance(track, spot)` stores them only when the advance starts. Tests
       `Game.onAdvance` in tests/js/Game.spec.js; studio re-check sends the original spot and a real
-      advance resolves. Likely also explains `Track resource N not found in payment` below. After
-      the deploy, check 777189 and 783316 have no events on the new release. 777259 `Outpost is not toppled` (8 / 5), 780189 `unexpected benefit on stack 209`
+      advance resolves. Likely also explains `Track resource N not found in payment` below. Next
+      run: check 777189, 783316, 792134 and 802389 have no events on 261122-0217. 777259 `Outpost is not toppled` (8 / 5), 780189 `unexpected benefit on stack 209`
       (4 / 1), 777405 `invalid spot -1` (4 / 1), 777253 `Unknown action` (4 / 3), 776892 `Unathorized
       move` (4 / 2), 777307 `ERR:Infiltrators:01` (2 / 1), 778052 `missing cube`, 776947
       `ERR:Genies:13` (1 / 1 each). No player report matched yet. 2026-11-11: 776947
@@ -451,3 +438,8 @@ Older detail is in git history of this file.
   #257377 already Not a bug by Victoria (2026-11-19 BGA outage); #257381 closed by its reporter.
   adj=9 scan of all 199 reports from the last 6 months: 9 on adj=9, 6 unresolved (see tracked
   entry). Marker bumped.
+- 2026-11-21: `v261122-0217` deployed (Pack v2 default, df1742e track payment spot, a7c1408
+  Alchemists board die click). #226930 and #242269 Open -> Fixed, BGA template; tracked entry
+  removed. Fix verified in studio table 1003166 (adj=9); not proven the reporters clicked the board
+  die. No reports Waiting for deploy; only #257131 changed since the marker (our own Info needed).
+  Next run: check the Release breakdown of 777189, 783316, 792134, 802389. Marker bumped.
