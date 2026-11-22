@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-21 (v261122-0217)
+
+- Adjustment Civilization Pack v2 (new Alchemists) is now the default
+- Fixed "Invalid resource count" error after tapping a track space while paying
+- Fixed Alchemists dice changing face when clicked during the keep choice (#226930, #242269)
+
 ## 2026-11-07 (v261107-2229)
 
 - Fixed Advisors changing the target of Espionage (#255108)
