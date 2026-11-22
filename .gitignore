@@ -111,3 +111,6 @@ dist
 # PHPUnit
 .phpunit.result.cache
 
+
+# written by the game-play-in-studio skill
+misc/STUDIO_TEST.md
