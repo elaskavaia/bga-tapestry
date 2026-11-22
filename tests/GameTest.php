@@ -176,7 +176,7 @@ final class GameTest extends TestCase {
         $this->assertEquals(5, count($alchemists["slots"]));
 
         // an a9 twin replaces the a8 value of the same field
-        $this->assertStringContainsString("unofficial variant", $alchemists["adjustment"]);
+        $this->assertStringContainsString("variant 2023 r9", $alchemists["adjustment"]);
 
         // compound @a4a8 keys still resolve
         $this->assertEquals([BE_ANYRES, BE_ANYRES, 0, 0], $game->civilizations[CIV_FUTURISTS]["start_benefit"]);

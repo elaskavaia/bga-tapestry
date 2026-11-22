@@ -18,13 +18,12 @@
         "description": "experimental rules (Removed, left only for existing games)"
       },
       "8": {
-        "name": "Adjustment Civilization Pack (Default)",
-        "description": "official expansion"
+        "name": "Adjustment Civilization Pack (v1, Deprecated)",
+        "description": "original expansion, deprecated in favor of v2"
       },
       "9": {
-        "name": "Adjustment Civilization Pack + new Alchemists (Testing)",
-        "beta": true,
-        "description": "official expansion, with the reworked Alchemists (testing, rules may change)"
+        "name": "Adjustment Civilization Pack + new Alchemists (v2, Official)",
+        "description": "official expansion, with the reworked Alchemists (v2)"
       }
     },
     // maintenance switch, disables table creation for every value:
@@ -42,7 +41,7 @@
         }
       ]
     },
-    "default": 8
+    "default": 9
   },
   // 101 and 102: card removal is mapped in material.inc.php ($this->option_removals)
   "101": {

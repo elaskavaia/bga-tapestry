@@ -74,7 +74,8 @@ prettier-formatted. `awk` is safer than manual editing for those columns.
 
 `doAdjustMaterial($players, $variant)` rewrites material in place for the player count and the
 "Civilization Adjustments" option (2 = original, 1 = official, 4 = deprecated experimental,
-8 = Adjustment Civilization Pack). Tests must call it before asserting on civ data.
+8 = Adjustment Civilization Pack v1, 9 = Pack v2 with reworked Alchemists, the default;
+`isAdjustments8()` is true for both). Tests must call it before asserting on civ data.
 
 ### The benefit stack
 

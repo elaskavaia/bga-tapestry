@@ -4022,7 +4022,7 @@ $this->civilizations = [
         ],
         "adjustment" => clienttranslate("When starting the game with the Alchemists, gain [ANY RESOURCE] [ANY RESOURCE] and 10 VP"),
         "adjustment@a4a8" => clienttranslate("rules change"), //
-        "adjustment@a9" => clienttranslate("rules change: unofficial variant 2023 r9"), //
+        "adjustment@a9" => clienttranslate("rules change: variant 2023 r9"), //
         "income_trigger" => ["from" => 2, "to" => 5], //
         "slots_description" => clienttranslate("counter clockwise"),
         "slots" => [
