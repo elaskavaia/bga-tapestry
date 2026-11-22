@@ -5386,14 +5386,28 @@ export class Game extends Game0Basics {
     }
   }
 
+  getAlchemistsKeepChoices() {
+    if (!this.bga.actions.checkPossibleActions("civTokenAdvance")) return null;
+    const benefits = Object.values(this.gamedatas.gamestate.args?.benefits ?? {});
+    return benefits.find((bene) => bene.benefit_type == this.CON.CIV_ALCHEMISTS)?.slots_choice ?? null;
+  }
+
   onDieClick(event) {
     dojo.stopEvent(event);
     var cid = event.currentTarget.id;
     if (this.showHelp(cid)) return;
 
     if (!this.bga.actions.checkPossibleActions("choose_die")) {
+      const dieColor = getPart(cid, 0);
+      const keepChoices = this.getAlchemistsKeepChoices();
+      if (keepChoices) {
+        // a fake roll would show a face the keep buttons and the server do not use
+        const spot = { black: 1, red: 2, science: 3 }[dieColor];
+        if (this.selectedCiv == this.CON.CIV_ALCHEMISTS && keepChoices[spot]) $("button_" + spot)?.click();
+        return;
+      }
       // roll it for fun
-      this.rolldie(getPart(cid, 0), -1);
+      this.rolldie(dieColor, -1);
       return;
     }
 

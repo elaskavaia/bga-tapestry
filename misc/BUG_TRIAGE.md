@@ -209,19 +209,20 @@ player count, per the priority section above.
 
 - [ ] **BGA #226930, #242269** - Alchemists die choice "changed on me". OPEN, 1 vote each, `rules`,
       same reporter. #226930 table 870107629 adj=8 set=7; #242269 adj=9 set=7 (follow-up table
-      925066800). **CONFIRMED (client)**: `onDieClick` in modules/js/Game.js, when `choose_die` is not
-      a possible action (the Alchemists keep prompt is `civAbility`), "rolls for fun": `rolldie(color,
-      -1)` repaints the board die to a random face and logs "You rolled a die for fun", without
-      touching `gamedatas.dice`. Keep buttons and the server use the real face; F5 repaints from it.
-      Fits "side bar says coin, buttons say worker". Not proven the reporters clicked the board die.
-      Test `tests/js/AlchemistsDieClick.spec.js` (green, pins buggy behavior). Fix (Victoria
-      2026-11-21): during the Alchemists keep prompt only, a board die click acts as its
-      `button_<spot>`; keep the roll for fun in all other states. Affects adj=8 and adj=9, so not a blocker for option 9 specifically.
+      925066800). **FIXED 2026-11-21, not deployed** (client): a board die click outside
+      `choose_die` used to "roll for fun" and repaint the die to a random face the keep buttons and
+      server never used. While an Alchemists keep choice is pending for the active player,
+      `onDieClick` in modules/js/Game.js no longer fake-rolls (`getAlchemistsKeepChoices()`). With
+      Alchemists selected, a die that has a keep choice clicks its `button_<spot>`. Test:
+      `tests/js/AlchemistsDieClick.spec.js`. NOTE: during the prompt, a kept die, any die in the
+      "Roll all dice" step, and any die while another pending civ is selected now do nothing. Veto if
+      you want it otherwise. NOTE: please confirm in Studio that clicking a board die during the
+      adj=9 keep prompt keeps that die. Not proven that the reporters clicked the board die. After
+      the deploy, mark both Fixed on BGA.
 
 - [ ] **adj=9 (reworked Alchemists) reports, open, never triaged** (all set=7, all predate the
-      Alchemists fixes c784b00 / 207e8ef first shipped in v260926-0320): #242269 (die choice shows
-      different dice than the roll; reporter 2026-10-05, after that deploy, on table 925066800: the
-      prompt listed the wrong die, F5 fixed it - a stale client lead), #245157 (science die advance
+      Alchemists fixes c784b00 / 207e8ef first shipped in v260926-0320): #242269 (triaged and fixed,
+      see the #226930 / #242269 entry), #245157 (science die advance
       gave no bonus payment, table 917631772 move 180), #245924 (exploration die did not move the
       token, table 920358718). Not option-9 specific: #245160 (Militants midgame decline, same
       table 917631772), #251908 (Advisors + Espionage copying Marriage of State, internal error,
