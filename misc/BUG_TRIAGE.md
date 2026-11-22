@@ -26,8 +26,9 @@ and still gets triaged; it just waits behind the Pack ones.
 The "Civilization Adjustments" game option (id 100 in
 [gameoptions.jsonc](../gameoptions.jsonc)):
 
-- `8` - Adjustment Civilization Pack (the official expansion) - **priority**
-- `9` - Pack + reworked Alchemists (testing) - also the Pack, **priority**
+- `9` - Adjustment Civilization Pack v2 (Pack + reworked Alchemists), official and the default
+  since 2026-11-21 - **priority**
+- `8` - Adjustment Civilization Pack v1, deprecated in favor of v2 - also the Pack, **priority**
 - `1`, `2` - official / no adjustments, both deprecated EOL 2027 - lower priority
 - `4` - experimental Nov 2022, removed from table creation - lower priority
 - `3` - turns up on old tables; not a value the current option defines
@@ -127,7 +128,7 @@ predates the last deploy and is therefore live.
 
 ## Bug triage last checked
 
-**2026-11-10 22:01 EST** - only triage BGA reports created/updated after this time; bump this line
+**2026-11-21 19:27 EST** - only triage BGA reports created/updated after this time; bump this line
 to `date` at run start after each run.
 
 Reports untouched since before 2026-11-03 are grandfathered: skip the full Open sweep and do not ask
@@ -183,6 +184,55 @@ player count, per the priority section above.
       Table 943979891, 2 players, iPhone Safari, dump state 13 (playerTurn), move 195. Options: adj=8,
       set=1, Marriage of State keep, Renaissance keep, Shadow Empire off. Report text is only "during";
       no studio errors for the table. Asked which civ, when it should have fired, what was seen, F5.
+
+- [ ] **BGA #255885** - "When using M12, I drew Collectors as a new Civ but couldn't use their
+      ability to place the outpost". OPEN (back from Info needed 2026-11-16), 1 vote, `rules`. Table
+      945458872, 2 players, replay move 500, dump state 13 move 506. Options: adj=8, set=7, Marriage
+      of State removed, Renaissance removed, Shadow Empire off. No studio errors for the table.
+      Reporter 2026-11-13: meant the conquer from the same M12; the game let them take the civ first,
+      so they expected that conquer to go to the Collectors mat. Open rules question for Victoria:
+      does a civ gained by M12 apply to the M12 conquer when the player resolves the civ first
+      (reference guide, Military 12: "Conquer 1 territory (gain the benefits of both conquer dice).
+      Also gain a random additional civilization.")? Collectors card text (material): "When you gain
+      at least one of the following during an advancement turn, you may place one of them on this
+      civilization mat"; no rules doc covers Collectors (Arts & Architecture). Reporter 2026-11-16:
+      happened again at move 434 on table 947134178 (2p, same options); no studio errors. Related
+      older #154361 (auto-closed `notupdated` 2026-11-21): Collectors owned, M12 gave Islanders, the
+      conquer could not go to Collectors, "This shouldn't have happened".
+
+- [ ] **BGA #257131** - "Game ended with two new civilisations meerfolk and elderones, i ignored
+      elders but when my turn came". INFO NEEDED (2026-11-21), 1 vote, `block`. Table 948596095, 2
+      players, dump state 99 (end game) move 510. Options: adj=9, set=8 (Fantasies & Futures
+      Testing), Marriage of State removed, Renaissance removed. Comment: "Two zivilisations that
+      don't work with each other". No studio errors. Asked what happened on that turn, error text,
+      move, F5.
+
+- [ ] **BGA #226930, #242269** - Alchemists die choice "changed on me". OPEN, 1 vote each, `rules`,
+      same reporter. #226930 table 870107629 adj=8 set=7; #242269 adj=9 set=7 (follow-up table
+      925066800). **CONFIRMED (client)**: `onDieClick` in modules/js/Game.js, when `choose_die` is not
+      a possible action (the Alchemists keep prompt is `civAbility`), "rolls for fun": `rolldie(color,
+      -1)` repaints the board die to a random face and logs "You rolled a die for fun", without
+      touching `gamedatas.dice`. Keep buttons and the server use the real face; F5 repaints from it.
+      Fits "side bar says coin, buttons say worker". Not proven the reporters clicked the board die.
+      Test `tests/js/AlchemistsDieClick.spec.js` (green, pins buggy behavior). Fix (Victoria
+      2026-11-21): during the Alchemists keep prompt only, a board die click acts as its
+      `button_<spot>`; keep the roll for fun in all other states. Affects adj=8 and adj=9, so not a blocker for option 9 specifically.
+
+- [ ] **adj=9 (reworked Alchemists) reports, open, never triaged** (all set=7, all predate the
+      Alchemists fixes c784b00 / 207e8ef first shipped in v260926-0320): #242269 (die choice shows
+      different dice than the roll; reporter 2026-10-05, after that deploy, on table 925066800: the
+      prompt listed the wrong die, F5 fixed it - a stale client lead), #245157 (science die advance
+      gave no bonus payment, table 917631772 move 180), #245924 (exploration die did not move the
+      token, table 920358718). Not option-9 specific: #245160 (Militants midgame decline, same
+      table 917631772), #251908 (Advisors + Espionage copying Marriage of State, internal error,
+      table 936569986).
+
+- [ ] **BGA #255898** - "Tinkerers blocked S2 for free bonus". OPEN, 1 vote, `action`. Table
+      946332928, solo, Automa level 6. Options: adj=8, set=7, Marriage of State removed,
+      Renaissance removed. Clicked the Tinkerers slot 2 option (adj=8 `BE_TINKERERS_2a`), got "This
+      move is not authorized now"; reporter says F5 solved it. No studio errors for the table, so a
+      stale client state, not a server reject. Untested lead: client regression from the
+      v261107-2229 module conversion.
 
 - [ ] **BGA #168202** - "Utilitarians are able to use the Lighthouse effect during their Income
       turn". OPEN on BGA, 1 vote, `rules`. Not triaged. The card says "Once on each of your
@@ -282,7 +332,21 @@ that window.
       the deploy, check 777189 and 783316 have no events on the new release. 777259 `Outpost is not toppled` (8 / 5), 780189 `unexpected benefit on stack 209`
       (4 / 1), 777405 `invalid spot -1` (4 / 1), 777253 `Unknown action` (4 / 3), 776892 `Unathorized
       move` (4 / 2), 777307 `ERR:Infiltrators:01` (2 / 1), 778052 `missing cube`, 776947
-      `ERR:Genies:13` (1 / 1 each). No player report matched yet.
+      `ERR:Genies:13` (1 / 1 each). No player report matched yet. 2026-11-11: 776947
+      `ERR:Genies:13` grew to 17 / 2 (a block, still firing); new 785125 `ERR:UrbanPlanners:04` (2 /
+      1) and 785207 `invalid benefit choice 28` (1 / 1). 2026-11-16 7-day list: new 791584 `Wrong
+      player 1 for benefit choice` (45 / 2, 2026-11-13 to 11-15, a block), 801221 `can only keep 1
+      cards` (9 / 1, 2026-11-16), 795306 `missing cube` (7 / 2), 793387 `Unathorized move` (7 / 5),
+      794863 `Invalid location ` (1 / 1); `Track resource N not found in payment` now 792134 (32 /
+      13) and 802389 besides 777189 (28 / 12), all still on v261107-2229, df1742e not deployed.
+      2026-11-21 7-day list: 802389 now 56 / 21; 804617 `Wrong player 1 for benefit choice` (33 /
+      2, a block, besides 791584); new 811898 `unexpected benefit on stack 33` (17 / 3), 813622
+      `Outpost is not toppled` (9 / 7), 811252 `unexpected structure type 6` (8 / 5), 808864 and
+      850567 `ERR:UrbanPlanners:04` / `:23`, 810887 `invalid card selected 93 not in era`, 815334
+      `ERR:Alchemists:Roll:1` (2 / 2, `alchemistRoll8`, i.e. not adj=9), 809451 `missing civ
+      benefit for 37`, 848379 `Player does not have marriage of state`, 815878 `No civ CRAFTSMEN`,
+      808756 `slot 12 does not exist for 15`. JS 771958 is a BGA `bga-zoom` import failure (we do
+      not use bga-zoom), skipped.
 
 ## Triage run log
 
@@ -368,3 +432,21 @@ Older detail is in git history of this file.
   recheck: 761167, 760051 / 754591 have no events after the deploy. JS 771958 (3078 / 2050) and
   19387 "failed to fetch dynamically imported module" are BGA-wide (the failing file was another
   game's Game.js, site release 261106-1745, before our deploy), skipped. Marker bumped.
+- 2026-11-11: No new tag (only df1742e fix after v261107-2229), nothing Waiting for deploy. Two new
+  adj=8 reports, no studio errors for either table. #255885 (Collectors via M12) Open -> Info
+  needed. #255898 (Tinkerers slot 2 "not authorized", F5 solved) left Open, recorded. 7-day log:
+  Genies 776947 now 17 / 2, new 785125 and 785207. Marker bumped.
+- 2026-11-16: No new tag (live 261107-2229), nothing Waiting for deploy. #255885 Info needed ->
+  Open (reporter answered: the conquer of the same M12; rules question recorded for Victoria).
+  New #256631 (Tanks conquer, adj=8, 4p) Open -> Info needed -> Not a bug: dump loaded in studio
+  table 1005923 (move 548), the single-outpost neighbour 2_2 belongs to heduck whose era4 tapestry
+  is ALLIANCE naming the reporter (card text "THIS ERA: Choose an opponent. You cannot conquer
+  each other's territories."); the other neighbour 2_1 holds an outpost plus a cube. UX lead: the
+  client never says an Alliance blocks a hex. Test `tests/Bug256631Test.php` (plain case offered)
+  left in the tree. 7-day log: new 791584 (45 / 2, a block) and 801221 recorded; Track
+  resource payment errors still growing until df1742e ships. Marker bumped.
+- 2026-11-21: No new tag (live 261107-2229), nothing Waiting for deploy. New #257131 (Merfolk +
+  Elder Ones, adj=9 set=8) Open -> Info needed. #255885 reporter added table 947134178. #257278 /
+  #257377 already Not a bug by Victoria (2026-11-19 BGA outage); #257381 closed by its reporter.
+  adj=9 scan of all 199 reports from the last 6 months: 9 on adj=9, 6 unresolved (see tracked
+  entry). Marker bumped.
